@@ -5,10 +5,10 @@ using Raven.Client.Document;
 using Raven.Client.Embedded;
 
 [TestFixture]
+[Explicit]
 public class RavenUserInstallerTests
 {
     [Test]
-    [Explicit("this will edit your current installed RavenDB")]
     public void Integration()
     {
         using (var documentStore = new DocumentStore
