@@ -18,11 +18,10 @@ class Program
         Feature.Enable<Sagas>();
         using (var documentStore = new DocumentStore())
         {
-            bus = Configure.With()
-                .DefaultBuilder()
-                .RavenDBPersistence(documentStore)
-                .UnicastBus()
-                .CreateBus();
+            var configure = Configure.With();
+            configure.DefaultBuilder();
+            configure.RegisterDefaults(documentStore);
+            bus = configure.UnicastBus().CreateBus();
 
             bus.Start(() => Configure.Instance.ForInstallationOn<Windows>().Install());
 

@@ -5,7 +5,7 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
     using System.Security.Cryptography;
     using System.Text;
 
-    public class SagaUniqueIdentity
+    class SagaUniqueIdentity
     {
         public string Id { get; set; }
         public Guid SagaId { get; set; }

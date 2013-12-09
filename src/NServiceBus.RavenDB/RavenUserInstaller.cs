@@ -1,22 +1,22 @@
 namespace NServiceBus.RavenDB.Persistence
 {
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Raven.Abstractions.Data;
-using Raven.Abstractions.Extensions;
-using Raven.Client.Connection;
-using Raven.Client.Document;
-using Raven.Json.Linq;
-using Installation;
-using Installation.Environments;
-using Logging;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+    using Raven.Abstractions.Data;
+    using Raven.Abstractions.Extensions;
+    using Raven.Client.Connection;
+    using Raven.Client.Document;
+    using Raven.Json.Linq;
+    using Installation;
+    using Installation.Environments;
+    using Logging;
 
     /// <summary>
     /// Add the identity to the Raven users group 
     /// </summary>
-    public class RavenUserInstaller : INeedToInstallSomething<Windows>
+    class RavenUserInstaller : INeedToInstallSomething<Windows>
     {
         static readonly ILog logger = LogManager.GetLogger(typeof(RavenUserInstaller));
 
@@ -102,9 +102,9 @@ using Logging;
             if (windowsAuthForUser == null)
             {
                 windowsAuthForUser = new WindowsAuthData
-                                     {
-                                         Name = identity
-                                     };
+                    {
+                        Name = identity
+                    };
                 windowsAuthDocument.RequiredUsers.Add(windowsAuthForUser);
             }
             windowsAuthForUser.Enabled = true;
@@ -120,9 +120,9 @@ using Logging;
             if (dataAccess == null)
             {
                 dataAccess = new DatabaseAccess
-                             {
-                                 TenantId = tenantId
-                             };
+                    {
+                        TenantId = tenantId
+                    };
                 windowsAuthForUser.Databases.Add(dataAccess);
             }
             dataAccess.ReadOnly = false;
@@ -143,7 +143,7 @@ using Logging;
             public List<DatabaseAccess> Databases = new List<DatabaseAccess>();
         }
 
-       
+
     }
 
 }

@@ -1,7 +1,7 @@
 namespace NServiceBus.RavenDB.Persistence
 {
-using System;
-using Saga;
+    using System;
+    using Saga;
 
     /// <summary>
     /// NServiceBus default RavenDB conventions.

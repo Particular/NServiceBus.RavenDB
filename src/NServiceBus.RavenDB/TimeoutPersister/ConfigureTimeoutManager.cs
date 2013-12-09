@@ -2,7 +2,7 @@ namespace NServiceBus.RavenDB
 {
     using NServiceBus.RavenDB.Persistence.TimeoutPersister;
 
-    public static class ConfigureTimeoutManager
+    static class ConfigureTimeoutManager
     {
 
         /// <summary>

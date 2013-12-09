@@ -1,15 +1,9 @@
 namespace NServiceBus.RavenDB
 {
     using System;
-    using Config;
     using NServiceBus;
-    using NServiceBus.Gateway.Deduplication;
-    using NServiceBus.Gateway.Persistence;
     using NServiceBus.RavenDB.Persistence;
-    using NServiceBus.Saga;
     using NServiceBus.Settings;
-    using NServiceBus.Timeout.Core;
-    using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using Raven.Client;
     using Raven.Client.Document;
 
@@ -81,11 +75,11 @@ namespace NServiceBus.RavenDB
 
         public static void RegisterDefaults(this Configure config, DocumentStore documentStore)
         {
-            InfrastructureServices.SetDefaultFor<ISagaPersister>(() => config.RavenDBPersistence(documentStore));
-            InfrastructureServices.SetDefaultFor<IPersistTimeouts>(() => config.UseRavenTimeoutPersister());
-            InfrastructureServices.SetDefaultFor<IPersistMessages>(() => config.UseRavenGatewayPersister());
-            InfrastructureServices.SetDefaultFor<IDeduplicateMessages>(() => config.UseRavenGatewayDeduplication());
-            InfrastructureServices.SetDefaultFor<ISubscriptionStorage>(() => config.RavenSubscriptionStorage());
+            config.RavenDBPersistence(documentStore);
+            config.UseRavenTimeoutPersister();
+            config.UseRavenGatewayPersister();
+            config.UseRavenGatewayDeduplication();
+            config.RavenSubscriptionStorage();
         }
 
     }

@@ -1,9 +1,9 @@
 ﻿namespace NServiceBus.RavenDB.Persistence
 {
-using System;
-using Raven.Client;
+    using System;
+    using Raven.Client;
 
-    public class StoreAccessor : IDisposable
+    class StoreAccessor : IDisposable
     {
         IDocumentStore store;
 
@@ -14,20 +14,15 @@ using Raven.Client;
 
         public IDocumentStore Store
         {
-            get { return store; }
+            get
+            {
+                return store;
+            }
         }
 
         public void Dispose()
         {
             //Injected at compile time
-        }
-
-        public void DisposeManaged()
-        {
-            if (store != null)
-            {
-                store.Dispose();
-            }
         }
     }
 }

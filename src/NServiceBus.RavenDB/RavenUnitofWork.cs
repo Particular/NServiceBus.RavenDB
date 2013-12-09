@@ -1,9 +1,9 @@
 namespace NServiceBus.RavenDB.Persistence
 {
-using System;
-using UnitOfWork;
+    using System;
+    using UnitOfWork;
 
-    public class RavenUnitOfWork : IManageUnitsOfWork
+    class RavenUnitOfWork : IManageUnitsOfWork
     {
         RavenSessionFactory sessionFactory;
 

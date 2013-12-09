@@ -8,7 +8,7 @@ namespace NServiceBus.RavenDB.Gateway.Persistence
     using Raven.Client;
     using NServiceBus.Gateway.Persistence;
 
-    public class RavenPersistence : IPersistMessages
+    class RavenPersistence : IPersistMessages
     {
         IDocumentStore store;
 

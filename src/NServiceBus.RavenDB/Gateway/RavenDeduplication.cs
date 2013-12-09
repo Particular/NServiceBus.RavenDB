@@ -6,7 +6,7 @@
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
 
-    public class RavenDeduplication : IDeduplicateMessages
+    class RavenDeduplication : IDeduplicateMessages
     {
         IDocumentStore store;
 

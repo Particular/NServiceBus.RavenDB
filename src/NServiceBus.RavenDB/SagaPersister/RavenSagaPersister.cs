@@ -7,7 +7,7 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
     using Raven.Abstractions.Commands;
     using Saga;
 
-    public class RavenSagaPersister : ISagaPersister
+    class RavenSagaPersister : ISagaPersister
     {
         internal const string UniqueValueMetadataKey = "NServiceBus-UniqueValue";
 

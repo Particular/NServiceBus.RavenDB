@@ -1,13 +1,12 @@
 namespace NServiceBus.RavenDB.Persistence
 {
-using System;
-using NServiceBus.Persistence;
-using Raven.Client;
+    using System;
+    using NServiceBus.Persistence;
+    using Raven.Client;
 
-    public class RavenSessionFactory
+    class RavenSessionFactory
     {
-        [ThreadStatic]
-        static IDocumentSession session;
+        [ThreadStatic] static IDocumentSession session;
 
         public IDocumentStore Store { get; private set; }
 
@@ -71,7 +70,7 @@ using Raven.Client;
                 session.SaveChanges();
             }
             catch (Raven.Abstractions.Exceptions.ConcurrencyException ex)
-            {                
+            {
                 throw new ConcurrencyException("A saga with the same Unique property already existed in the storage. See the inner exception for further details", ex);
             }
         }
