@@ -1,6 +1,7 @@
 binaries
 obj
 bin
+nugets
 *.vshost.*
 .nu
 _ReSharper.*
