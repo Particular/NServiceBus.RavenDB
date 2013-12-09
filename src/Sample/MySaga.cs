@@ -14,6 +14,6 @@ public class MySaga:Saga<MySagaData>, IAmStartedByMessages<MyMessage>
 
     public void Handle(MyMessage message)
     {
-        logger.Info("Hello from MyHandler"); 
+        logger.Info("Hello from MySaga"); 
     }
 }

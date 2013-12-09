@@ -67,8 +67,9 @@
   <ItemGroup>
     <Compile Include="ConfigErrorQueue.cs" />
     <Compile Include="LoggingConfig.cs" />
-    <Compile Include="MyHandler.cs" />
+    <Compile Include="MySagaData.cs" />
     <Compile Include="MyMessage.cs" />
+    <Compile Include="MySaga.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>
