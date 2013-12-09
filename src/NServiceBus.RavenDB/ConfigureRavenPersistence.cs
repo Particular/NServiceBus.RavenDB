@@ -4,8 +4,8 @@ namespace NServiceBus.RavenDB
     using NServiceBus;
     using NServiceBus.RavenDB.Persistence;
     using NServiceBus.Settings;
-    using Raven.Client;
     using Raven.Client.Document;
+    using RavenLogManager = Raven.Abstractions.Logging.LogManager;
 
     /// <summary>
     /// Extension methods to configure RavenDB persister.
@@ -24,36 +24,21 @@ namespace NServiceBus.RavenDB
         /// <summary>
         /// Configures RavenDB as the default persistence.
         /// </summary>
-        /// <remarks>This method does not use any of the NServiceBus conventions either specified or out of the box.</remarks>
         /// <param name="config">The configuration object.</param>
-        /// <param name="documentStore">An <see cref="IDocumentStore"/>.</param>
-        /// <returns>The configuration object.</returns>
-        public static Configure RavenDBPersistence(this Configure config, DocumentStore documentStore)
+        /// <param name="documentStore">An <see cref="DocumentStore"/>.</param>
+        /// <param name="applyConventions"><code>true</code> to call <see cref="ApplyConventions"/> on <paramref name="documentStore"/>.</param>
+        /// <returns>The instance passed in by <paramref name="config"/> to enable the fluent API.</returns>
+        public static Configure RavenDBPersistence(this Configure config, DocumentStore documentStore, bool applyConventions)
         {
-            documentStore.Conventions.FindTypeTagName = RavenConventions.FindTypeTagName;
-            documentStore.Conventions.MaxNumberOfRequestsPerSession = 100;
-
-            if (documentStore.Url == null)
+            if (applyConventions)
             {
-                documentStore.Url = RavenPersistenceConstants.DefaultUrl;
+                ApplyConventions(documentStore);
             }
-            if (documentStore.DefaultDatabase == null)
-            {
-                documentStore.DefaultDatabase = Configure.EndpointName;
-            }
-            documentStore.ResourceManagerId = RavenPersistenceConstants.DefaultResourceManagerId;
 
-
-            if (SettingsHolder.Get<bool>("Transactions.SuppressDistributedTransactions"))
-            {
-                documentStore.EnlistInDistributedTransactions = false;
-            }
-            documentStore.Initialize();
             config.Configurer.ConfigureComponent(() => new StoreAccessor(documentStore), DependencyLifecycle.SingleInstance);
             config.Configurer.ConfigureComponent<RavenSessionFactory>(DependencyLifecycle.SingleInstance);
             config.Configurer.ConfigureComponent<RavenUnitOfWork>(DependencyLifecycle.InstancePerUnitOfWork);
 
-            Raven.Abstractions.Logging.LogManager.CurrentLogManager = new NoOpLogManager();
 
             RavenUserInstaller.RunInstaller = true;
 
@@ -73,9 +58,37 @@ namespace NServiceBus.RavenDB
             return config;
         }
 
+
+        /// <summary>
+        /// Apply the NServiceBus conventions to a <see cref="DocumentStore"/> .
+        /// </summary>
+        public static void ApplyConventions(DocumentStore documentStore)
+        {
+            documentStore.Conventions.FindTypeTagName = RavenConventions.FindTypeTagName;
+            documentStore.Conventions.MaxNumberOfRequestsPerSession = 100;
+
+            if (documentStore.Url == null)
+            {
+                documentStore.Url = RavenPersistenceConstants.DefaultUrl;
+            }
+            if (documentStore.DefaultDatabase == null)
+            {
+                documentStore.DefaultDatabase = Configure.EndpointName;
+            }
+            documentStore.ResourceManagerId = RavenPersistenceConstants.DefaultResourceManagerId;
+
+
+            if (SettingsHolder.Get<bool>("Transactions.SuppressDistributedTransactions"))
+            {
+                documentStore.EnlistInDistributedTransactions = false;
+            }
+            RavenLogManager.CurrentLogManager = new NoOpLogManager();
+            documentStore.Initialize();
+        }
+
         public static void RegisterDefaults(this Configure config, DocumentStore documentStore)
         {
-            config.RavenDBPersistence(documentStore);
+            config.RavenDBPersistence(documentStore, true);
             config.UseRavenTimeoutPersister();
             config.UseRavenGatewayPersister();
             config.UseRavenGatewayDeduplication();

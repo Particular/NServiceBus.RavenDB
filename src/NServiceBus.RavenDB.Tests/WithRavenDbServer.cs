@@ -20,7 +20,7 @@ public class When_configuring_raven_persistence
 
         using (var store = new DocumentStore())
         {
-            config.RavenDBPersistence(store);
+            config.RavenDBPersistence(store, true);
 
             Assert.AreEqual("http://localhost:8080", store.Url);
             Assert.AreEqual("UnitTests", store.DefaultDatabase);
