@@ -57,4 +57,4 @@ The previous Raven configuration API supported several approaches to passing in 
  * NServiceBus took ownership of the client-server version compatibility checking. This should be a concern of the developer consuming the API
  * NServiceBus took ownership of verifying the connectivity to the server. This should be a concern of the developer consuming the API.
  
-So now there is one configuration API that takes a `DosumentStore`.
+So now there is one configuration API that takes a `DocumentStore`.
