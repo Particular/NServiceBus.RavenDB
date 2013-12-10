@@ -15,5 +15,6 @@ public class ConfigureRavenSagaPersister
             };
 
         config.RavenDBPersistence(store, true);
+        store.Initialize();
     }
 }

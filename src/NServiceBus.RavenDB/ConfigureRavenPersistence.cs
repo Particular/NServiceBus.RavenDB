@@ -83,7 +83,6 @@ namespace NServiceBus.RavenDB
                 documentStore.EnlistInDistributedTransactions = false;
             }
             RavenLogManager.CurrentLogManager = new NoOpLogManager();
-            documentStore.Initialize();
         }
 
         public static void RegisterDefaults(this Configure config, DocumentStore documentStore)
