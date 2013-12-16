@@ -27,7 +27,7 @@ class Program
 
             bus.SendLocal(new MyMessage
                 {
-                    SomeId = new Guid()
+                    SomeId = Guid.NewGuid()
                 });
             Console.ReadLine();
         }
