@@ -87,7 +87,6 @@
     <Compile Include="Gateway\RavenDeduplication.cs" />
     <Compile Include="Gateway\RavenPersistence.cs" />
     <Compile Include="NoOpLogManager.cs" />
-    <Compile Include="RavenConventions.cs" />
     <Compile Include="RavenPersistenceConstants.cs" />
     <Compile Include="RavenSessionFactory.cs" />
     <Compile Include="RavenUnitofWork.cs" />
