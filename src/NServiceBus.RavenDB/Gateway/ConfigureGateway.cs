@@ -5,11 +5,6 @@ namespace NServiceBus.RavenDB
 
     public static class ConfigureGateway
     {
-        public static Configure RunGatewayWithRavenPersistence(this Configure config)
-        {
-            return config.RunGateway(typeof(RavenPersistence));
-        }
-
         /// <summary>
         /// Use RavenDB messages persistence by the gateway.
         /// </summary>
@@ -17,8 +12,7 @@ namespace NServiceBus.RavenDB
         {
             config.ThrowIfStoreNotConfigured();
 
-            config.Configurer.ConfigureComponent<RavenPersistence>(DependencyLifecycle.SingleInstance);
-            return config;
+            return config.RunGateway(typeof(RavenPersistence));
         }
 
         /// <summary>
