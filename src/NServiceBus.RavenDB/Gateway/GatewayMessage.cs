@@ -3,7 +3,7 @@ namespace NServiceBus.RavenDB.Gateway.Persistence
     using System;
     using System.Collections.Generic;
 
-    public class GatewayMessage
+    class GatewayMessage
     {
         public IDictionary<string, string> Headers { get; set; }
 

@@ -6,7 +6,7 @@ namespace NServiceBus.RavenDB.Persistence
     /// <summary>
     /// NServiceBus default RavenDB conventions.
     /// </summary>
-    public class RavenConventions
+    class RavenConventions
     {
         /// <summary>
         /// NServiceBus default RavenDB FindTypeTagName convention

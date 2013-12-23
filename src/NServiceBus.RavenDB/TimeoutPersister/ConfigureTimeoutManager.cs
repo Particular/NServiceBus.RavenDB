@@ -8,7 +8,7 @@ namespace NServiceBus.RavenDB
         /// <summary>
         /// Use the Raven timeout persister implementation.
         /// </summary>
-        public static Configure UseRavenTimeoutPersister(this Configure config)
+        public static Configure UseRavenDBTimeoutStorage(this Configure config)
         {
             config.ThrowIfStoreNotConfigured();
 

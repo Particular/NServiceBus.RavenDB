@@ -4,7 +4,7 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
     using NServiceBus.Unicast.Subscriptions;
     using Raven.Imports.Newtonsoft.Json;
 
-    public class MessageTypeConverter : JsonConverter
+    class MessageTypeConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {

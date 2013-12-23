@@ -4,7 +4,7 @@ namespace NServiceBus.RavenDB
 
     public static class ConfigureRavenSubscriptionStorage
     {
-        public static Configure RavenSubscriptionStorage(this Configure config)
+        public static Configure UseRavenDBSubscriptionStorage(this Configure config)
         {
             config.ThrowIfStoreNotConfigured();
 

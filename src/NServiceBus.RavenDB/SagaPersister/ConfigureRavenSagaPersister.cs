@@ -4,7 +4,7 @@ namespace NServiceBus.RavenDB
 
     public static class ConfigureRavenSagaPersister
     {
-        public static Configure RavenSagaPersister(this Configure config)
+        public static Configure UseRavenDBSagaStorage(this Configure config)
         {
            config.ThrowIfStoreNotConfigured();
 

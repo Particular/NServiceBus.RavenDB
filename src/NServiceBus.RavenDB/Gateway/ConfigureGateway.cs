@@ -10,11 +10,10 @@ namespace NServiceBus.RavenDB
             return config.RunGateway(typeof(RavenPersistence));
         }
 
-
         /// <summary>
         /// Use RavenDB messages persistence by the gateway.
         /// </summary>
-        public static Configure UseRavenGatewayPersister(this Configure config)
+        public static Configure UseRavenDBGatewayStorage(this Configure config)
         {
             config.ThrowIfStoreNotConfigured();
 
@@ -25,7 +24,7 @@ namespace NServiceBus.RavenDB
         /// <summary>
         /// Use RavenDB for message deduplication by the gateway.
         /// </summary>
-        public static Configure UseRavenGatewayDeduplication(this Configure config)
+        public static Configure UseRavenDBGatewayDeduplicationStorage(this Configure config)
         {
             config.ThrowIfStoreNotConfigured();
 

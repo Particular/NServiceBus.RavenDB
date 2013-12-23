@@ -28,7 +28,7 @@ namespace NServiceBus.RavenDB
         /// <param name="documentStore">An <see cref="DocumentStore"/>.</param>
         /// <param name="applyConventions"><code>true</code> to call <see cref="ApplyConventions"/> on <paramref name="documentStore"/>.</param>
         /// <returns>The instance passed in by <paramref name="config"/> to enable the fluent API.</returns>
-        public static Configure RavenDBPersistence(this Configure config, DocumentStore documentStore, bool applyConventions)
+        public static Configure RavenDBStorage(this Configure config, DocumentStore documentStore, bool applyConventions)
         {
             if (applyConventions)
             {
@@ -87,11 +87,12 @@ namespace NServiceBus.RavenDB
 
         public static void RegisterDefaults(this Configure config, DocumentStore documentStore)
         {
-            config.RavenDBPersistence(documentStore, true);
-            config.UseRavenTimeoutPersister();
-            config.UseRavenGatewayPersister();
-            config.UseRavenGatewayDeduplication();
-            config.RavenSubscriptionStorage();
+            config.RavenDBStorage(documentStore, true);
+            config.UseRavenDBTimeoutStorage();
+            config.UseRavenDBSagaStorage();
+            config.UseRavenDBGatewayStorage();
+            config.UseRavenDBGatewayDeduplicationStorage();
+            config.UseRavenDBSubscriptionStorage();
         }
 
     }
