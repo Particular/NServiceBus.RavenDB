@@ -4,7 +4,7 @@ namespace NServiceBus.RavenDB.Persistence
     using NServiceBus.Persistence;
     using Raven.Client;
 
-    class RavenSessionFactory
+    class RavenSessionFactory:ISessionProvider
     {
         [ThreadStatic] static IDocumentSession session;
 

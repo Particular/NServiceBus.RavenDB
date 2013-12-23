@@ -9,18 +9,14 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
 
     class RavenSagaPersister : ISagaPersister
     {
-        internal const string UniqueValueMetadataKey = "NServiceBus-UniqueValue";
-
-        RavenSessionFactory factory;
-
-        public RavenSagaPersister(RavenSessionFactory factory)
+        public RavenSagaPersister(ISessionProvider sessionProvider)
         {
-            this.factory = factory;
+            this.sessionProvider = sessionProvider;
         }
 
         public void Save(IContainSagaData saga)
         {
-            factory.Session.Store(saga);
+            sessionProvider.Session.Store(saga);
             StoreUniqueProperty(saga);
         }
 
@@ -35,7 +31,7 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
 
             var uniqueProperty = p.Value;
 
-            var metadata = factory.Session.Advanced.GetMetadataFor(saga);
+            var metadata = sessionProvider.Session.Advanced.GetMetadataFor(saga);
 
             //if the user just added the unique property to a saga with existing data we need to set it
             if (!metadata.ContainsKey(UniqueValueMetadataKey))
@@ -60,7 +56,7 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
 
         public T Get<T>(Guid sagaId) where T : IContainSagaData
         {
-            return factory.Session.Load<T>(sagaId);
+            return sessionProvider.Session.Load<T>(sagaId);
         }
 
         public T Get<T>(string property, object value) where T : IContainSagaData
@@ -73,7 +69,7 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
 
         public void Complete(IContainSagaData saga)
         {
-            factory.Session.Delete(saga);
+            sessionProvider.Session.Delete(saga);
 
             var uniqueProperty = UniqueAttribute.GetUniqueProperty(saga);
 
@@ -102,14 +98,14 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
         {
             var lookupId = SagaUniqueIdentity.FormatId(typeof(T), new KeyValuePair<string, object>(property, value));
 
-            var lookup = factory.Session
+            var lookup = sessionProvider.Session
                 .Include("SagaDocId") //tell raven to pull the saga doc as well to save us a round-trip
                 .Load<SagaUniqueIdentity>(lookupId);
 
             if (lookup != null)
             {
                 return lookup.SagaDocId != null
-                    ? factory.Session.Load<T>(lookup.SagaDocId) //if we have a saga id we can just load it
+                    ? sessionProvider.Session.Load<T>(lookup.SagaDocId) //if we have a saga id we can just load it
                     : Get<T>(lookup.SagaId); //if not this is a saga that was created pre 3.0.4 so we fallback to a get instead
             }
 
@@ -120,7 +116,7 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
         {
             try
             {
-                return factory.Session.Advanced.LuceneQuery<T>()
+                return sessionProvider.Session.Advanced.LuceneQuery<T>()
                     .WhereEquals(property, value)
                     .WaitForNonStaleResultsAsOfNow();
             }
@@ -140,9 +136,11 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
             if (!uniqueProperty.HasValue) return;
 
             var id = SagaUniqueIdentity.FormatId(saga.GetType(), uniqueProperty.Value);
-            var sagaDocId = factory.Store.Conventions.FindFullDocumentKeyFromNonStringIdentifier(saga.Id, saga.GetType(), false);
+            var sagaDocId = sessionProvider.Session.Advanced.DocumentStore.Conventions.FindFullDocumentKeyFromNonStringIdentifier(saga.Id, saga.GetType(), false);
 
-            factory.Session.Store(new SagaUniqueIdentity
+            
+
+            sessionProvider.Session.Store(new SagaUniqueIdentity
                 {
                     Id = id,
                     SagaId = saga.Id,
@@ -155,18 +153,21 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
 
         void SetUniqueValueMetadata(IContainSagaData saga, KeyValuePair<string, object> uniqueProperty)
         {
-            factory.Session.Advanced.GetMetadataFor(saga)[UniqueValueMetadataKey] = uniqueProperty.Value.ToString();
+            sessionProvider.Session.Advanced.GetMetadataFor(saga)[UniqueValueMetadataKey] = uniqueProperty.Value.ToString();
         }
 
         void DeleteUniqueProperty(IContainSagaData saga, KeyValuePair<string, object> uniqueProperty)
         {
             var id = SagaUniqueIdentity.FormatId(saga.GetType(), uniqueProperty);
 
-            factory.Session.Advanced.Defer(new DeleteCommandData
+            sessionProvider.Session.Advanced.Defer(new DeleteCommandData
                 {
                     Key = id
                 });
         }
+
+        readonly ISessionProvider sessionProvider;
+        internal const string UniqueValueMetadataKey = "NServiceBus-UniqueValue";
 
         static readonly ConcurrentDictionary<string, bool> PropertyCache = new ConcurrentDictionary<string, bool>();
     }

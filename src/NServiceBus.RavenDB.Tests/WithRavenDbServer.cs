@@ -26,7 +26,6 @@ public class When_configuring_raven_persistence
             Assert.AreEqual("http://localhost:8080", store.Url);
             Assert.AreEqual("UnitTests", store.DefaultDatabase);
             Assert.AreEqual(RavenPersistenceConstants.DefaultResourceManagerId, store.ResourceManagerId);
-            Assert.AreEqual("NServiceBus.RavenDB.Persistence.RavenConventions.FindTypeTagName", store.Conventions.FindTypeTagName.Method.DeclaringType.FullName + "." + store.Conventions.FindTypeTagName.Method.Name);
             Assert.AreEqual(typeof(NoOpLogManager), Raven.Abstractions.Logging.LogManager.CurrentLogManager.GetType());
 
             Assert.IsTrue(config.Configurer.HasComponent<StoreAccessor>());

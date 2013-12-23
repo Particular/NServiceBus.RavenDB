@@ -4,6 +4,7 @@ namespace NServiceBus.RavenDB
     using NServiceBus;
     using NServiceBus.RavenDB.Persistence;
     using NServiceBus.Settings;
+    using Raven.Client;
     using Raven.Client.Document;
     using RavenLogManager = Raven.Abstractions.Logging.LogManager;
 
@@ -40,6 +41,21 @@ namespace NServiceBus.RavenDB
             config.Configurer.ConfigureComponent<RavenUnitOfWork>(DependencyLifecycle.InstancePerUnitOfWork);
 
 
+            RavenUserInstaller.RunInstaller = true;
+
+            return config;
+        }
+
+        public static Configure RavenDBStorageWithSelfManagedSession(this Configure config, DocumentStore documentStore, bool applyConventions,Func<IDocumentSession> sessionProvider)
+        {
+            if (applyConventions)
+            {
+                RavenDBStorageApplyConventions(documentStore);
+            }
+
+            config.Configurer.ConfigureComponent(() => new StoreAccessor(documentStore), DependencyLifecycle.SingleInstance);
+            config.Configurer.ConfigureComponent<ISessionProvider>(()=>new UserControlledSessionProvider(sessionProvider),DependencyLifecycle.InstancePerCall);
+            
             RavenUserInstaller.RunInstaller = true;
 
             return config;

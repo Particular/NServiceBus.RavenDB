@@ -82,6 +82,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Gateway\ConfigureGateway.cs" />
     <Compile Include="ConfigureRavenPersistence.cs" />
+    <Compile Include="ISessionProvider.cs" />
     <Compile Include="TimeoutPersister\ConfigureTimeoutManager.cs" />
     <Compile Include="Gateway\GatewayMessage.cs" />
     <Compile Include="Gateway\RavenDeduplication.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="SubscriptionStorage\RavenSubscriptionStorage.cs" />
     <Compile Include="SubscriptionStorage\Subscription.cs" />
     <Compile Include="TimeoutPersister\RavenTimeoutPersistence.cs" />
+    <Compile Include="UserControlledSessionProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ripple.dependencies.config">
