@@ -64,7 +64,6 @@ namespace NServiceBus.RavenDB
         /// </summary>
         public static void RavenDBStorageApplyConventions(DocumentStore documentStore)
         {
-            documentStore.Conventions.FindTypeTagName = RavenConventions.FindTypeTagName;
             documentStore.Conventions.MaxNumberOfRequestsPerSession = 100;
 
             if (documentStore.Url == null)
