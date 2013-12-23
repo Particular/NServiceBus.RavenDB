@@ -26,13 +26,13 @@ namespace NServiceBus.RavenDB
         /// </summary>
         /// <param name="config">The configuration object.</param>
         /// <param name="documentStore">An <see cref="DocumentStore"/>.</param>
-        /// <param name="applyConventions"><code>true</code> to call <see cref="ApplyConventions"/> on <paramref name="documentStore"/>.</param>
+        /// <param name="applyConventions"><code>true</code> to call <see cref="RavenDBStorageApplyConventions"/> on <paramref name="documentStore"/>.</param>
         /// <returns>The instance passed in by <paramref name="config"/> to enable the fluent API.</returns>
         public static Configure RavenDBStorage(this Configure config, DocumentStore documentStore, bool applyConventions)
         {
             if (applyConventions)
             {
-                ApplyConventions(documentStore);
+                RavenDBStorageApplyConventions(documentStore);
             }
 
             config.Configurer.ConfigureComponent(() => new StoreAccessor(documentStore), DependencyLifecycle.SingleInstance);
@@ -51,7 +51,7 @@ namespace NServiceBus.RavenDB
         /// <param name="config">The configuration object.</param>
         /// <param name="convention">The method referenced by a Func delegate for finding the database name for the specified message.</param>
         /// <returns>The configuration object.</returns>
-        public static Configure MessageToDatabaseMappingConvention(this Configure config, Func<IMessageContext, string> convention)
+        public static Configure RavenDBStorageMessageToDatabaseMappingConvention(this Configure config, Func<IMessageContext, string> convention)
         {
             RavenSessionFactory.GetDatabaseName = convention;
 
@@ -62,7 +62,7 @@ namespace NServiceBus.RavenDB
         /// <summary>
         /// Apply the NServiceBus conventions to a <see cref="DocumentStore"/> .
         /// </summary>
-        public static void ApplyConventions(DocumentStore documentStore)
+        public static void RavenDBStorageApplyConventions(DocumentStore documentStore)
         {
             documentStore.Conventions.FindTypeTagName = RavenConventions.FindTypeTagName;
             documentStore.Conventions.MaxNumberOfRequestsPerSession = 100;
@@ -85,7 +85,7 @@ namespace NServiceBus.RavenDB
             RavenLogManager.CurrentLogManager = new NoOpLogManager();
         }
 
-        public static void RegisterDefaults(this Configure config, DocumentStore documentStore)
+        public static void RavenDBStorageAsDefault(this Configure config, DocumentStore documentStore)
         {
             config.RavenDBStorage(documentStore, true);
             config.UseRavenDBTimeoutStorage();
