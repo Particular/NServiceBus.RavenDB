@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8BF5E2C0-8F97-4746-9A8B-10CB38CF8B97}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NServiceBus.RavenDB.AcceptanceTests</RootNamespace>
+    <AssemblyName>NServiceBus.RavenDB.AcceptanceTests</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net\lib\2.0\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CompilerServices.AsyncTargetingPack.Net45">
+      <HintPath>..\packages\Microsoft.CompilerServices.AsyncTargetingPack\lib\net45\Microsoft.CompilerServices.AsyncTargetingPack.Net45.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="NServiceBus">
+      <HintPath>..\packages\NServiceBus.Interfaces\lib\net40\NServiceBus.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.AcceptanceTesting">
+      <HintPath>..\packages\NServiceBus.AcceptanceTesting\lib\net40\NServiceBus.AcceptanceTesting.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.Core">
+      <HintPath>..\packages\NServiceBus\lib\net40\NServiceBus.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Raven.Abstractions">
+      <HintPath>..\packages\RavenDB.Client\lib\net45\Raven.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Raven.Abstractions, Version=2.5.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
+      <HintPath>..\packages\RavenDB.Database\lib\net45\Raven.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Raven.Client.Lightweight">
+      <HintPath>..\packages\RavenDB.Client\lib\net45\Raven.Client.Lightweight.dll</HintPath>
+    </Reference>
+    <Reference Include="Raven.Client.Lightweight, Version=2.5.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
+      <HintPath>..\packages\RavenDB.Client\lib\net45\Raven.Client.Lightweight.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Audit\When_a_message_is_audited.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Audit\When_using_auditing_as_a_feature.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\BasicMessaging\When_aborting_the_behavior_chain.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\BasicMessaging\When_handling_current_message_later.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\BasicMessaging\When_registering_a_callback_for_a_local_message.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\BasicMessaging\When_sending_a_message_to_another_endpoint.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\BasicMessaging\When_using_a_custom_correlation_id.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\BasicMessaging\When_using_callbacks_in_a_scaleout_scenario.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\BusStartStop\When_bus_start_and_stops_with_a_pending_message.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Configuration\When_a_config_override_is_found.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\ConfigureRavenSagaPersister.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\DataBus\When_sending_databus_properties.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Encryption\When_using_encryption.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\EndpointTemplates\BusExtensions.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\EndpointTemplates\ConfigureExtensions.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\EndpointTemplates\DefaultServer.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Gateway\When_doing_request_response_between_sites.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Gateway\When_sending_a_message_via_the_gateway.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Gateway\When_using_a_custom_correlation_id.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\InMemory\When_calling_DoNotContinueDispatchingCurrentMessageToHandlers_from_inmemory.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\InMemory\When_raising_an_in_memory_event.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\NServiceBusAcceptanceTest.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Performance\NServiceBusPerformanceTest.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Performance\Receive\Receive_performance.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Performance\RequestResponse\Request_response_performance.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Performance\Sagas\Saga_performance.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\PubSub\PubSubAcceptanceTest.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\PubSub\When_publishing_an_event.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\PubSub\When_publishing_an_event_using_a_broker_transport_with_centralized_routing.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\PubSub\When_publishing_an_event_with_only_local_messagehandlers.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\PubSub\When_publishing_an_event_with_the_subscriber_scaled_out.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\PubSub\When_subscribing_to_a_polymorphic_event.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Retries\When_doing_flr_with_default_settings.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Retries\When_messages_fails_flr.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Retries\When_message_fails_with_retries_set_to_0.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Retries\When_sending_a_message_off_to_slr.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Sagas\When_an_endpoint_replies_to_a_saga.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Sagas\When_a_saga_is_started_by_an_event_published_by_another_saga.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Sagas\When_a_saga_message_goes_through_the_slr.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Sagas\When_doing_request_response_between_sagas.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Sagas\When_receiving_a_message_that_is_mapped_to_an_existing_saga_instance.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Sagas\When_receiving_a_message_that_should_complete_saga.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Sagas\When_receiving_a_message_that_should_start_a_saga.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Sagas\When_sending_from_a_saga_handle.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Sagas\When_sending_from_a_saga_timeout.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Sagas\When_two_sagas_subscribe_to_the_same_event.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Sagas\When_using_a_received_message_for_timeout.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Sagas\When_using_containSagaData.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\ScenarioDescriptors\AllBuilders.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\ScenarioDescriptors\AllSerializers.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\ScenarioDescriptors\AllSubscriptionStorages.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\ScenarioDescriptors\AllTransports.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\ScenarioDescriptors\SagaPersisters.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\ScenarioDescriptors\Serializers.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\ScenarioDescriptors\SubscriptionStorages.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\ScenarioDescriptors\Transports.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Scheduling\When_scheduling_a_recurring_task.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Transactions\FakePromotableResourceManager.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Transactions\When_receiving_a_message_with_dtc_disabled.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Transactions\When_receiving_a_message_with_dtc_enabled.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Transactions\When_receiving_a_message_with_the_default_settings.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Transactions\When_receiving_a_message_with_transactions_disabled.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Transactions\When_sending_a_message_from_a_non_transactional_endpoint_with_a_ambient_transaction_enabled.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Transactions\When_sending_messages_within_an_ambient_transaction.cs" />
+    <Compile Include="App_Packages\NServiceBus.AcceptanceTests.4.3.0-Unstable111\Versioning\When_multiple_versions_of_a_message_is_published.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ripple.dependencies.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj">
+      <Project>{281646e3-32e0-4f4d-bcf6-1dc5efc6c268}</Project>
+      <Name>NServiceBus.RavenDB</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,0 +1,21 @@
+namespace NServiceBus.RavenDB
+{
+    using NServiceBus.RavenDB.Persistence.TimeoutPersister;
+
+    public static class ConfigureTimeoutManager
+    {
+
+        /// <summary>
+        /// Use the Raven timeout persister implementation.
+        /// </summary>
+        public static Configure UseRavenDBTimeoutStorage(this Configure config)
+        {
+            config.ThrowIfStoreNotConfigured();
+
+            config.Configurer.ConfigureComponent<RavenTimeoutPersistence>(DependencyLifecycle.SingleInstance);
+
+            return config;
+        }
+
+    }
+}
