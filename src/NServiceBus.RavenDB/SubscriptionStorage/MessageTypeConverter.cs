@@ -1,7 +1,7 @@
 namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
 {
     using System;
-    using NServiceBus.Unicast.Subscriptions;
+    using Unicast.Subscriptions;
     using Raven.Imports.Newtonsoft.Json;
 
     class MessageTypeConverter : JsonConverter

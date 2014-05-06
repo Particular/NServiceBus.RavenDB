@@ -4,9 +4,9 @@
     using Raven.Client.Indexes;
     using Timeout.Core;
 
-    public class TimeoutDatasIndex : AbstractIndexCreationTask<TimeoutData>
+    class TimeoutDataIndex : AbstractIndexCreationTask<TimeoutData>
     {
-        public TimeoutDatasIndex()
+        public TimeoutDataIndex()
         {
             Map = docs => from doc in docs
                 select new

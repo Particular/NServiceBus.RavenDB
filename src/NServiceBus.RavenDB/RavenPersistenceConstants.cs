@@ -3,6 +3,7 @@ namespace NServiceBus.RavenDB.Persistence
     using System;
     using System.Security.Cryptography;
     using System.Text;
+    using Config;
     using Utils;
 
     static class RavenPersistenceConstants
@@ -20,13 +21,21 @@ namespace NServiceBus.RavenDB.Persistence
         {
             get
             {
-                string masterNode = null;// = Configure.Instance.GetMasterNode(); TODO
+                var masterNode = GetMasterNode();
 
                 if (string.IsNullOrEmpty(masterNode))
+                {
                     masterNode = "localhost";
+                }
 
                 return string.Format("http://{0}:{1}", masterNode, registryPort);
             }
+        }
+
+        static string GetMasterNode()
+        {
+            var section = Configure.GetConfigSection<MasterNodeConfig>();
+            return section != null ? section.Node : null;
         }
 
         public static Guid DefaultResourceManagerId

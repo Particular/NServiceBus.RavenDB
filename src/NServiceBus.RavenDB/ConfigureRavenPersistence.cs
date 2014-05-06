@@ -103,7 +103,6 @@ namespace NServiceBus.RavenDB
             config.RavenDBStorage(documentStore, true);
             config.UseRavenDBTimeoutStorage();
             config.UseRavenDBSagaStorage();
-            config.UseRavenDBGatewayStorage();
             config.UseRavenDBGatewayDeduplicationStorage();
             config.UseRavenDBSubscriptionStorage();
         }

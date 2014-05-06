@@ -1,6 +1,5 @@
 ﻿using NServiceBus;
 using Raven.Client;
-using Raven.Client.Embedded;
 
 public abstract class ConfigurePersistences
 {

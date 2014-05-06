@@ -25,7 +25,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\..\binaries\NServiceBus.RavenDB.xml</DocumentationFile>
-    <NoWarn>1591,1573,618</NoWarn>
+    <NoWarn>1591,1573</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
@@ -37,7 +37,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\..\binaries\NServiceBus.RavenDB.xml</DocumentationFile>
-    <NoWarn>1591,1573,618</NoWarn>
+    <NoWarn>1591,1573</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
@@ -51,9 +51,6 @@
     </Reference>
     <Reference Include="Microsoft.CompilerServices.AsyncTargetingPack.Net4">
       <HintPath>..\packages\Microsoft.CompilerServices.AsyncTargetingPack\lib\net40\Microsoft.CompilerServices.AsyncTargetingPack.Net4.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CompilerServices.AsyncTargetingPack.Net45">
-      <HintPath>..\packages\Microsoft.CompilerServices.AsyncTargetingPack\lib\net45\Microsoft.CompilerServices.AsyncTargetingPack.Net45.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="NServiceBus">
@@ -87,9 +84,7 @@
     <Compile Include="ConfigureRavenPersistence.cs" />
     <Compile Include="ISessionProvider.cs" />
     <Compile Include="TimeoutPersister\ConfigureTimeoutManager.cs" />
-    <Compile Include="Gateway\GatewayMessage.cs" />
     <Compile Include="Gateway\RavenDeduplication.cs" />
-    <Compile Include="Gateway\RavenPersistence.cs" />
     <Compile Include="NoOpLogManager.cs" />
     <Compile Include="RavenPersistenceConstants.cs" />
     <Compile Include="RavenSessionFactory.cs" />
@@ -104,7 +99,7 @@
     <Compile Include="SubscriptionStorage\RavenSubscriptionStorage.cs" />
     <Compile Include="SubscriptionStorage\Subscription.cs" />
     <Compile Include="TimeoutPersister\RavenTimeoutPersistence.cs" />
-    <Compile Include="TimeoutPersister\TimeoutDatasIndex.cs" />
+    <Compile Include="TimeoutPersister\TimeoutDataIndex.cs" />
     <Compile Include="UserControlledSessionProvider.cs" />
   </ItemGroup>
   <ItemGroup>

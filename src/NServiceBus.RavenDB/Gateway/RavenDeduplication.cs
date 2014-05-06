@@ -2,7 +2,7 @@
 {
     using System;
     using NServiceBus.Gateway.Deduplication;
-    using NServiceBus.RavenDB.Persistence;
+    using Persistence;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
 
@@ -45,6 +45,5 @@
         {
             return clientId.Replace("\\", "_");
         }
-
     }
 }

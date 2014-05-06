@@ -1,7 +1,7 @@
 namespace NServiceBus.RavenDB
 {
     using System;
-    using NServiceBus.RavenDB.Persistence;
+    using Persistence;
     using Raven.Client;
 
     class UserControlledSessionProvider:ISessionProvider
