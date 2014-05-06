@@ -1,3 +1,4 @@
+using System.IO;
 using Raven.Client.Document;
 using Raven.Client.Embedded;
 
@@ -14,6 +15,7 @@ public class DocumentStoreBuilder
                     }
             };
         store.Configuration.RunInUnreliableYetFastModeThatIsNotSuitableForProduction = true;
+        store.Configuration.CompiledIndexCacheDirectory = Path.GetTempPath();
 
         store.Initialize();
         return store;
