@@ -5,6 +5,7 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
     using System.Linq;
     using System.Net;
     using System.Text;
+    using Raven.Abstractions.Commands;
     using Raven.Abstractions.Data;
     using Raven.Client;
     using Raven.Client.Linq;
@@ -98,10 +99,14 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
         {
             using (var session = OpenSession())
             {
-                var items = session.Query<TimeoutData>().Where(x => x.SagaId == sagaId);
-                foreach (var item in items)
-                    session.Delete(item);
-
+                var query = session.Query<TimeoutData>().Where(x => x.SagaId == sagaId).Select(x => x.Id);
+                using (var enumerator = session.Advanced.Stream(query))
+                {
+                    while (enumerator.MoveNext())
+                    {
+                        session.Advanced.Defer(new DeleteCommandData{Key = enumerator.Current.Key});
+                    }
+                }
                 session.SaveChanges();
             }
         }
