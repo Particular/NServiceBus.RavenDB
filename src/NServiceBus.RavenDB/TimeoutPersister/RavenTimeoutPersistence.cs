@@ -5,6 +5,7 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
     using System.Linq;
     using System.Net;
     using System.Text;
+    using Raven.Abstractions.Data;
     using Raven.Client;
     using Raven.Client.Linq;
     using Logging;
@@ -23,79 +24,40 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
         {
             try
             {
-                var now = DateTime.UtcNow;
-                var skip = 0;
                 var results = new List<Tuple<string, DateTime>>();
-                var numberOfRequestsExecutedSoFar = 0;
-                RavenQueryStatistics stats;
-
-                do
-                {
-                    using (var session = OpenSession())
-                    {
-                        session.Advanced.AllowNonAuthoritativeInformation = true;
-
-                        var query = session.Query<TimeoutData>()
-                            .Where(
-                                t =>
-                                    t.OwningTimeoutManager == String.Empty ||
-                                    t.OwningTimeoutManager == Configure.EndpointName)
-                            .Where(
-                                t =>
-                                    t.Time > startSlice &&
-                                    t.Time <= now)
-                            .OrderBy(t => t.Time)
-                            .Select(t => new
-                                {
-                                    t.Id,
-                                    t.Time
-                                })
-                            .Statistics(out stats);
-                        do
-                        {
-                            results.AddRange(query
-                                .Skip(skip)
-                                .Take(1024)
-                                .ToList()
-                                .Select(arg => new Tuple<string, DateTime>(arg.Id, arg.Time)));
-
-                            skip += 1024;
-                        } while (skip < stats.TotalResults &&
-                                 ++numberOfRequestsExecutedSoFar < session.Advanced.MaxNumberOfRequestsPerSession);
-                    }
-                } while (skip < stats.TotalResults);
-
                 using (var session = OpenSession())
                 {
-                    session.Advanced.AllowNonAuthoritativeInformation = true;
 
-                    //Retrieve next time we need to run query
-                    var startOfNextChunk =
-                        session.Query<TimeoutData>()
-                            .Where(
-                                t =>
-                                    t.OwningTimeoutManager == String.Empty ||
-                                    t.OwningTimeoutManager == Configure.EndpointName)
-                            .Where(t => t.Time > now)
-                            .OrderBy(t => t.Time)
-                            .Select(t => new
-                                {
-                                    t.Id,
-                                    t.Time
-                                })
-                            .FirstOrDefault();
+                    var query = session.Query<TimeoutData>()
+                        .Where(
+                            t =>
+                                t.OwningTimeoutManager == String.Empty ||
+                                t.OwningTimeoutManager == Configure.EndpointName)
+                        .Where(t => t.Time > startSlice)
+                        .OrderBy(t => t.Time)
+                        .Select(t => t.Time);
 
-                    if (startOfNextChunk != null)
+                    QueryHeaderInformation qhi;
+                    using (var enumerator = session.Advanced.Stream(query, out qhi))
                     {
-                        nextTimeToRunQuery = startOfNextChunk.Time;
+                        if (qhi.TotalResults == 0)
+                        {
+                            nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10);
+                        }
+                        else
+                        {
+                            while (enumerator.MoveNext())
+                            {
+                                results.Add(new Tuple<string, DateTime>(enumerator.Current.Key, enumerator.Current.Document));
+                            }
+                            
+                            nextTimeToRunQuery = results.Max(x => x.Item2);
+                            if (nextTimeToRunQuery < qhi.IndexTimestamp) nextTimeToRunQuery = qhi.IndexTimestamp;
+                        }
                     }
-                    else
-                    {
-                        nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10);
-                    }
-
-                    return results;
                 }
+
+                return results;
             }
             catch (WebException ex)
             {
@@ -147,10 +109,7 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
         IDocumentSession OpenSession()
         {
             var session = store.OpenSession();
-
-            session.Advanced.AllowNonAuthoritativeInformation = false;
             session.Advanced.UseOptimisticConcurrency = true;
-
             return session;
         }
 
