@@ -10,9 +10,10 @@ public class DocumentStoreBuilder
                 RunInMemory = true,
                 Conventions =
                     {
-                        DefaultQueryingConsistency = ConsistencyOptions.AlwaysWaitForNonStaleResultsAsOfLastWrite
+                        DefaultQueryingConsistency = ConsistencyOptions.AlwaysWaitForNonStaleResultsAsOfLastWrite,
                     }
             };
+        store.Configuration.RunInUnreliableYetFastModeThatIsNotSuitableForProduction = true;
 
         store.Initialize();
         return store;
