@@ -2,8 +2,8 @@ namespace NServiceBus.RavenDB
 {
     using System;
     using NServiceBus;
-    using NServiceBus.RavenDB.Persistence;
-    using NServiceBus.Settings;
+    using Persistence;
+    using Settings;
     using Raven.Client;
     using Raven.Client.Document;
     using RavenLogManager = Raven.Abstractions.Logging.LogManager;
@@ -80,8 +80,6 @@ namespace NServiceBus.RavenDB
         /// </summary>
         public static void RavenDBStorageApplyConventions(DocumentStore documentStore)
         {
-            documentStore.Conventions.MaxNumberOfRequestsPerSession = 100;
-
             if (documentStore.Url == null)
             {
                 documentStore.Url = RavenPersistenceConstants.DefaultUrl;
