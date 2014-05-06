@@ -85,7 +85,7 @@ namespace NServiceBus.RavenDB.Persistence
             }
             catch (TargetInvocationException exception)
             {
-                //need to catch OperationVetoedException here but cant do it in a strong typed way since the namespace of OperationVetoedException changed in 2.5  but cant because in 
+                //need to catch OperationVetoedException here but cant do it in a strong typed way since the namespace of OperationVetoedException changed in 2.5
                 if (exception.InnerException.Message.Contains("Cannot setup Windows Authentication without a valid commercial license."))
                 {
                     throw new Exception("RavenDB requires a Commercial license to configure windows authentication. Please either install your RavenDB license or contact support@particular.net if you need a copy of the RavenDB license.");
