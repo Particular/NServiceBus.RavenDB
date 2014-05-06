@@ -20,7 +20,7 @@ namespace NServiceBus.RavenDB.Persistence
         {
             get
             {
-                var masterNode = Configure.Instance.GetMasterNode();
+                string masterNode = null;// = Configure.Instance.GetMasterNode(); TODO
 
                 if (string.IsNullOrEmpty(masterNode))
                     masterNode = "localhost";
