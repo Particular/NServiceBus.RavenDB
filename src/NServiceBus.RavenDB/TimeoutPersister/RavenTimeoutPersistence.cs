@@ -28,13 +28,15 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
                 var results = new List<Tuple<string, DateTime>>();
                 using (var session = OpenSession())
                 {
+                    var now = DateTime.UtcNow;
+                    var strippedNow = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second);
 
                     var query = session.Query<TimeoutData>()
                         .Where(
                             t =>
                                 t.OwningTimeoutManager == String.Empty ||
                                 t.OwningTimeoutManager == Configure.EndpointName)
-                        .Where(t => t.Time > startSlice)
+                        .Where(t => t.Time > startSlice && t.Time <= strippedNow)
                         .OrderBy(t => t.Time)
                         .Select(t => t.Time);
 
