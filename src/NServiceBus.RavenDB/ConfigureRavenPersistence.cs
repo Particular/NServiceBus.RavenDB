@@ -3,6 +3,9 @@ namespace NServiceBus.RavenDB
     using System;
     using NServiceBus;
     using Persistence;
+    using Persistence.SagaPersister;
+    using Persistence.SubscriptionStorage;
+    using Persistence.TimeoutPersister;
     using Settings;
     using Raven.Client;
     using Raven.Client.Document;
@@ -13,52 +16,58 @@ namespace NServiceBus.RavenDB
     /// </summary>
     public static class ConfigureRavenPersistence
     {
+        public static Configure PersistenceForTimeouts(this Configure config, IDocumentStore documentStore)
+        {
+            SetupRavenPersistence(config, documentStore);
 
-        internal static void ThrowIfStoreNotConfigured(this Configure config)
+            config.Configurer.ConfigureComponent<RavenTimeoutPersistence>(DependencyLifecycle.SingleInstance);
+
+            return config;
+        }
+
+        // TODO here would be the place to wire up the ISagaFinder extension point
+        public static Configure PersistenceForSagas(this Configure config, IDocumentStore documentStore)
+        {
+            SetupRavenPersistence(config, documentStore);
+
+            config.Configurer.ConfigureComponent<RavenSagaPersister>(DependencyLifecycle.InstancePerCall);
+
+            return config;
+        }
+
+        public static Configure PersistenceForSubscriptions(this Configure config, IDocumentStore documentStore)
+        {
+            SetupRavenPersistence(config, documentStore);
+
+            config.Configurer.ConfigureComponent<RavenSubscriptionStorage>(DependencyLifecycle.SingleInstance);
+
+            return config;
+        }
+
+        public static Configure PersistenceForAll(this Configure config, IDocumentStore documentStore)
+        {
+            PersistenceForTimeouts(config, documentStore);
+            PersistenceForSubscriptions(config, documentStore);
+            PersistenceForSagas(config, documentStore);
+            return config;
+        }
+
+        private static void SetupRavenPersistence(Configure config, IDocumentStore documentStore)
         {
             if (!config.Configurer.HasComponent<IDocumentStore>())
             {
-                throw new Exception(string.Format("Call {0}.RavenPersistence(Configure, DocumentStore) first.", typeof(ConfigureRavenPersistence).Name));
+                config.Configurer.ConfigureComponent(() => documentStore, DependencyLifecycle.SingleInstance);
+                config.Configurer.ConfigureComponent<RavenSessionFactory>(DependencyLifecycle.SingleInstance);
+                config.Configurer.ConfigureComponent<RavenUnitOfWork>(DependencyLifecycle.InstancePerUnitOfWork);
+                RavenUserInstaller.RunInstaller = true; // TODO this smells
             }
-        }
-
-        /// <summary>
-        /// Configures RavenDB as the default persistence.
-        /// </summary>
-        /// <param name="config">The configuration object.</param>
-        /// <param name="documentStore">An <see cref="DocumentStore"/>.</param>
-        /// <param name="applyConventions"><code>true</code> to call <see cref="RavenDBStorageApplyConventions"/> on <paramref name="documentStore"/>.</param>
-        /// <returns>The instance passed in by <paramref name="config"/> to enable the fluent API.</returns>
-        public static Configure RavenDBStorage(this Configure config, DocumentStore documentStore, bool applyConventions)
-        {
-            if (applyConventions)
+            else
             {
-                RavenDBStorageApplyConventions(documentStore);
+                // TODO if this is not acceptable, we are going to need a type to docStore mapping set up
+                var configuredStore = config.Builder.Build<IDocumentStore>();
+                if (configuredStore != documentStore)
+                    throw new Exception("You can only point to one RavenDB document store for all persisted types");
             }
-
-            config.Configurer.ConfigureComponent<IDocumentStore>(() => documentStore, DependencyLifecycle.SingleInstance);
-            config.Configurer.ConfigureComponent<RavenSessionFactory>(DependencyLifecycle.SingleInstance);
-            config.Configurer.ConfigureComponent<RavenUnitOfWork>(DependencyLifecycle.InstancePerUnitOfWork);
-
-
-            RavenUserInstaller.RunInstaller = true;
-
-            return config;
-        }
-
-        public static Configure RavenDBStorageWithSelfManagedSession(this Configure config, DocumentStore documentStore, bool applyConventions,Func<IDocumentSession> sessionProvider)
-        {
-            if (applyConventions)
-            {
-                RavenDBStorageApplyConventions(documentStore);
-            }
-
-            config.Configurer.ConfigureComponent<IDocumentStore>(() => documentStore, DependencyLifecycle.SingleInstance);
-            config.Configurer.ConfigureComponent<ISessionProvider>(()=>new UserControlledSessionProvider(sessionProvider),DependencyLifecycle.InstancePerCall);
-            
-            RavenUserInstaller.RunInstaller = true;
-
-            return config;
         }
 
         /// <summary>
@@ -78,7 +87,7 @@ namespace NServiceBus.RavenDB
         /// <summary>
         /// Apply the NServiceBus conventions to a <see cref="DocumentStore"/> .
         /// </summary>
-        public static void RavenDBStorageApplyConventions(DocumentStore documentStore)
+        public static Configure ApplyRavenDBConventions(this Configure config, DocumentStore documentStore)
         {
             if (documentStore.Url == null)
             {
@@ -96,16 +105,8 @@ namespace NServiceBus.RavenDB
                 documentStore.EnlistInDistributedTransactions = false;
             }
             RavenLogManager.CurrentLogManager = new NoOpLogManager();
-        }
 
-        public static void RavenDBStorageAsDefault(this Configure config, DocumentStore documentStore)
-        {
-            config.RavenDBStorage(documentStore, true);
-            config.UseRavenDBTimeoutStorage();
-            config.UseRavenDBSagaStorage();
-            config.UseRavenDBGatewayDeduplicationStorage();
-            config.UseRavenDBSubscriptionStorage();
+            return config;
         }
-
     }
 }

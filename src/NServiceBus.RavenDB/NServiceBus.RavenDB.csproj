@@ -83,17 +83,14 @@
     <Compile Include="Gateway\ConfigureGateway.cs" />
     <Compile Include="ConfigureRavenPersistence.cs" />
     <Compile Include="ISessionProvider.cs" />
-    <Compile Include="TimeoutPersister\ConfigureTimeoutManager.cs" />
     <Compile Include="Gateway\RavenDeduplication.cs" />
     <Compile Include="NoOpLogManager.cs" />
     <Compile Include="RavenPersistenceConstants.cs" />
     <Compile Include="RavenSessionFactory.cs" />
     <Compile Include="RavenUnitofWork.cs" />
     <Compile Include="RavenUserInstaller.cs" />
-    <Compile Include="SagaPersister\ConfigureRavenSagaPersister.cs" />
     <Compile Include="SagaPersister\RavenSagaPersister.cs" />
     <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />
-    <Compile Include="SubscriptionStorage\ConfigureRavenSubscriptionStorage.cs" />
     <Compile Include="SubscriptionStorage\MessageTypeConverter.cs" />
     <Compile Include="SubscriptionStorage\RavenSubscriptionStorage.cs" />
     <Compile Include="SubscriptionStorage\Subscription.cs" />

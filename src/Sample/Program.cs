@@ -20,7 +20,7 @@ class Program
         {
             var configure = Configure.With();
             configure.DefaultBuilder();
-            configure.RavenDBStorageAsDefault(documentStore);
+            configure.PersistenceForAll(documentStore).ApplyRavenDBConventions(documentStore);
             bus = configure.UnicastBus().CreateBus();
 
             bus.Start(() => Configure.Instance.ForInstallationOn<Windows>().Install());
