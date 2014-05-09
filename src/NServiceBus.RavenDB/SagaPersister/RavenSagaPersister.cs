@@ -64,7 +64,9 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
             if (IsUniqueProperty<T>(property))
                 return GetByUniqueProperty<T>(property, value);
 
-            return GetSingleByQuery<T>(property, value);
+            return sessionProvider.Session.Advanced.LuceneQuery<T>()
+                    .WhereEquals(property, value)
+                    .FirstOrDefault();
         }
 
         public void Complete(IContainSagaData saga)
@@ -79,7 +81,7 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
             DeleteUniqueProperty(saga, uniqueProperty.Value);
         }
 
-        bool IsUniqueProperty<T>(string property)
+        static bool IsUniqueProperty<T>(string property)
         {
             var key = typeof(T).FullName + property;
             bool value;
@@ -110,20 +112,6 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
             }
 
             return default(T);
-        }
-
-        T GetSingleByQuery<T>(string property, object value) where T : IContainSagaData
-        {
-            try
-            {
-                return sessionProvider.Session.Advanced.LuceneQuery<T>()
-                    .WhereEquals(property, value)
-                    .FirstOrDefault();
-            }
-            catch (InvalidCastException)
-            {
-                return default(T);
-            }
         }
 
         void StoreUniqueProperty(IContainSagaData saga)
