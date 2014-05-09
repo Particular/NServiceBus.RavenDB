@@ -64,7 +64,7 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
             if (IsUniqueProperty<T>(property))
                 return GetByUniqueProperty<T>(property, value);
 
-            return GetByQuery<T>(property, value).FirstOrDefault();
+            return GetSingleByQuery<T>(property, value);
         }
 
         public void Complete(IContainSagaData saga)
@@ -112,20 +112,17 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
             return default(T);
         }
 
-        IEnumerable<T> GetByQuery<T>(string property, object value) where T : IContainSagaData
+        T GetSingleByQuery<T>(string property, object value) where T : IContainSagaData
         {
             try
             {
                 return sessionProvider.Session.Advanced.LuceneQuery<T>()
                     .WhereEquals(property, value)
-                    .WaitForNonStaleResultsAsOfNow();
+                    .FirstOrDefault();
             }
             catch (InvalidCastException)
             {
-                return new[]
-                    {
-                        default(T)
-                    };
+                return default(T);
             }
         }
 
