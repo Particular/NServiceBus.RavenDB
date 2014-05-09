@@ -87,9 +87,6 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
                 if (timeoutData == null)
                     return false;
 
-                timeoutData.Time = DateTime.UtcNow.AddYears(-1);
-                session.SaveChanges();
-
                 session.Delete(timeoutData);
                 session.SaveChanges();
 
