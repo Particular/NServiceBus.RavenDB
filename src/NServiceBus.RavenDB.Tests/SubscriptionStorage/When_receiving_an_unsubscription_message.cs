@@ -11,7 +11,7 @@ public class When_receiving_an_unsubscribe_message
     {
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new RavenSubscriptionStorage(new StoreAccessor(store));
+            var storage = new RavenSubscriptionStorage(store);
 
             storage.Subscribe(TestClients.ClientA, MessageTypes.All);
 

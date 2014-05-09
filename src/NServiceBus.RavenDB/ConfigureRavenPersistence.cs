@@ -16,7 +16,7 @@ namespace NServiceBus.RavenDB
 
         internal static void ThrowIfStoreNotConfigured(this Configure config)
         {
-            if (!config.Configurer.HasComponent<StoreAccessor>())
+            if (!config.Configurer.HasComponent<IDocumentStore>())
             {
                 throw new Exception(string.Format("Call {0}.RavenPersistence(Configure, DocumentStore) first.", typeof(ConfigureRavenPersistence).Name));
             }
@@ -36,7 +36,7 @@ namespace NServiceBus.RavenDB
                 RavenDBStorageApplyConventions(documentStore);
             }
 
-            config.Configurer.ConfigureComponent(() => new StoreAccessor(documentStore), DependencyLifecycle.SingleInstance);
+            config.Configurer.ConfigureComponent<IDocumentStore>(() => documentStore, DependencyLifecycle.SingleInstance);
             config.Configurer.ConfigureComponent<RavenSessionFactory>(DependencyLifecycle.SingleInstance);
             config.Configurer.ConfigureComponent<RavenUnitOfWork>(DependencyLifecycle.InstancePerUnitOfWork);
 
@@ -53,7 +53,7 @@ namespace NServiceBus.RavenDB
                 RavenDBStorageApplyConventions(documentStore);
             }
 
-            config.Configurer.ConfigureComponent(() => new StoreAccessor(documentStore), DependencyLifecycle.SingleInstance);
+            config.Configurer.ConfigureComponent<IDocumentStore>(() => documentStore, DependencyLifecycle.SingleInstance);
             config.Configurer.ConfigureComponent<ISessionProvider>(()=>new UserControlledSessionProvider(sessionProvider),DependencyLifecycle.InstancePerCall);
             
             RavenUserInstaller.RunInstaller = true;

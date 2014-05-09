@@ -12,7 +12,7 @@ public class When_storing_a_saga_with_a_long_namespace
     {
         using (var store = DocumentStoreBuilder.Build())
         {
-            var factory = new RavenSessionFactory(new StoreAccessor(store));
+            var factory = new RavenSessionFactory(store);
             factory.ReleaseSession();
             var persister = new RavenSagaPersister(factory);
             var uniqueString = Guid.NewGuid().ToString();

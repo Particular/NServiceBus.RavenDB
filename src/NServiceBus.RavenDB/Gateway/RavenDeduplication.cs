@@ -2,7 +2,6 @@
 {
     using System;
     using NServiceBus.Gateway.Deduplication;
-    using Persistence;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
 
@@ -10,9 +9,9 @@
     {
         IDocumentStore store;
 
-        public RavenDeduplication(StoreAccessor storeAccessor)
+        public RavenDeduplication(IDocumentStore documentStore)
         {
-            store = storeAccessor.Store;
+            store = documentStore;
         }
 
         public bool DeduplicateMessage(string clientId, DateTime timeReceived)

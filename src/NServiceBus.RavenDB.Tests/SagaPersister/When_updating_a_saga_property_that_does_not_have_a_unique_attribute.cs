@@ -13,7 +13,7 @@ public class When_updating_a_saga_property_that_does_not_have_a_unique_attribute
 
         using (var store = DocumentStoreBuilder.Build())
         {
-            var factory = new RavenSessionFactory(new StoreAccessor(store));
+            var factory = new RavenSessionFactory(store);
             factory.ReleaseSession();
             var persister = new RavenSagaPersister(factory);
             var uniqueString = Guid.NewGuid().ToString();

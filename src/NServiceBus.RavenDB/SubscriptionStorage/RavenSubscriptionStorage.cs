@@ -10,9 +10,9 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
     {
         IDocumentStore store;
 
-        public RavenSubscriptionStorage(StoreAccessor storeAccessor)
+        public RavenSubscriptionStorage(IDocumentStore documentStore)
         {
-            store = storeAccessor.Store;
+            store = documentStore;
         }
 
         public void Init()

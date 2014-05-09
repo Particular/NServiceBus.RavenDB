@@ -14,7 +14,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
         using (var store = DocumentStoreBuilder.Build())
         {
 
-            var factory = new RavenSessionFactory(new StoreAccessor(store));
+            var factory = new RavenSessionFactory(store);
             factory.ReleaseSession();
             var persister = new RavenSagaPersister(factory);
             var uniqueString = Guid.NewGuid().ToString();

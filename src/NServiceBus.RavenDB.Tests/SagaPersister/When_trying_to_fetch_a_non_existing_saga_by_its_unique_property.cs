@@ -13,7 +13,7 @@ public class When_trying_to_fetch_a_non_existing_saga_by_its_unique_property
 
         using (var store = DocumentStoreBuilder.Build())
         {
-            var factory = new RavenSessionFactory(new StoreAccessor(store));
+            var factory = new RavenSessionFactory(store);
             factory.ReleaseSession();
             var persister = new RavenSagaPersister(factory);
             Assert.Null(persister.Get<SagaData>("UniqueString", Guid.NewGuid().ToString()));

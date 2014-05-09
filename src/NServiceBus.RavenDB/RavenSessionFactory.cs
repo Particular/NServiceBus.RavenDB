@@ -17,9 +17,9 @@ namespace NServiceBus.RavenDB.Persistence
             get { return session ?? (session = OpenSession()); }
         }
 
-        public RavenSessionFactory(StoreAccessor storeAccessor)
+        public RavenSessionFactory(IDocumentStore documentStore)
         {
-            Store = storeAccessor.Store;
+            Store = documentStore;
         }
 
         public void ReleaseSession()

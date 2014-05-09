@@ -22,7 +22,7 @@ public class When_receiving_a_subscription_message
 
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new RavenSubscriptionStorage(new StoreAccessor(store));
+            var storage = new RavenSubscriptionStorage(store);
 
             using (var transaction = new TransactionScope())
             {

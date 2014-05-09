@@ -18,7 +18,7 @@ public class Saga_with_unique_property_set_to_null
                     UniqueString = null
                 };
 
-            var factory = new RavenSessionFactory(new StoreAccessor(store));
+            var factory = new RavenSessionFactory(store);
             var persister = new RavenSagaPersister(factory);
             persister.Save(saga1);
             factory.SaveChanges();

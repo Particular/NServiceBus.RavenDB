@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using NServiceBus;
-using NServiceBus.RavenDB.Persistence;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.Unicast.Subscriptions;
 using NUnit.Framework;
@@ -16,7 +15,7 @@ public class When_receiving_duplicate_subscription_messages
 
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new RavenSubscriptionStorage(new StoreAccessor(store));
+            var storage = new RavenSubscriptionStorage(store);
 
             storage.Subscribe(new Address("testEndPoint", "localhost"), new List<MessageType>
                 {

@@ -6,6 +6,7 @@ namespace NServiceBus.RavenDB.Persistence
     using System.Reflection;
     using Raven.Abstractions.Data;
     using Raven.Abstractions.Extensions;
+    using Raven.Client;
     using Raven.Client.Connection;
     using Raven.Client.Document;
     using Raven.Json.Linq;
@@ -20,7 +21,7 @@ namespace NServiceBus.RavenDB.Persistence
     {
         static readonly ILog logger = LogManager.GetLogger(typeof(RavenUserInstaller));
 
-        public StoreAccessor StoreAccessor { get; set; }
+        public IDocumentStore Store { get; set; }
 
         internal static bool RunInstaller { get; set; }
 
@@ -31,8 +32,7 @@ namespace NServiceBus.RavenDB.Persistence
                 return;
             }
 
-            var store = StoreAccessor.Store as DocumentStore;
-
+            var store = Store as DocumentStore;
             if (store == null)
             {
                 return;

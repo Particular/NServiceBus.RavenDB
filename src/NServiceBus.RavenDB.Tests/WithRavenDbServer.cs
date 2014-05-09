@@ -2,6 +2,7 @@ using NServiceBus;
 using NServiceBus.RavenDB;
 using NServiceBus.RavenDB.Persistence;
 using NUnit.Framework;
+using Raven.Client;
 using Raven.Client.Document;
 
 [TestFixture]
@@ -28,7 +29,7 @@ public class When_configuring_raven_persistence
             Assert.AreEqual(RavenPersistenceConstants.DefaultResourceManagerId, store.ResourceManagerId);
             Assert.AreEqual(typeof(NoOpLogManager), Raven.Abstractions.Logging.LogManager.CurrentLogManager.GetType());
 
-            Assert.IsTrue(config.Configurer.HasComponent<StoreAccessor>());
+            Assert.IsTrue(config.Configurer.HasComponent<IDocumentStore>());
             Assert.IsTrue(config.Configurer.HasComponent<RavenSessionFactory>());
             Assert.IsTrue(config.Configurer.HasComponent<RavenUnitOfWork>());
         }

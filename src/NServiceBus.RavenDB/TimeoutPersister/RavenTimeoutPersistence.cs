@@ -16,9 +16,9 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
     {
         readonly IDocumentStore store;
 
-        public RavenTimeoutPersistence(StoreAccessor storeAccessor)
+        public RavenTimeoutPersistence(IDocumentStore documentStore)
         {
-            store = storeAccessor.Store;
+            store = documentStore;
         }
 
         public List<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)

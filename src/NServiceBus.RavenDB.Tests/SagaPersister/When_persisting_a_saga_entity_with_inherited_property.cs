@@ -14,7 +14,7 @@ public class When_persisting_a_saga_entity_with_inherited_property
         using (var store = DocumentStoreBuilder.Build())
         {
 
-            var factory = new RavenSessionFactory(new StoreAccessor(store));
+            var factory = new RavenSessionFactory(store);
             factory.ReleaseSession();
             var persister = new RavenSagaPersister(factory);
             var entity = new SagaData
