@@ -28,35 +28,32 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
                 var results = new List<Tuple<string, DateTime>>();
                 using (var session = OpenSession())
                 {
-                    var now = DateTime.UtcNow;
-                    var strippedNow = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second);
-
                     var query = session.Query<TimeoutData>()
                         .Where(
                             t =>
                                 t.OwningTimeoutManager == String.Empty ||
                                 t.OwningTimeoutManager == Configure.EndpointName)
-                        .Where(t => t.Time > startSlice && t.Time <= strippedNow)
+                        .Where(t => t.Time > startSlice)
                         .OrderBy(t => t.Time)
                         .Select(t => t.Time);
 
                     QueryHeaderInformation qhi;
                     using (var enumerator = session.Advanced.Stream(query, out qhi))
                     {
-                        if (qhi.TotalResults == 0)
+                        // default return value for when no results are found and index is stale (non-stale is checked below)
+                        nextTimeToRunQuery = qhi.IndexTimestamp;
+
+                        while (enumerator.MoveNext())
                         {
-                            nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10);
+                            var dateTime = enumerator.Current.Document;
+                            nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time
+
+                            if (dateTime > DateTime.UtcNow) return results; // break on first future timeout
+
+                            results.Add(new Tuple<string, DateTime>(enumerator.Current.Key, enumerator.Current.Document));
                         }
-                        else
-                        {
-                            while (enumerator.MoveNext())
-                            {
-                                results.Add(new Tuple<string, DateTime>(enumerator.Current.Key, enumerator.Current.Document));
-                            }
-                            
-                            nextTimeToRunQuery = results.Max(x => x.Item2);
-                            if (nextTimeToRunQuery < qhi.IndexTimestamp) nextTimeToRunQuery = qhi.IndexTimestamp;
-                        }
+
+                        if (!qhi.IsStable) nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10); // since we consumed all timeouts and no future timeouts found
                     }
                 }
 
