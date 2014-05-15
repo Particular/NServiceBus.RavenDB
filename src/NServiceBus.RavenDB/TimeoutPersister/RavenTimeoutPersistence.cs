@@ -7,6 +7,7 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
     using Raven.Client;
     using Raven.Client.Linq;
     using Timeout.Core;
+    using RavenDB.TimeoutPersister;
 
     class RavenTimeoutPersistence : IPersistTimeouts
     {
@@ -22,7 +23,7 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
             var results = new List<Tuple<string, DateTime>>();
             using (var session = OpenSession())
             {
-                var query = session.Query<TimeoutData>()
+                var query = session.Query<Timeout>()
                     .Where(
                         t =>
                             t.OwningTimeoutManager == String.Empty ||
@@ -58,7 +59,7 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
         {
             using (var session = OpenSession())
             {
-                session.Store(timeout);
+                session.Store(new Timeout(timeout));
                 session.SaveChanges();
             }
         }
@@ -67,14 +68,16 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
         {
             using (var session = OpenSession())
             {
-                timeoutData = session.Load<TimeoutData>(timeoutId);
-
-                if (timeoutData == null)
+                var timeout = session.Load<Timeout>(timeoutId);
+                if (timeout == null)
+                {
+                    timeoutData = null;
                     return false;
+                }
 
-                session.Delete(timeoutData);
+                timeoutData = timeout.ToTimeoutData();
+                session.Delete(timeout);
                 session.SaveChanges();
-
                 return true;
             }
         }
@@ -83,7 +86,7 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
         {
             using (var session = OpenSession())
             {
-                var query = session.Query<TimeoutData>().Where(x => x.SagaId == sagaId).Select(x => x.Id);
+                var query = session.Query<Timeout>().Where(x => x.SagaId == sagaId).Select(x => x.Id);
                 using (var enumerator = session.Advanced.Stream(query))
                 {
                     while (enumerator.MoveNext())

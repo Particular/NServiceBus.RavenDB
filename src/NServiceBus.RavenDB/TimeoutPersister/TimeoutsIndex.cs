@@ -2,11 +2,10 @@
 {
     using System.Linq;
     using Raven.Client.Indexes;
-    using Timeout.Core;
 
-    class TimeoutDataIndex : AbstractIndexCreationTask<TimeoutData>
+    class TimeoutsIndex : AbstractIndexCreationTask<Timeout>
     {
-        public TimeoutDataIndex()
+        public TimeoutsIndex()
         {
             Map = docs => from doc in docs
                 select new

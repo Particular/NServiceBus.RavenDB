@@ -95,7 +95,8 @@
     <Compile Include="SubscriptionStorage\RavenSubscriptionStorage.cs" />
     <Compile Include="SubscriptionStorage\Subscription.cs" />
     <Compile Include="TimeoutPersister\RavenTimeoutPersistence.cs" />
-    <Compile Include="TimeoutPersister\TimeoutDataIndex.cs" />
+    <Compile Include="TimeoutPersister\Timeout.cs" />
+    <Compile Include="TimeoutPersister\TimeoutsIndex.cs" />
     <Compile Include="UserControlledSessionProvider.cs" />
   </ItemGroup>
   <ItemGroup>
