@@ -21,6 +21,7 @@ public class When_configuring_raven_persistence
 
         using (var store = new DocumentStore())
         {
+            store.Initialize();
             config.PersistenceForAll(store).ApplyRavenDBConventions(store);
             store.Initialize();
 
