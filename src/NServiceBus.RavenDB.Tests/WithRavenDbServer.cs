@@ -23,7 +23,6 @@ public class When_configuring_raven_persistence
         {
             store.Initialize();
             config.PersistenceForAll(store).ApplyRavenDBConventions(store);
-            store.Initialize();
 
             Assert.AreEqual("http://localhost:8080", store.Url);
             Assert.AreEqual("UnitTests", store.DefaultDatabase);
