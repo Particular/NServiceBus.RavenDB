@@ -59,7 +59,7 @@ namespace NServiceBus.RavenDB.TimeoutPersister
 
         public TimeoutData ToTimeoutData()
         {
-            return new TimeoutData()
+            return new TimeoutData
             {
                 Destination = Destination,
                 Headers = Headers,
