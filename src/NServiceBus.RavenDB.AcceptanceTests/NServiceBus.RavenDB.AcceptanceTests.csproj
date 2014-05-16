@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -62,9 +63,6 @@
     </Reference>
     <Reference Include="Lucene.Net.Contrib.Spatial.NTS">
       <HintPath>..\packages\RavenDB.Database\lib\net45\Lucene.Net.Contrib.Spatial.NTS.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CompilerServices.AsyncTargetingPack.Net45">
-      <HintPath>..\packages\Microsoft.CompilerServices.AsyncTargetingPack\lib\net45\Microsoft.CompilerServices.AsyncTargetingPack.Net45.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Data.Edm">
