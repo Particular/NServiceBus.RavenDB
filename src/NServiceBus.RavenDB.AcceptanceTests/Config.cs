@@ -1,4 +1,6 @@
-﻿using NServiceBus;
+﻿
+// ReSharper disable UnusedParameter.Global
+using NServiceBus;
 
 public abstract class ConfigurePersistences
 {
