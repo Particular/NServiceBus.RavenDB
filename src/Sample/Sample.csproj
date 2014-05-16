@@ -37,10 +37,10 @@
       <HintPath>..\packages\Anotar.Serilog.Fody\Lib\portable-net4+sl4+wp7+windows8\Anotar.Serilog.dll</HintPath>
     </Reference>
     <Reference Include="NServiceBus">
-      <HintPath>..\packages\NServiceBus.Interfaces\lib\net40\NServiceBus.dll</HintPath>
+      <HintPath>..\packages\NServiceBus.Interfaces\lib\net45\NServiceBus.dll</HintPath>
     </Reference>
     <Reference Include="NServiceBus.Core">
-      <HintPath>..\packages\NServiceBus\lib\net40\NServiceBus.Core.dll</HintPath>
+      <HintPath>..\packages\NServiceBus\lib\net45\NServiceBus.Core.dll</HintPath>
     </Reference>
     <Reference Include="NServiceBus.Serilog">
       <HintPath>..\packages\NServiceBus.Serilog\Lib\NET45\NServiceBus.Serilog.dll</HintPath>

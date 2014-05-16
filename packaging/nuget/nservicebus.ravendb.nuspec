@@ -17,6 +17,6 @@
     <dependencies/>
   </metadata>
   <files>
-    <file src="..\..\binaries\NServiceBus.RavenDB.???" target="lib\net40" />
+    <file src="..\..\binaries\NServiceBus.RavenDB.???" target="lib\net45" />
   </files>
 </package>
