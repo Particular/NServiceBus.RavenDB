@@ -17,11 +17,9 @@ namespace NServiceBus.RavenDB.Persistence
             registryPort = RegistryReader<int>.Read("RavenPort", DefaultPort);
         }
 
-        public static string DefaultUrl
+        public static string GetDefaultUrl(Configure config)
         {
-            get
-            {
-                var masterNode = GetMasterNode();
+            var masterNode = GetMasterNode(config);
 
                 if (string.IsNullOrEmpty(masterNode))
                 {
@@ -29,12 +27,11 @@ namespace NServiceBus.RavenDB.Persistence
                 }
 
                 return string.Format("http://{0}:{1}", masterNode, registryPort);
-            }
         }
 
-        static string GetMasterNode()
+        static string GetMasterNode(Configure config)
         {
-            var section = Configure.GetConfigSection<MasterNodeConfig>();
+            var section = config.GetConfigSection<MasterNodeConfig>();
             return section != null ? section.Node : null;
         }
 
