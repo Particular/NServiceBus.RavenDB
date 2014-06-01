@@ -9,7 +9,6 @@ namespace NServiceBus.RavenDB
     using Persistence.SubscriptionStorage;
     using Persistence.TimeoutPersister;
     using Raven.Json.Linq;
-    using Settings;
     using Raven.Client;
     using Raven.Client.Document;
     using RavenLogManager = Raven.Abstractions.Logging.LogManager;
@@ -107,7 +106,7 @@ namespace NServiceBus.RavenDB
         {
             if (documentStore.Url == null)
             {
-                documentStore.Url = RavenPersistenceConstants.DefaultUrl;
+                documentStore.Url = RavenPersistenceConstants.GetDefaultUrl(config);
             }
             if (documentStore.DefaultDatabase == null)
             {
@@ -116,7 +115,7 @@ namespace NServiceBus.RavenDB
             documentStore.ResourceManagerId = RavenPersistenceConstants.DefaultResourceManagerId;
 
 
-            if (SettingsHolder.Get<bool>("Transactions.SuppressDistributedTransactions"))
+            if (config.Settings.Get<bool>("Transactions.SuppressDistributedTransactions"))
             {
                 documentStore.EnlistInDistributedTransactions = false;
             }

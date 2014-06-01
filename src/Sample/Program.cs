@@ -11,7 +11,6 @@ class Program
 
     static void Main()
     {
-        LoggingConfig.ConfigureLogging();
 
         Configure.Serialization.Json();
 

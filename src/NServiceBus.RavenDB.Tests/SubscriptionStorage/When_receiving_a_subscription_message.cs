@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Transactions;
 using NServiceBus;
-using NServiceBus.RavenDB.Persistence;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.Unicast.Subscriptions;
 using NUnit.Framework;

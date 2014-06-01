@@ -1,18 +1,19 @@
-﻿using NServiceBus;
-using Raven.Client;
+﻿
+// ReSharper disable UnusedParameter.Global
+using NServiceBus;
 
 public abstract class ConfigurePersistences
 {
-    protected readonly IDocumentStore documentStore;
+    //protected readonly IDocumentStore documentStore;
 
-    protected ConfigurePersistences()
-    {
-//        documentStore = new EmbeddableDocumentStore
-//                        {
-//                            RunInMemory = true,
-//                            UseEmbeddedHttpServer = true, // enable debugging through HTTP
-//                        }.Initialize();
-    }
+    //protected ConfigurePersistences()
+    //{
+    //    documentStore = new EmbeddableDocumentStore
+    //                    {
+    //                        RunInMemory = true,
+    //                        UseEmbeddedHttpServer = true, // enable debugging through HTTP
+    //                    }.Initialize();
+    //}
 }
 
 public class ConfigureRavenTimeoutPersistence : ConfigurePersistences
