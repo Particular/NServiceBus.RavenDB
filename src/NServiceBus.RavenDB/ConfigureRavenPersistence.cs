@@ -19,6 +19,8 @@ namespace NServiceBus.RavenDB
     /// </summary>
     public static class ConfigureRavenPersistence
     {
+        // TODO RavenPersistenceWithConnectionString
+
         public static Configure PersistenceForTimeouts(this Configure config, IDocumentStore documentStore)
         {
             SetupRavenPersistence(config, documentStore);
