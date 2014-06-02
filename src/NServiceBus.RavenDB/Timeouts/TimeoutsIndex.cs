@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.RavenDB.TimeoutPersister
+﻿namespace NServiceBus.TimeoutPersisters.RavenDB
 {
     using System.Linq;
     using Raven.Client.Indexes;

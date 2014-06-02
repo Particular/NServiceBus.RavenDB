@@ -5,9 +5,6 @@ namespace NServiceBus.RavenDB
     using Logging;
     using NServiceBus;
     using Persistence;
-    using Persistence.SagaPersister;
-    using Persistence.SubscriptionStorage;
-    using Persistence.TimeoutPersister;
     using Raven.Json.Linq;
     using Raven.Client;
     using Raven.Client.Document;
@@ -18,44 +15,6 @@ namespace NServiceBus.RavenDB
     /// </summary>
     public static class ConfigureRavenPersistence
     {
-        // TODO RavenPersistenceWithConnectionString
-
-        public static Configure PersistenceForTimeouts(this Configure config, IDocumentStore documentStore)
-        {
-            SetupRavenPersistence(config, documentStore);
-
-            config.Configurer.ConfigureComponent<RavenTimeoutPersistence>(DependencyLifecycle.SingleInstance);
-
-            return config;
-        }
-
-        // TODO here would be the place to wire up the ISagaFinder extension point
-        public static Configure PersistenceForSagas(this Configure config, IDocumentStore documentStore)
-        {
-            SetupRavenPersistence(config, documentStore);
-
-            config.Configurer.ConfigureComponent<RavenSagaPersister>(DependencyLifecycle.InstancePerCall);
-
-            return config;
-        }
-
-        public static Configure PersistenceForSubscriptions(this Configure config, IDocumentStore documentStore)
-        {
-            SetupRavenPersistence(config, documentStore);
-
-            config.Configurer.ConfigureComponent<RavenSubscriptionStorage>(DependencyLifecycle.SingleInstance);
-
-            return config;
-        }
-
-        public static Configure PersistenceForAll(this Configure config, IDocumentStore documentStore)
-        {
-            PersistenceForTimeouts(config, documentStore);
-            PersistenceForSubscriptions(config, documentStore);
-            PersistenceForSagas(config, documentStore);
-            return config;
-        }
-
         private static void SetupRavenPersistence(Configure config, IDocumentStore documentStore)
         {
             if (!config.Configurer.HasComponent<IDocumentStore>())

@@ -17,7 +17,7 @@ public class When_completing_a_saga_with_the_raven_persister
 
             var factory = new RavenSessionFactory(store);
             factory.ReleaseSession();
-            var persister = new RavenSagaPersister(factory);
+            var persister = new SagaPersister(factory);
             persister.Save(new SagaData
                 {
                     Id = sagaId

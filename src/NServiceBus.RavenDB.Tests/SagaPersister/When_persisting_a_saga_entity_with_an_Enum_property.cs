@@ -21,7 +21,7 @@ public class When_persisting_a_saga_entity_with_an_Enum_property
 
             var factory = new RavenSessionFactory(store);
             factory.ReleaseSession();
-            var persister = new RavenSagaPersister(factory);
+            var persister = new SagaPersister(factory);
             persister.Save(entity);
             factory.SaveChanges();
             

@@ -11,7 +11,7 @@ public class When_listing_subscribers_for_message_types
     {
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new RavenSubscriptionStorage(store);
+            var storage = new SubscriptionStorage(store);
 
             storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA);
             storage.Subscribe(TestClients.ClientA, MessageTypes.MessageB);
@@ -30,7 +30,7 @@ public class When_listing_subscribers_for_message_types
     {
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new RavenSubscriptionStorage(store);
+            var storage = new SubscriptionStorage(store);
 
             storage.Init();
             storage.Subscribe(TestClients.ClientA, new[]

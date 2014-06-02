@@ -15,7 +15,7 @@ public class When_updating_a_saga_without_unique_properties
         {
             var factory = new RavenSessionFactory(store);
             factory.ReleaseSession();
-            var persister = new RavenSagaPersister(factory);
+            var persister = new SagaPersister(factory);
             var uniqueString = Guid.NewGuid().ToString();
             var anotherUniqueString = Guid.NewGuid().ToString();
 

@@ -21,7 +21,7 @@ public class When_receiving_a_subscription_message
 
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new RavenSubscriptionStorage(store);
+            var storage = new SubscriptionStorage(store);
 
             using (var transaction = new TransactionScope())
             {

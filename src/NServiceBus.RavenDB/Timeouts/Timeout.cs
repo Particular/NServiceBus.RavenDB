@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NServiceBus.RavenDB.TimeoutPersister
+namespace NServiceBus.TimeoutPersisters.RavenDB
 {
     using NServiceBus.Timeout.Core;
 

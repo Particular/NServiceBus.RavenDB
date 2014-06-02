@@ -1,15 +1,19 @@
-namespace NServiceBus.RavenDB.Persistence.SagaPersister
+namespace NServiceBus.SagaPersisters.RavenDB
 {
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using NServiceBus.RavenDB.Persistence;
+    using NServiceBus.RavenDB.Persistence.SagaPersister;
     using Raven.Abstractions.Commands;
     using Saga;
 
-    class RavenSagaPersister : ISagaPersister
+    class SagaPersister : ISagaPersister
     {
-        public RavenSagaPersister(ISessionProvider sessionProvider)
+        public ISessionProvider SessionProvider { get; set; }
+
+        public SagaPersister(ISessionProvider sessionProvider)
         {
             this.sessionProvider = sessionProvider;
         }

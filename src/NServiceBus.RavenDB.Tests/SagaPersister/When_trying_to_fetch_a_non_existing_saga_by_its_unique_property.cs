@@ -15,7 +15,7 @@ public class When_trying_to_fetch_a_non_existing_saga_by_its_unique_property
         {
             var factory = new RavenSessionFactory(store);
             factory.ReleaseSession();
-            var persister = new RavenSagaPersister(factory);
+            var persister = new SagaPersister(factory);
             Assert.Null(persister.Get<SagaData>("UniqueString", Guid.NewGuid().ToString()));
         }
     }

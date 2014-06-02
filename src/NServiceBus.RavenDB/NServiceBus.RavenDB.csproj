@@ -72,22 +72,28 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Gateway\ConfigureGateway.cs" />
     <Compile Include="ConfigureRavenPersistence.cs" />
+    <Compile Include="Internal\Helpers.cs" />
     <Compile Include="ISessionProvider.cs" />
     <Compile Include="Gateway\RavenDeduplication.cs" />
     <Compile Include="NoOpLogManager.cs" />
+    <Compile Include="RavenDB.cs" />
+    <Compile Include="RavenDBConfigurer.cs" />
     <Compile Include="RavenPersistenceConstants.cs" />
     <Compile Include="RavenSessionFactory.cs" />
     <Compile Include="RavenUnitofWork.cs" />
     <Compile Include="RavenUserInstaller.cs" />
     <Compile Include="RegistryReader.cs" />
-    <Compile Include="SagaPersister\RavenSagaPersister.cs" />
+    <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />
+    <Compile Include="SagaPersister\SagaPersister.cs" />
     <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />
     <Compile Include="SubscriptionStorage\MessageTypeConverter.cs" />
-    <Compile Include="SubscriptionStorage\RavenSubscriptionStorage.cs" />
+    <Compile Include="SubscriptionStorage\RavenDbSubscriptionStorage.cs" />
+    <Compile Include="SubscriptionStorage\SubscriptionPersister.cs" />
     <Compile Include="SubscriptionStorage\Subscription.cs" />
-    <Compile Include="TimeoutPersister\RavenTimeoutPersistence.cs" />
-    <Compile Include="TimeoutPersister\Timeout.cs" />
-    <Compile Include="TimeoutPersister\TimeoutsIndex.cs" />
+    <Compile Include="Timeouts\RavenDbTimeoutStorage.cs" />
+    <Compile Include="Timeouts\TimeoutPersister.cs" />
+    <Compile Include="Timeouts\Timeout.cs" />
+    <Compile Include="Timeouts\TimeoutsIndex.cs" />
     <Compile Include="UserControlledSessionProvider.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -95,6 +101,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)..\BuildSupport\RippleRestoreTask.targets" />
   <Import Project="$(SolutionDir)..\BuildSupport\GitVersionTask\Build\GitVersionTask.targets" />

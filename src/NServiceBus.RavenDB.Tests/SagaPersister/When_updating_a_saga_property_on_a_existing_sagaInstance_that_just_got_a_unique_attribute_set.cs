@@ -15,7 +15,7 @@ public class When_updating_a_saga_property_on_a_existing_sagaInstance_that_just_
         {
             var factory = new RavenSessionFactory(store);
             factory.ReleaseSession();
-            var persister = new RavenSagaPersister(factory);
+            var persister = new SagaPersister(factory);
             var uniqueString = Guid.NewGuid().ToString();
 
             var anotherUniqueString = Guid.NewGuid().ToString();
@@ -34,7 +34,7 @@ public class When_updating_a_saga_property_on_a_existing_sagaInstance_that_just_
             using (var session = store.OpenSession())
             {
                 //fake that the attribute was just added by removing the metadata
-                session.Advanced.GetMetadataFor(saga1).Remove(RavenSagaPersister.UniqueValueMetadataKey);
+                session.Advanced.GetMetadataFor(saga1).Remove(SagaPersister.UniqueValueMetadataKey);
                 session.SaveChanges();
             }
 
@@ -46,7 +46,7 @@ public class When_updating_a_saga_property_on_a_existing_sagaInstance_that_just_
 
             using (var session = store.OpenSession())
             {
-                var value = session.Advanced.GetMetadataFor(saga1)[RavenSagaPersister.UniqueValueMetadataKey].ToString();
+                var value = session.Advanced.GetMetadataFor(saga1)[SagaPersister.UniqueValueMetadataKey].ToString();
                 Assert.AreEqual(anotherUniqueString, value);
             }
         }

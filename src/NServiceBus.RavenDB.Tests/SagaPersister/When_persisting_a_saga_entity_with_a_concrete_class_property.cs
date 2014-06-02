@@ -24,7 +24,7 @@ public class When_persisting_a_saga_entity_with_a_concrete_class_property
                 };
             var factory = new RavenSessionFactory(store);
             factory.ReleaseSession();
-            var persister = new RavenSagaPersister(factory);
+            var persister = new SagaPersister(factory);
             persister.Save(entity);
             factory.SaveChanges();
             var savedEntity = persister.Get<SagaData>(entity.Id);

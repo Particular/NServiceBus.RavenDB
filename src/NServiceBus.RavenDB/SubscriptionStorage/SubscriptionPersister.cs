@@ -1,19 +1,14 @@
-namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
+namespace NServiceBus.Unicast.Subscriptions.RavenDB
 {
     using System.Collections.Generic;
     using System.Linq;
+    using MessageDrivenSubscriptions;
+    using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using Raven.Client;
-    using Unicast.Subscriptions;
-    using Unicast.Subscriptions.MessageDrivenSubscriptions;
-
-    class RavenSubscriptionStorage : ISubscriptionStorage
+    
+    class SubscriptionPersister : ISubscriptionStorage
     {
-        IDocumentStore store;
-
-        public RavenSubscriptionStorage(IDocumentStore documentStore)
-        {
-            store = documentStore;
-        }
+        public IDocumentStore DocumentStore { get; set; }
 
         public void Init()
         {
@@ -72,10 +67,8 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
 
         IDocumentSession OpenSession()
         {
-            var session = store.OpenSession();
-
+            var session = DocumentStore.OpenSession();
             session.Advanced.AllowNonAuthoritativeInformation = false;
-
             return session;
         }
 

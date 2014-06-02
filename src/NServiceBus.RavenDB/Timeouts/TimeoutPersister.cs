@@ -1,22 +1,18 @@
-namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
+namespace NServiceBus.TimeoutPersisters.RavenDB
 {
     using System;
     using System.Collections.Generic;
+    using NServiceBus.Timeout.Core;
     using Raven.Abstractions.Commands;
     using Raven.Abstractions.Data;
     using Raven.Client;
     using Raven.Client.Linq;
-    using Timeout.Core;
-    using RavenDB.TimeoutPersister;
 
-    class RavenTimeoutPersistence : IPersistTimeouts
+    class TimeoutPersister : IPersistTimeouts
     {
-        readonly IDocumentStore store;
+        public IDocumentStore DocumentStore { get; set; }
 
-        public RavenTimeoutPersistence(IDocumentStore documentStore)
-        {
-            store = documentStore;
-        }
+        public string EndpointName { get; set; }
 
         public List<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
         {
@@ -27,7 +23,7 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
                     .Where(
                         t =>
                             t.OwningTimeoutManager == String.Empty ||
-                            t.OwningTimeoutManager == Configure.EndpointName)
+                            t.OwningTimeoutManager == EndpointName)
                     .Where(t => t.Time > startSlice)
                     .OrderBy(t => t.Time)
                     .Select(t => t.Time);
@@ -100,7 +96,7 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
 
         IDocumentSession OpenSession()
         {
-            var session = store.OpenSession();
+            var session = DocumentStore.OpenSession();
             session.Advanced.UseOptimisticConcurrency = true;
             return session;
         }

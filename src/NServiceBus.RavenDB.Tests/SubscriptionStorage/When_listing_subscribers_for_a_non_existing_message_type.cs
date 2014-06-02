@@ -10,7 +10,7 @@ public class When_listing_subscribers_for_a_non_existing_message_type
     {
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new RavenSubscriptionStorage(store);
+            var storage = new SubscriptionStorage(store);
 
             storage.Init();
             var subscriptionsForMessageType = storage.GetSubscriberAddressesForMessage(MessageTypes.MessageA);
