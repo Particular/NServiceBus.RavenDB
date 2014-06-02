@@ -11,13 +11,12 @@ namespace NServiceBus.RavenDB.Persistence
     using Raven.Client.Document;
     using Raven.Json.Linq;
     using Installation;
-    using Installation.Environments;
     using Logging;
 
     /// <summary>
     /// Add the identity to the Raven users group 
     /// </summary>
-    class RavenUserInstaller : INeedToInstallSomething<Windows>
+    class RavenUserInstaller : INeedToInstallSomething
     {
         static readonly ILog logger = LogManager.GetLogger(typeof(RavenUserInstaller));
 
@@ -25,7 +24,7 @@ namespace NServiceBus.RavenDB.Persistence
 
         internal static bool RunInstaller { get; set; }
 
-        public void Install(string identity)
+        public void Install(string identity, Configure config)
         {
             if (!RunInstaller)
             {
@@ -142,8 +141,6 @@ namespace NServiceBus.RavenDB.Persistence
             public bool Enabled;
             public List<DatabaseAccess> Databases = new List<DatabaseAccess>();
         }
-
-
     }
 
 }
