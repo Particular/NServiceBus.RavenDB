@@ -76,6 +76,7 @@
     <Compile Include="ISessionProvider.cs" />
     <Compile Include="Gateway\RavenDeduplication.cs" />
     <Compile Include="NoOpLogManager.cs" />
+    <Compile Include="ProvidedDocumentStore.cs" />
     <Compile Include="RavenDB.cs" />
     <Compile Include="RavenDBConfigurer.cs" />
     <Compile Include="RavenPersistenceConstants.cs" />

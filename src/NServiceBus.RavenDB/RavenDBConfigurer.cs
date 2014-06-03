@@ -2,7 +2,6 @@
 {
     using Features;
     using NServiceBus.Persistence;
-    using Timeouts;
 
     class RavenDBConfigurer : IConfigurePersistence<RavenDB>
     {
