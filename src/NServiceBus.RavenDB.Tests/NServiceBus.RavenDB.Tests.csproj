@@ -155,5 +155,8 @@
     <Compile Include="WithRavenDbServer.cs" />
     <Compile Include="With_using_raven_persistence.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Timeouts\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

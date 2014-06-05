@@ -3,6 +3,7 @@ using System.Transactions;
 using NServiceBus;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.Unicast.Subscriptions;
+using NServiceBus.Unicast.Subscriptions.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]
@@ -21,7 +22,10 @@ public class When_receiving_a_subscription_message
 
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new SubscriptionStorage(store);
+            var storage = new SubscriptionPersister()
+            {
+                DocumentStore = store
+            };
 
             using (var transaction = new TransactionScope())
             {

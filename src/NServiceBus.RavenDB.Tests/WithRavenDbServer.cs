@@ -1,4 +1,5 @@
 using NServiceBus;
+using NServiceBus.Persistence;
 using NServiceBus.RavenDB;
 using NServiceBus.RavenDB.Persistence;
 using NUnit.Framework;
@@ -22,11 +23,12 @@ public class When_configuring_raven_persistence
         using (var store = new DocumentStore())
         {
             store.Initialize();
-            config.PersistenceForAll(store).ApplyRavenDBConventions(store);
+            config.UsePersistence<RavenDB>(_ => _.SetDefaultDocumentStore(store));
+            // TODO .ApplyRavenDBConventions(store);
 
             Assert.AreEqual("http://localhost:8080", store.Url);
             Assert.AreEqual("UnitTests", store.DefaultDatabase);
-            Assert.AreEqual(RavenPersistenceConstants.DefaultResourceManagerId, store.ResourceManagerId);
+            // TODO Assert.AreEqual(RavenPersistenceConstants.DefaultResourceManagerId, store.ResourceManagerId);
             Assert.AreEqual(typeof(NoOpLogManager), Raven.Abstractions.Logging.LogManager.CurrentLogManager.GetType());
 
             Assert.IsTrue(config.Configurer.HasComponent<IDocumentStore>());

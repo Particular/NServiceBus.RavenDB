@@ -1,6 +1,6 @@
 using System.Linq;
-using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.Unicast.Subscriptions;
+using NServiceBus.Unicast.Subscriptions.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]
@@ -11,7 +11,10 @@ public class When_listing_subscribers_for_message_types
     {
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new SubscriptionStorage(store);
+            var storage = new SubscriptionPersister()
+            {
+                DocumentStore = store
+            };
 
             storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA);
             storage.Subscribe(TestClients.ClientA, MessageTypes.MessageB);
@@ -30,7 +33,10 @@ public class When_listing_subscribers_for_message_types
     {
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new SubscriptionStorage(store);
+            var storage = new SubscriptionPersister()
+            {
+                DocumentStore = store
+            };
 
             storage.Init();
             storage.Subscribe(TestClients.ClientA, new[]

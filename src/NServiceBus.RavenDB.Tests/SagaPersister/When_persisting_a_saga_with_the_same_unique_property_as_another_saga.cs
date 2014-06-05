@@ -1,9 +1,9 @@
 using System;
-using NServiceBus.Persistence;
 using NServiceBus.RavenDB.Persistence;
-using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.Saga;
+using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
+using Raven.Abstractions.Exceptions;
 
 [TestFixture]
 public class When_persisting_a_saga_with_the_same_unique_property_as_another_saga

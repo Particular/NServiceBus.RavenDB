@@ -1,5 +1,5 @@
 using System.Linq;
-using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+using NServiceBus.Unicast.Subscriptions.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]
@@ -10,7 +10,10 @@ public class When_receiving_an_unsubscribe_message
     {
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new SubscriptionStorage(store);
+            var storage = new SubscriptionPersister()
+            {
+                DocumentStore = store
+            };
 
             storage.Subscribe(TestClients.ClientA, MessageTypes.All);
 

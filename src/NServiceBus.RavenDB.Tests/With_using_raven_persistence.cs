@@ -1,4 +1,5 @@
 using NServiceBus;
+using NServiceBus.Persistence;
 using NUnit.Framework;
 using Raven.Client;
 
@@ -9,12 +10,12 @@ public class With_using_raven_persistence
     public void Should_not_register_IDocumentStore_into_the_container()
     {
         var config = Configure.With(new[]
-            {
-                GetType().Assembly
-            })
+                                    {
+                                        GetType().Assembly
+                                    })
             .DefineEndpointName("UnitTests")
             .DefaultBuilder()
-            .RavenPersistence();
+            .UsePersistence<RavenDB>();
 
         Assert.IsFalse(config.Configurer.HasComponent<IDocumentStore>());
     }

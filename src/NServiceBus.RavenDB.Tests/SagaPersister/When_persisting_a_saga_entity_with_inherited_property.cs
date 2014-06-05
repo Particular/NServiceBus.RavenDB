@@ -1,7 +1,7 @@
 using System;
 using NServiceBus.RavenDB.Persistence;
-using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.Saga;
+using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]
