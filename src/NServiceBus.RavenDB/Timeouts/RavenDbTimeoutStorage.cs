@@ -4,6 +4,7 @@
     using Persistence;
     using Raven.Client;
     using Raven.Client.Document;
+    using RavenDB;
     using RavenDB.Internal;
     using TimeoutPersisters.RavenDB;
 
@@ -25,10 +26,10 @@
         /// </summary>
         protected override void Setup(FeatureConfigurationContext context)
         {
-            // Try getting a document store object that may have been wired by the user
+            // Try getting a document store object specific to this Feature that user may have wired in
             var store = context.Settings.GetOrDefault<IDocumentStore>(RavenDbTimeoutSettingsExtenstions.SettingsKey);
 
-            // Init up a new DocumentStore based on a connection string
+            // Init up a new DocumentStore based on a connection string specific to this feature
             if (store == null)
             {
                 var connectionStringName = Helpers.GetFirstNonEmptyConnectionString("NServiceBus/Persistence/RavenDB/Timeout");
@@ -39,23 +40,11 @@
             }
 
             // Trying pulling a shared DocumentStore set by the user or other Feature
-            // TODO pull from a centralized place instead
-            if (store == null)
-            {
-                store = context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtenstions.DocumentStoreSettingsKey);
-                if (store == null)
-                {
-                    var connectionStringName = Helpers.GetFirstNonEmptyConnectionString("NServiceBus/Persistence/RavenDB", "NServiceBus/Persistence");
-                    if (!string.IsNullOrWhiteSpace(connectionStringName))
-                    {
-                        store = new DocumentStore { ConnectionStringName = connectionStringName }.Initialize();
-                    }
-                }
-            }
+            store = store ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtenstions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context);
 
             if (store == null)
             {
-                throw new Exception("RavenDB is configured as persistence and no document store found");
+                throw new Exception("RavenDB is configured as persistence for Timeouts and no DocumentStore instance found");
             }
 
             new TimeoutsIndex().Execute(store);

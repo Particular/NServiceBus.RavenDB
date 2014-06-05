@@ -4,6 +4,7 @@
     using Persistence;
     using Raven.Client;
     using Raven.Client.Document;
+    using RavenDB;
     using RavenDB.Internal;
     using Unicast.Subscriptions.RavenDB;
 
@@ -16,23 +17,25 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            // Try getting a document store object that may have been wired by the user
-            var store = context.Settings.GetOrDefault<IDocumentStore>(RavenDbSubscriptionSettingsExtenstions.SettingsKey)
-                ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtenstions.DocumentStoreSettingsKey);
+            // Try getting a document store object specific to this Feature that user may have wired in
+            var store = context.Settings.GetOrDefault<IDocumentStore>(RavenDbSubscriptionSettingsExtenstions.SettingsKey);
 
-            // Init up a new DocumentStore based on a connection string
+            // Init up a new DocumentStore based on a connection string specific to this feature
             if (store == null)
             {
-                var connectionStringName = Helpers.GetFirstNonEmptyConnectionString("NServiceBus/Persistence/RavenDB/Subscription", "NServiceBus/Persistence/RavenDB", "NServiceBus/Persistence");
+                var connectionStringName = Helpers.GetFirstNonEmptyConnectionString("NServiceBus/Persistence/RavenDB/Subscription");
                 if (!string.IsNullOrWhiteSpace(connectionStringName))
                 {
                     store = new DocumentStore { ConnectionStringName = connectionStringName }.Initialize();
                 }
             }
 
+            // Trying pulling a shared DocumentStore set by the user or other Feature
+            store = store ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtenstions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context);
+
             if (store == null)
             {
-                throw new Exception("RavenDB is configured as persistence and no document store found");
+                throw new Exception("RavenDB is configured as persistence for Subscriptions and no DocumentStore instance found");
             }
 
             context.Container.ConfigureComponent<SubscriptionPersister>(DependencyLifecycle.InstancePerCall)
