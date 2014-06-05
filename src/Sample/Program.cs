@@ -1,8 +1,7 @@
 ﻿using System;
 using NServiceBus;
 using NServiceBus.Features;
-using NServiceBus.Installation.Environments;
-using NServiceBus.RavenDB;
+using NServiceBus.Persistence;
 using Raven.Client.Document;
 
 class Program
@@ -15,11 +14,13 @@ class Program
         Configure.Serialization.Json();
 
         Feature.Enable<Sagas>();
-        using (var documentStore = new DocumentStore())
+        using (var documentStore = new DocumentStore().Initialize())
         {
-            var configure = Configure.With();
-            configure.DefaultBuilder();
-            configure.PersistenceForAll(documentStore).ApplyRavenDBConventions(documentStore);
+            var configure = Configure.With()
+                .DefaultBuilder()
+                .UsePersistence<RavenDB>(_ => _.SetDefaultDocumentStore(documentStore))
+                ;
+
             bus = configure.UnicastBus().CreateBus();
 
             bus.Start(() => Configure.Instance.ForInstallationOn<Windows>().Install());
