@@ -57,7 +57,7 @@ namespace NServiceBus.RavenDB
             {
                 documentStore.DefaultDatabase = config.Settings.EndpointName();
             }
-            documentStore.ResourceManagerId = RavenPersistenceConstants.DefaultResourceManagerId;
+            documentStore.ResourceManagerId = RavenPersistenceConstants.DefaultResourceManagerId(config);
 
 
             if (config.Settings.Get<bool>("Transactions.SuppressDistributedTransactions"))

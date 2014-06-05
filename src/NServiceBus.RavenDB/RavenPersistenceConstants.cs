@@ -35,14 +35,11 @@ namespace NServiceBus.RavenDB.Persistence
             return section != null ? section.Node : null;
         }
 
-        public static Guid DefaultResourceManagerId
+        public static Guid DefaultResourceManagerId(Configure config)
         {
-            get
-            {
-                var resourceManagerId = Address.Local + "-" + Configure.DefineEndpointVersionRetriever();
+            var resourceManagerId = Address.Local + "-" + "foo";// TODO Configure.DefineEndpointVersionRetriever();
 
-                return DeterministicGuidBuilder(resourceManagerId);
-            }
+            return DeterministicGuidBuilder(resourceManagerId);
         }
 
         static Guid DeterministicGuidBuilder(string input)

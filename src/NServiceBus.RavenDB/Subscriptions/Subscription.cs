@@ -1,3 +1,5 @@
+using NServiceBus.Unicast.Subscriptions;
+
 namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
 {
     using System;
@@ -5,7 +7,6 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
     using System.Security.Cryptography;
     using System.Text;
     using Raven.Imports.Newtonsoft.Json;
-    using Unicast.Subscriptions;
 
     class Subscription
     {
