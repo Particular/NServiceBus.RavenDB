@@ -58,6 +58,8 @@
                 throw new Exception("RavenDB is configured as persistence and no document store found");
             }
 
+            new TimeoutsIndex().Execute(store);
+
             context.Container.ConfigureComponent<TimeoutPersister>(DependencyLifecycle.SingleInstance)
                 .ConfigureProperty(x => x.DocumentStore, store)
                 .ConfigureProperty(x => x.EndpointName, context.Settings.EndpointName())
