@@ -1,11 +1,8 @@
 namespace NServiceBus.RavenDB
 {
     using System;
-    using System.Text;
-    using Logging;
     using NServiceBus;
     using Persistence;
-    using Raven.Json.Linq;
     using Raven.Client;
     using Raven.Client.Document;
     using RavenLogManager = Raven.Abstractions.Logging.LogManager;
@@ -19,17 +16,6 @@ namespace NServiceBus.RavenDB
         {
             if (!config.Configurer.HasComponent<IDocumentStore>())
             {
-                try
-                {
-                    documentStore.DatabaseCommands.Put("nsb/ravendb/testdocument", null, new RavenJObject(), new RavenJObject());
-                    documentStore.DatabaseCommands.Delete("nsb/ravendb/testdocument", null);
-                }
-                catch (Exception e)
-                {
-                    LogRavenConnectionFailure(e, documentStore);
-                    throw;
-                }
-
                 config.Configurer.ConfigureComponent(() => documentStore, DependencyLifecycle.SingleInstance);
                 config.Configurer.ConfigureComponent<RavenSessionFactory>(DependencyLifecycle.SingleInstance);
                 config.Configurer.ConfigureComponent<RavenUnitOfWork>(DependencyLifecycle.InstancePerUnitOfWork);
@@ -82,26 +68,5 @@ namespace NServiceBus.RavenDB
 
             return config;
         }
-
-        static void LogRavenConnectionFailure(Exception exception, IDocumentStore store)
-        {
-            var sb = new StringBuilder();
-            sb.AppendFormat("RavenDB could not be contacted. We tried to access Raven using the following url: {0}.",
-                store.Url);
-            sb.AppendLine();
-            sb.AppendFormat("Please ensure that you can open the Raven Studio by navigating to {0}.", store.Url);
-            sb.AppendLine();
-            sb.AppendLine(
-                @"To configure NServiceBus to use a different Raven connection string add a connection string named ""NServiceBus.Persistence"" in your config file, example:");
-            sb.AppendFormat(
-                @"<connectionStrings>
-    <add name=""NServiceBus.Persistence"" connectionString=""http://localhost:9090"" />
-</connectionStrings>");
-            sb.AppendLine("Original exception: " + exception);
-
-            Logger.Warn(sb.ToString());
-        }
-
-        static readonly ILog Logger = LogManager.GetLogger(typeof(ConfigureRavenPersistence));
     }
 }
