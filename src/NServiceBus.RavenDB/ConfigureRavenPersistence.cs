@@ -55,7 +55,7 @@ namespace NServiceBus.RavenDB
             }
             if (documentStore.DefaultDatabase == null)
             {
-                documentStore.DefaultDatabase = Configure.EndpointName;
+                documentStore.DefaultDatabase = config.Settings.EndpointName();
             }
             documentStore.ResourceManagerId = RavenPersistenceConstants.DefaultResourceManagerId;
 

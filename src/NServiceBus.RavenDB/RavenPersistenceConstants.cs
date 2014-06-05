@@ -4,7 +4,7 @@ namespace NServiceBus.RavenDB.Persistence
     using System.Security.Cryptography;
     using System.Text;
     using Config;
-    using Utils;
+    using Internal;
 
     static class RavenPersistenceConstants
     {

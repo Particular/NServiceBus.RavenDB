@@ -83,7 +83,7 @@
     <Compile Include="RavenSessionFactory.cs" />
     <Compile Include="RavenUnitofWork.cs" />
     <Compile Include="RavenUserInstaller.cs" />
-    <Compile Include="RegistryReader.cs" />
+    <Compile Include="Internal\RegistryReader.cs" />
     <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />
     <Compile Include="SagaPersister\SagaPersister.cs" />
     <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />

@@ -1,7 +1,7 @@
 namespace NServiceBus.RavenDB.Persistence
 {
     using System;
-    using NServiceBus.Persistence;
+    using Raven.Abstractions.Exceptions;
     using Raven.Client;
 
     class RavenSessionFactory:ISessionProvider
@@ -69,7 +69,7 @@ namespace NServiceBus.RavenDB.Persistence
             {
                 session.SaveChanges();
             }
-            catch (Raven.Abstractions.Exceptions.ConcurrencyException ex)
+            catch (ConcurrencyException ex)
             {
                 throw new ConcurrencyException("A saga with the same Unique property already existed in the storage. See the inner exception for further details", ex);
             }

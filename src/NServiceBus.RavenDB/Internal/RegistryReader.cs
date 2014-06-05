@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Utils
+﻿namespace NServiceBus.RavenDB.Internal
 {
     using System;
     using Logging;
