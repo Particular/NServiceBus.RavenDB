@@ -4,6 +4,7 @@
     using Internal;
     using Raven.Client;
     using Raven.Client.Document;
+    using Settings;
 
     class SharedDocumentStore : Feature
     {
@@ -19,10 +20,10 @@
             // no-op, the docstore is initialized lazily
         }
 
-        public static IDocumentStore Get(FeatureConfigurationContext context)
+        public static IDocumentStore Get(ReadOnlySettings settings)
         {
             // The holder is known to be non-null since we set it in the ctor
-            var holder = context.Settings.Get<DocumentStoreHolder>();
+            var holder = settings.Get<DocumentStoreHolder>();
             if (holder.DocumentStore == null)
             {
                 var connectionStringName = Helpers.GetFirstNonEmptyConnectionString("NServiceBus/Persistence/RavenDB", "NServiceBus/Persistence");
