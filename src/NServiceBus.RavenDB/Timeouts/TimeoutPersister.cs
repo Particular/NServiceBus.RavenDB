@@ -19,7 +19,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             var results = new List<Tuple<string, DateTime>>();
             using (var session = OpenSession())
             {
-                var query = session.Query<Timeout>()
+                var query = session.Query<Timeout, TimeoutsIndex>()
                     .Where(
                         t =>
                             t.OwningTimeoutManager == String.Empty ||
