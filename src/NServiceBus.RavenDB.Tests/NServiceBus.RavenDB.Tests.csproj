@@ -159,9 +159,8 @@
     <Compile Include="SubscriptionStorage\When_receiving_a_subscription_message.cs" />
     <Compile Include="SubscriptionStorage\When_receiving_duplicate_subscription_messages.cs" />
     <Compile Include="Persistence\With_using_raven_persistence.cs" />
+    <Compile Include="Timeouts\When_fetching_timeouts_from_storage.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Timeouts\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
