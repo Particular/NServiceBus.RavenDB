@@ -10,15 +10,13 @@ class Program
 
     static void Main()
     {
-
-        Configure.Serialization.Json();
-
-        Feature.Enable<Sagas>();
         using (var documentStore = new DocumentStore().Initialize())
         {
             var configure = Configure.With()
                 .DefaultBuilder()
                 .UsePersistence<RavenDB>(_ => _.SetDefaultDocumentStore(documentStore))
+                .Serialization.Json()
+                .Features(_ => _.Enable<Sagas>())
                 ;
 
             bus = configure.UnicastBus().CreateBus();
