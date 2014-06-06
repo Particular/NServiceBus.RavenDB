@@ -158,7 +158,6 @@
     <Compile Include="SubscriptionStorage\When_receiving_an_unsubscription_message.cs" />
     <Compile Include="SubscriptionStorage\When_receiving_a_subscription_message.cs" />
     <Compile Include="SubscriptionStorage\When_receiving_duplicate_subscription_messages.cs" />
-    <Compile Include="WithRavenDbServer.cs" />
     <Compile Include="With_using_raven_persistence.cs" />
   </ItemGroup>
   <ItemGroup>
