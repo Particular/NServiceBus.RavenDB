@@ -9,11 +9,14 @@ public class With_using_raven_persistence
     [Test]
     public void Should_not_register_IDocumentStore_into_the_container()
     {
-        var config = Configure.With(new[]
+        var config = Configure.With(_ =>
                                     {
-                                        GetType().Assembly
+                                        _.AssembliesToScan(new[]
+                                                           {
+                                                               GetType().Assembly
+                                                           });
+                                        _.EndpointName("UnitTests");
                                     })
-            .DefineEndpointName("UnitTests")
             .DefaultBuilder()
             .UsePersistence<RavenDB>();
 
