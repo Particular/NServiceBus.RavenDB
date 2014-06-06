@@ -10,6 +10,7 @@
             config.Settings.EnableFeatureByDefault<RavenDbTimeoutStorage>();
             config.Settings.EnableFeatureByDefault<RavenDbSagaStorage>();
             config.Settings.EnableFeatureByDefault<RavenDbSubscriptionStorage>();
+            config.Settings.EnableFeatureByDefault<SharedDocumentStore>();
         }
     }
 }
