@@ -32,7 +32,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 using (var enumerator = session.Advanced.Stream(query, out qhi))
                 {
                     // default return value for when no results are found and index is stale (non-stale is checked below)
-                    nextTimeToRunQuery = qhi.IndexTimestamp;
+                    nextTimeToRunQuery = DateTime.UtcNow;
 
                     while (enumerator.MoveNext())
                     {
@@ -44,7 +44,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                         results.Add(new Tuple<string, DateTime>(enumerator.Current.Key, enumerator.Current.Document));
                     }
 
-                    if (!qhi.IsStable) nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10); // since we consumed all timeouts and no future timeouts found
+                    if (qhi != null && !qhi.IsStable) nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10); // since we consumed all timeouts and no future timeouts found
                 }
             }
 
