@@ -13,11 +13,7 @@ public class When_configuring_raven_persistence
     [Test]
     public void Ensure_defaults_are_set()
     {
-        var config = Configure.With(new[]
-            {
-                GetType().Assembly
-            })
-            .DefineEndpointName("UnitTests")
+        var config = Configure.With(_ => _.EndpointName("UnitTests").AssembliesToScan(new[] {GetType().Assembly}))
             .DefaultBuilder();
 
         using (var store = new DocumentStore())
