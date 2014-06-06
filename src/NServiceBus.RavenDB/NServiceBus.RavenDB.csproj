@@ -73,7 +73,7 @@
     <Compile Include="SessionManagement\ISessionProvider.cs" />
     <Compile Include="Gateway\RavenDeduplication.cs" />
     <Compile Include="Internal\NoOpLogManager.cs" />
-    <Compile Include="ProvidedDocumentStore.cs" />
+    <Compile Include="Internal\SharedDocumentStore.cs" />
     <Compile Include="RavenDB.cs" />
     <Compile Include="RavenDBConfigurer.cs" />
     <Compile Include="RavenPersistenceConstants.cs" />
