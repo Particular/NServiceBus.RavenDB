@@ -82,7 +82,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
         {
             using (var session = OpenSession())
             {
-                var query = session.Query<Timeout>().Where(x => x.SagaId == sagaId).Select(x => x.Id);
+                var query = session.Query<Timeout, TimeoutsIndex>().Where(x => x.SagaId == sagaId).Select(x => x.Id);
                 using (var enumerator = session.Advanced.Stream(query))
                 {
                     while (enumerator.MoveNext())
