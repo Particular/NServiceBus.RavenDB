@@ -3,6 +3,7 @@
 namespace NServiceBus.RavenDB.Tests
 {
     using System.Diagnostics;
+    using System.IO;
     using System.Threading;
     using Raven.Client;
     using Raven.Client.Connection;
@@ -15,6 +16,37 @@ namespace NServiceBus.RavenDB.Tests
 
     public class RavenTestBase
     {
+        protected IDocumentStore store;
+
+        [SetUp]
+        public void SetUp()
+        {
+            store = NewDocumentStore();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            store.Dispose();
+        }
+
+        protected static EmbeddableDocumentStore NewDocumentStore()
+        {
+            var store = new EmbeddableDocumentStore
+            {
+                RunInMemory = true,
+                Conventions =
+                {
+                    DefaultQueryingConsistency = ConsistencyOptions.AlwaysWaitForNonStaleResultsAsOfLastWrite,
+                }
+            };
+            store.Configuration.RunInUnreliableYetFastModeThatIsNotSuitableForProduction = true;
+            store.Configuration.CompiledIndexCacheDirectory = Path.GetTempPath();
+
+            store.Initialize();
+            return store;
+        }
+
         public static void WaitForIndexing(IDocumentStore store, string db = null, TimeSpan? timeout = null)
         {
             var databaseCommands = store.DatabaseCommands;
