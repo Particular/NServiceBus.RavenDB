@@ -19,9 +19,9 @@ class Program
                 .Features(_ => _.Enable<Sagas>())
                 ;
 
-            bus = configure.UnicastBus().CreateBus();
-
-            bus.Start(() => Configure.Instance.ForInstallationOn<Windows>().Install());
+            bus = configure.CreateBus();
+            bus.RunInstallers();
+            bus.Start();
 
             bus.SendLocal(new MyMessage
                 {
