@@ -4,18 +4,10 @@ namespace NServiceBus.RavenDB.Persistence
     using System.Security.Cryptography;
     using System.Text;
     using Config;
-    using Internal;
 
     static class RavenPersistenceConstants
     {
         public const int DefaultPort = 8080;
-
-        static readonly int registryPort = DefaultPort;
-
-        static RavenPersistenceConstants()
-        {
-            registryPort = RegistryReader<int>.Read("RavenPort", DefaultPort);
-        }
 
         public static string GetDefaultUrl(Configure config)
         {
@@ -26,7 +18,7 @@ namespace NServiceBus.RavenDB.Persistence
                     masterNode = "localhost";
                 }
 
-                return string.Format("http://{0}:{1}", masterNode, registryPort);
+                return string.Format("http://{0}:{1}", masterNode, DefaultPort);
         }
 
         static string GetMasterNode(Configure config)
