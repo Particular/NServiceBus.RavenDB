@@ -7,7 +7,7 @@
     using Timeout.Core;
     using TimeoutPersisters.RavenDB;
 
-    public class When_fetching_timeouts_from_storage
+    public class When_fetching_timeouts_from_storage : RavenTestBase
     {
         [Test]
         public void Should_return_the_complete_list_of_timeouts()
@@ -36,6 +36,9 @@
                         OwningTimeoutManager = "MyTestEndpoint",
                     });
                 }
+
+                WaitForIndexing(store);
+
                 DateTime nextTimeToRunQuery;
                 Assert.AreEqual(numberOfTimeoutsToAdd, persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery).Count);
             }
@@ -66,7 +69,7 @@
                     OwningTimeoutManager = "MyTestEndpoint",
                 });
 
-
+                WaitForIndexing(store);
 
                 DateTime nextTimeToRunQuery;
                 persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
