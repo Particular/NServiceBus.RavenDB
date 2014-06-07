@@ -11,7 +11,7 @@ public class When_listing_subscribers_for_message_types
     {
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new SubscriptionPersister()
+            var storage = new SubscriptionPersister
             {
                 DocumentStore = store
             };
@@ -33,7 +33,7 @@ public class When_listing_subscribers_for_message_types
     {
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new SubscriptionPersister()
+            var storage = new SubscriptionPersister
             {
                 DocumentStore = store
             };

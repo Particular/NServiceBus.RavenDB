@@ -15,7 +15,7 @@ public class When_receiving_duplicate_subscription_messages
 
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new SubscriptionPersister()
+            var storage = new SubscriptionPersister
             {
                 DocumentStore = store
             };

@@ -22,7 +22,7 @@ public class When_receiving_a_subscription_message
 
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new SubscriptionPersister()
+            var storage = new SubscriptionPersister
             {
                 DocumentStore = store
             };

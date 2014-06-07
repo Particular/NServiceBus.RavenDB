@@ -1,5 +1,4 @@
-﻿using NServiceBus.Features;
-using NServiceBus.Persistence;
+﻿using NServiceBus.Persistence;
 using Raven.Client;
 using Raven.Client.Embedded;
 // ReSharper disable UnusedParameter.Global

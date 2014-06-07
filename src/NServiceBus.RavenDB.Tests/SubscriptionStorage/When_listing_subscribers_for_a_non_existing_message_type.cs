@@ -10,8 +10,8 @@ public class When_listing_subscribers_for_a_non_existing_message_type
     {
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new SubscriptionPersister()
-                          {
+            var storage = new SubscriptionPersister
+            {
                               DocumentStore = store
                           };
 

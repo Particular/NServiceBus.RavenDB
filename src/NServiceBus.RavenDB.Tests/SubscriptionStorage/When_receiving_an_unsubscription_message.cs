@@ -10,7 +10,7 @@ public class When_receiving_an_unsubscribe_message
     {
         using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new SubscriptionPersister()
+            var storage = new SubscriptionPersister
             {
                 DocumentStore = store
             };
