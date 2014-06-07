@@ -19,8 +19,8 @@ class Program
                 .Features(_ => _.Enable<Sagas>())
                 ;
 
+            configure.EnableInstallers();
             bus = configure.CreateBus();
-            bus.RunInstallers();
             bus.Start();
 
             bus.SendLocal(new MyMessage
