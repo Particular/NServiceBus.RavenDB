@@ -26,7 +26,11 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                             t.OwningTimeoutManager == EndpointName)
                     .Where(t => t.Time > startSlice)
                     .OrderBy(t => t.Time)
-                    .Select(t => t.Time);
+                    .Select(t => new
+                                 {
+                                     t.Id,
+                                     t.Time
+                                 });
 
                 QueryHeaderInformation qhi;
                 using (var enumerator = session.Advanced.Stream(query, out qhi))
@@ -36,12 +40,12 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
                     while (enumerator.MoveNext())
                     {
-                        var dateTime = enumerator.Current.Document;
+                        var dateTime = enumerator.Current.Document.Time;
                         nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time
 
                         if (dateTime > DateTime.UtcNow) return results; // break on first future timeout
 
-                        results.Add(new Tuple<string, DateTime>(enumerator.Current.Key, enumerator.Current.Document));
+                        results.Add(new Tuple<string, DateTime>(enumerator.Current.Document.Id, dateTime));
                     }
 
                     if (qhi != null && !qhi.IsStable) nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10); // since we consumed all timeouts and no future timeouts found
