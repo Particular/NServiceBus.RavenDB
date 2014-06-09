@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using NUnit.Framework;
     using Support;
     using Timeout.Core;
@@ -38,7 +39,7 @@
             WaitForIndexing(store);
 
             DateTime nextTimeToRunQuery;
-            Assert.AreEqual(numberOfTimeoutsToAdd, persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery).Count);            
+            Assert.AreEqual(numberOfTimeoutsToAdd, persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery).Count());            
         }
 
         [Test]

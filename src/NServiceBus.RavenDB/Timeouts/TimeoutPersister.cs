@@ -14,7 +14,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
         public string EndpointName { get; set; }
 
-        public List<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
+        public IEnumerable<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
         {
             var results = new List<Tuple<string, DateTime>>();
             using (var session = DocumentStore.OpenSession())
