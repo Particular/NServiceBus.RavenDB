@@ -58,10 +58,9 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
         {
             using (var session = OpenSession())
             {
-                var subscriptions = GetSubscriptions(messageTypes, session);
-                return subscriptions.SelectMany(s => s.Clients)
-                    .Distinct()
-                    .ToArray();
+                return GetSubscriptions(messageTypes, session)
+                    .SelectMany(s => s.Clients)
+                    .Distinct();
             }
         }
 
