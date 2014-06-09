@@ -17,7 +17,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
         public List<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
         {
             var results = new List<Tuple<string, DateTime>>();
-            using (var session = OpenSession())
+            using (var session = DocumentStore.OpenSession())
             {
                 var query = session.Query<Timeout, TimeoutsIndex>()
                     .Where(
@@ -57,7 +57,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
         public void Add(TimeoutData timeout)
         {
-            using (var session = OpenSession())
+            using (var session = DocumentStore.OpenSession())
             {
                 session.Store(new Timeout(timeout));
                 session.SaveChanges();
@@ -66,8 +66,10 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
         public bool TryRemove(string timeoutId, out TimeoutData timeoutData)
         {
-            using (var session = OpenSession())
+            using (var session = DocumentStore.OpenSession())
             {
+                session.Advanced.UseOptimisticConcurrency = true;
+
                 var timeout = session.Load<Timeout>(timeoutId);
                 if (timeout == null)
                 {
@@ -84,8 +86,10 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
         public void RemoveTimeoutBy(Guid sagaId)
         {
-            using (var session = OpenSession())
+            using (var session = DocumentStore.OpenSession())
             {
+                session.Advanced.UseOptimisticConcurrency = true;
+
                 var query = session.Query<Timeout, TimeoutsIndex>().Where(x => x.SagaId == sagaId).Select(x => x.Id);
                 using (var enumerator = session.Advanced.Stream(query))
                 {
@@ -96,13 +100,6 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 }
                 session.SaveChanges();
             }
-        }
-
-        IDocumentSession OpenSession()
-        {
-            var session = DocumentStore.OpenSession();
-            session.Advanced.UseOptimisticConcurrency = true;
-            return session;
         }
     }
 }
