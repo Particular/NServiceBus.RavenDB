@@ -2,6 +2,7 @@
 {
     using Features;
     using Internal;
+    using NServiceBus.Persistence;
     using Raven.Client;
     using Raven.Client.Document;
     using Settings;
@@ -26,10 +27,26 @@
             var holder = settings.Get<DocumentStoreHolder>();
             if (holder.DocumentStore == null)
             {
-                var connectionStringName = Helpers.GetFirstNonEmptyConnectionString("NServiceBus/Persistence/RavenDB", "NServiceBus/Persistence");
-                if (!string.IsNullOrWhiteSpace(connectionStringName))
+                var p = settings.GetOrDefault<ConnectionParameters>(RavenDbSettingsExtenstions.DefaultConnectionParameters);
+                if (p != null)
                 {
-                    holder.DocumentStore = new DocumentStore { ConnectionStringName = connectionStringName }.Initialize();
+                    holder.DocumentStore = new DocumentStore
+                                           {
+                                               Url = p.Url,
+                                               DefaultDatabase = p.DatabaseName ?? settings.EndpointName(),
+                                               ApiKey = p.ApiKey
+                                           }.Initialize();
+                }
+                else
+                {
+                    var connectionStringName = Helpers.GetFirstNonEmptyConnectionString("NServiceBus/Persistence/RavenDB", "NServiceBus/Persistence");
+                    if (!string.IsNullOrWhiteSpace(connectionStringName))
+                    {
+                        holder.DocumentStore = new DocumentStore
+                                               {
+                                                   ConnectionStringName = connectionStringName
+                                               }.Initialize();
+                    }
                 }
             }
             return holder.DocumentStore;
