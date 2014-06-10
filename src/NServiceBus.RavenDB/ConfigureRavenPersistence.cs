@@ -18,7 +18,6 @@ namespace NServiceBus.RavenDB
             {
                 config.Configurer.ConfigureComponent(() => documentStore, DependencyLifecycle.SingleInstance);
                 config.Configurer.ConfigureComponent<RavenSessionFactory>(DependencyLifecycle.SingleInstance);
-                config.Configurer.ConfigureComponent<RavenUnitOfWork>(DependencyLifecycle.InstancePerUnitOfWork);
                 RavenUserInstaller.RunInstaller = true; // TODO this smells
             }
             else

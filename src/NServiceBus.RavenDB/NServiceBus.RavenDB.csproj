@@ -69,6 +69,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Gateway\ConfigureGateway.cs" />
     <Compile Include="ConfigureRavenPersistence.cs" />
+    <Compile Include="Internal\DocumentStoreWrapper.cs" />
     <Compile Include="Internal\Helpers.cs" />
     <Compile Include="ConnectionParameters.cs" />
     <Compile Include="SessionManagement\ISessionProvider.cs" />
@@ -78,8 +79,9 @@
     <Compile Include="RavenDB.cs" />
     <Compile Include="RavenDBConfigurer.cs" />
     <Compile Include="RavenPersistenceConstants.cs" />
+    <Compile Include="SessionManagement\OpenSessionBehavior.cs" />
+    <Compile Include="SessionManagement\RavenDbStorageSession.cs" />
     <Compile Include="SessionManagement\RavenSessionFactory.cs" />
-    <Compile Include="SessionManagement\RavenUnitofWork.cs" />
     <Compile Include="Internal\RavenUserInstaller.cs" />
     <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />
     <Compile Include="SagaPersister\SagaPersister.cs" />
