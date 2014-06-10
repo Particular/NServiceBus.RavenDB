@@ -11,8 +11,6 @@ namespace NServiceBus.SagaPersisters.RavenDB
 
     class SagaPersister : ISagaPersister
     {
-        public ISessionProvider SessionProvider { get; set; }
-
         public SagaPersister(ISessionProvider sessionProvider)
         {
             this.sessionProvider = sessionProvider;
