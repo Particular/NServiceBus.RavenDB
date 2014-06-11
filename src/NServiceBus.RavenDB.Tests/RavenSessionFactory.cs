@@ -14,7 +14,15 @@
             this.store = store;
         }
 
-        public IDocumentSession Session { get { return session ?? (session = store.OpenSession()); }}
+        public IDocumentSession Session { get { return session ?? (session = OpenSession()); }}
+
+        IDocumentSession OpenSession()
+        {
+            var documentSession = store.OpenSession();
+            documentSession.Advanced.AllowNonAuthoritativeInformation = false;
+            documentSession.Advanced.UseOptimisticConcurrency = true;
+            return documentSession;
+        }
 
         public void ReleaseSession()
         {
