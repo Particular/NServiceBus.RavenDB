@@ -108,12 +108,6 @@
     <Reference Include="Raven.Database">
       <HintPath>..\packages\RavenDB.Database\lib\net45\Raven.Database.dll</HintPath>
     </Reference>
-    <Reference Include="Raven.Server">
-      <HintPath>..\packages\RavenDB.Tests.Helpers\lib\net45\Raven.Server.exe</HintPath>
-    </Reference>
-    <Reference Include="Raven.Tests.Helpers">
-      <HintPath>..\packages\RavenDB.Tests.Helpers\lib\net45\Raven.Tests.Helpers.dll</HintPath>
-    </Reference>
     <Reference Include="Spatial4n.Core.NTS">
       <HintPath>..\packages\RavenDB.Database\lib\net45\Spatial4n.Core.NTS.dll</HintPath>
     </Reference>
