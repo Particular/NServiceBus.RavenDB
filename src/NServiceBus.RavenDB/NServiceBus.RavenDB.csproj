@@ -79,6 +79,7 @@
     <Compile Include="RavenDB.cs" />
     <Compile Include="RavenDBConfigurer.cs" />
     <Compile Include="RavenPersistenceConstants.cs" />
+    <Compile Include="SessionManagement\ProvidedSessionBehavior.cs" />
     <Compile Include="SessionManagement\OpenSessionBehavior.cs" />
     <Compile Include="SessionManagement\RavenDbStorageSession.cs" />
     <Compile Include="SessionManagement\RavenSessionFactory.cs" />

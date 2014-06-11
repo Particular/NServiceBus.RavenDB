@@ -16,6 +16,16 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
+            // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
+            var getSessionFunc = context.Settings.GetOrDefault<Func<IDocumentSession>>(RavenDbSettingsExtenstions.SharedSessionSettingsKey);
+            if (getSessionFunc != null)
+            {
+                context.Container.ConfigureComponent<ProvidedSessionBehavior>(DependencyLifecycle.InstancePerCall)
+                    .ConfigureProperty(x => x.GetSession, getSessionFunc);
+                context.Pipeline.Register<ProvidedSessionBehavior.Registration>();
+                return;
+            }
+
             // Try getting a document store object specific to this Feature that user may have wired in
             var store = context.Settings.GetOrDefault<IDocumentStore>(RavenDbSagaSettingsExtenstions.SettingsKey);
 
@@ -37,9 +47,8 @@
                 throw new Exception("RavenDB is configured as persistence for Sagas and no DocumentStore instance found");
             }
 
-            context.Container.RegisterSingleton<IDocumentStoreWrapper>(new DocumentStoreWrapper {DocumentStore = store}); // TODO needs a better wiring
-
             context.Container.ConfigureComponent<RavenSessionProvider>(DependencyLifecycle.InstancePerCall);
+            context.Container.RegisterSingleton<IDocumentStoreWrapper>(new DocumentStoreWrapper {DocumentStore = store}); // TODO needs a better wiring
             context.Pipeline.Register<OpenSessionBehavior.Registration>();
         }
     }
