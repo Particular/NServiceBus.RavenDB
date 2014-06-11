@@ -15,7 +15,7 @@ class Program
             var configure = Configure.With()
                 .DefaultBuilder()
                 .UsePersistence<RavenDB>(_ => _.SetDefaultDocumentStore(documentStore))
-                .Serialization.Json()
+                .UseSerialization<Json>()
                 .Features(_ => _.Enable<Sagas>())
                 ;
 
