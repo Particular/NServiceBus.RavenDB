@@ -16,6 +16,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
     public class Should_not_skip_timeouts
     {
         [TestCase]
+        [Ignore]
         public void Never_ever()
         {
             var expected = new List<Tuple<string, DateTime>>();
