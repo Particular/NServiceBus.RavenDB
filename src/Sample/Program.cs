@@ -13,7 +13,6 @@ class Program
         using (var documentStore = new DocumentStore().Initialize())
         {
             var configure = Configure.With()
-                .DefaultBuilder()
                 .UsePersistence<RavenDB>(_ => _.SetDefaultDocumentStore(documentStore))
                 .UseSerialization<Json>()
                 .Features(_ => _.Enable<Sagas>())
