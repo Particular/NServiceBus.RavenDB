@@ -39,14 +39,7 @@
                 }
                 else
                 {
-                    var connectionStringName = Helpers.GetFirstNonEmptyConnectionString("NServiceBus/Persistence/RavenDB", "NServiceBus/Persistence");
-                    if (!string.IsNullOrWhiteSpace(connectionStringName))
-                    {
-                        holder.DocumentStore = new DocumentStore
-                                               {
-                                                   ConnectionStringName = connectionStringName
-                                               }.Initialize();
-                    }
+                    holder.DocumentStore = Helpers.CreateDocumentStoreByConnectionStringName(settings, "NServiceBus/Persistence/RavenDB", "NServiceBus/Persistence");
                 }
             }
             return holder.DocumentStore;

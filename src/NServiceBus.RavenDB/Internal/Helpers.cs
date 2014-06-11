@@ -7,10 +7,30 @@
     using Logging;
     using NServiceBus.Persistence;
     using Raven.Client;
+    using Raven.Client.Document;
     using Raven.Json.Linq;
+    using Settings;
 
     class Helpers
     {
+        public static IDocumentStore CreateDocumentStoreByConnectionStringName(ReadOnlySettings settings, params string[] connectionStringNames)
+        {
+            var connectionStringName = GetFirstNonEmptyConnectionString(connectionStringNames);
+            if (!string.IsNullOrWhiteSpace(connectionStringName))
+            {
+                var docStore = new DocumentStore
+                {
+                    ConnectionStringName = connectionStringName
+                };
+                if (docStore.DefaultDatabase == null)
+                {
+                    docStore.DefaultDatabase = settings.EndpointName();
+                }
+                return docStore.Initialize();
+            }
+            return null;
+        }
+
         static void LogRavenConnectionFailure(Exception exception, IDocumentStore store)
         {
             var sb = new StringBuilder();

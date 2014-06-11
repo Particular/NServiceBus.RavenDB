@@ -5,7 +5,6 @@
     using Internal;
     using NServiceBus.Persistence;
     using Raven.Client;
-    using Raven.Client.Document;
 
     class RavenDbStorageSession : Feature
     {
@@ -26,21 +25,13 @@
                 return;
             }
 
-            // Try getting a document store object specific to this Feature that user may have wired in
-            var store = context.Settings.GetOrDefault<IDocumentStore>(RavenDbSagaSettingsExtenstions.SettingsKey);
-
-            // Init up a new DocumentStore based on a connection string specific to this feature
-            if (store == null)
-            {
-                var connectionStringName = Helpers.GetFirstNonEmptyConnectionString("NServiceBus/Persistence/RavenDB/Saga");
-                if (!string.IsNullOrWhiteSpace(connectionStringName))
-                {
-                    store = new DocumentStore { ConnectionStringName = connectionStringName }.Initialize();
-                }
-            }
-
-            // Trying pulling a shared DocumentStore set by the user or other Feature
-            store = store ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtenstions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context.Settings);
+            var store =
+                // Try getting a document store object specific to this Feature that user may have wired in
+                context.Settings.GetOrDefault<IDocumentStore>(RavenDbSagaSettingsExtenstions.SettingsKey)
+                // Init up a new DocumentStore based on a connection string specific to this feature
+                ?? Helpers.CreateDocumentStoreByConnectionStringName(context.Settings, "NServiceBus/Persistence/RavenDB/Saga")
+                // Trying pulling a shared DocumentStore set by the user or other Feature
+                ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtenstions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context.Settings);
 
             if (store == null)
             {

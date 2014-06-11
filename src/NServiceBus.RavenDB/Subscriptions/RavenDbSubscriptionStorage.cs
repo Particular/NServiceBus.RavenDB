@@ -3,7 +3,6 @@
     using System;
     using Persistence;
     using Raven.Client;
-    using Raven.Client.Document;
     using RavenDB;
     using RavenDB.Internal;
     using Unicast.Subscriptions.RavenDB;
@@ -17,21 +16,13 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            // Try getting a document store object specific to this Feature that user may have wired in
-            var store = context.Settings.GetOrDefault<IDocumentStore>(RavenDbSubscriptionSettingsExtenstions.SettingsKey);
-
-            // Init up a new DocumentStore based on a connection string specific to this feature
-            if (store == null)
-            {
-                var connectionStringName = Helpers.GetFirstNonEmptyConnectionString("NServiceBus/Persistence/RavenDB/Subscription");
-                if (!string.IsNullOrWhiteSpace(connectionStringName))
-                {
-                    store = new DocumentStore { ConnectionStringName = connectionStringName }.Initialize();
-                }
-            }
-
-            // Trying pulling a shared DocumentStore set by the user or other Feature
-            store = store ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtenstions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context.Settings);
+            var store =
+                // Try getting a document store object specific to this Feature that user may have wired in
+                context.Settings.GetOrDefault<IDocumentStore>(RavenDbSubscriptionSettingsExtenstions.SettingsKey)
+                // Init up a new DocumentStore based on a connection string specific to this feature
+                ?? Helpers.CreateDocumentStoreByConnectionStringName(context.Settings, "NServiceBus/Persistence/RavenDB/Subscription")
+                // Trying pulling a shared DocumentStore set by the user or other Feature
+                ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtenstions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context.Settings);
 
             if (store == null)
             {
