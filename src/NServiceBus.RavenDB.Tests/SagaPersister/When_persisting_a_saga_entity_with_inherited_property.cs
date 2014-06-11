@@ -1,5 +1,5 @@
 using System;
-using NServiceBus.RavenDB.Persistence;
+using NServiceBus.RavenDB.Tests;
 using NServiceBus.Saga;
 using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;

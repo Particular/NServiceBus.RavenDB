@@ -153,6 +153,7 @@
     <Compile Include="SagaPersister\When_updating_a_saga_property_that_has_a_unique_attribute.cs" />
     <Compile Include="SagaPersister\When_updating_a_saga_without_unique_properties.cs" />
     <Compile Include="DocumentStoreBuilder.cs" />
+    <Compile Include="RavenSessionFactory.cs" />
     <Compile Include="SubscriptionStorage\TestData.cs" />
     <Compile Include="SubscriptionStorage\When_listing_subscribers_for_a_non_existing_message_type.cs" />
     <Compile Include="SubscriptionStorage\When_listing_subscribers_for_message_types.cs" />

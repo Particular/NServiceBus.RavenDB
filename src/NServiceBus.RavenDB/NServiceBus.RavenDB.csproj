@@ -82,7 +82,6 @@
     <Compile Include="SessionManagement\ProvidedSessionBehavior.cs" />
     <Compile Include="SessionManagement\OpenSessionBehavior.cs" />
     <Compile Include="SessionManagement\RavenDbStorageSession.cs" />
-    <Compile Include="SessionManagement\RavenSessionFactory.cs" />
     <Compile Include="Internal\RavenUserInstaller.cs" />
     <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />
     <Compile Include="SagaPersister\SagaPersister.cs" />

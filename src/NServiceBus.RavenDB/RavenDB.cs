@@ -2,6 +2,7 @@
 {
     using System;
     using NServiceBus.RavenDB;
+    using NServiceBus.RavenDB.SessionManagement;
     using Raven.Client;
 
     public class RavenDB : PersistenceDefinition
@@ -29,6 +30,18 @@
         public static PersistenceConfiguration UseSharedSession(this PersistenceConfiguration cfg, Func<IDocumentSession> getSessionFunc)
         {
             cfg.Config.Settings.Set(SharedSessionSettingsKey, getSessionFunc);
+            return cfg;
+        }
+
+        /// <summary>
+        /// Specifies the mapping to use for when resolving the database name to use for each message.
+        /// </summary>
+        /// <param name="cfg">The configuration object.</param>
+        /// <param name="convention">The method referenced by a Func delegate for finding the database name for the specified message.</param>
+        /// <returns>The configuration object.</returns>
+        public static PersistenceConfiguration SetMessageToDatabaseMappingConvention(this PersistenceConfiguration cfg, Func<IMessageContext, string> convention)
+        {
+            OpenSessionBehavior.GetDatabaseName = convention;
             return cfg;
         }
     }

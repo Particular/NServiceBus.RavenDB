@@ -10,14 +10,13 @@ namespace NServiceBus.RavenDB
     /// <summary>
     /// Extension methods to configure RavenDB persister.
     /// </summary>
-    public static class ConfigureRavenPersistence
+    static class ConfigureRavenPersistence
     {
         private static void SetupRavenPersistence(Configure config, IDocumentStore documentStore)
         {
             if (!config.Configurer.HasComponent<IDocumentStore>())
             {
                 config.Configurer.ConfigureComponent(() => documentStore, DependencyLifecycle.SingleInstance);
-                config.Configurer.ConfigureComponent<RavenSessionFactory>(DependencyLifecycle.SingleInstance);
                 RavenUserInstaller.RunInstaller = true; // TODO this smells
             }
             else
@@ -30,23 +29,9 @@ namespace NServiceBus.RavenDB
         }
 
         /// <summary>
-        /// Specifies the mapping to use for when resolving the database name to use for each message.
-        /// </summary>
-        /// <param name="config">The configuration object.</param>
-        /// <param name="convention">The method referenced by a Func delegate for finding the database name for the specified message.</param>
-        /// <returns>The configuration object.</returns>
-        public static Configure RavenDBStorageMessageToDatabaseMappingConvention(this Configure config, Func<IMessageContext, string> convention)
-        {
-            RavenSessionFactory.GetDatabaseName = convention;
-
-            return config;
-        }
-
-
-        /// <summary>
         /// Apply the NServiceBus conventions to a <see cref="DocumentStore"/> .
         /// </summary>
-        public static Configure ApplyRavenDBConventions(this Configure config, DocumentStore documentStore)
+        static Configure ApplyRavenDBConventions(this Configure config, DocumentStore documentStore)
         {
             if (documentStore.Url == null)
             {

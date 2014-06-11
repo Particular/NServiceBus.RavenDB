@@ -6,19 +6,31 @@
     using Pipeline;
     using Pipeline.Contexts;
     using Raven.Client;
+    using Unicast;
 
     class OpenSessionBehavior : IBehavior<IncomingContext>
     {
         public IDocumentStoreWrapper DocumentStoreWrapper { get; set; }
 
+        public static Func<IMessageContext, string> GetDatabaseName = context => String.Empty;
+
         public void Invoke(IncomingContext context, Action next)
         {
-            using (var session = DocumentStoreWrapper.DocumentStore.OpenSession())
-            {
+            using (var session = OpenSession(context))
+            {             
                 context.Set(session);
                 next();
                 session.SaveChanges();
             }
+        }
+
+        IDocumentSession OpenSession(IncomingContext context)
+        {
+            var databaseName = GetDatabaseName(new MessageContext(context.PhysicalMessage));
+            var documentSession = string.IsNullOrEmpty(databaseName) ? DocumentStoreWrapper.DocumentStore.OpenSession() : DocumentStoreWrapper.DocumentStore.OpenSession(databaseName);
+            documentSession.Advanced.AllowNonAuthoritativeInformation = false;
+            documentSession.Advanced.UseOptimisticConcurrency = true;
+            return documentSession;
         }
 
         public class Registration : RegisterBehavior
