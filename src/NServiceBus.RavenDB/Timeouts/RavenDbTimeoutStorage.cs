@@ -60,9 +60,10 @@
     {
         public const string SettingsKey = "RavenDbDocumentStore/Timeouts";
 
-        public static void UseDocumentStoreForTimeouts(this PersistenceConfiguration cfg, IDocumentStore documentStore)
+        public static PersistenceConfiguration UseDocumentStoreForTimeouts(this PersistenceConfiguration cfg, IDocumentStore documentStore)
         {
             cfg.Config.Settings.Set(SettingsKey, documentStore);
+            return cfg;
         }
     }
 }

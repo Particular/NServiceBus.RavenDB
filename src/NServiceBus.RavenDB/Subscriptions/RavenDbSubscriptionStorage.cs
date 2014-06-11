@@ -48,9 +48,10 @@
     {
         public const string SettingsKey = "RavenDbDocumentStore/Subscription";
 
-        public static void UseDocumentStoreForSubscriptions(this PersistenceConfiguration cfg, IDocumentStore documentStore)
+        public static PersistenceConfiguration UseDocumentStoreForSubscriptions(this PersistenceConfiguration cfg, IDocumentStore documentStore)
         {
             cfg.Config.Settings.Set(SettingsKey, documentStore);
+            return cfg;
         }
     }
 }

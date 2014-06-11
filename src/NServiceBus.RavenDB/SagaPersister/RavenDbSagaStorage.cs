@@ -32,9 +32,10 @@
     {
         public const string SettingsKey = "RavenDbDocumentStore/Saga";
 
-        public static void UseDocumentStoreForSagas(this PersistenceConfiguration cfg, IDocumentStore documentStore)
+        public static PersistenceConfiguration UseDocumentStoreForSagas(this PersistenceConfiguration cfg, IDocumentStore documentStore)
         {
             cfg.Config.Settings.Set(SettingsKey, documentStore);
+            return cfg;
         }
     }
 }
