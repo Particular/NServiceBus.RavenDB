@@ -91,7 +91,7 @@
             var store = documentStore as DocumentStore;
             if (store == null) return;
 
-            var resourceManagerId = Address.Local + "-" + EndpointHelper.GetEndpointVersion();
+            var resourceManagerId = Address.Local + "-" + (settings.GetOrDefault<string>("EndpointVersion") ?? EndpointHelper.GetEndpointVersion());
             store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
 
             bool suppressDistributedTransactions;
