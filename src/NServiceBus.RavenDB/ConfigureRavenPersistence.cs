@@ -4,7 +4,6 @@ namespace NServiceBus.RavenDB
     using System.Security.Cryptography;
     using System.Text;
     using NServiceBus;
-    using Persistence;
     using Raven.Client.Document;
 
     /// <summary>
@@ -28,7 +27,7 @@ namespace NServiceBus.RavenDB
             return config;
         }
 
-        static Guid DefaultResourceManagerId(Configure config)
+        static Guid DefaultResourceManagerId()
         {
             var resourceManagerId = Address.Local + "-" + "foo";// TODO Configure.DefineEndpointVersionRetriever();
 

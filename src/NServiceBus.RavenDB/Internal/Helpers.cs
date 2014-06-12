@@ -66,7 +66,7 @@
 
         static readonly ILog Logger = LogManager.GetLogger(typeof(RavenDB));
 
-        public static string GetFirstNonEmptyConnectionString(params string[] connectionStringNames)
+        static string GetFirstNonEmptyConnectionString(params string[] connectionStringNames)
         {
             try
             {
