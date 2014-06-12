@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
+    using Config.Conventions;
     using Logging;
     using NServiceBus.Persistence;
     using Raven.Client;
@@ -27,6 +28,7 @@
                 {
                     docStore.DefaultDatabase = settings.EndpointName();
                 }
+                ApplyRavenDBConventions(settings, docStore);
                 return docStore.Initialize();
             }
             return null;
@@ -79,7 +81,25 @@
             }
         }
 
-        public static Guid DeterministicGuidBuilder(string input)
+        /// <summary>
+        /// Apply the NServiceBus conventions to a <see cref="DocumentStore"/> .
+        /// </summary>
+        public static void ApplyRavenDBConventions(ReadOnlySettings settings, IDocumentStore documentStore)
+        {
+            var store = documentStore as DocumentStore;
+            if (store == null) return;
+
+            var resourceManagerId = Address.Local + "-" + EndpointHelper.GetEndpointVersion();
+            store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
+
+            bool suppressDistributedTransactions;
+            if (settings.TryGet("Transactions.SuppressDistributedTransactions", out suppressDistributedTransactions) && suppressDistributedTransactions)
+            {
+                store.EnlistInDistributedTransactions = false;
+            }
+        }
+
+        static Guid DeterministicGuidBuilder(string input)
         {
             // use MD5 hash to get a 16-byte hash of the string
             using (var provider = new MD5CryptoServiceProvider())

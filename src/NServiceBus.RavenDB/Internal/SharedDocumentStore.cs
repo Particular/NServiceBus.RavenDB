@@ -35,7 +35,9 @@
                                                Url = p.Url,
                                                DefaultDatabase = p.DatabaseName ?? settings.EndpointName(),
                                                ApiKey = p.ApiKey
-                                           }.Initialize();
+                                           };
+                    Helpers.ApplyRavenDBConventions(settings, holder.DocumentStore);
+                    holder.DocumentStore.Initialize();
                 }
                 else
                 {

@@ -68,7 +68,6 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Gateway\ConfigureGateway.cs" />
-    <Compile Include="ConfigureRavenPersistence.cs" />
     <Compile Include="Internal\DocumentStoreWrapper.cs" />
     <Compile Include="Internal\Helpers.cs" />
     <Compile Include="ConnectionParameters.cs" />
