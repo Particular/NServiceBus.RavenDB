@@ -26,6 +26,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                             t.OwningTimeoutManager == EndpointName)
                     .Where(t => t.Time > startSlice)
                     .OrderBy(t => t.Time)
+                    .Customize(_ => _.WaitForNonStaleResultsAsOfLastWrite())
                     .Select(t => new
                                  {
                                      t.Id,
