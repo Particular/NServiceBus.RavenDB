@@ -16,7 +16,7 @@ namespace NServiceBus.RavenDB
         /// </summary>
         static Configure ApplyRavenDBConventions(this Configure config, DocumentStore documentStore)
         {
-            documentStore.ResourceManagerId = DefaultResourceManagerId(config);
+            documentStore.ResourceManagerId = DefaultResourceManagerId();
 
 
             if (config.Settings.Get<bool>("Transactions.SuppressDistributedTransactions"))
