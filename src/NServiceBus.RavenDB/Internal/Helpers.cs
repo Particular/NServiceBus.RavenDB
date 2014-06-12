@@ -3,6 +3,7 @@
     using System;
     using System.Configuration;
     using System.Linq;
+    using System.Security.Cryptography;
     using System.Text;
     using Logging;
     using NServiceBus.Persistence;
@@ -75,6 +76,18 @@
             catch (ConfigurationErrorsException)
             {
                 return null;
+            }
+        }
+
+        public static Guid DeterministicGuidBuilder(string input)
+        {
+            // use MD5 hash to get a 16-byte hash of the string
+            using (var provider = new MD5CryptoServiceProvider())
+            {
+                var inputBytes = Encoding.Default.GetBytes(input);
+                var hashBytes = provider.ComputeHash(inputBytes);
+                // generate a guid from the hash:
+                return new Guid(hashBytes);
             }
         }
     }

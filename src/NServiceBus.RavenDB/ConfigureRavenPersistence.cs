@@ -1,8 +1,8 @@
 namespace NServiceBus.RavenDB
 {
     using System;
-    using System.Security.Cryptography;
-    using System.Text;
+    using Config.Conventions;
+    using Internal;
     using NServiceBus;
     using Raven.Client.Document;
 
@@ -29,21 +29,9 @@ namespace NServiceBus.RavenDB
 
         static Guid DefaultResourceManagerId()
         {
-            var resourceManagerId = Address.Local + "-" + "foo";// TODO Configure.DefineEndpointVersionRetriever();
+            var resourceManagerId = Address.Local + "-" + EndpointHelper.GetEndpointVersion();
 
-            return DeterministicGuidBuilder(resourceManagerId);
-        }
-
-        static Guid DeterministicGuidBuilder(string input)
-        {
-            // use MD5 hash to get a 16-byte hash of the string
-            using (var provider = new MD5CryptoServiceProvider())
-            {
-                var inputBytes = Encoding.Default.GetBytes(input);
-                var hashBytes = provider.ComputeHash(inputBytes);
-                // generate a guid from the hash:
-                return new Guid(hashBytes);
-            }
+            return Helpers.DeterministicGuidBuilder(resourceManagerId);
         }
     }
 }
