@@ -19,7 +19,6 @@ public class With_using_raven_persistence
                                                            });
                                         _.EndpointName("UnitTests");
                                     })
-            .DefaultBuilder()
             .UsePersistence<RavenDB>();
 
         config.CreateBus();
@@ -39,7 +38,6 @@ public class With_using_raven_persistence
                                                            });
                                         _.EndpointName("UnitTests");
                                     })
-            .DefaultBuilder()
             .UsePersistence<RavenDB>();
 
         config.CreateBus();
