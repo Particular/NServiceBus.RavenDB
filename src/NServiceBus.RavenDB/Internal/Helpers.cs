@@ -8,6 +8,7 @@
     using Config.Conventions;
     using Logging;
     using NServiceBus.Persistence;
+    using Persistence;
     using Raven.Client;
     using Raven.Client.Document;
     using Raven.Json.Linq;
@@ -29,6 +30,7 @@
                     docStore.DefaultDatabase = settings.EndpointName();
                 }
                 ApplyRavenDBConventions(settings, docStore);
+                RavenUserInstaller.AddDocumentStore(docStore);
                 return docStore.Initialize();
             }
             return null;

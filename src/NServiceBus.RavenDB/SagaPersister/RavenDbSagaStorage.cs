@@ -2,6 +2,7 @@
 {
     using Persistence;
     using Raven.Client;
+    using RavenDB.Persistence;
     using SagaPersisters.RavenDB;
 
     /// <summary>
@@ -35,6 +36,7 @@
         public static PersistenceConfiguration UseDocumentStoreForSagas(this PersistenceConfiguration cfg, IDocumentStore documentStore)
         {
             cfg.Config.Settings.Set(SettingsKey, documentStore);
+            RavenUserInstaller.AddDocumentStore(documentStore);
             return cfg;
         }
     }

@@ -3,6 +3,7 @@
     using Features;
     using Internal;
     using NServiceBus.Persistence;
+    using Persistence;
     using Raven.Client;
     using Raven.Client.Document;
     using Settings;
@@ -38,6 +39,7 @@
                                            };
                     Helpers.ApplyRavenDBConventions(settings, holder.DocumentStore);
                     holder.DocumentStore.Initialize();
+                    RavenUserInstaller.AddDocumentStore(holder.DocumentStore);
                 }
                 else
                 {

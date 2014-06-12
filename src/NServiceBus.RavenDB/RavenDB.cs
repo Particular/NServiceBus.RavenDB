@@ -2,6 +2,7 @@
 {
     using System;
     using NServiceBus.RavenDB;
+    using NServiceBus.RavenDB.Persistence;
     using NServiceBus.RavenDB.SessionManagement;
     using Raven.Client;
 
@@ -18,12 +19,14 @@
         public static PersistenceConfiguration SetDefaultDocumentStore(this PersistenceConfiguration cfg, IDocumentStore documentStore)
         {
             cfg.Config.Settings.Set(DocumentStoreSettingsKey, documentStore);
+            RavenUserInstaller.AddDocumentStore(documentStore);
             return cfg;
         }
 
         public static PersistenceConfiguration SetDefaultDocumentStore(this PersistenceConfiguration cfg, ConnectionParameters connectionParameters)
         {
             cfg.Config.Settings.Set(DefaultConnectionParameters, connectionParameters);
+            // This will be registered with RavenUserInstaller once we initialize the document store object internally
             return cfg;
         }
 

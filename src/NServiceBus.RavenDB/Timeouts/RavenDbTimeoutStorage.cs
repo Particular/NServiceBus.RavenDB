@@ -5,6 +5,7 @@
     using Raven.Client;
     using RavenDB;
     using RavenDB.Internal;
+    using RavenDB.Persistence;
     using TimeoutPersisters.RavenDB;
 
     /// <summary>
@@ -54,6 +55,7 @@
         public static PersistenceConfiguration UseDocumentStoreForTimeouts(this PersistenceConfiguration cfg, IDocumentStore documentStore)
         {
             cfg.Config.Settings.Set(SettingsKey, documentStore);
+            RavenUserInstaller.AddDocumentStore(documentStore);
             return cfg;
         }
     }

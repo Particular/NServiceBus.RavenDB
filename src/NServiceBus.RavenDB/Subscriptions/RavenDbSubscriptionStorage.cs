@@ -5,6 +5,7 @@
     using Raven.Client;
     using RavenDB;
     using RavenDB.Internal;
+    using RavenDB.Persistence;
     using Unicast.Subscriptions.RavenDB;
 
     public class RavenDbSubscriptionStorage : Feature
@@ -42,6 +43,7 @@
         public static PersistenceConfiguration UseDocumentStoreForSubscriptions(this PersistenceConfiguration cfg, IDocumentStore documentStore)
         {
             cfg.Config.Settings.Set(SettingsKey, documentStore);
+            RavenUserInstaller.AddDocumentStore(documentStore);
             return cfg;
         }
     }

@@ -19,31 +19,30 @@ namespace NServiceBus.RavenDB.Persistence
     class RavenUserInstaller : INeedToInstallSomething
     {
         static readonly ILog logger = LogManager.GetLogger(typeof(RavenUserInstaller));
-
-        public IDocumentStore Store { get; set; }
-
-        internal static bool RunInstaller { get; set; }
+        static List<DocumentStore> StoresToInstall { get; set; }
+        static RavenUserInstaller()
+        {
+            StoresToInstall = new List<DocumentStore>();
+        }
+        public static void AddDocumentStore(IDocumentStore documentStore)
+        {
+            var store = documentStore as DocumentStore;
+            if (store != null)
+                StoresToInstall.Add(store);
+        }
 
         public void Install(string identity, Configure config)
         {
-            if (!RunInstaller)
+            foreach (var store in StoresToInstall)
             {
-                return;
-            }
-
-            var store = Store as DocumentStore;
-            if (store == null)
-            {
-                return;
-            }
-
-            try
-            {
-                AddUserToDatabase(identity, store);
-            }
-            catch (Exception exception)
-            {
-                logger.Warn("Failed to add user to raven. Processing will continue", exception);
+                try
+                {
+                    AddUserToDatabase(identity, store);
+                }
+                catch (Exception exception)
+                {
+                    logger.Warn("Failed to add user to raven. Processing will continue", exception);
+                }
             }
         }
 
