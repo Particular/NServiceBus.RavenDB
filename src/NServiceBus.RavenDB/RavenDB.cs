@@ -5,6 +5,9 @@
     /// </summary>
     public class RavenDB : PersistenceDefinition
     {
+        /// <summary>
+        /// Defines the capabilities
+        /// </summary>
         public RavenDB()
         {
             Supports(Storage.GatewayDeduplication);

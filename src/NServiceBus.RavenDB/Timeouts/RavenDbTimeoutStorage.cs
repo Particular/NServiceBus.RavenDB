@@ -1,11 +1,9 @@
 ﻿namespace NServiceBus.Features
 {
     using System;
-    using Persistence;
     using Raven.Client;
     using RavenDB;
     using RavenDB.Internal;
-    using RavenDB.Persistence;
     using TimeoutPersisters.RavenDB;
 
     /// <summary>
@@ -28,7 +26,7 @@
         {
             var store =
                 // Try getting a document store object specific to this Feature that user may have wired in
-                context.Settings.GetOrDefault<IDocumentStore>(RavenDbTimeoutSettingsExtenstions.SettingsKey)
+                context.Settings.GetOrDefault<IDocumentStore>(RavenDbTimeoutSettingsExtensions.SettingsKey)
                 // Init up a new DocumentStore based on a connection string specific to this feature
                 ?? Helpers.CreateDocumentStoreByConnectionStringName(context.Settings, "NServiceBus/Persistence/RavenDB/Timeout")
                 // Trying pulling a shared DocumentStore set by the user or other Feature
@@ -45,18 +43,6 @@
                 .ConfigureProperty(x => x.DocumentStore, store)
                 .ConfigureProperty(x => x.EndpointName, context.Settings.EndpointName())
                 ;
-        }
-    }
-
-    public static class RavenDbTimeoutSettingsExtenstions
-    {
-        public const string SettingsKey = "RavenDbDocumentStore/Timeouts";
-
-        public static PersistenceConfiguration UseDocumentStoreForTimeouts(this PersistenceConfiguration cfg, IDocumentStore documentStore)
-        {
-            cfg.Config.Settings.Set(SettingsKey, documentStore);
-            RavenUserInstaller.AddDocumentStore(documentStore);
-            return cfg;
         }
     }
 }

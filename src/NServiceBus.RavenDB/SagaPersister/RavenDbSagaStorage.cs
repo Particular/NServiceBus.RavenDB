@@ -1,8 +1,5 @@
 ﻿namespace NServiceBus.Features
 {
-    using Persistence;
-    using Raven.Client;
-    using RavenDB.Persistence;
     using SagaPersisters.RavenDB;
 
     /// <summary>
@@ -26,18 +23,6 @@
             // TODO here would be the place to wire up the ISagaFinder extension point
 
             context.Container.ConfigureComponent<SagaPersister>(DependencyLifecycle.InstancePerCall);
-        }
-    }
-
-    public static class RavenDbSagaSettingsExtenstions
-    {
-        public const string SettingsKey = "RavenDbDocumentStore/Saga";
-
-        public static PersistenceConfiguration UseDocumentStoreForSagas(this PersistenceConfiguration cfg, IDocumentStore documentStore)
-        {
-            cfg.Config.Settings.Set(SettingsKey, documentStore);
-            RavenUserInstaller.AddDocumentStore(documentStore);
-            return cfg;
         }
     }
 }

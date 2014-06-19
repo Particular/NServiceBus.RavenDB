@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿
 namespace NServiceBus.TimeoutPersisters.RavenDB
 {
     using NServiceBus.Timeout.Core;
+    using System;
+    using System.Collections.Generic;
 
-    public class Timeout
+    class Timeout
     {
         public Timeout()
         {

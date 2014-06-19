@@ -1,25 +1,31 @@
 ﻿namespace NServiceBus.Features
 {
     using System;
-    using Persistence;
     using Raven.Client;
     using RavenDB;
     using RavenDB.Internal;
-    using RavenDB.Persistence;
     using Unicast.Subscriptions.RavenDB;
 
+    /// <summary>
+    /// Provides subscription storage using RavenDB
+    /// </summary>
     public class RavenDbSubscriptionStorage : Feature
     {
-        public RavenDbSubscriptionStorage()
+        internal RavenDbSubscriptionStorage()
         {
             DependsOn<StorageDrivenPublishing>();
         }
+        
 
+        /// <summary>
+        /// Performs the setup of the feature
+        /// </summary>
+        /// <param name="context"></param>
         protected override void Setup(FeatureConfigurationContext context)
         {
             var store =
                 // Try getting a document store object specific to this Feature that user may have wired in
-                context.Settings.GetOrDefault<IDocumentStore>(RavenDbSubscriptionSettingsExtenstions.SettingsKey)
+                context.Settings.GetOrDefault<IDocumentStore>(RavenDbSubscriptionSettingsExtensions.SettingsKey)
                 // Init up a new DocumentStore based on a connection string specific to this feature
                 ?? Helpers.CreateDocumentStoreByConnectionStringName(context.Settings, "NServiceBus/Persistence/RavenDB/Subscription")
                 // Trying pulling a shared DocumentStore set by the user or other Feature
@@ -31,20 +37,7 @@
             }
 
             context.Container.ConfigureComponent<SubscriptionPersister>(DependencyLifecycle.InstancePerCall)
-                .ConfigureProperty(x => x.DocumentStore, store)
-                ;
-        }
-    }
-
-    public static class RavenDbSubscriptionSettingsExtenstions
-    {
-        public const string SettingsKey = "RavenDbDocumentStore/Subscription";
-
-        public static PersistenceConfiguration UseDocumentStoreForSubscriptions(this PersistenceConfiguration cfg, IDocumentStore documentStore)
-        {
-            cfg.Config.Settings.Set(SettingsKey, documentStore);
-            RavenUserInstaller.AddDocumentStore(documentStore);
-            return cfg;
+                .ConfigureProperty(x => x.DocumentStore, store);
         }
     }
 }

@@ -25,7 +25,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\..\binaries\NServiceBus.RavenDB.xml</DocumentationFile>
-    <NoWarn>1591,1573</NoWarn>
+    <NoWarn>1573</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
@@ -65,6 +65,7 @@
     <Compile Include="Internal\Helpers.cs" />
     <Compile Include="ConnectionParameters.cs" />
     <Compile Include="RavenDbSettingsExtensions.cs" />
+    <Compile Include="SagaPersister\RavenDbSagaSettingsExtensions.cs" />
     <Compile Include="SessionManagement\ISessionProvider.cs" />
     <Compile Include="Gateway\RavenDeduplication.cs" />
     <Compile Include="Internal\NoOpLogManager.cs" />
@@ -79,9 +80,11 @@
     <Compile Include="SagaPersister\SagaPersister.cs" />
     <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />
     <Compile Include="Subscriptions\MessageTypeConverter.cs" />
+    <Compile Include="Subscriptions\RavenDbSubscriptionSettingsExtensions.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionStorage.cs" />
     <Compile Include="Subscriptions\SubscriptionPersister.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
+    <Compile Include="Timeouts\RavenDbTimeoutSettingsExtensions.cs" />
     <Compile Include="Timeouts\RavenDbTimeoutStorage.cs" />
     <Compile Include="Timeouts\TimeoutPersister.cs" />
     <Compile Include="Timeouts\Timeout.cs" />

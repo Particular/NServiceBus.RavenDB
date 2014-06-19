@@ -2,12 +2,12 @@
 {
     using Raven.Client;
 
-    public class DocumentStoreWrapper : IDocumentStoreWrapper
+    class DocumentStoreWrapper : IDocumentStoreWrapper
     {
         public IDocumentStore DocumentStore { get; set; }
     }
 
-    public interface IDocumentStoreWrapper
+    interface IDocumentStoreWrapper
     {
         IDocumentStore DocumentStore { get; }
     }
