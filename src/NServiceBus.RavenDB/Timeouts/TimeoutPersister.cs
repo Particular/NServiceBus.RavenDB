@@ -33,7 +33,8 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
             // added after startSlice have been set to a later timout and we might have missed them
             // because of stale indexes.
-            if (seenStaleResults && (lastCleanupTime.Add(TriggerCleanupEvery) > DateTime.UtcNow || lastCleanupTime == DateTime.MinValue))
+            if (seenStaleResults && 
+                (TriggerCleanupEvery == TimeSpan.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) > DateTime.UtcNow || lastCleanupTime == DateTime.MinValue))
             {
                 results = DoCleanup(startSlice).ToList();
                 lastCleanupTime = now;

@@ -51,6 +51,8 @@
             {
                 DocumentStore = store,
                 EndpointName = "MyTestEndpoint",
+                CleanupGapFromTimeslice = TimeSpan.FromSeconds(1),
+                TriggerCleanupEvery = TimeSpan.MinValue,
             };
 
             var nextTime = DateTime.UtcNow.AddHours(1);
