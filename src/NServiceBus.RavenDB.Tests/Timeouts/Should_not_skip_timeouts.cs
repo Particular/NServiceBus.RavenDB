@@ -11,89 +11,83 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
     using Raven.Client.Embedded;
     using Timeout.Core;
     using TimeoutPersisters.RavenDB;
+    using Timeout = TimeoutPersisters.RavenDB.Timeout;
 
     [TestFixture]
     public class Should_not_skip_timeouts
     {
-        [TestCase,Explicit("Flaky on the build server. Please take a look itamar")]
+        [TestCase]
         public void Never_ever()
         {
-            var expected = new List<Tuple<string, DateTime>>();
-            var lastTimeout = DateTime.UtcNow;
-            var finishedAdding = false;
-            new Thread(() =>
+            using (var documentStore = new EmbeddableDocumentStore
+                                   {
+                                       RunInMemory = true
+                                   }.Initialize())
             {
-                var sagaId = Guid.NewGuid();
-                for (var i = 0; i < 10000; i++)
+                new TimeoutsIndex().Execute(documentStore);
+
+                var persister = new TimeoutPersister
+                            {
+                                DocumentStore = documentStore,
+                                EndpointName = "foo",
+                            };
+
+                var expected = new List<Tuple<string, DateTime>>();
+                var lastTimeout = DateTime.UtcNow;
+                var finishedAdding = false;
+                new Thread(() =>
+                           {
+                               var sagaId = Guid.NewGuid();
+                               for (var i = 0; i < 10000; i++)
+                               {
+                                   var td = new TimeoutData
+                                            {
+                                                SagaId = sagaId,
+                                                Destination = new Address("queue", "machine"),
+                                                Time = DateTime.UtcNow.AddSeconds(1 + RandomProvider.GetThreadRandom().Next(1, 20)),
+                                                OwningTimeoutManager = string.Empty,
+                                            };
+                                   persister.Add(td);
+                                   expected.Add(new Tuple<string, DateTime>(td.Id, td.Time));
+                                   lastTimeout = (td.Time > lastTimeout) ? td.Time : lastTimeout;
+                                   //Trace.WriteLine("Added timeout for " + td.Time);
+                               }
+                               finishedAdding = true;
+                               Trace.WriteLine("*** Finished adding ***");
+                           }).Start();
+
+                // Mimic the behavior of the TimeoutPersister coordinator
+                var found = 0;
+                var startSlice = DateTime.UtcNow.AddYears(-10);
+                while (!finishedAdding || startSlice < lastTimeout)
                 {
-                    var td = new TimeoutData
+                    DateTime nextRetrieval;
+
+                    var timeoutDatas = persister.GetNextChunk(startSlice, out nextRetrieval);
+                    Trace.WriteLine("Querying for timeouts starting at " + startSlice + " with last known added timeout at " + lastTimeout);
+                    foreach (var timeoutData in timeoutDatas)
                     {
-                        SagaId = sagaId,
-                        Destination = new Address("queue", "machine"),
-                        Time = DateTime.UtcNow.AddSeconds(1 + RandomProvider.GetThreadRandom().Next(1, 20)),
-                        OwningTimeoutManager = string.Empty,
-                    };
-                    persister.Add(td);
-                    expected.Add(new Tuple<string, DateTime>(td.Id, td.Time));
-                    lastTimeout = (td.Time > lastTimeout) ? td.Time : lastTimeout;
-                    //Trace.WriteLine("Added timeout for " + td.Time);
-                }
-                finishedAdding = true;
-                Trace.WriteLine("*** Finished adding ***");
-            }).Start();
-
-            // Mimic the behavior of the TimeoutPersister coordinator
-            var found = 0;
-            var startSlice = DateTime.UtcNow.AddYears(-10);
-            while (!finishedAdding || startSlice < lastTimeout)
-            {
-                DateTime nextRetrieval;
-            
-                var timeoutDatas = persister.GetNextChunk(startSlice, out nextRetrieval);
-                Trace.WriteLine("Querying for timeouts starting at " + startSlice + " with last known added timeout at " + lastTimeout);
-                foreach (var timeoutData in timeoutDatas)
-                {
-                    if (startSlice < timeoutData.Item2)
-                    {
-                        startSlice = timeoutData.Item2;
-                    }
-                    found++;
-
-                    TimeoutData td;
-                    Assert.IsTrue(persister.TryRemove(timeoutData.Item1, out td));
-                }
-            }
-
-            Assert.AreEqual(expected.Count, found);
-
-            WaitForIndexing(documentStore);
-
-            using (var session = documentStore.OpenSession())
-            {
-                var results = session.Query<TimeoutData>().ToList();
-                Assert.AreEqual(0, results.Count);
-            }
-
-            documentStore.Dispose();
-        }
-
-        IDocumentStore documentStore;
-        IPersistTimeouts persister;
-
-        [SetUp]
-        public void SetUp()
-        {
-            documentStore = new EmbeddableDocumentStore
-            {
-                RunInMemory = true
-            }.Initialize();
-            new TimeoutsIndex().Execute(documentStore);
-
-            persister = new TimeoutPersister
+                        if (startSlice < timeoutData.Item2)
                         {
-                            DocumentStore = documentStore,
-                            EndpointName = "foo"
-                        };
+                            startSlice = timeoutData.Item2;
+                        }
+                        found++;
+
+                        TimeoutData td;
+                        Assert.IsTrue(persister.TryRemove(timeoutData.Item1, out td));
+                    }
+                }
+
+                Assert.AreEqual(expected.Count, found);
+
+                WaitForIndexing(documentStore);
+
+                using (var session = documentStore.OpenSession())
+                {
+                    var results = session.Query<Timeout, TimeoutsIndex>().ToList();
+                    Assert.AreEqual(0, results.Count);
+                }
+            }
         }
 
         static void WaitForIndexing(IDocumentStore store, string db = null, TimeSpan? timeout = null)
