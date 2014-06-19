@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.RavenDB
 {
+    using System.Collections.Generic;
     using Features;
     using NServiceBus.Persistence;
     using SessionManagement;
@@ -7,14 +8,22 @@
 
     class RavenDBConfigurer : IConfigurePersistence<RavenDB>
     {
-        public void Enable(Configure config)
+        public void Enable(Configure config, List<Storage> storagesToEnable)
         {
-            config.Settings.EnableFeatureByDefault<RavenDbTimeoutStorage>();
-            config.Settings.EnableFeatureByDefault<RavenDbSagaStorage>();
-            config.Settings.EnableFeatureByDefault<RavenDbStorageSession>();
-            config.Settings.EnableFeatureByDefault<RavenDbSubscriptionStorage>();
-            config.Settings.EnableFeatureByDefault<SharedDocumentStore>();
             RavenLogManager.CurrentLogManager = new NoOpLogManager();
+
+            config.Settings.EnableFeatureByDefault<RavenDbStorageSession>();
+            config.Settings.EnableFeatureByDefault<SharedDocumentStore>();
+
+            if (storagesToEnable.Contains(Storage.Timeouts))
+                config.Settings.EnableFeatureByDefault<RavenDbTimeoutStorage>();
+
+            if (storagesToEnable.Contains(Storage.Sagas)) 
+                config.Settings.EnableFeatureByDefault<RavenDbSagaStorage>();
+            
+            if (storagesToEnable.Contains(Storage.Subscriptions)) 
+                config.Settings.EnableFeatureByDefault<RavenDbSubscriptionStorage>();
+            
         }
     }
 }

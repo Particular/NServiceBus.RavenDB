@@ -20,7 +20,7 @@
             public Registration()
                 : base("ProvidedRavenDbSession", typeof(ProvidedSessionBehavior), "Makes sure that there is a RavenDB IDocumentSession available on the pipeline")
             {
-                InsertAfter(WellKnownBehavior.UnitOfWork);
+                InsertAfter(WellKnownBehavior.ExecuteUnitOfWork);
                 InsertBeforeIfExists(WellKnownBehavior.InvokeSaga);
             }
         }
