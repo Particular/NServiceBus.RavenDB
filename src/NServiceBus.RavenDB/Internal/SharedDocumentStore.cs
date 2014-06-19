@@ -28,7 +28,7 @@
             var holder = settings.Get<DocumentStoreHolder>();
             if (holder.DocumentStore == null)
             {
-                var p = settings.GetOrDefault<ConnectionParameters>(RavenDbSettingsExtenstions.DefaultConnectionParameters);
+                var p = settings.GetOrDefault<ConnectionParameters>(RavenDbSettingsExtensions.DefaultConnectionParameters);
                 if (p != null)
                 {
                     holder.DocumentStore = new DocumentStore

@@ -3,7 +3,6 @@
     using System;
     using Features;
     using Internal;
-    using NServiceBus.Persistence;
     using Raven.Client;
 
     class RavenDbStorageSession : Feature
@@ -16,7 +15,7 @@
         protected override void Setup(FeatureConfigurationContext context)
         {
             // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
-            var getSessionFunc = context.Settings.GetOrDefault<Func<IDocumentSession>>(RavenDbSettingsExtenstions.SharedSessionSettingsKey);
+            var getSessionFunc = context.Settings.GetOrDefault<Func<IDocumentSession>>(RavenDbSettingsExtensions.SharedSessionSettingsKey);
             if (getSessionFunc != null)
             {
                 context.Container.ConfigureComponent<ProvidedSessionBehavior>(DependencyLifecycle.InstancePerCall)
@@ -31,7 +30,7 @@
                 // Init up a new DocumentStore based on a connection string specific to this feature
                 ?? Helpers.CreateDocumentStoreByConnectionStringName(context.Settings, "NServiceBus/Persistence/RavenDB/Saga")
                 // Trying pulling a shared DocumentStore set by the user or other Feature
-                ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtenstions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context.Settings);
+                ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtensions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context.Settings);
 
             if (store == null)
             {
