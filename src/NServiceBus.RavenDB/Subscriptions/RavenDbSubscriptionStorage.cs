@@ -14,6 +14,7 @@
         internal RavenDbSubscriptionStorage()
         {
             DependsOn<StorageDrivenPublishing>();
+            DependsOn<SharedDocumentStore>();
         }
         
 

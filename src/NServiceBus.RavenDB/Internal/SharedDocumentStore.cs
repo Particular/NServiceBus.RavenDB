@@ -2,7 +2,6 @@
 {
     using Features;
     using Internal;
-    using NServiceBus.Persistence;
     using Persistence;
     using Raven.Client;
     using Raven.Client.Document;
@@ -13,8 +12,6 @@
         public SharedDocumentStore()
         {
             Defaults(_ => _.Set<DocumentStoreHolder>(new DocumentStoreHolder()));
-
-            DependsOnAtLeastOne(typeof(RavenDbSagaStorage), typeof(RavenDbSubscriptionStorage), typeof(RavenDbTimeoutStorage));
         }
 
         protected override void Setup(FeatureConfigurationContext context)
@@ -44,6 +41,11 @@
                 else
                 {
                     holder.DocumentStore = Helpers.CreateDocumentStoreByConnectionStringName(settings, "NServiceBus/Persistence/RavenDB", "NServiceBus/Persistence");
+
+                    if (holder.DocumentStore == null)
+                    {
+                        holder.DocumentStore = Helpers.CreateDocumentStoreByUrl(settings, "http://localhost:8080");
+                    }
                 }
             }
             return holder.DocumentStore;

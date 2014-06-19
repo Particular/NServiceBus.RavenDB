@@ -36,6 +36,22 @@
             return null;
         }
 
+        public static IDocumentStore CreateDocumentStoreByUrl(ReadOnlySettings settings,string url)
+        {
+            var docStore = new DocumentStore{Url = url};
+
+            if (docStore.DefaultDatabase == null)
+            {
+                docStore.DefaultDatabase = settings.EndpointName();
+            }
+            
+            ApplyRavenDBConventions(settings, docStore);
+            
+            RavenUserInstaller.AddDocumentStore(docStore);
+            
+            return docStore.Initialize();
+        }
+
         static void LogRavenConnectionFailure(Exception exception, IDocumentStore store)
         {
             var sb = new StringBuilder();
