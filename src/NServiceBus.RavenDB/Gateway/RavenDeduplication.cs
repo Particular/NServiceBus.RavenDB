@@ -7,16 +7,11 @@
 
     class RavenDeduplication : IDeduplicateMessages
     {
-        IDocumentStore store;
-
-        public RavenDeduplication(IDocumentStore documentStore)
-        {
-            store = documentStore;
-        }
+        public IDocumentStore DocumentStore { get; set; }
 
         public bool DeduplicateMessage(string clientId, DateTime timeReceived)
         {
-            using (var session = store.OpenSession())
+            using (var session = DocumentStore.OpenSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
                 session.Advanced.AllowNonAuthoritativeInformation = false;

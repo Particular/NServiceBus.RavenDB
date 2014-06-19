@@ -6,22 +6,14 @@
     using RavenDB.Internal;
     using TimeoutPersisters.RavenDB;
 
-    /// <summary>
-    /// RavenDB Timeout storage
-    /// </summary>
-    public class RavenDbTimeoutStorage : Feature
+
+    class RavenDbTimeoutStorage : Feature
     {
-        /// <summary>
-        /// Creates an instance of <see cref="RavenDbTimeoutStorage"/>.
-        /// </summary>
         RavenDbTimeoutStorage()
         {
             DependsOn<TimeoutManager>();
         }
 
-        /// <summary>
-        /// Called when the feature should perform its initialization. This call will only happen if the feature is enabled.
-        /// </summary>
         protected override void Setup(FeatureConfigurationContext context)
         {
             var store =

@@ -23,6 +23,9 @@
             
             if (storagesToEnable.Contains(Storage.Subscriptions)) 
                 config.Settings.EnableFeatureByDefault<RavenDbSubscriptionStorage>();
+
+            if (storagesToEnable.Contains(Storage.GatewayDeduplication))
+                config.Settings.EnableFeatureByDefault<RavenDbGatewayDeduplication>();
             
         }
     }

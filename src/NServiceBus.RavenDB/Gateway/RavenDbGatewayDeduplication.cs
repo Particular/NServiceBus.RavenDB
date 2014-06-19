@@ -3,33 +3,33 @@
     using System;
     using Raven.Client;
     using RavenDB;
+    using RavenDB.Gateway.Deduplication;
     using RavenDB.Internal;
-    using Unicast.Subscriptions.RavenDB;
 
-    class RavenDbSubscriptionStorage : Feature
+    class RavenDbGatewayDeduplication: Feature
     {
-        RavenDbSubscriptionStorage()
+        RavenDbGatewayDeduplication()
         {
-            DependsOn<StorageDrivenPublishing>();
-            DependsOn<SharedDocumentStore>();
+            DependsOn<Gateway>();
         }
-    
+
         protected override void Setup(FeatureConfigurationContext context)
         {
             var store =
                 // Try getting a document store object specific to this Feature that user may have wired in
-                context.Settings.GetOrDefault<IDocumentStore>(RavenDbSubscriptionSettingsExtensions.SettingsKey)
+                context.Settings.GetOrDefault<IDocumentStore>(RavenDbGatewayDeduplicationSettingsExtensions.SettingsKey)
                 // Init up a new DocumentStore based on a connection string specific to this feature
-                ?? Helpers.CreateDocumentStoreByConnectionStringName(context.Settings, "NServiceBus/Persistence/RavenDB/Subscription")
+                ?? Helpers.CreateDocumentStoreByConnectionStringName(context.Settings, "NServiceBus/Persistence/RavenDB/GatewayDeduplication")
                 // Trying pulling a shared DocumentStore set by the user or other Feature
                 ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtensions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context.Settings);
 
             if (store == null)
             {
-                throw new Exception("RavenDB is configured as persistence for Subscriptions and no DocumentStore instance found");
+                throw new Exception("RavenDB is configured as persistence for GatewayDeduplication and no DocumentStore instance found");
             }
 
-            context.Container.ConfigureComponent<SubscriptionPersister>(DependencyLifecycle.InstancePerCall)
+
+            context.Container.ConfigureComponent<RavenDeduplication>(DependencyLifecycle.SingleInstance)
                 .ConfigureProperty(x => x.DocumentStore, store);
         }
     }
