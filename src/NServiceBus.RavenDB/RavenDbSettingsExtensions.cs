@@ -65,5 +65,17 @@
             OpenSessionBehavior.GetDatabaseName = convention;
             return cfg;
         }
+
+        /// <summary>
+        /// Tells the persister to not setup user permissions for the database
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <returns></returns>
+        public static PersistenceConfiguration DoNotSetupDatabasePermissions(this PersistenceConfiguration cfg)
+        {
+            cfg.Config.Settings.Set("RavenDB.DoNotSetupPermissions", true);
+            return cfg;
+        }
+        
     }
 }

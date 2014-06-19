@@ -12,6 +12,7 @@ namespace NServiceBus.RavenDB.Persistence
     using Raven.Json.Linq;
     using Installation;
     using Logging;
+    using Settings;
 
     /// <summary>
     /// Add the identity to the Raven users group 
@@ -20,6 +21,10 @@ namespace NServiceBus.RavenDB.Persistence
     {
         static readonly ILog logger = LogManager.GetLogger(typeof(RavenUserInstaller));
         static List<DocumentStore> StoresToInstall { get; set; }
+
+        public ReadOnlySettings Settings { get; set; }
+
+
         static RavenUserInstaller()
         {
             StoresToInstall = new List<DocumentStore>();
@@ -33,6 +38,12 @@ namespace NServiceBus.RavenDB.Persistence
 
         public void Install(string identity, Configure config)
         {
+            if (Settings.GetOrDefault<bool>("RavenDB.DoNotSetupPermissions"))
+            {
+                logger.Info("User permissions setup has been disabled. Please make sure the correct access rights has been granted in RavenDB manually");
+                return;
+            }
+
             foreach (var store in StoresToInstall)
             {
                 try
