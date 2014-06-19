@@ -2,6 +2,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using NServiceBus.Timeout.Core;
     using Raven.Abstractions.Commands;
     using Raven.Abstractions.Data;
@@ -11,22 +12,33 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     class TimeoutPersister : IPersistTimeouts
     {
         public IDocumentStore DocumentStore { get; set; }
-
         public string EndpointName { get; set; }
+
+        public TimeSpan CleanupGapFromTimeslice { get; set; }
+        public TimeSpan TriggerCleanupEvery { get; set; }
+        DateTime lastCleanupTime = DateTime.MinValue;
+        bool seenStaleResults;
+
+        public TimeoutPersister()
+        {
+            TriggerCleanupEvery = TimeSpan.FromMinutes(2);
+            CleanupGapFromTimeslice = TimeSpan.FromMinutes(1);
+        }
 
         public IEnumerable<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
         {
-            var results = new List<Tuple<string, DateTime>>();
+            var now = DateTime.UtcNow;
+            var results = DoCleanup(startSlice);
+
             using (var session = DocumentStore.OpenSession())
             {
                 var query = session.Query<Timeout, TimeoutsIndex>()
+                    .OrderBy(t => t.Time)
                     .Where(
                         t =>
                             t.OwningTimeoutManager == String.Empty ||
                             t.OwningTimeoutManager == EndpointName)
                     .Where(t => t.Time > startSlice)
-                    .OrderBy(t => t.Time)
-                    .Customize(_ => _.WaitForNonStaleResultsAsOfLastWrite())
                     .Select(t => new
                                  {
                                      t.Id,
@@ -37,20 +49,74 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 using (var enumerator = session.Advanced.Stream(query, out qhi))
                 {
                     // default return value for when no results are found and index is stale (non-stale is checked below)
-                    nextTimeToRunQuery = DateTime.UtcNow;
+                    nextTimeToRunQuery = now;
 
                     while (enumerator.MoveNext())
                     {
                         var dateTime = enumerator.Current.Document.Time;
                         nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time
 
-                        if (dateTime > DateTime.UtcNow) return results; // break on first future timeout
+                        if (dateTime > DateTime.UtcNow) break; // break on first future timeout
 
                         results.Add(new Tuple<string, DateTime>(enumerator.Current.Document.Id, dateTime));
                     }
 
-                    if (qhi != null && !qhi.IsStable) nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10); // since we consumed all timeouts and no future timeouts found
+                    // Next execution is either now if we haven't consumed the entire thing, or delayed
+                    // a bit if we ded
+                    if (qhi != null)
+                    {
+                        if (qhi.IsStable)
+                        {
+                            seenStaleResults = true;
+                        }
+                        else
+                        {
+                            // since we consumed all timeouts and no future timeouts found
+                            nextTimeToRunQuery = nextTimeToRunQuery < DateTime.UtcNow.AddMinutes(10) ? nextTimeToRunQuery : DateTime.UtcNow.AddMinutes(10);                   
+                        }
+                    }
                 }
+            }
+
+            return results;
+        }
+
+        public List<Tuple<string, DateTime>> DoCleanup(DateTime startSlice)
+        {
+            var results = new List<Tuple<string, DateTime>>();
+
+            // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
+            // added after startSlice have been set to a later timout and we might have missed them
+            // because of stale indexes.
+            if (seenStaleResults && (lastCleanupTime.Add(TriggerCleanupEvery) > DateTime.UtcNow || lastCleanupTime == DateTime.MinValue))
+            {
+                using (var session = DocumentStore.OpenSession())
+                {
+                    session.Advanced.AllowNonAuthoritativeInformation = true;
+
+                    var query = session.Query<Timeout, TimeoutsIndex>()
+                        .OrderBy(t => t.Time)
+                        .Where(
+                            t =>
+                                t.OwningTimeoutManager == String.Empty ||
+                                t.OwningTimeoutManager == EndpointName)
+                        ;
+
+                    results.AddRange(query
+                        .Where(t => t.Time <= startSlice.Subtract(CleanupGapFromTimeslice))
+                        .Select(t => new
+                        {
+                            t.Id,
+                            t.Time
+                        })
+                        .Take(1024)
+                        .ToList()
+                        .Select(arg => new Tuple<string, DateTime>(arg.Id, arg.Time))
+                        );
+                }
+
+                lastCleanupTime = DateTime.UtcNow;
+                seenStaleResults = false;
             }
 
             return results;

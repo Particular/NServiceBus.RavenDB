@@ -30,6 +30,8 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                             {
                                 DocumentStore = documentStore,
                                 EndpointName = "foo",
+                                TriggerCleanupEvery = TimeSpan.FromSeconds(1),
+                                CleanupGapFromTimeslice = TimeSpan.FromSeconds(2),
                             };
 
                 var expected = new List<Tuple<string, DateTime>>();
@@ -58,11 +60,10 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
 
                 // Mimic the behavior of the TimeoutPersister coordinator
                 var found = 0;
+                DateTime nextRetrieval;
                 var startSlice = DateTime.UtcNow.AddYears(-10);
                 while (!finishedAdding || startSlice < lastTimeout)
                 {
-                    DateTime nextRetrieval;
-
                     var timeoutDatas = persister.GetNextChunk(startSlice, out nextRetrieval);
                     Trace.WriteLine("Querying for timeouts starting at " + startSlice + " with last known added timeout at " + lastTimeout);
                     foreach (var timeoutData in timeoutDatas)
@@ -82,10 +83,13 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
 
                 WaitForIndexing(documentStore);
 
+                // Those leftovers - if any - will be picked up by the cleanup process
+                var expectedLeftovers = persister.GetNextChunk(DateTime.UtcNow.AddYears(-10), out nextRetrieval).Count();
+                Console.WriteLine("Done getting chunks, expected leftovers: " + expectedLeftovers);
                 using (var session = documentStore.OpenSession())
                 {
                     var results = session.Query<Timeout, TimeoutsIndex>().ToList();
-                    Assert.AreEqual(0, results.Count);
+                    Assert.AreEqual(expectedLeftovers, results.Count);
                 }
             }
         }
