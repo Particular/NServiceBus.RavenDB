@@ -10,7 +10,7 @@
     {
         RavenDbGatewayDeduplication()
         {
-            DependsOn<Gateway>();
+            DependsOn("Gateway");
         }
 
         protected override void Setup(FeatureConfigurationContext context)
