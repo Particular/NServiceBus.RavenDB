@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Gateway\GatewayMessage.cs" />
     <Compile Include="Gateway\RavenDbTimeoutSettingsExtensions.cs" />
     <Compile Include="Gateway\RavenDbGatewayDeduplication.cs" />
     <Compile Include="Internal\DocumentStoreWrapper.cs" />
