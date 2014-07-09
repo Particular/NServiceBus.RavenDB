@@ -15,13 +15,13 @@
             next();
         }
 
-        public class Registration : RegisterBehavior
+        public class Registration : RegisterStep
         {
             public Registration()
                 : base("ProvidedRavenDbSession", typeof(ProvidedSessionBehavior), "Makes sure that there is a RavenDB IDocumentSession available on the pipeline")
             {
-                InsertAfter(WellKnownBehavior.ExecuteUnitOfWork);
-                InsertBeforeIfExists(WellKnownBehavior.InvokeSaga);
+                InsertAfter(WellKnownStep.ExecuteUnitOfWork);
+                InsertBeforeIfExists(WellKnownStep.InvokeSaga);
             }
         }
     }
