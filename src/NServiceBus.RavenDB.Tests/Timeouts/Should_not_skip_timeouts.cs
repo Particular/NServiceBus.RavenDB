@@ -63,10 +63,10 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
 
                 // Mimic the behavior of the TimeoutPersister coordinator
                 var found = 0;
-                DateTime nextRetrieval;
                 var startSlice = DateTime.UtcNow.AddYears(-10);
                 while (!finishedAdding || startSlice < lastTimeout)
                 {
+                    DateTime nextRetrieval;
                     var timeoutDatas = persister.GetNextChunk(startSlice, out nextRetrieval);
                     Trace.WriteLine("Querying for timeouts starting at " + startSlice + " with last known added timeout at " + lastTimeout);
                     foreach (var timeoutData in timeoutDatas)
