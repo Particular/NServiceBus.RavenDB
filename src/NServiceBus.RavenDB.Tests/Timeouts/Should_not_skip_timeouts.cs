@@ -173,9 +173,9 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                 // Mimic the behavior of the TimeoutPersister coordinator
                 var found = 0;
                 var startSlice = DateTime.UtcNow.AddYears(-10);
-                DateTime nextRetrieval;
                 while (!finishedAdding1 || !finishedAdding2 || startSlice < lastTimeout1 || startSlice < lastTimeout2)
                 {
+                    DateTime nextRetrieval;
                     var timeoutDatas = persister.GetNextChunk(startSlice, out nextRetrieval);
                     Trace.WriteLine("Querying for timeouts starting at " + startSlice + " with last known added timeouts at " + lastTimeout1 + " & " + lastTimeout2);
                     foreach (var timeoutData in timeoutDatas)
