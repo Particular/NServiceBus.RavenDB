@@ -12,11 +12,10 @@ class Program
     {
         using (var documentStore = new DocumentStore().Initialize())
         {
-            var configure = Configure.With()
-                .UsePersistence<RavenDB>(_ => _.SetDefaultDocumentStore(documentStore))
-                .UseSerialization<Json>()
-                .Features(_ => _.Enable<Sagas>())
-                ;
+            var configure = Configure.With();
+            configure.UsePersistence<RavenDB>(_ => _.SetDefaultDocumentStore(documentStore));
+                configure.UseSerialization<Json>();
+                configure.EnableFeature<Sagas>();
 
             configure.EnableInstallers();
             bus = configure.CreateBus();
