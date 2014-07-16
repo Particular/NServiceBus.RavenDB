@@ -89,7 +89,7 @@
     <Compile Include="Timeouts\RavenDbTimeoutSettingsExtensions.cs" />
     <Compile Include="Timeouts\RavenDbTimeoutStorage.cs" />
     <Compile Include="Timeouts\TimeoutPersister.cs" />
-    <Compile Include="Timeouts\Timeout.cs" />
+    <Compile Include="Timeouts\TimeoutData.cs" />
     <Compile Include="Timeouts\TimeoutsIndex.cs" />
   </ItemGroup>
   <ItemGroup>

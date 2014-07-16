@@ -5,8 +5,8 @@
     using System.Linq;
     using NUnit.Framework;
     using Support;
-    using Timeout.Core;
     using TimeoutPersisters.RavenDB;
+    using TimeoutData = Timeout.Core.TimeoutData;
 
     public class When_fetching_timeouts_from_storage : RavenTestBase
     {

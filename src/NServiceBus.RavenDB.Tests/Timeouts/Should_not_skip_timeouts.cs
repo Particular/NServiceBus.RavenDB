@@ -9,8 +9,8 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
     using NUnit.Framework;
     using Raven.Client;
     using Raven.Client.Document;
-    using Raven.Database.Util;
-    using Timeout.Core;
+    using TimeoutData = Timeout.Core.TimeoutData;
+    using Timeout = TimeoutPersisters.RavenDB.TimeoutData;
     using TimeoutPersisters.RavenDB;
 
     [TestFixture]

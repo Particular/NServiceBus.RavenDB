@@ -1,18 +1,12 @@
 ﻿
 namespace NServiceBus.TimeoutPersisters.RavenDB
 {
-    using NServiceBus.Timeout.Core;
     using System;
     using System.Collections.Generic;
 
-    class Timeout
+    class TimeoutData
     {
-        public Timeout()
-        {
-            
-        }
-
-        public Timeout(TimeoutData data)
+        public TimeoutData(Timeout.Core.TimeoutData data)
         {
             Destination = data.Destination;
             SagaId = data.SagaId;
@@ -57,9 +51,9 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
         /// </summary>
         public Dictionary<string, string> Headers { get; set; }
 
-        public TimeoutData ToTimeoutData()
+        public Timeout.Core.TimeoutData ToCoreTimeoutData()
         {
-            return new TimeoutData
+            return new Timeout.Core.TimeoutData
             {
                 Destination = Destination,
                 Headers = Headers,

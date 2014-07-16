@@ -3,11 +3,13 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using NServiceBus.Timeout.Core;
+    using Timeout.Core;
     using Raven.Abstractions.Commands;
     using Raven.Abstractions.Data;
     using Raven.Client;
     using Raven.Client.Linq;
+    using CoreTimeoutData = Timeout.Core.TimeoutData;
+    using Timeout = TimeoutData;
 
     class TimeoutPersister : IPersistTimeouts
     {
@@ -110,7 +112,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             return results;
         }
 
-        public void Add(TimeoutData timeout)
+        public void Add(CoreTimeoutData timeout)
         {
             using (var session = DocumentStore.OpenSession())
             {
@@ -119,7 +121,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             }
         }
 
-        public bool TryRemove(string timeoutId, out TimeoutData timeoutData)
+        public bool TryRemove(string timeoutId, out CoreTimeoutData timeoutData)
         {
             using (var session = DocumentStore.OpenSession())
             {
@@ -132,7 +134,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                     return false;
                 }
 
-                timeoutData = timeout.ToTimeoutData();
+                timeoutData = timeout.ToCoreTimeoutData();
                 session.Delete(timeout);
                 session.SaveChanges();
                 return true;

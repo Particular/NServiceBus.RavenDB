@@ -3,7 +3,7 @@
     using System.Linq;
     using Raven.Client.Indexes;
 
-    class TimeoutsIndex : AbstractIndexCreationTask<Timeout>
+    class TimeoutsIndex : AbstractIndexCreationTask<TimeoutData>
     {
         public TimeoutsIndex()
         {

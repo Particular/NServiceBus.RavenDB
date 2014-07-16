@@ -5,8 +5,9 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
 {
     using NUnit.Framework;
     using Support;
-    using Timeout.Core;
     using TimeoutPersisters.RavenDB;
+    using TimeoutData = Timeout.Core.TimeoutData;
+    using Timeout = TimeoutPersisters.RavenDB.TimeoutData;
 
     [TestFixture]
     [Ignore("These tests currently operate under the assumption TimeoutData.Id gets assigned by the persistence layer; need to revisit this")]
