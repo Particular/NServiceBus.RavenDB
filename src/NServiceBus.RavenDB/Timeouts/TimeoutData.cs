@@ -6,6 +6,10 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
     class TimeoutData
     {
+        public TimeoutData()
+        {
+        }
+        
         public TimeoutData(Timeout.Core.TimeoutData data)
         {
             Destination = data.Destination;
