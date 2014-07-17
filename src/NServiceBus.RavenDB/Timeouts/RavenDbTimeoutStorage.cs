@@ -29,6 +29,8 @@
                 throw new Exception("RavenDB is configured as persistence for Timeouts and no DocumentStore instance found");
             }
 
+            ConnectionVerifier.VerifyConnectionToRavenDBServer(store);
+
             new TimeoutsIndex().Execute(store);
 
             context.Container.ConfigureComponent<TimeoutPersister>(DependencyLifecycle.SingleInstance)

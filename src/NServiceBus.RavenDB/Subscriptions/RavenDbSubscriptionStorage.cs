@@ -29,6 +29,8 @@
                 throw new Exception("RavenDB is configured as persistence for Subscriptions and no DocumentStore instance found");
             }
 
+            ConnectionVerifier.VerifyConnectionToRavenDBServer(store);
+
             context.Container.ConfigureComponent<SubscriptionPersister>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(x => x.DocumentStore, store);
         }

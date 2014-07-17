@@ -28,6 +28,7 @@
                 throw new Exception("RavenDB is configured as persistence for GatewayDeduplication and no DocumentStore instance found");
             }
 
+            ConnectionVerifier.VerifyConnectionToRavenDBServer(store);
 
             context.Container.ConfigureComponent<RavenDeduplication>(DependencyLifecycle.SingleInstance)
                 .ConfigureProperty(x => x.DocumentStore, store);
