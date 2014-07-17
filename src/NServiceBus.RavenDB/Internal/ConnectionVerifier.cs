@@ -51,7 +51,7 @@
                 return;
             }
 
-            if (!ravenBuildInfo.IsVersion2OrHigher())
+            if (!ravenBuildInfo.IsSufficientVersion())
             {
                 throw new InvalidOperationException(string.Format(WrongRavenVersionMessage, ravenBuildInfo));
             }
@@ -84,9 +84,12 @@
 
             public string BuildVersion { get; set; }
 
-            public bool IsVersion2OrHigher()
+            public bool IsSufficientVersion()
             {
-                return !string.IsNullOrEmpty(ProductVersion) && !ProductVersion.StartsWith("1");
+                int buildVersion;
+                if (!int.TryParse(BuildVersion, out buildVersion))
+                    return false;
+                return !string.IsNullOrEmpty(ProductVersion) && ProductVersion.StartsWith("2.5") && buildVersion >= 2900;
             }
 
             public override string ToString()
@@ -96,9 +99,9 @@
         }
 
         const string WrongRavenVersionMessage =
-@"The RavenDB server you have specified is detected to be {0}. NServiceBus requires RavenDB version 2 or higher to operate correctly. Please update your RavenDB server.
+@"The RavenDB server you have specified is detected to be {0}. NServiceBus requires RavenDB version 2.5 build 2900 or higher to operate correctly. Please update your RavenDB server.
 
-Further instructions can be found at:http://particular.net/articles/using-ravendb-in-nservicebus-installing";
+Further instructions can be found at: http://particular.net/articles/using-ravendb-in-nservicebus-installing";
 
         static readonly ILog Logger = LogManager.GetLogger(typeof(ConnectionVerifier));
     }
