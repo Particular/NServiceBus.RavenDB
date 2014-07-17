@@ -37,6 +37,11 @@
                 throw new Exception("RavenDB is configured as persistence for Sagas and no DocumentStore instance found");
             }
 
+            if (context.Settings.GetOrDefault<bool>(RavenDbSettingsExtensions.UseLegacyRavenDbConfigs))
+            {
+                store.Conventions.FindTypeTagName = LegacySettings.LegacyFindTypeTagName;
+            }
+
             context.Container.ConfigureComponent<RavenSessionProvider>(DependencyLifecycle.InstancePerCall);
             context.Container.RegisterSingleton<IDocumentStoreWrapper>(new DocumentStoreWrapper {DocumentStore = store}); // TODO needs a better wiring
             context.Pipeline.Register<OpenSessionBehavior.Registration>();
