@@ -75,8 +75,8 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 results = new List<Tuple<string, DateTime>>();
             }
 
-            // default return value for when no results are found and index is stale (non-stale is checked below)
-            nextTimeToRunQuery = now;
+            // default return value for when no results are found
+            nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10);
 
             using (var session = DocumentStore.OpenSession())
             {
@@ -94,7 +94,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                     while (enumerator.MoveNext())
                     {
                         var dateTime = enumerator.Current.Document.Time;
-                        nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time
+                        nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time < now
 
                         if (dateTime > DateTime.UtcNow) break; // break on first future timeout
 
@@ -102,10 +102,10 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                     }
                 }
 
-                // Next execution is either now if we know we got stale results, otherwise we delay the next execution a bit
-                if (qhi != null && !qhi.IsStable)
+                // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
+                if (qhi != null && qhi.IsStable && results.Count == 0)
                 {
-                    nextTimeToRunQuery = nextTimeToRunQuery < DateTime.UtcNow.AddMinutes(10) ? nextTimeToRunQuery : DateTime.UtcNow.AddMinutes(10);
+                    nextTimeToRunQuery = now;
                 }
             }
 
