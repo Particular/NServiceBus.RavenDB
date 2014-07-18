@@ -22,7 +22,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             var db = Guid.NewGuid().ToString();
             using (var documentStore = new DocumentStore
             {
-                Url = "http://localhost:8080",
+                Url = "http://localhost:8081",
                 DefaultDatabase = db,
             }.Initialize())
             {
@@ -116,7 +116,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             var db = Guid.NewGuid().ToString();
             using (var documentStore = new DocumentStore
             {
-                Url = "http://localhost:8080",
+                Url = "http://localhost:8081",
                 DefaultDatabase = db,
             }.Initialize())
             {
