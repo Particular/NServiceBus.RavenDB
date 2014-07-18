@@ -3,8 +3,34 @@ NServiceBus.RavenDB
 
 Persistence support for NServiceBus RavenDB
 
-NOT READY FOR PRODUCTION
-=======================
+## How to use this library
+
+After addig a reference to it from your project, simply specify RavenDB to be used for persistence, and set a RavenDB connection string in your `app.config` as `NServiceBus/Persistence/RavenDB` or pass the conection parameters like this:
+
+```csharp
+configure.UsePersistence<RavenDB>(_ => _.SetDefaultDocumentStore(new ConnectionParameters
+            {
+                Url = "http://myravendb.mydomain.com/",
+                DatabaseName = "myapp"
+            }));
+```
+
+Alternatively, you can initialize an instance of RavenDB's `IDocunentStore` yourself and pass it to NServiceBus:
+
+```csharp
+var documentStore = new DocumentStore 
+{ 
+    Url = "http://myravendb.mydomain.com/" 
+};
+configure.UsePersistence<RavenDB>(_ => _.SetDefaultDocumentStore(documentStore));
+documentStore.Initialize();
+```
+
+Both approaches will use the same DocumentStore instance for all enabled features. You can specify different DocumentStores to different features by configuring it explicitly, e.g.:
+
+```csharp
+configure.UsePersistence<RavenDB>(_ => _.UseDocumentStoreForTimeouts(...));
+```
 
 ## Wait I thought RavenDB was embedded in NServiceBus?
 
@@ -36,20 +62,9 @@ The idea with this library it to test the feasibility of shipping the RavenDB fu
 
 Yes this is true however since Costura only loads on demand usage of this library will effectively suppress usage of the merged version 
 
-## How to use this library.
-
-```
-var documentStore = new DocumentStore 
-{ 
-    Url = "http://myravendb.mydomain.com/" 
-};
-config.RavenDBPersistence(store, true);
-documentStore.Initialize();
-```
-
 ## Where did the connection string config overloads go?
 
-The previous Raven configuration API supported several approaches to passing in a connection string. This API had several issue.
+The previous RavenDB configuration API supported several approaches to passing in a connection string. This API had several issue.
 
  * Suffered from too many choices.
  * Minor typos in an App.config file could cause connection string to be ignored
