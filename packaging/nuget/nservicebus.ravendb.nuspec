@@ -14,7 +14,10 @@
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2010-2014 NServiceBus. All rights reserved</copyright>
     <tags>nservicebus servicebus msmq cqrs publish subscribe ravendb</tags>
-    <dependencies/>
+    <dependencies>
+      <dependency id="NServiceBus" version="[5.0.0-beta0002, 6.0.0-alpha0001)" />
+      <dependency id="RavenDB.Client" />
+    </dependencies>
   </metadata>
   <files>
     <file src="..\..\binaries\NServiceBus.RavenDB.???" target="lib\net45" />
