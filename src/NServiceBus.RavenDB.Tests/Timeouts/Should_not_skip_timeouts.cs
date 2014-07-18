@@ -134,7 +134,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                 Assert.AreEqual(0, persister.GetCleanupChunk(startSlice).Count());
 
                 const int insertsPerThread = 1000;
-                var expected = new List<Tuple<string, DateTime>>();
+                var expected = 0;
                 var lastExpectedTimeout = DateTime.UtcNow;
                 var finishedAdding1 = false;
                 var finishedAdding2 = false;
@@ -152,7 +152,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                                 OwningTimeoutManager = string.Empty,
                                             };
                                    persister.Add(td);
-                                   expected.Add(new Tuple<string, DateTime>(td.Id, td.Time));
+                                   Interlocked.Increment(ref expected);
                                    lastExpectedTimeout = (td.Time > lastExpectedTimeout) ? td.Time : lastExpectedTimeout;
                                }
                                finishedAdding1 = true;
@@ -184,7 +184,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                                     OwningTimeoutManager = string.Empty,
                                                 };
                                        persister2.Add(td);
-                                       expected.Add(new Tuple<string, DateTime>(td.Id, td.Time));
+                                       Interlocked.Increment(ref expected);
                                        lastExpectedTimeout = (td.Time > lastExpectedTimeout) ? td.Time : lastExpectedTimeout;
                                    }
                                }
@@ -236,7 +236,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                     Assert.AreEqual(0, results.Count);
                 }
 
-                Assert.AreEqual(expected.Count, found);
+                Assert.AreEqual(expected, found);
             }
         }
 
