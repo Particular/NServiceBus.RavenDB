@@ -1,3 +1,5 @@
+using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+
 namespace NServiceBus.RavenDB
 {
     using System;
@@ -7,6 +9,7 @@ namespace NServiceBus.RavenDB
     using System.Text;
     using Logging;
     using NServiceBus.Persistence.Raven;
+    using NServiceBus.RavenDB.Gateway.Persistence;
     using NServiceBus.Serializers.Json;
     using Raven.Abstractions.Data;
     using Raven.Abstractions.Extensions;
@@ -173,6 +176,23 @@ namespace NServiceBus.RavenDB
                 documentStore.Conventions.FindTypeTagName = RavenConventions.FindTypeTagName;
 
                 documentStore.Conventions.MaxNumberOfRequestsPerSession = 100;
+
+                documentStore.Conventions.FindClrType = (id, doc, metadata) =>
+                {
+                    var clrtype = metadata.Value<string>(Constants.RavenClrType);
+
+                    if (clrtype == "NServiceBus.Persistence.Raven.SubscriptionStorage.Subscription, NServiceBus.Core")
+                    {
+                        clrtype = ReflectionUtil.GetFullNameWithoutVersionInformation(typeof(Subscription));
+                    }
+
+                    if (clrtype == "NServiceBus.Gateway.Persistence.Raven.GatewayMessage, NServiceBus.Core")
+                    {
+                        clrtype = ReflectionUtil.GetFullNameWithoutVersionInformation(typeof(GatewayMessage));
+                    }
+
+                    return clrtype;
+                };
 
                 if (SettingsHolder.Get<bool>("Transactions.SuppressDistributedTransactions"))
                 {
