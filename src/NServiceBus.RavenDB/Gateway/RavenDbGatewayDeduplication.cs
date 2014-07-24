@@ -30,12 +30,14 @@
                 throw new Exception("RavenDB is configured as persistence for GatewayDeduplication and no DocumentStore instance found");
             }
 
+            ConnectionVerifier.VerifyConnectionToRavenDBServer(store);
+
+            BackwardsCompatibilityHelper.SupportOlderClrTypes(store);
+
             // This is required for DTC fix, and this requires RavenDB 2.5 build 2900 or above
             var remoteStorage = store as DocumentStore;
             if (remoteStorage != null)
                 remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
-
-            ConnectionVerifier.VerifyConnectionToRavenDBServer(store);
 
             context.Container.ConfigureComponent<RavenDeduplication>(DependencyLifecycle.SingleInstance)
                 .ConfigureProperty(x => x.DocumentStore, store);
