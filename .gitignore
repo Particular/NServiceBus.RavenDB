@@ -33,3 +33,4 @@ csx
 *.ncrunchsolution
 _NCrunch_NServiceBus/*
 src/Chocolatey/Build/*
+logs/ripple.log
