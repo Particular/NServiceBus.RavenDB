@@ -1,5 +1,3 @@
-using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
-
 namespace NServiceBus.RavenDB
 {
     using System;
@@ -10,6 +8,7 @@ namespace NServiceBus.RavenDB
     using Logging;
     using NServiceBus.Persistence.Raven;
     using NServiceBus.RavenDB.Gateway.Persistence;
+    using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Serializers.Json;
     using Raven.Abstractions.Data;
     using Raven.Abstractions.Extensions;
