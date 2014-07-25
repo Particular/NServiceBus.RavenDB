@@ -39,9 +39,9 @@ Yes, but with this library is now possible to load a different implementation of
 Configure.With()
     .DefaultBuilder()
     .RavenDBStorage() // Need to call this method
-    .UseRavenDBSubscriptionStorage() // Call this method to use Raven subscriptiion storage
-    .UseRavenDBTimeoutStorage() // Call this method to use Raven saga storage
+    .UseRavenDBSubscriptionStorage() // Call this method to use Raven subscription storage
+    .UseRavenDBTimeoutStorage() // Call this method to use Raven timeout storage
+    .UseRavenDBSagaStorage() // Call this method to use Raven saga storage
     .UseRavenDBGatewayDeduplicationStorage() // Call this method to use Raven dedupplication storage for the Gateway
     .UseRavenDBGatewayStorage(); // Call this method to use the old Raven Gateway storage method
-
 ```
