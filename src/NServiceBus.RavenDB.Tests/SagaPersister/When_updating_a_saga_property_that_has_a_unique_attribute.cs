@@ -1,57 +1,32 @@
-using System;
-using NServiceBus.RavenDB.Persistence;
-using NServiceBus.RavenDB.Persistence.SagaPersister;
-using NServiceBus.Saga;
-using NUnit.Framework;
-
-[TestFixture]
-public class When_updating_a_saga_property_that_has_a_unique_attribute 
+namespace NServiceBus.Core.Tests.Persistence.RavenDB.SagaPersister
 {
-    [Test]
-    public void It_should_allow_the_update()
+    using System;
+    using NUnit.Framework;
+
+    class When_updating_a_saga_property_that_has_a_unique_attribute : Raven_saga_persistence_concern
     {
-        using (var store = DocumentStoreBuilder.Build())
+        [Test]
+        public void It_should_allow_the_update()
         {
-
-            var factory = new RavenSessionFactory(new StoreAccessor(store));
-            factory.ReleaseSession();
-            var persister = new RavenSagaPersister(factory);
             var uniqueString = Guid.NewGuid().ToString();
-            var saga1 = new SagaData
-                {
-                    Id = Guid.NewGuid(),
-                    UniqueString = uniqueString
-                };
+            var saga1 = new SagaWithUniqueProperty
+                        {
+                            Id = Guid.NewGuid(),
+                            UniqueString = uniqueString
+                        };
 
-            persister.Save(saga1);
-            factory.SaveChanges();
-            factory.ReleaseSession();
+            SaveSaga(saga1);
 
-            var saga = persister.Get<SagaData>(saga1.Id);
-            saga.UniqueString = Guid.NewGuid().ToString();
-            persister.Update(saga);
-            factory.SaveChanges();
-            factory.ReleaseSession();
-
-            var saga2 = new SagaData
-                {
-                    Id = Guid.NewGuid(),
-                    UniqueString = uniqueString
-                };
+            UpdateSaga<SagaWithUniqueProperty>(saga1.Id, s => s.UniqueString = Guid.NewGuid().ToString());
+         
+            var saga2 = new SagaWithUniqueProperty
+            {
+                Id = Guid.NewGuid(),
+                UniqueString = uniqueString
+            };
 
             //this should not blow since we changed the unique value in the previous saga
-            persister.Save(saga2);
-            factory.SaveChanges();
+            SaveSaga(saga2);
         }
-    }
-
-    public class SagaData : IContainSagaData
-    {
-        public Guid Id { get; set; }
-        public string Originator { get; set; }
-        public string OriginalMessageId { get; set; }
-
-        [Unique]
-        public string UniqueString { get; set; }
     }
 }

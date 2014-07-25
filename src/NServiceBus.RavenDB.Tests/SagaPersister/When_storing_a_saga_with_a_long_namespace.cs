@@ -1,39 +1,23 @@
-using System;
-using NServiceBus.RavenDB.Persistence;
-using NServiceBus.RavenDB.Persistence.SagaPersister;
-using NServiceBus.Saga;
-using NUnit.Framework;
-
-[TestFixture]
-public class When_storing_a_saga_with_a_long_namespace
+namespace NServiceBus.Core.Tests.Persistence.RavenDB.SagaPersister
 {
-    [Test]
-    public void Should_not_generate_a_to_long_unique_property_id()
+    using System;
+    using NUnit.Framework;
+
+    class When_storing_a_saga_with_a_long_namespace : Raven_saga_persistence_concern
     {
-        using (var store = DocumentStoreBuilder.Build())
+        [Test]
+        public void Should_not_generate_a_to_long_unique_property_id()
         {
-            var factory = new RavenSessionFactory(new StoreAccessor(store));
-            factory.ReleaseSession();
-            var persister = new RavenSagaPersister(factory);
             var uniqueString = Guid.NewGuid().ToString();
-            var saga = new SagaWithUniquePropertyAndALongNamespace
-                {
-                    Id = Guid.NewGuid(),
-                    UniqueString = uniqueString
-                };
-            persister.Save(saga);
-            factory.SaveChanges();
+            var saga1 = new SagaWithUniquePropertyAndALongNamespace
+                            {
+                                Id = Guid.NewGuid(),
+                                UniqueString = uniqueString
+                            };
+
+            SaveSaga(saga1);
+
+          
         }
-    }
-
-    public class SagaWithUniquePropertyAndALongNamespace : IContainSagaData
-    {
-        public Guid Id { get; set; }
-        public string Originator { get; set; }
-        public string OriginalMessageId { get; set; }
-
-        [Unique]
-        public string UniqueString { get; set; }
-
     }
 }

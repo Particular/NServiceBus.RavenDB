@@ -1,36 +1,20 @@
-﻿using System;
-using NServiceBus.RavenDB.Persistence;
-using NServiceBus.RavenDB.Persistence.SagaPersister;
-using NServiceBus.Saga;
-using NUnit.Framework;
-
-[TestFixture]
-public class Saga_with_unique_property_set_to_null 
+﻿namespace NServiceBus.Core.Tests.Persistence.RavenDB.SagaPersister
 {
-    [Test, ExpectedException(typeof(ArgumentNullException))]
-    public void should_throw_a_ArgumentNullException()
+    using System;
+    using NUnit.Framework;
+
+    class Saga_with_unique_property_set_to_null : Raven_saga_persistence_concern
     {
-        using (var store = DocumentStoreBuilder.Build())
+        [Test, ExpectedException(typeof(ArgumentNullException))]
+        public void should_throw_a_ArgumentNullException()
         {
             var saga1 = new SagaWithUniqueProperty
-                {
-                    Id = Guid.NewGuid(),
-                    UniqueString = null
-                };
+                            {
+                                Id = Guid.NewGuid(),
+                                UniqueString = null
+                            };
 
-            var factory = new RavenSessionFactory(new StoreAccessor(store));
-            var persister = new RavenSagaPersister(factory);
-            persister.Save(saga1);
-            factory.SaveChanges();
+            SaveSaga(saga1);        
         }
-    }
-    public class SagaWithUniqueProperty : IContainSagaData
-    {
-        public Guid Id { get; set; }
-        public string Originator { get; set; }
-        public string OriginalMessageId { get; set; }
-        [Unique]
-        public string UniqueString { get; set; }
-
     }
 }

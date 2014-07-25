@@ -1,0 +1,67 @@
+namespace NServiceBus.Core.Tests.Installers
+{
+    using System;
+    using NServiceBus.RavenDB.Persistence;
+    using NUnit.Framework;
+    using Raven.Client.Document;
+    using Raven.Client.Embedded;
+
+    [TestFixture]
+    public class RavenUserInstallerTests
+    {
+        [Test]
+        [Explicit("This will edit your current installed RavenDB")]
+        public void Integration()
+        {
+            using (var documentStore = new DocumentStore
+            {
+                Url = "http://localhost:8081",
+                DefaultDatabase = "Test"
+            })
+            {
+                documentStore.Initialize();
+
+                var identity = Environment.MachineName + @"\Test";
+                RavenUserInstaller.AddUserToDatabase(identity, documentStore);
+            }
+        }
+
+        [Test]
+        [Explicit("Cannot setup Windows Authentication without a valid commercial license.")]
+        public void EnsureUserIsAddedToWindowsSettings()
+        {
+            using (var documentStore = new EmbeddableDocumentStore
+            {
+                RunInMemory = true,
+            })
+            {
+                documentStore.Initialize();
+                RavenUserInstaller.AddUserToDatabase(@"domain\user", documentStore);
+                var systemCommands = documentStore
+                    .DatabaseCommands
+                    .ForSystemDatabase();
+                var existing = systemCommands.Get("Raven/Authorization/WindowsSettings");
+
+                var expected = @"{
+  ""RequiredGroups"": [],
+  ""RequiredUsers"": [
+    {
+      ""Name"": ""domain\\user"",
+      ""Enabled"": true,
+      ""Databases"": [
+        {
+          ""Admin"": true,
+          ""ReadOnly"": false,
+          ""TenantId"": ""<system>""
+        }
+      ]
+    }
+  ]
+}".Replace("\r", String.Empty);
+
+                var actual = existing.DataAsJson.ToString().Replace("\r", String.Empty);
+                Assert.AreEqual(expected, actual);
+            }
+        }
+    }
+}

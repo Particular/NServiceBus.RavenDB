@@ -1,28 +1,20 @@
-﻿using System.Linq;
-using System.Transactions;
-using NServiceBus;
-using NServiceBus.RavenDB.Persistence;
-using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
-using NServiceBus.Unicast.Subscriptions;
-using NUnit.Framework;
-
-[TestFixture]
-public class When_receiving_a_subscription_message 
+﻿namespace NServiceBus.Core.Tests.Persistence.RavenDB.SubscriptionStorage
 {
-    [Test]
-    public void A_subscription_entry_should_be_added_to_the_database()
+    using System.Linq;
+    using System.Transactions;
+    using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+    using NUnit.Framework;
+    using Unicast.Subscriptions;
+
+    [TestFixture]
+    public class When_receiving_a_subscription_message : WithRavenSubscriptionStorage
     {
-        var clientEndpoint = Address.Parse("TestEndpoint");
-
-        var messageTypes = new[]
-            {
-                new MessageType("MessageType1", "1.0.0.0"),
-                new MessageType("MessageType2", "1.0.0.0")
-            };
-
-        using (var store = DocumentStoreBuilder.Build())
+        [Test]
+        public void A_subscription_entry_should_be_added_to_the_database()
         {
-            var storage = new RavenSubscriptionStorage(new StoreAccessor(store));
+            var clientEndpoint = Address.Parse("TestEndpoint");
+
+            var messageTypes = new[] { new MessageType("MessageType1", "1.0.0.0"), new MessageType("MessageType2", "1.0.0.0") };
 
             using (var transaction = new TransactionScope())
             {

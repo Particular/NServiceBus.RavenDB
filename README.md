@@ -3,9 +3,6 @@ NServiceBus.RavenDB
 
 Persistence support for NServiceBus RavenDB
 
-NOT READY FOR PRODUCTION
-=======================
-
 ## Wait I thought RavenDB was embedded in NServiceBus?
 
 So a little history
@@ -30,31 +27,21 @@ This resolved all the issue with ILMerged but raised a different one:  **Compati
 
 ## So what is the intent of this library
 
-The idea with this library it to test the feasibility of shipping the RavenDB functionality for NServiceBus as a separate assembly. This will allow us to evolve the implementation more closely instep with the RavenDB release schedule. It should also reduce the need for version compatibility hacks.
+The idea is to be able to ship upgrades to this library without having to ship the core. This will allow us to evolve the implementation more closely instep with the RavenDB release schedule. It should also reduce the need for version compatibility hacks.
 
-### But isnt RavenDB still embedded in NServiceBus?
+### But isn't RavenDB still embedded in NServiceBus?
 
-Yes this is true however since Costura only loads on demand usage of this library will effectively suppress usage of the merged version 
+Yes, but with this library is now possible to load a different implementation of the RavenDB storages.
 
 ## How to use this library.
 
+```c#
+Configure.With()
+    .DefaultBuilder()
+    .RavenDBStorage() // Need to call this method
+    .UseRavenDBSubscriptionStorage() // Call this method to use Raven subscriptiion storage
+    .UseRavenDBTimeoutStorage() // Call this method to use Raven saga storage
+    .UseRavenDBGatewayDeduplicationStorage() // Call this method to use Raven dedupplication storage for the Gateway
+    .UseRavenDBGatewayStorage(); // Call this method to use the old Raven Gateway storage method
+
 ```
-var documentStore = new DocumentStore 
-{ 
-    Url = "http://myravendb.mydomain.com/" 
-};
-config.RavenDBPersistence(store, true);
-documentStore.Initialize();
-```
-
-## Where did the connection string config overloads go?
-
-The previous Raven configuration API supported several approaches to passing in a connection string. This API had several issue.
-
- * Suffered from too many choices.
- * Minor typos in an App.config file could cause connection string to be ignored
- * The strong typed `DocumentStore` overload does not apply the NServiceBus conventions and hence force a user to have internal knowledge of NServiceBus
- * NServiceBus took ownership of the client-server version compatibility checking. This should be a concern of the developer consuming the API
- * NServiceBus took ownership of verifying the connectivity to the server. This should be a concern of the developer consuming the API.
- 
-So now there is one configuration API that takes a `DocumentStore`.
