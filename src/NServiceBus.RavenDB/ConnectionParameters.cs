@@ -6,17 +6,17 @@
     public class ConnectionParameters
     {
         /// <summary>
-        /// The url of the Raven server
+        /// The url of the RavenDB server
         /// </summary>
         public string Url { get; set; }
         
         /// <summary>
-        /// The name of the database to use
+        /// The name of the database to use on the specified RavenDB server
         /// </summary>
         public string DatabaseName { get; set; }
         
         /// <summary>
-        /// The Raven api key if needed
+        /// The RavenDB API key if needed
         /// </summary>
         public string ApiKey { get; set; }
     }
