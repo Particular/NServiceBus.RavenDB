@@ -5,10 +5,8 @@
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
-    using Config.Conventions;
     using Logging;
     using NServiceBus.Persistence;
-    using Persistence;
     using Raven.Client;
     using Raven.Client.Document;
     using Raven.Json.Linq;
@@ -30,7 +28,7 @@
                     docStore.DefaultDatabase = settings.EndpointName();
                 }
                 ApplyRavenDBConventions(settings, docStore);
-                RavenUserInstaller.AddDocumentStore(docStore);
+
                 return docStore.Initialize();
             }
             return null;
@@ -46,8 +44,6 @@
             }
             
             ApplyRavenDBConventions(settings, docStore);
-            
-            RavenUserInstaller.AddDocumentStore(docStore);
             
             return docStore.Initialize();
         }
@@ -85,7 +81,7 @@
             }
         }
 
-        static readonly ILog Logger = LogManager.GetLogger(typeof(RavenDB));
+        static readonly ILog Logger = LogManager.GetLogger(typeof(RavenDBPersistence));
 
         static string GetFirstNonEmptyConnectionString(params string[] connectionStringNames)
         {
@@ -107,7 +103,7 @@
             var store = documentStore as DocumentStore;
             if (store == null) return;
 
-            var resourceManagerId = Address.Local + "-" + (settings.GetOrDefault<string>("EndpointVersion") ?? EndpointHelper.GetEndpointVersion());
+            var resourceManagerId = settings.Get<string>("NServiceBus.LocalAddress") + "-" + settings.Get<string>("EndpointVersion");
             store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
 
             bool suppressDistributedTransactions;

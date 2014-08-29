@@ -1,8 +1,8 @@
 ﻿namespace NServiceBus
 {
+    using NServiceBus.Configuration.AdvanceExtensibility;
     using Persistence;
     using Raven.Client;
-    using RavenDB.Persistence;
 
     /// <summary>
     /// Provides configuration options specific to the subscription storage
@@ -17,10 +17,9 @@
         /// <param name="cfg"></param>
         /// <param name="documentStore">The document store to use</param>
         /// <returns></returns>
-        public static PersistenceConfiguration UseDocumentStoreForSubscriptions(this PersistenceConfiguration cfg, IDocumentStore documentStore)
+        public static PersistenceExtentions<RavenDBPersistence> UseDocumentStoreForSubscriptions(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            cfg.Config.Settings.Set(SettingsKey, documentStore);
-            RavenUserInstaller.AddDocumentStore(documentStore);
+            cfg.GetSettings().Set(SettingsKey, documentStore);
             return cfg;
         }
     }

@@ -5,7 +5,7 @@ using Raven.Client.Document;
 
 public class ConfigureRavenDBPersistence
 {
-    public void Configure(Configure config)
+    public void Configure(BusConfiguration config)
     {
         var store = new DocumentStore
         {
@@ -15,10 +15,6 @@ public class ConfigureRavenDBPersistence
 
         store.Initialize();
 
-        config.UsePersistence<RavenDB>(c =>
-        {
-            c.DoNotSetupDatabasePermissions();
-            c.SetDefaultDocumentStore(store);
-        });
+        config.UsePersistence<RavenDBPersistence>().DoNotSetupDatabasePermissions().SetDefaultDocumentStore(store);
     }
 }

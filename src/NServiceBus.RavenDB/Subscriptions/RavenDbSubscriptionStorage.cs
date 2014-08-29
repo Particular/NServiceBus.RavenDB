@@ -38,7 +38,12 @@
             // This is required for DTC fix, and this requires RavenDB 2.5 build 2900 or above
             var remoteStorage = store as DocumentStore;
             if (remoteStorage != null)
+            {
                 remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
+            }
+
+            context.Container.ConfigureComponent<Installer>(DependencyLifecycle.InstancePerCall)
+                .ConfigureProperty(c => c.StoreToInstall, store);
 
             context.Container.ConfigureComponent<SubscriptionPersister>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(x => x.DocumentStore, store);

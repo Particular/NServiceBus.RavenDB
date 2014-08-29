@@ -43,8 +43,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="NServiceBus.Core">
-      <HintPath>..\packages\NServiceBus.5.0.0-beta0002\lib\net45\NServiceBus.Core.dll</HintPath>
+    <Reference Include="NServiceBus.Core, Version=5.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NServiceBus.5.0.0-beta0003\lib\net45\NServiceBus.Core.dll</HintPath>
     </Reference>
     <Reference Include="Raven.Abstractions">
       <HintPath>..\packages\RavenDB.Client.2.5.2907\lib\net45\Raven.Abstractions.dll</HintPath>
@@ -62,6 +63,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Gateway\GatewayMessage.cs" />
+    <Compile Include="Gateway\Installer.cs" />
     <Compile Include="Gateway\RavenDbTimeoutSettingsExtensions.cs" />
     <Compile Include="Gateway\RavenDbGatewayDeduplication.cs" />
     <Compile Include="Internal\BackwardsCompatibilityHelper.cs" />
@@ -71,13 +73,13 @@
     <Compile Include="ConnectionParameters.cs" />
     <Compile Include="Internal\LegacySettings.cs" />
     <Compile Include="RavenDbSettingsExtensions.cs" />
+    <Compile Include="SessionManagement\Installer.cs" />
     <Compile Include="SagaPersister\RavenDbSagaSettingsExtensions.cs" />
     <Compile Include="SessionManagement\ISessionProvider.cs" />
     <Compile Include="Gateway\RavenDeduplication.cs" />
     <Compile Include="Internal\NoOpLogManager.cs" />
     <Compile Include="Internal\SharedDocumentStore.cs" />
-    <Compile Include="RavenDB.cs" />
-    <Compile Include="RavenDBConfigurer.cs" />
+    <Compile Include="RavenDBPersistence.cs" />
     <Compile Include="SessionManagement\ProvidedSessionBehavior.cs" />
     <Compile Include="SessionManagement\OpenSessionBehavior.cs" />
     <Compile Include="SessionManagement\RavenDbStorageSession.cs" />
@@ -85,11 +87,13 @@
     <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />
     <Compile Include="SagaPersister\SagaPersister.cs" />
     <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />
+    <Compile Include="Subscriptions\Installer.cs" />
     <Compile Include="Subscriptions\MessageTypeConverter.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionSettingsExtensions.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionStorage.cs" />
     <Compile Include="Subscriptions\SubscriptionPersister.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
+    <Compile Include="Timeouts\Installer.cs" />
     <Compile Include="Timeouts\RavenDbTimeoutSettingsExtensions.cs" />
     <Compile Include="Timeouts\RavenDbTimeoutStorage.cs" />
     <Compile Include="Timeouts\TimeoutPersister.cs" />

@@ -1,10 +1,10 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Persistence;
     using RavenDB;
-    using RavenDB.Persistence;
     using RavenDB.SessionManagement;
-    using Persistence;
     using Raven.Client;
 
     /// <summary>
@@ -23,10 +23,9 @@
         /// <param name="cfg"></param>
         /// <param name="documentStore">Document store managed by me as a user</param>
         /// <returns></returns>
-        public static PersistenceConfiguration SetDefaultDocumentStore(this PersistenceConfiguration cfg, IDocumentStore documentStore)
+        public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            cfg.Config.Settings.Set(DocumentStoreSettingsKey, documentStore);
-            RavenUserInstaller.AddDocumentStore(documentStore);
+            cfg.GetSettings().Set(DocumentStoreSettingsKey, documentStore);
             return cfg;
         }
 
@@ -36,9 +35,9 @@
         /// <param name="cfg"></param>
         /// <param name="connectionParameters">Connection details</param>
         /// <returns></returns>
-        public static PersistenceConfiguration SetDefaultDocumentStore(this PersistenceConfiguration cfg, ConnectionParameters connectionParameters)
+        public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, ConnectionParameters connectionParameters)
         {
-            cfg.Config.Settings.Set(DefaultConnectionParameters, connectionParameters);
+            cfg.GetSettings().Set(DefaultConnectionParameters, connectionParameters);
             // This will be registered with RavenUserInstaller once we initialize the document store object internally
             return cfg;
         }
@@ -49,9 +48,9 @@
         /// <param name="cfg"></param>
         /// <param name="getSessionFunc">A func returning the session to be used</param>
         /// <returns></returns>
-        public static PersistenceConfiguration UseSharedSession(this PersistenceConfiguration cfg, Func<IDocumentSession> getSessionFunc)
+        public static PersistenceExtentions<RavenDBPersistence> UseSharedSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDocumentSession> getSessionFunc)
         {
-            cfg.Config.Settings.Set(SharedSessionSettingsKey, getSessionFunc);
+            cfg.GetSettings().Set(SharedSessionSettingsKey, getSessionFunc);
             return cfg;
         }
 
@@ -61,7 +60,7 @@
         /// <param name="cfg">The configuration object.</param>
         /// <param name="convention">The method referenced by a Func delegate for finding the database name for the specified message.</param>
         /// <returns>The configuration object.</returns>
-        public static PersistenceConfiguration SetMessageToDatabaseMappingConvention(this PersistenceConfiguration cfg, Func<IMessageContext, string> convention)
+        public static PersistenceExtentions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IMessageContext, string> convention)
         {
             OpenSessionBehavior.GetDatabaseName = convention;
             return cfg;
@@ -72,9 +71,9 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <returns></returns>
-        public static PersistenceConfiguration DoNotSetupDatabasePermissions(this PersistenceConfiguration cfg)
+        public static PersistenceExtentions<RavenDBPersistence> DoNotSetupDatabasePermissions(this PersistenceExtentions<RavenDBPersistence> cfg)
         {
-            cfg.Config.Settings.Set("RavenDB.DoNotSetupPermissions", true);
+            cfg.GetSettings().Set("RavenDB.DoNotSetupPermissions", true);
             return cfg;
         }
 
@@ -85,9 +84,9 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <returns></returns>
-        public static PersistenceConfiguration UseLegacySettings(this PersistenceConfiguration cfg)
+        public static PersistenceExtentions<RavenDBPersistence> UseLegacySettings(this PersistenceExtentions<RavenDBPersistence> cfg)
         {
-            cfg.Config.Settings.Set(UseLegacyRavenDbConfigs, true);
+            cfg.GetSettings().Set(UseLegacyRavenDbConfigs, true);
             return cfg;
         }
     }

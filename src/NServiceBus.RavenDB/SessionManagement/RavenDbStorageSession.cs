@@ -11,7 +11,7 @@
     {
         public RavenDbStorageSession()
         {
-            DependsOnAtLeastOne(typeof(RavenDbSagaStorage));
+            DependsOn<RavenDbSagaStorage>();
         }
 
         protected override void Setup(FeatureConfigurationContext context)
@@ -42,12 +42,17 @@
             // This is required for DTC fix, and this requires RavenDB 2.5 build 2900 or above
             var remoteStorage = store as DocumentStore;
             if (remoteStorage != null)
+            {
                 remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
+            }
 
             if (context.Settings.GetOrDefault<bool>(RavenDbSettingsExtensions.UseLegacyRavenDbConfigs))
             {
                 store.Conventions.FindTypeTagName = LegacySettings.LegacyFindTypeTagName;
             }
+
+            context.Container.ConfigureComponent<Installer>(DependencyLifecycle.InstancePerCall)
+                .ConfigureProperty(c => c.StoreToInstall, store);
 
             context.Container.ConfigureComponent<RavenSessionProvider>(DependencyLifecycle.InstancePerCall);
             context.Container.RegisterSingleton<IDocumentStoreWrapper>(new DocumentStoreWrapper {DocumentStore = store}); // TODO needs a better wiring

@@ -6,7 +6,6 @@ namespace NServiceBus.RavenDB.Persistence
     using System.Reflection;
     using Raven.Abstractions.Data;
     using Raven.Abstractions.Extensions;
-    using Raven.Client;
     using Raven.Client.Connection;
     using Raven.Client.Document;
     using Raven.Json.Linq;
@@ -17,24 +16,12 @@ namespace NServiceBus.RavenDB.Persistence
     /// <summary>
     /// Add the identity to the Raven users group 
     /// </summary>
-    class RavenUserInstaller : INeedToInstallSomething
+    abstract class RavenUserInstaller : INeedToInstallSomething
     {
         static readonly ILog logger = LogManager.GetLogger(typeof(RavenUserInstaller));
-        static List<DocumentStore> StoresToInstall { get; set; }
-
+        
+        public DocumentStore StoreToInstall { get; set; }
         public ReadOnlySettings Settings { get; set; }
-
-
-        static RavenUserInstaller()
-        {
-            StoresToInstall = new List<DocumentStore>();
-        }
-        public static void AddDocumentStore(IDocumentStore documentStore)
-        {
-            var store = documentStore as DocumentStore;
-            if (store != null)
-                StoresToInstall.Add(store);
-        }
 
         public void Install(string identity, Configure config)
         {
@@ -44,16 +31,13 @@ namespace NServiceBus.RavenDB.Persistence
                 return;
             }
 
-            foreach (var store in StoresToInstall)
+            try
             {
-                try
-                {
-                    AddUserToDatabase(identity, store);
-                }
-                catch (Exception exception)
-                {
-                    logger.Warn("Failed to add user to raven. Processing will continue", exception);
-                }
+                AddUserToDatabase(identity, StoreToInstall);
+            }
+            catch (Exception exception)
+            {
+                logger.Warn("Failed to add user to raven. Processing will continue", exception);
             }
         }
 
