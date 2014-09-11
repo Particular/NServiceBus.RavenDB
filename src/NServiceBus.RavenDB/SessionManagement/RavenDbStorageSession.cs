@@ -46,11 +46,6 @@
                 remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
             }
 
-            if (context.Settings.GetOrDefault<bool>(RavenDbSettingsExtensions.UseLegacyRavenDbConfigs))
-            {
-                store.Conventions.FindTypeTagName = LegacySettings.LegacyFindTypeTagName;
-            }
-
             context.Container.ConfigureComponent<Installer>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(c => c.StoreToInstall, store);
 

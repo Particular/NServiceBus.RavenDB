@@ -15,7 +15,6 @@
         internal const string DocumentStoreSettingsKey = "RavenDbDocumentStore";
         internal const string DefaultConnectionParameters = "RavenDbConnectionParameters";
         internal const string SharedSessionSettingsKey = "RavenDbSharedSession";
-        internal const string UseLegacyRavenDbConfigs = "RavenDB.UseLegacyConfigs";
 
         /// <summary>
         /// Configures the storages to use the given document store supplied
@@ -74,19 +73,6 @@
         public static PersistenceExtentions<RavenDBPersistence> DoNotSetupDatabasePermissions(this PersistenceExtentions<RavenDBPersistence> cfg)
         {
             cfg.GetSettings().Set("RavenDB.DoNotSetupPermissions", true);
-            return cfg;
-        }
-
-        /// <summary>
-        /// Use legacy NServiceBus configs (versions 3 and 4). Those configs are deprecated, off by default and are not
-        /// recommended for use. Only explicitly enable them during an upgrade process or if your system is known to
-        /// rely on any of them.
-        /// </summary>
-        /// <param name="cfg"></param>
-        /// <returns></returns>
-        public static PersistenceExtentions<RavenDBPersistence> UseLegacySettings(this PersistenceExtentions<RavenDBPersistence> cfg)
-        {
-            cfg.GetSettings().Set(UseLegacyRavenDbConfigs, true);
             return cfg;
         }
     }

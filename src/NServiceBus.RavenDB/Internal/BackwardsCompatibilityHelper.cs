@@ -1,7 +1,9 @@
 ﻿namespace NServiceBus.RavenDB.Internal
 {
+    using System;
     using NServiceBus.Gateway.Deduplication;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+    using NServiceBus.Saga;
     using NServiceBus.TimeoutPersisters.RavenDB;
     using Raven.Abstractions.Data;
     using Raven.Client;
@@ -30,6 +32,23 @@
 
                 return clrtype;
             };
+        }
+
+        public static string LegacyFindTypeTagName(Type t)
+        {
+            var tagName = t.Name;
+
+            if (IsASagaEntity(t))
+            {
+                tagName = tagName.Replace("Data", String.Empty);
+            }
+
+            return tagName;
+        }
+
+        static bool IsASagaEntity(Type t)
+        {
+            return t != null && typeof(IContainSagaData).IsAssignableFrom(t);
         }
     }
 }

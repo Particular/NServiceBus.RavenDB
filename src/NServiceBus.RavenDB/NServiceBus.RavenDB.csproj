@@ -71,7 +71,6 @@
     <Compile Include="Internal\DocumentStoreWrapper.cs" />
     <Compile Include="Internal\Helpers.cs" />
     <Compile Include="ConnectionParameters.cs" />
-    <Compile Include="Internal\LegacySettings.cs" />
     <Compile Include="RavenDbSettingsExtensions.cs" />
     <Compile Include="SessionManagement\Installer.cs" />
     <Compile Include="SagaPersister\RavenDbSagaSettingsExtensions.cs" />

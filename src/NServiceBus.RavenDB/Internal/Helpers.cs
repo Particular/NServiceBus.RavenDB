@@ -100,8 +100,13 @@
         /// </summary>
         public static void ApplyRavenDBConventions(ReadOnlySettings settings, IDocumentStore documentStore)
         {
+            documentStore.Conventions.FindTypeTagName = BackwardsCompatibilityHelper.LegacyFindTypeTagName;
+
             var store = documentStore as DocumentStore;
-            if (store == null) return;
+            if (store == null)
+            {
+                return;
+            }
 
             var resourceManagerId = settings.Get<string>("NServiceBus.LocalAddress") + "-" + settings.Get<string>("EndpointVersion");
             store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
