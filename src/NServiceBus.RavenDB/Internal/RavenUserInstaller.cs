@@ -21,10 +21,16 @@ namespace NServiceBus.RavenDB.Persistence
         static readonly ILog logger = LogManager.GetLogger(typeof(RavenUserInstaller));
         
         public DocumentStore StoreToInstall { get; set; }
+
         public ReadOnlySettings Settings { get; set; }
 
         public void Install(string identity, Configure config)
         {
+            if (StoreToInstall == null)
+            {
+                return;
+            }
+
             if (Settings.GetOrDefault<bool>("RavenDB.DoNotSetupPermissions"))
             {
                 logger.Info("User permissions setup has been disabled. Please make sure the correct access rights has been granted in RavenDB manually");
