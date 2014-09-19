@@ -5,7 +5,7 @@ Persistence support for NServiceBus RavenDB
 
 ## How to use this library
 
-After addig a reference to it from your project, simply specify RavenDB to be used for persistence, and set a RavenDB connection string in your `app.config` as `NServiceBus/Persistence/RavenDB` or pass the conection parameters like this:
+After adding a reference to it from your project, simply specify RavenDB to be used for persistence, and set a RavenDB connection string in your `app.config` as `NServiceBus/Persistence/RavenDB` or pass the conection parameters like this:
 
 ```csharp
 configure.UsePersistence<RavenDB>(_ => _.SetDefaultDocumentStore(new ConnectionParameters
