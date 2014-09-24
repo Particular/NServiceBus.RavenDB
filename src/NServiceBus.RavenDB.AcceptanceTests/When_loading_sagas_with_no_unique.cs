@@ -19,21 +19,13 @@
                 {
                     SomeId = Guid.NewGuid()
                 })))
-                .Done(c =>
-                {
-                    if (!string.IsNullOrEmpty(c.Exceptions))
-                    {
-                        context.ExceptionThrown = c.Exceptions;
-                        return true;
-                    }
-
-                    return false;
-                })
+                .Done(c =>c.Exceptions != null)
                 .AllowExceptions()
                 .Run();
 
-            Assert.NotNull(context.ExceptionThrown,"An exception should have been thrown");
-            Assert.True(context.ExceptionThrown.Contains(" Please add a [Unique] attribute to the 'SomeId' property on your 'TestSagaData'"));
+            Assert.False(context.SagaStarted, "Saga should not have started");
+            Assert.NotNull(context.Exceptions,"An exception should have been thrown");
+            Assert.True(context.Exceptions.Contains(" Please add a [Unique] attribute to the 'SomeId' property on your 'TestSagaData'"));
         }
 
         [Test]
@@ -69,7 +61,6 @@
         public class Context : ScenarioContext
         {
             public bool SagaStarted { get; set; }
-            public string ExceptionThrown { get; set; }
         }
 
         public class SagaEndpoint : EndpointConfigurationBuilder
@@ -84,11 +75,13 @@
                 public Context Context { get; set; }
                 public void Handle(StartSagaMessage message)
                 {
+                    Context.AddTrace("Saga started by StartSagaMessage");
                     Context.SagaStarted = true;
                 }
 
                 public void Handle(StartSagaMessageWithNoMapping message)
                 {
+                    Context.AddTrace("Saga started by StartSagaMessageWithNoMapping");
                     Context.SagaStarted = true;
                 }
 
