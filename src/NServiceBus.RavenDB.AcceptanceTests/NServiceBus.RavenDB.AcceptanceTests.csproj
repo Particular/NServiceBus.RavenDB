@@ -84,7 +84,7 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Basic\When_using_callbacks_from_older_versions.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Basic\When_using_callbacks_in_a_scaleout.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Config\When_a_config_override_is_found.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Config\When_IWantToRunWhenBusStartsAndStops_Start_throws.cs" />
+    <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Config\When_throw_on_startup.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Config\When__startup_is_complete.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\CriticalError\When_registering_a_custom_criticalErrorHandler.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\DataBus\When_sending_databus_properties.cs" />

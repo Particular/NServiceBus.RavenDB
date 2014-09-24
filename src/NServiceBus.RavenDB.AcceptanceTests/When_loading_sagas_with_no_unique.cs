@@ -3,6 +3,7 @@
     using System;
     using EndpointTemplates;
     using AcceptanceTesting;
+    using NServiceBus.AcceptanceTesting.Support;
     using NServiceBus.Persistence;
     using NUnit.Framework;
     using Saga;
@@ -21,7 +22,7 @@
                 })))
                 .Done(c =>c.Exceptions != null)
                 .AllowExceptions()
-                .Run();
+                .Run(new RunSettings{UseSeparateAppDomains = true});
 
             Assert.False(context.SagaStarted, "Saga should not have started");
             Assert.NotNull(context.Exceptions,"An exception should have been thrown");
