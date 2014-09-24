@@ -19,21 +19,13 @@
                 {
                     SomeId = Guid.NewGuid()
                 })))
-                .Done(c =>
-                {
-                    if (!string.IsNullOrEmpty(c.Exceptions))
-                    {
-                        context.ExceptionThrown = c.Exceptions;
-                        return true;
-                    }
-
-                    return false;
-                })
+                .Done(c =>c.Exceptions != null)
                 .AllowExceptions()
                 .Run();
 
-            Assert.NotNull(context.ExceptionThrown,"An exception should have been thrown");
-            Assert.True(context.ExceptionThrown.Contains(" Please add a [Unique] attribute to the 'SomeId' property on your 'TestSagaData'"));
+            Assert.False(context.SagaStarted, "Saga should not have started");
+            Assert.NotNull(context.Exceptions,"An exception should have been thrown");
+            Assert.True(context.Exceptions.Contains(" Please add a [Unique] attribute to the 'SomeId' property on your 'TestSagaData'"));
         }
 
         [Test]
@@ -55,8 +47,7 @@
             var context = new Context();
 
             Scenario.Define(context)
-                .WithEndpoint<SagaEndpoint>(b => b.CustomConfig(c => c.UsePersistence<RavenDBPersistence>().AllowStaleSagaReads())
-                    .Given(bus => bus.SendLocal(new StartSagaMessage
+                .WithEndpoint<SagaEndpointWithOptIn>(b=>b.Given(bus => bus.SendLocal(new StartSagaMessage
                 {
                     SomeId = Guid.NewGuid()
                 })))
@@ -69,7 +60,6 @@
         public class Context : ScenarioContext
         {
             public bool SagaStarted { get; set; }
-            public string ExceptionThrown { get; set; }
         }
 
         public class SagaEndpoint : EndpointConfigurationBuilder
@@ -84,11 +74,13 @@
                 public Context Context { get; set; }
                 public void Handle(StartSagaMessage message)
                 {
+                    Context.AddTrace("Saga started by StartSagaMessage");
                     Context.SagaStarted = true;
                 }
 
                 public void Handle(StartSagaMessageWithNoMapping message)
                 {
+                    Context.AddTrace("Saga started by StartSagaMessageWithNoMapping");
                     Context.SagaStarted = true;
                 }
 
@@ -96,6 +88,41 @@
                 {
                     mapper.ConfigureMapping<StartSagaMessage>(m => m.SomeId)
                         .ToSaga(s=>s.SomeId);
+                }
+
+            }
+
+            public class TestSagaData : IContainSagaData
+            {
+                public virtual Guid Id { get; set; }
+                public virtual string Originator { get; set; }
+                public virtual string OriginalMessageId { get; set; }
+
+                public virtual Guid SomeId { get; set; }
+            }
+        }
+
+
+        public class SagaEndpointWithOptIn : EndpointConfigurationBuilder
+        {
+            public SagaEndpointWithOptIn()
+            {
+                EndpointSetup<DefaultServer>(c => c.UsePersistence<RavenDBPersistence>().AllowStaleSagaReads());
+            }
+
+            public class TestSaga : Saga<TestSagaData>, IAmStartedByMessages<StartSagaMessage>
+            {
+                public Context Context { get; set; }
+                public void Handle(StartSagaMessage message)
+                {
+                    Context.SagaStarted = true;
+                }
+
+         
+                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<TestSagaData> mapper)
+                {
+                    mapper.ConfigureMapping<StartSagaMessage>(m => m.SomeId)
+                        .ToSaga(s => s.SomeId);
                 }
 
             }
