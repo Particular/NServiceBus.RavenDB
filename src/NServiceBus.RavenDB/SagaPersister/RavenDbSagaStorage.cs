@@ -22,7 +22,8 @@
         {
             // TODO here would be the place to wire up the ISagaFinder extension point
 
-            context.Container.ConfigureComponent<SagaPersister>(DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent<SagaPersister>(DependencyLifecycle.InstancePerCall)
+               .ConfigureProperty(p=>p.AllowUnsafeLoads,context.Settings.GetOrDefault<bool>(RavenDbSagaSettingsExtensions.AllowStaleSagaReadsKey)) ;
         }
     }
 }
