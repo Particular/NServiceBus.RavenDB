@@ -16,9 +16,9 @@ namespace NServiceBus.AcceptanceTests.Sagas
             var context = new Context();
 
             Scenario.Define(context)
-                    .WithEndpoint<Endpoint>(b => b.Given(bus => bus.SendLocal(new InitiateRequestingSaga())))
+                    .WithEndpoint<SagaEndpoint>(b => b.Given(bus => bus.SendLocal(new InitiateRequestingSaga())))
                     .Done(c => c.DidRequestingSagaGetTheResponse)
-                    .Run(new RunSettings { UseSeparateAppDomains = true });
+                    .Run();
 
             Assert.True(context.DidRequestingSagaGetTheResponse);
         }
@@ -32,9 +32,9 @@ namespace NServiceBus.AcceptanceTests.Sagas
             };
 
             Scenario.Define(context)
-                    .WithEndpoint<Endpoint>(b => b.Given(bus => bus.SendLocal(new InitiateRequestingSaga())))
+                    .WithEndpoint<SagaEndpoint>(b => b.Given(bus => bus.SendLocal(new InitiateRequestingSaga())))
                     .Done(c => c.DidRequestingSagaGetTheResponse)
-                    .Run(new RunSettings { UseSeparateAppDomains = true, TestExecutionTimeout = TimeSpan.FromSeconds(15) });
+                    .Run(new RunSettings { TestExecutionTimeout = TimeSpan.FromSeconds(15) });
 
             Assert.True(context.DidRequestingSagaGetTheResponse);
         }
@@ -49,9 +49,9 @@ namespace NServiceBus.AcceptanceTests.Sagas
             };
 
             Scenario.Define(context)
-                    .WithEndpoint<Endpoint>(b => b.Given(bus => bus.SendLocal(new InitiateRequestingSaga())))
+                    .WithEndpoint<SagaEndpoint>(b => b.Given(bus => bus.SendLocal(new InitiateRequestingSaga())))
                     .Done(c => c.DidRequestingSagaGetTheResponse)
-                    .Run(new RunSettings { UseSeparateAppDomains = true, TestExecutionTimeout = TimeSpan.FromSeconds(15) });
+                    .Run(new RunSettings { TestExecutionTimeout = TimeSpan.FromSeconds(15) });
 
             Assert.True(context.DidRequestingSagaGetTheResponse);
         }
@@ -63,10 +63,10 @@ namespace NServiceBus.AcceptanceTests.Sagas
             public bool ReplyFromNonInitiatingHandler { get; set; }
         }
 
-        public class Endpoint : EndpointConfigurationBuilder
+        public class SagaEndpoint : EndpointConfigurationBuilder
         {
 
-            public Endpoint()
+            public SagaEndpoint()
             {
                 EndpointSetup<DefaultServer>();
             }
