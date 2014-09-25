@@ -28,7 +28,7 @@
 
             var store =
                 // Try getting a document store object specific to this Feature that user may have wired in
-                context.Settings.GetOrDefault<IDocumentStore>(RavenDbSagaSettingsExtensions.SettingsKey)
+                context.Settings.GetOrDefault<IDocumentStore>(RavenDbSagaSettingsExtensions.DocumentStoreSettingsKey)
                 // Init up a new DocumentStore based on a connection string specific to this feature
                 ?? Helpers.CreateDocumentStoreByConnectionStringName(context.Settings, "NServiceBus/Persistence/RavenDB/Saga")
                 // Trying pulling a shared DocumentStore set by the user or other Feature

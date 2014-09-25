@@ -65,11 +65,21 @@ namespace NServiceBus.SagaPersisters.RavenDB
         {
             if (IsUniqueProperty<T>(property))
                 return GetByUniqueProperty<T>(property, value);
+            
+            if (!AllowUnsafeLoads)
+            {
+                var message = string.Format("Correlating on saga properties not marked as unique is not safe due to the high risk for stale results. Please add a [Unique] attribute to the '{0}' property on your '{1}' saga data class. If you still want to allow this please add .UsePersistence<RavenDBPersistence>().AllowStaleSagaReads() to your config",
+                    property,
+                    typeof(T).Name);
+                throw new Exception(message);
+            }
 
             return sessionProvider.Session.Advanced.LuceneQuery<T>()
                     .WhereEquals(property, value)
                     .FirstOrDefault();
         }
+
+        public bool AllowUnsafeLoads { get; set; }
 
         public void Complete(IContainSagaData saga)
         {
