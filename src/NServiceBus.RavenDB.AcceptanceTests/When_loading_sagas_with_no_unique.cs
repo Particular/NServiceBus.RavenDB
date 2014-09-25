@@ -19,7 +19,7 @@
                 {
                     SomeId = Guid.NewGuid()
                 })))
-                .Done(c =>c.Exceptions != null)
+                .Done(c =>!string.IsNullOrEmpty(c.Exceptions))
                 .AllowExceptions()
                 .Run();
 
