@@ -3,7 +3,7 @@
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>NServiceBus.RavenDB</id>
     <title>NServiceBus RavenDB</title>
-    <version>0.0.0.0</version>
+    <version>$version$</version>
     <authors>NServiceBus Ltd</authors>
     <owners>NServiceBus Ltd</owners>
     <licenseUrl>http://particular.net/LicenseAgreement</licenseUrl>
@@ -15,11 +15,11 @@
     <copyright>Copyright 2010-2014 NServiceBus. All rights reserved</copyright>
     <tags>nservicebus servicebus msmq cqrs publish subscribe ravendb</tags>
     <dependencies>
-	  <dependency id="NServiceBus" version="[4.1.0, 5.0.0)" />
-	  <dependency id="RavenDB.Client" version="[2.5.2908, 3.0.0)" />
+      <dependency id="NServiceBus" version="[5.0.0-beta0004, 6.0.0)" />
+      <dependency id="RavenDB.Client"  version="[2.5.2907, 3.0.0)" />
     </dependencies>
   </metadata>
   <files>
-    <file src="..\..\binaries\NServiceBus.RavenDB.???" target="lib\net40" />
+    <file src="..\..\binaries\NServiceBus.RavenDB.???" target="lib\net45" />
   </files>
 </package>

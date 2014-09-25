@@ -1,18 +1,19 @@
-namespace NServiceBus.RavenDB.Gateway.Persistence
+﻿namespace NServiceBus.Gateway.Deduplication
 {
     using System;
-    using System.Collections.Generic;
 
-    class GatewayMessage
+    /// <summary>
+    /// The Gateway message
+    /// </summary>
+    public class GatewayMessage
     {
-        public IDictionary<string, string> Headers { get; set; }
-
-        public DateTime TimeReceived { get; set; }
-
+        /// <summary>
+        /// Id of this message.
+        /// </summary>
         public string Id { get; set; }
-
-        public byte[] OriginalMessage { get; set; }
-
-        public bool Acknowledged { get; set; }
+        /// <summary>
+        /// The time at which the message was received.
+        /// </summary>
+        public DateTime TimeReceived { get; set; }
     }
 }

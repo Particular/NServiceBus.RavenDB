@@ -2,22 +2,16 @@
 {
     using System;
     using NServiceBus.Gateway.Deduplication;
-    using NServiceBus.RavenDB.Persistence;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
 
     class RavenDeduplication : IDeduplicateMessages
     {
-        IDocumentStore store;
-
-        public RavenDeduplication(StoreAccessor storeAccessor)
-        {
-            store = storeAccessor.Store;
-        }
+        public IDocumentStore DocumentStore { get; set; }
 
         public bool DeduplicateMessage(string clientId, DateTime timeReceived)
         {
-            using (var session = store.OpenSession())
+            using (var session = DocumentStore.OpenSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
                 session.Advanced.AllowNonAuthoritativeInformation = false;
@@ -45,6 +39,5 @@
         {
             return clientId.Replace("\\", "_");
         }
-
     }
 }

@@ -1,74 +1,88 @@
-﻿namespace NServiceBus.Core.Tests.Timeout
+﻿using System;
+using System.Collections.Generic;
+
+namespace NServiceBus.RavenDB.Tests.Timeouts
 {
-    using System;
-    using System.Collections.Generic;
-    using NServiceBus.Persistence.InMemory.TimeoutPersister;
-    using NServiceBus.Persistence.Raven;
-    using NServiceBus.Persistence.Raven.TimeoutPersister;
-    using NServiceBus.Timeout.Core;
     using NUnit.Framework;
-    using Raven.Client;
-    using Raven.Client.Document;
-    using Raven.Client.Embedded;
+    using Support;
+    using TimeoutPersisters.RavenDB;
+    using TimeoutData = Timeout.Core.TimeoutData;
+    using Timeout = TimeoutPersisters.RavenDB.TimeoutData;
 
     [TestFixture]
-    public class When_removing_timeouts_from_the_storage_with_raven : When_removing_timeouts_from_the_storage
+    [Ignore("These tests currently operate under the assumption TimeoutData.Id gets assigned by the persistence layer; need to revisit this")]
+    class When_removing_timeouts_from_the_storage:RavenTestBase
     {
-        private IDocumentStore store;
-
-        protected override IPersistTimeouts CreateTimeoutPersister()
+        [Test]
+        public void Should_return_the_correct_headers()
         {
-            store = new EmbeddableDocumentStore {RunInMemory = true};
-            //store = new DocumentStore { Url = "http://localhost:8081", DefaultDatabase = "TempTest" };
-            store.Conventions.DefaultQueryingConsistency = ConsistencyOptions.AlwaysWaitForNonStaleResultsAsOfLastWrite;
-            store.Conventions.MaxNumberOfRequestsPerSession = 10;
-            store.Initialize();
+            var persister = new TimeoutPersister
+            {
+                DocumentStore = store,
+                EndpointName = "MyTestEndpoint",
+            };
 
-            return new RavenTimeoutPersistence(new StoreAccessor(store));
-        }
+            var headers = new Dictionary<string, string>
+                          {
+                              {"Bar", "34234"},
+                              {"Foo", "aString1"},
+                              {"Super", "aString2"}
+                          };
 
-        [TearDown]
-        public void Cleanup()
-        {
-            store.Dispose();
-        }
-    }
+            var timeout = new TimeoutData
+            {
+                Time = DateTime.UtcNow.AddHours(-1),
+                Destination = new Address("timeouts", RuntimeEnvironment.MachineName),
+                SagaId = Guid.NewGuid(),
+                State = new byte[] { 1, 1, 133, 200 },
+                Headers = headers,
+                OwningTimeoutManager = "MyTestEndpoint",
+            };
+            persister.Add(timeout);
 
-    [TestFixture]
-    public class When_removing_timeouts_from_the_storage_with_inMemory : When_removing_timeouts_from_the_storage
-    {
-        protected override IPersistTimeouts CreateTimeoutPersister()
-        {
-            return new InMemoryTimeoutPersistence();
-        }
-    }
+            TimeoutData timeoutData;
+            persister.TryRemove(timeout.Id, out timeoutData);
 
-    public abstract class When_removing_timeouts_from_the_storage
-    {
-        protected IPersistTimeouts persister;
-
-        protected abstract IPersistTimeouts CreateTimeoutPersister();
-
-        [SetUp]
-        public void Setup()
-        {
-            Address.InitializeLocalAddress("MyEndpoint");
-
-            Configure.GetEndpointNameAction = () => "MyEndpoint";
-
-            persister = CreateTimeoutPersister();
+            CollectionAssert.AreEqual(headers, timeoutData.Headers);
         }
 
         [Test]
         public void Should_remove_timeouts_by_id()
         {
-            var t1 = new TimeoutData {Id = "1", Time = DateTime.UtcNow.AddHours(-1)};
-            persister.Add(t1);
+            new TimeoutsIndex().Execute(store);
 
-            var t2 = new TimeoutData {Id = "2", Time = DateTime.UtcNow.AddHours(-1)};
+            var persister = new TimeoutPersister
+            {
+                DocumentStore = store,
+                EndpointName = "MyTestEndpoint",
+            };
+
+            var t1 = new TimeoutData
+            {
+                Time = DateTime.Now.AddYears(-1),
+                OwningTimeoutManager = "MyTestEndpoint",
+                Headers = new Dictionary<string, string>
+                                   {
+                                       {"Header1", "Value1"}
+                                   }
+            };
+            var t2 = new TimeoutData
+            {
+                Time = DateTime.Now.AddYears(-1),
+                OwningTimeoutManager = "MyTestEndpoint",
+                Headers = new Dictionary<string, string>
+                                   {
+                                       {"Header1", "Value1"}
+                                   }
+            };
+
+            persister.Add(t1);
             persister.Add(t2);
 
-            var timeouts = GetNextChunk();
+            WaitForIndexing(store);
+
+            DateTime nextTimeToRunQuery;
+            var timeouts = persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
 
             foreach (var timeout in timeouts)
             {
@@ -76,13 +90,60 @@
                 persister.TryRemove(timeout.Item1, out timeoutData);
             }
 
-            Assert.AreEqual(0, GetNextChunk().Count);
+            using (var session = store.OpenSession())
+            {
+                Assert.Null(session.Load<Timeout>(new Guid(t1.Id)));
+                Assert.Null(session.Load<Timeout>(new Guid(t2.Id)));
+            }
         }
 
-        protected List<Tuple<string, DateTime>> GetNextChunk()
+        [Test]
+        public void Should_remove_timeouts_by_sagaid()
         {
-            DateTime nextTimeToRunQuery;
-            return persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
+            new TimeoutsIndex().Execute(store);
+
+            var persister = new TimeoutPersister
+            {
+                DocumentStore = store,
+                EndpointName = "MyTestEndpoint",
+            };
+
+            var sagaId1 = Guid.NewGuid();
+            var sagaId2 = Guid.NewGuid();
+            var t1 = new TimeoutData
+            {
+                SagaId = sagaId1,
+                Time = DateTime.Now.AddYears(1),
+                OwningTimeoutManager = "MyTestEndpoint",
+                Headers = new Dictionary<string, string>
+                                   {
+                                       {"Header1", "Value1"}
+                                   }
+            };
+            var t2 = new TimeoutData
+            {
+                SagaId = sagaId2,
+                Time = DateTime.Now.AddYears(1),
+                OwningTimeoutManager = "MyTestEndpoint",
+                Headers = new Dictionary<string, string>
+                                   {
+                                       {"Header1", "Value1"}
+                                   }
+            };
+
+            persister.Add(t1);
+            persister.Add(t2);
+
+            WaitForIndexing(store);
+
+            persister.RemoveTimeoutBy(sagaId1);
+            persister.RemoveTimeoutBy(sagaId2);
+
+            using (var session = store.OpenSession())
+            {
+                Assert.Null(session.Load<Timeout>(new Guid(t1.Id)));
+                Assert.Null(session.Load<Timeout>(new Guid(t2.Id)));
+            }
         }
     }
 }

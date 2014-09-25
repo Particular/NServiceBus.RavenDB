@@ -1,20 +1,36 @@
-﻿namespace NServiceBus.Core.Tests.Persistence.RavenDB.SagaPersister
-{
-    using System;
-    using NUnit.Framework;
+﻿using System;
+using NServiceBus.RavenDB.Tests;
+using NServiceBus.Saga;
+using NServiceBus.SagaPersisters.RavenDB;
+using NUnit.Framework;
 
-    class Saga_with_unique_property_set_to_null : Raven_saga_persistence_concern
+[TestFixture]
+public class Saga_with_unique_property_set_to_null 
+{
+    [Test, ExpectedException(typeof(ArgumentNullException))]
+    public void should_throw_a_ArgumentNullException()
     {
-        [Test, ExpectedException(typeof(ArgumentNullException))]
-        public void should_throw_a_ArgumentNullException()
+        using (var store = DocumentStoreBuilder.Build())
         {
             var saga1 = new SagaWithUniqueProperty
-                            {
-                                Id = Guid.NewGuid(),
-                                UniqueString = null
-                            };
+                {
+                    Id = Guid.NewGuid(),
+                    UniqueString = null
+                };
 
-            SaveSaga(saga1);        
+            var factory = new RavenSessionFactory(store);
+            var persister = new SagaPersister(factory);
+            persister.Save(saga1);
+            factory.SaveChanges();
         }
+    }
+    public class SagaWithUniqueProperty : IContainSagaData
+    {
+        public Guid Id { get; set; }
+        public string Originator { get; set; }
+        public string OriginalMessageId { get; set; }
+        [Unique]
+        public string UniqueString { get; set; }
+
     }
 }
