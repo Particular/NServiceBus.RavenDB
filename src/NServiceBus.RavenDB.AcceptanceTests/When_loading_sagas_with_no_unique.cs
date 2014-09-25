@@ -39,7 +39,7 @@
             Assert.True(context.Exceptions.Contains(" Please add a [Unique] attribute to the 'SomeId' property on your 'TestSagaData'"));
         }
 
-        [Test,Explicit("For now")]
+        [Test]
         public void Should_not_blow_up_if_there_is_no_mapping()
         {
             var context = new Context();
