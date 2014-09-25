@@ -70,10 +70,6 @@
 
         public class Context : ScenarioContext
         {
-            public Context()
-            {
-                SagaStarted = false;
-            }
             public bool SagaStarted { get; set; }
         }
 
