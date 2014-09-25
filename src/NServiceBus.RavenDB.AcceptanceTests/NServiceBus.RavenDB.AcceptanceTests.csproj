@@ -147,7 +147,7 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Sagas\When_receiving_that_should_start_a_saga.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Sagas\When_replies_to_message_published_by_a_saga.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Sagas\When_saga_has_a_non_empty_constructor.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Sagas\When_saga_is_mapped_to_complex_expression.cs" />
+    <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Sagas\When_saga_is_mapped_to_complex_expr.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Sagas\When_sending_from_a_saga_handle.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Sagas\When_sending_from_a_saga_timeout.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.0.0\Sagas\When_started_by_base_event_from_other_saga.cs" />
