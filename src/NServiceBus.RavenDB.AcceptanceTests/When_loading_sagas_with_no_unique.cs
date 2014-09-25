@@ -9,7 +9,7 @@
 
     public class When_loading_sagas_with_no_unique : NServiceBusAcceptanceTest
     {
-        [Test]
+        [Test,Ignore("Flaky, issue raised")]
         public void Should_blow_up()
         {
             var context = new Context();
