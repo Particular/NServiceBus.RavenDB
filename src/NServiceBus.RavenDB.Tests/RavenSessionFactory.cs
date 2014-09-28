@@ -1,6 +1,6 @@
 ﻿namespace NServiceBus.RavenDB.Tests
 {
-    using Persistence;
+    using NServiceBus.RavenDB.Persistence;
     using Raven.Client;
 
     class RavenSessionFactory : ISessionProvider
