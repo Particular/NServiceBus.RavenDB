@@ -32,6 +32,7 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
                 .OrderBy(t => t.Time)
                 .Where(
                     t =>
+						t.OwningTimeoutManager == null ||
                         t.OwningTimeoutManager == String.Empty ||
                         t.OwningTimeoutManager == Configure.EndpointName);
         }
