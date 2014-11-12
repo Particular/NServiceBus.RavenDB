@@ -15,6 +15,6 @@ public class ConfigureRavenDBPersistence
 
         store.Initialize();
 
-        config.UsePersistence<RavenDBPersistence>().DoNotSetupDatabasePermissions().SetDefaultDocumentStore(store);
+        config.UsePersistence<RavenDBPersistence>().DoNotSetupDatabasePermissions().SetDefaultDocumentStore(store).AllowStaleSagaReads();
     }
 }
