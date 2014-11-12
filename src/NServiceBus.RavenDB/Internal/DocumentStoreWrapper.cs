@@ -4,7 +4,17 @@
 
     class DocumentStoreWrapper : IDocumentStoreWrapper
     {
-        public IDocumentStore DocumentStore { get; set; }
+        readonly IDocumentStore documentStore;
+
+        public DocumentStoreWrapper(IDocumentStore documentStore)
+        {
+            this.documentStore = documentStore;
+        }
+
+        public IDocumentStore DocumentStore
+        {
+            get { return documentStore; }
+        }
     }
 
     interface IDocumentStoreWrapper
