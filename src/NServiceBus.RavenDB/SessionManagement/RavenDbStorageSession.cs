@@ -50,7 +50,7 @@
                 .ConfigureProperty(c => c.StoreToInstall, store);
 
             context.Container.ConfigureComponent<RavenSessionProvider>(DependencyLifecycle.InstancePerCall);
-            context.Container.RegisterSingleton<IDocumentStoreWrapper>(new DocumentStoreWrapper {DocumentStore = store}); // TODO needs a better wiring
+            context.Container.RegisterSingleton<IDocumentStoreWrapper>(new DocumentStoreWrapper(store));
             context.Pipeline.Register<OpenSessionBehavior.Registration>();
         }
     }
