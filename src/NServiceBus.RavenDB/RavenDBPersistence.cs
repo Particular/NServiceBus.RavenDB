@@ -2,6 +2,7 @@
 {
     using NServiceBus.Features;
     using NServiceBus.RavenDB;
+    using NServiceBus.RavenDB.Outbox;
     using NServiceBus.RavenDB.SessionManagement;
     using RavenLogManager = Raven.Abstractions.Logging.LogManager;
 
@@ -27,6 +28,7 @@
             Supports(Storage.Timeouts, s => s.EnableFeatureByDefault<RavenDbTimeoutStorage>());
             Supports(Storage.Sagas, s => s.EnableFeatureByDefault<RavenDbSagaStorage>());
             Supports(Storage.Subscriptions, s => s.EnableFeatureByDefault<RavenDbSubscriptionStorage>());
+            Supports(Storage.Outbox, s => s.EnableFeatureByDefault<RavenDbOutboxStorage>());
         }
     }
 }
