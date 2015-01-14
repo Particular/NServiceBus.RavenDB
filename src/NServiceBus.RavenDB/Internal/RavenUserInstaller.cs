@@ -3,6 +3,7 @@ namespace NServiceBus.RavenDB.Persistence
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Reflection;
     using Raven.Abstractions.Data;
     using Raven.Abstractions.Extensions;
@@ -51,7 +52,14 @@ namespace NServiceBus.RavenDB.Persistence
         {
             var database = documentStore.DefaultDatabase ?? "<system>";
 
-            logger.InfoFormat(string.Format("Adding user '{0}' to raven. Instance:'{1}', Database:'{2}'.", identity, documentStore.Url, database));
+            var credentials = documentStore.Credentials as NetworkCredential;
+            if (credentials != null && !string.IsNullOrWhiteSpace(credentials.UserName) && !string.IsNullOrWhiteSpace(credentials.Password))
+            {
+                logger.InfoFormat("Skipping adding user '{0}' to RavenDB, because credentials were provided via connection string", identity);
+                return;
+            }
+
+            logger.Info(string.Format("Adding user '{0}' to raven. Instance:'{1}', Database:'{2}'.", identity, documentStore.Url, database));
 
             var systemCommands = documentStore
                 .DatabaseCommands
