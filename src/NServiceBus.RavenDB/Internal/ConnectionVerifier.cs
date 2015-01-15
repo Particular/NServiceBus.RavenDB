@@ -99,8 +99,7 @@
         }
 
         const string WrongRavenVersionMessage =
-@"The RavenDB server you have specified is detected to be {0}. NServiceBus requires RavenDB version 2.5 build 2900 or higher to operate correctly. Please update your RavenDB server.
-
+@"The RavenDB server you have specified is detected to be {0}. NServiceBus requires RavenDB version 2.5 build 2900 (or a higher build number for version 2.5) to operate correctly. Please update your RavenDB server.
 Further instructions can be found at: http://particular.net/articles/using-ravendb-in-nservicebus-installing";
 
         static readonly ILog Logger = LogManager.GetLogger(typeof(ConnectionVerifier));
