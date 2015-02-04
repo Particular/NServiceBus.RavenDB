@@ -55,7 +55,7 @@ namespace NServiceBus.RavenDB.Persistence
             var credentials = documentStore.Credentials as NetworkCredential;
             if (credentials != null && !string.IsNullOrWhiteSpace(credentials.UserName) && !string.IsNullOrWhiteSpace(credentials.Password))
             {
-                logger.InfoFormat("Skipping adding user '{0}' to RavenDB, because credentials were provided: {1}", identity, credentials);
+                logger.InfoFormat("Skipping adding user '{0}' to RavenDB, because credentials were provided via connection string", identity);
                 return;
             }
 
