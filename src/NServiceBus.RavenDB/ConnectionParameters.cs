@@ -1,5 +1,7 @@
 ﻿namespace NServiceBus.RavenDB
 {
+    using System.Net;
+
     /// <summary>
     /// Connection parameters to be used when connecting to RavenDB
     /// </summary>
@@ -19,5 +21,11 @@
         /// The RavenDB API key if needed
         /// </summary>
         public string ApiKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets the credentials.
+        /// </summary>
+        /// <value>The credentials.</value>
+        public ICredentials Credentials { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using NServiceBus.RavenDB.Persistence;
 using NUnit.Framework;
 using Raven.Client.Document;
@@ -58,6 +59,25 @@ public class RavenUserInstallerTests
 
             var actual = existing.DataAsJson.ToString().Replace("\r", String.Empty);
             Assert.AreEqual(expected, actual);
+        }
+    }
+
+    [Test]
+    public void EnsureUserIsNotAddedIfCredentialsAreProvidedExplicitly()
+    {
+        using (var documentStore = new EmbeddableDocumentStore
+        {
+            RunInMemory = true,
+            Credentials = new NetworkCredential("foo", "bar"),
+        })
+        {
+            documentStore.Initialize();
+            RavenUserInstaller.AddUserToDatabase(@"domain\user", documentStore);
+            var systemCommands = documentStore
+                .DatabaseCommands
+                .ForSystemDatabase();
+            var existing = systemCommands.Get("Raven/Authorization/WindowsSettings");
+            Assert.IsNull(existing);
         }
     }
 }

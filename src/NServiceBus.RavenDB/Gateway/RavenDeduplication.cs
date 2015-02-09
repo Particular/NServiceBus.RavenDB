@@ -9,7 +9,7 @@
     {
         public IDocumentStore DocumentStore { get; set; }
 
-        public bool DeduplicateMessage(string clientId, DateTime timeReceived)
+        public bool DeduplicateMessage(string messageId, DateTime timeReceived)
         {
             using (var session = DocumentStore.OpenSession())
             {
@@ -18,7 +18,7 @@
 
                 session.Store(new GatewayMessage
                     {
-                        Id = EscapeClientId(clientId),
+                        Id = EscapeMessageId(messageId),
                         TimeReceived = timeReceived
                     });
 
@@ -35,9 +35,9 @@
             }
         }
 
-        static string EscapeClientId(string clientId)
+        static string EscapeMessageId(string messageId)
         {
-            return clientId.Replace("\\", "_");
+            return messageId.Replace("\\", "_");
         }
     }
 }

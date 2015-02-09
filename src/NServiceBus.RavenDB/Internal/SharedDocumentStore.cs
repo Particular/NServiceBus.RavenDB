@@ -31,7 +31,8 @@
                                            {
                                                Url = p.Url,
                                                DefaultDatabase = p.DatabaseName ?? settings.EndpointName(),
-                                               ApiKey = p.ApiKey
+                                               ApiKey = p.ApiKey,
+                                               Credentials = p.Credentials,
                                            };
                     Helpers.ApplyRavenDBConventions(settings, holder.DocumentStore);
                     holder.DocumentStore.Initialize();
