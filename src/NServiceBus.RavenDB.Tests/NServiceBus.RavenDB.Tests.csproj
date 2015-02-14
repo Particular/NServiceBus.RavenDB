@@ -109,6 +109,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Persistence\RavenUserInstallerTests.cs" />
+    <Compile Include="Persistence\TestConnectionVerifier.cs" />
     <Compile Include="RavenTestBase.cs" />
     <Compile Include="SagaPersister\Saga_with_unique_property_set_to_null.cs" />
     <Compile Include="SagaPersister\When_completing_a_saga_with_the_raven_persister.cs" />
