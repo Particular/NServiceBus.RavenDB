@@ -123,9 +123,9 @@
             persister.SetAsDispatched(id);
             Thread.Sleep(TimeSpan.FromSeconds(1)); //Need to wait for dispatch logic to finish
 
-            persister.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));
-
             WaitForIndexing(store);
+
+            persister.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));           
 
             using (var session = store.OpenSession())
             {
