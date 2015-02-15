@@ -6,6 +6,7 @@ namespace NServiceBus.RavenDB.Outbox
     using System.Linq;
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Persistence;
+    using Raven.Abstractions.Data;
     using Raven.Client;
 
     class OutboxPersister : IOutboxStorage
@@ -75,8 +76,29 @@ namespace NServiceBus.RavenDB.Outbox
                 outboxMessage.Dispatched = true;
                 outboxMessage.DispatchedAt = DateTime.UtcNow;
 
-                // TODO the NHibernate implementation cleans up all operations associated with this message
-                // We can either do this here as well, or hard delete the outbox message
+                session.SaveChanges();
+            }
+        }
+
+        public void RemoveEntriesOlderThan(DateTime dateTime)
+        {
+            using (var session = DocumentStore.OpenSession())
+            {
+                var query = session.Query<OutboxRecord>()
+                    .Where(o => o.Dispatched)
+                    .OrderBy(o => o.DispatchedAt);
+
+                QueryHeaderInformation qhi;
+                using (var enumerator = session.Advanced.Stream(query, out qhi))
+                {
+                    while (enumerator.MoveNext())
+                    {
+                        if (enumerator.Current.Document.DispatchedAt >= dateTime)
+                            break; // break streaming if we went past the threshold
+
+                        session.Delete(enumerator.Current);
+                    }
+                }
 
                 session.SaveChanges();
             }
