@@ -47,6 +47,8 @@ namespace NServiceBus.RavenDB.Outbox
         {
             using (var session = sessionProvider.Session)
             {
+                session.Advanced.UseOptimisticConcurrency = true;
+
                 session.Store(new OutboxRecord
                 {
                     MessageId = messageId,
@@ -84,7 +86,7 @@ namespace NServiceBus.RavenDB.Outbox
         {
             using (var session = DocumentStore.OpenSession())
             {
-                var query = session.Query<OutboxRecord>()
+                var query = session.Query<OutboxRecord, OutboxRecordsIndex>()
                     .Where(o => o.Dispatched)
                     .OrderBy(o => o.DispatchedAt);
 
