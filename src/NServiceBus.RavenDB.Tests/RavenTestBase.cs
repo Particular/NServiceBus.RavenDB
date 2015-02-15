@@ -19,7 +19,7 @@ namespace NServiceBus.RavenDB.Tests
         protected IDocumentStore store;
 
         [SetUp]
-        public void SetUp()
+        public virtual void SetUp()
         {
             store = NewDocumentStore();
         }

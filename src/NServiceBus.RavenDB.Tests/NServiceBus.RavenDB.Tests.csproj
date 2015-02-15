@@ -108,6 +108,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Outbox\When_adding_outbox_messages.cs" />
     <Compile Include="Persistence\RavenUserInstallerTests.cs" />
     <Compile Include="Persistence\TestConnectionVerifier.cs" />
     <Compile Include="RavenTestBase.cs" />
