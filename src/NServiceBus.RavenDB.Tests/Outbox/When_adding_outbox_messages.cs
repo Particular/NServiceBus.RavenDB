@@ -21,7 +21,6 @@
         }
 
         [Test]
-        [ExpectedException(typeof(NonUniqueObjectException))]
         public void Should_throw_if__trying_to_insert_same_messageid()
         {
             var sessionFactory = new RavenSessionFactory(store);
@@ -30,14 +29,13 @@
             using (sessionFactory.Session)
             {
                 persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>());
-                persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>());
+                Assert.Throws<NonUniqueObjectException>(() => persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>()));
 
                 sessionFactory.SaveChanges();
             }
         }
 
         [Test]
-        [ExpectedException(typeof(ConcurrencyException))]
         public void Should_throw_if__trying_to_insert_same_messageid2()
         {
             var sessionFactory = new RavenSessionFactory(store);
@@ -48,7 +46,7 @@
             sessionFactory.ReleaseSession();
 
             persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>());
-            sessionFactory.SaveChanges();
+            Assert.Throws<ConcurrencyException>(sessionFactory.SaveChanges);
         }
 
         [Test]

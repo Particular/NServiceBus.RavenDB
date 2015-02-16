@@ -9,14 +9,8 @@ namespace NServiceBus.RavenDB.Outbox
     using NServiceBus.RavenDB.Internal;
     using Raven.Client;
 
-    /// <summary>
-    /// RavenDB Outbox storage
-    /// </summary>
     class RavenDbOutboxStorage : Feature
     {
-        /// <summary>
-        /// Creates an instance of <see cref="RavenDbOutboxStorage"/>.
-        /// </summary>
         public RavenDbOutboxStorage()
         {
             DependsOn<Outbox>();

@@ -85,7 +85,7 @@ namespace NServiceBus.RavenDB.Outbox
 
         public void RemoveEntriesOlderThan(DateTime dateTime)
         {
-            var ids = new List<ICommandData>();
+            var deletionCommands = new List<ICommandData>();
 
             using (var session = DocumentStore.OpenSession())
             {
@@ -101,12 +101,12 @@ namespace NServiceBus.RavenDB.Outbox
                         if (enumerator.Current.Document.DispatchedAt >= dateTime)
                             break; // break streaming if we went past the threshold
 
-                        ids.Add(new DeleteCommandData{Key = enumerator.Current.Key});
+                        deletionCommands.Add(new DeleteCommandData { Key = enumerator.Current.Key });
                     }
                 }
             }
 
-            DocumentStore.DatabaseCommands.Batch(ids);
+            DocumentStore.DatabaseCommands.Batch(deletionCommands);
         }
 
         readonly ISessionProvider sessionProvider;
