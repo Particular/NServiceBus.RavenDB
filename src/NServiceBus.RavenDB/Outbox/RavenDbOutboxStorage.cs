@@ -38,7 +38,7 @@ namespace NServiceBus.RavenDB.Outbox
                 .ConfigureProperty(x => x.DocumentStore, store);
         }
 
-        class OutboxCleaner : FeatureStartupTask
+        class OutboxCleaner : FeatureStartupTask, IDisposable
         {
             public OutboxPersister OutboxPersister { get; set; }
 
@@ -80,8 +80,8 @@ namespace NServiceBus.RavenDB.Outbox
                 using (var waitHandle = new ManualResetEvent(false))
                 {
                     cleanupTimer.Dispose(waitHandle);
-
                     waitHandle.WaitOne();
+                    cleanupTimer = null;
                 }
             }
 
@@ -90,9 +90,16 @@ namespace NServiceBus.RavenDB.Outbox
                 OutboxPersister.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData);
             }
 
-            // ReSharper disable NotAccessedField.Local
+            public void Dispose()
+            {
+                if (cleanupTimer != null)
+                {
+                    cleanupTimer.Dispose();
+                    cleanupTimer = null;
+                }
+            }
+
             Timer cleanupTimer;
-            // ReSharper restore NotAccessedField.Local
             TimeSpan timeToKeepDeduplicationData;
             TimeSpan frequencyToRunDeduplicationDataCleanup;
         }
