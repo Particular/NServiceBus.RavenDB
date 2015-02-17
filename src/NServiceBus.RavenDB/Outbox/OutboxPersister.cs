@@ -46,25 +46,21 @@ namespace NServiceBus.RavenDB.Outbox
 
         public void Store(string messageId, IEnumerable<TransportOperation> transportOperations)
         {
-            using (var session = sessionProvider.Session)
+            var session = sessionProvider.Session;
+            session.Advanced.UseOptimisticConcurrency = true;
+
+            session.Store(new OutboxRecord
             {
-                session.Advanced.UseOptimisticConcurrency = true;
-
-                session.Store(new OutboxRecord
+                MessageId = messageId,
+                Dispatched = false,
+                TransportOperations = transportOperations.Select(t => new OutboxRecord.OutboxOperation
                 {
-                    MessageId = messageId,
-                    Dispatched = false,
-                    TransportOperations = transportOperations.Select(t => new OutboxRecord.OutboxOperation
-                    {
-                        Message = t.Body,
-                        Headers = t.Headers,
-                        MessageId = t.MessageId,
-                        Options = t.Options,
-                    }).ToList()
-                }, GetOutboxRecordId(messageId));
-
-                session.SaveChanges();
-            }
+                    Message = t.Body,
+                    Headers = t.Headers,
+                    MessageId = t.MessageId,
+                    Options = t.Options,
+                }).ToList()
+            }, GetOutboxRecordId(messageId));
         }
 
         public void SetAsDispatched(string messageId)
