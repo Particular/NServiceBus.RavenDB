@@ -8,11 +8,11 @@
     public class TestConnectionVerifier
     {
         [Test]
-        public void Throws_on_ravendb3_server()
+        public void Throws_on_ravendb25_server()
         {
             using (var documentStore = new DocumentStore
             {
-                Url = "http://localhost:8083", // RavenDB 3.0 is running on port 8083 on the test agents
+                Url = "http://localhost:8081", // RavenDB 2.5 is running on port 8081 on the test agents
                 DefaultDatabase = "Test"
             })
             {
@@ -23,11 +23,11 @@
         }
 
         [Test]
-        public void Doesnt_throw_on_ravendb25_server()
+        public void Doesnt_throw_on_ravendb3_server()
         {
             using (var documentStore = new DocumentStore
             {
-                Url = "http://localhost:8081", // RavenDB 2.5 is running on port 8081 on the test agents
+                Url = "http://localhost:8083", // RavenDB 3.0 is running on port 8083 on the test agents
                 DefaultDatabase = "Test"
             })
             {

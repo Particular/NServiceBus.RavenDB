@@ -2,9 +2,11 @@
 
 namespace NServiceBus.RavenDB.Tests
 {
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
     using System.Threading;
+    using Raven.Abstractions.Data;
     using Raven.Client;
     using Raven.Client.Connection;
     using Raven.Client.Document;
@@ -54,37 +56,59 @@ namespace NServiceBus.RavenDB.Tests
                 databaseCommands = databaseCommands.ForDatabase(db);
             var spinUntil = SpinWait.SpinUntil(() => databaseCommands.GetStatistics().StaleIndexes.Length == 0, timeout ?? TimeSpan.FromSeconds(20));
             if (spinUntil == false)
-                WaitForUserToContinueTheTest((EmbeddableDocumentStore)store);
+                WaitForUserToContinueTheTest(store);
             Assert.True(spinUntil);
         }
 
-        public static void WaitForIndexing(DocumentDatabase db)
+        public static void WaitForIndexing(IDocumentStore store)
         {
-            Assert.IsTrue(SpinWait.SpinUntil(() => db.Statistics.StaleIndexes.Length == 0, TimeSpan.FromMinutes(5)));
+            Assert.IsTrue(SpinWait.SpinUntil(() => store.DatabaseCommands.GetStatistics().StaleIndexes.Length == 0, TimeSpan.FromMinutes(5)));
         }
 
-        public static void WaitForUserToContinueTheTest(EmbeddableDocumentStore documentStore, bool debug = true)
+        public static void WaitForUserToContinueTheTest(IDocumentStore documentStore, bool debug = true, int port = 8079)
         {
             if (debug && Debugger.IsAttached == false)
                 return;
 
-            documentStore.SetStudioConfigToAllowSingleDb();
+            var databaseName = Constants.SystemDatabase;
 
-            documentStore.DatabaseCommands.Put("Pls Delete Me", null,
-
-                                               RavenJObject.FromObject(new { StackTrace = new StackTrace(true) }),
-                                               new RavenJObject());
-
-            documentStore.Configuration.AnonymousUserAccessMode = AnonymousUserAccessMode.Admin;
-            using (var server = new HttpServer(documentStore.Configuration, documentStore.DocumentDatabase))
+            var embeddableDocumentStore = documentStore as EmbeddableDocumentStore;
+            OwinHttpServer server = null;
+            var url = documentStore.Url;
+            if (embeddableDocumentStore != null)
             {
-                server.StartListening();
-                Process.Start(documentStore.Configuration.ServerUrl); // start the server
+                databaseName = embeddableDocumentStore.DefaultDatabase;
+                embeddableDocumentStore.Configuration.Port = port;
+                SetStudioConfigToAllowSingleDb(embeddableDocumentStore);
+                embeddableDocumentStore.Configuration.AnonymousUserAccessMode = AnonymousUserAccessMode.Admin;
+                NonAdminHttp.EnsureCanListenToWhenInNonAdminContext(port);
+                server = new OwinHttpServer(embeddableDocumentStore.Configuration, embeddableDocumentStore.SystemDatabase);
+                url = embeddableDocumentStore.Configuration.ServerUrl;
+            }
+
+            var remoteDocumentStore = documentStore as DocumentStore;
+            if (remoteDocumentStore != null)
+            {
+                databaseName = remoteDocumentStore.DefaultDatabase;
+            }
+
+            using (server)
+            {
+                try
+                {
+                    var databaseNameEncoded = Uri.EscapeDataString(databaseName ?? Constants.SystemDatabase);
+                    var documentsPage = url + "studio/index.html#databases/documents?&database=" + databaseNameEncoded + "&withStop=true";
+                    Process.Start(documentsPage); // start the server
+                }
+                catch (Win32Exception e)
+                {
+                    Console.WriteLine("Failed to open the browser. Please open it manually at {0}. {1}", url, e);
+                }
 
                 do
                 {
                     Thread.Sleep(100);
-                } while (documentStore.DatabaseCommands.Get("Pls Delete Me") != null && (debug == false || Debugger.IsAttached));
+                } while (documentStore.DatabaseCommands.Head("Debug/Done") == null && (debug == false || Debugger.IsAttached));
             }
         }
 
@@ -121,6 +145,30 @@ namespace NServiceBus.RavenDB.Tests
             }, TimeSpan.FromMinutes(5));
 
             Assert.True(done);
+        }
+
+        /// <summary>
+        ///     Let the studio knows that it shouldn't display the warning about sys db access
+        /// </summary>
+        public static void SetStudioConfigToAllowSingleDb(IDocumentStore documentDatabase)
+        {
+            var jsonDocument = documentDatabase.DatabaseCommands.Get("Raven/StudioConfig");
+            RavenJObject doc;
+            RavenJObject metadata;
+            if (jsonDocument == null)
+            {
+                doc = new RavenJObject();
+                metadata = new RavenJObject();
+            }
+            else
+            {
+                doc = jsonDocument.DataAsJson;
+                metadata = jsonDocument.Metadata;
+            }
+
+            doc["WarnWhenUsingSystemDatabase"] = false;
+
+            documentDatabase.DatabaseCommands.Put("Raven/StudioConfig", null, doc, metadata);
         }
     }
 }

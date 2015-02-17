@@ -10,11 +10,18 @@ using Raven.Client.Embedded;
 public class RavenUserInstallerTests
 {
     [Test]
+    public void TestUsageOfDynamic()
+    {
+        var identity = Environment.MachineName + @"\Test";
+        Assert.False(RavenUserInstaller.AddUserToDatabase(identity, new Exception()));
+    }
+
+    [Test]
     public void Integration()
     {
         using (var documentStore = new DocumentStore
             {
-                Url = "http://localhost:8080",
+                Url = "http://localhost:8083",
                 DefaultDatabase = "Test"
             })
         {

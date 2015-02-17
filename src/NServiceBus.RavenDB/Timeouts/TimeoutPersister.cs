@@ -103,7 +103,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 }
 
                 // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
-                if (qhi != null && qhi.IsStable && results.Count == 0)
+                if (qhi != null && qhi.IsStale && results.Count == 0)
                 {
                     nextTimeToRunQuery = now;
                 }
