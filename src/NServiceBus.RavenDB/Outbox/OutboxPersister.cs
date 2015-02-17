@@ -83,30 +83,49 @@ namespace NServiceBus.RavenDB.Outbox
             }
         }
 
-        public void RemoveEntriesOlderThan(DateTime dateTime)
+        volatile bool doingCleanup;
+
+        public bool RemoveEntriesOlderThan(DateTime dateTime)
         {
-            var deletionCommands = new List<ICommandData>();
-
-            using (var session = DocumentStore.OpenSession())
+            lock (this)
             {
-                var query = session.Query<OutboxRecord, OutboxRecordsIndex>()
-                    .Where(o => o.Dispatched)
-                    .OrderBy(o => o.DispatchedAt);
+                if (doingCleanup)
+                    return false;
 
-                QueryHeaderInformation qhi;
-                using (var enumerator = session.Advanced.Stream(query, out qhi))
-                {
-                    while (enumerator.MoveNext())
-                    {
-                        if (enumerator.Current.Document.DispatchedAt >= dateTime)
-                            break; // break streaming if we went past the threshold
-
-                        deletionCommands.Add(new DeleteCommandData { Key = enumerator.Current.Key });
-                    }
-                }
+                doingCleanup = true;                
             }
 
-            DocumentStore.DatabaseCommands.Batch(deletionCommands);
+            try
+            {
+                var deletionCommands = new List<ICommandData>();
+
+                using (var session = DocumentStore.OpenSession())
+                {
+                    var query = session.Query<OutboxRecord, OutboxRecordsIndex>()
+                        .Where(o => o.Dispatched)
+                        .OrderBy(o => o.DispatchedAt);
+
+                    QueryHeaderInformation qhi;
+                    using (var enumerator = session.Advanced.Stream(query, out qhi))
+                    {
+                        while (enumerator.MoveNext())
+                        {
+                            if (enumerator.Current.Document.DispatchedAt >= dateTime)
+                                break; // break streaming if we went past the threshold
+
+                            deletionCommands.Add(new DeleteCommandData { Key = enumerator.Current.Key });
+                        }
+                    }
+                }
+
+                DocumentStore.DatabaseCommands.Batch(deletionCommands);
+
+                return true;
+            }
+            finally
+            {
+                doingCleanup = false;
+            }
         }
 
         readonly ISessionProvider sessionProvider;
