@@ -11,7 +11,6 @@ namespace NServiceBus.RavenDB.Tests
     using Raven.Client.Connection;
     using Raven.Client.Document;
     using Raven.Client.Embedded;
-    using Raven.Database;
     using Raven.Database.Server;
     using Raven.Json.Linq;
     using NUnit.Framework;
@@ -40,10 +39,13 @@ namespace NServiceBus.RavenDB.Tests
                 Conventions =
                 {
                     DefaultQueryingConsistency = ConsistencyOptions.AlwaysWaitForNonStaleResultsAsOfLastWrite,
+                },
+                Configuration =
+                {
+                    RunInUnreliableYetFastModeThatIsNotSuitableForProduction = true,
+                    CompiledIndexCacheDirectory = Path.GetTempPath()
                 }
             };
-            store.Configuration.RunInUnreliableYetFastModeThatIsNotSuitableForProduction = true;
-            store.Configuration.CompiledIndexCacheDirectory = Path.GetTempPath();
 
             store.Initialize();
             return store;

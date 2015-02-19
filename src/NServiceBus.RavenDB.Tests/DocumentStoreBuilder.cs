@@ -7,15 +7,18 @@ public class DocumentStoreBuilder
     public static EmbeddableDocumentStore Build()
     {
         var store = new EmbeddableDocumentStore
+        {
+            RunInMemory = true,
+            Conventions =
             {
-                RunInMemory = true,
-                Conventions =
-                    {
-                        DefaultQueryingConsistency = ConsistencyOptions.AlwaysWaitForNonStaleResultsAsOfLastWrite,
-                    }
-            };
-        store.Configuration.RunInUnreliableYetFastModeThatIsNotSuitableForProduction = true;
-        store.Configuration.CompiledIndexCacheDirectory = Path.GetTempPath();
+                DefaultQueryingConsistency = ConsistencyOptions.AlwaysWaitForNonStaleResultsAsOfLastWrite,
+            },
+            Configuration =
+            {
+                RunInUnreliableYetFastModeThatIsNotSuitableForProduction = true,
+                CompiledIndexCacheDirectory = Path.GetTempPath()
+            }
+        };
 
         store.Initialize();
         return store;
