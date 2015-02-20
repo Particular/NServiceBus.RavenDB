@@ -4,6 +4,5 @@ namespace NServiceBus.Outbox.RavenDB
 
     class Installer : RavenUserInstaller
     {
-        
     }
 }
