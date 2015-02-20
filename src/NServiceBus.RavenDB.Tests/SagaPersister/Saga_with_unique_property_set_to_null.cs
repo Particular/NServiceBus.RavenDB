@@ -31,6 +31,7 @@ public class Saga_with_unique_property_set_to_null
         public string Originator { get; set; }
         public string OriginalMessageId { get; set; }
         [Unique]
+// ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
 
     }

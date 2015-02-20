@@ -43,8 +43,10 @@ public class When_updating_a_saga_property_that_does_not_have_a_unique_attribute
         public string OriginalMessageId { get; set; }
 
         [Unique]
+// ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
 
+// ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string NonUniqueString { get; set; }
     }
 }

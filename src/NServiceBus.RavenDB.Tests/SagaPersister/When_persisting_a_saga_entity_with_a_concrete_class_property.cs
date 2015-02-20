@@ -44,6 +44,7 @@ public class When_persisting_a_saga_entity_with_a_concrete_class_property
     class TestComponent
     {
         public string Property { get; set; }
+// ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string AnotherProperty { get; set; }
     }
 }

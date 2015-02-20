@@ -48,6 +48,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
         public string OriginalMessageId { get; set; }
 
         [Unique]
+// ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
     }
 }

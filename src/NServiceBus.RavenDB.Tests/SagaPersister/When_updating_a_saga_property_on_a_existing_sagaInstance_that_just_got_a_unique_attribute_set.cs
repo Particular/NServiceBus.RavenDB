@@ -59,8 +59,10 @@ public class When_updating_a_saga_property_on_a_existing_sagaInstance_that_just_
         public string OriginalMessageId { get; set; }
 
         [Unique]
+// ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
 
+// ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string NonUniqueString { get; set; }
     }
 }

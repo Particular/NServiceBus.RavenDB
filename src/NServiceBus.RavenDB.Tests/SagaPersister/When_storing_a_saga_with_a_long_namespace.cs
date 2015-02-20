@@ -33,6 +33,7 @@ public class When_storing_a_saga_with_a_long_namespace
         public string OriginalMessageId { get; set; }
 
         [Unique]
+// ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
 
     }

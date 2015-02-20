@@ -41,7 +41,9 @@ public class When_updating_a_saga_without_unique_properties
         public Guid Id { get; set; }
         public string Originator { get; set; }
         public string OriginalMessageId { get; set; }
+// ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
+// ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string NonUniqueString { get; set; }
     }
 }
