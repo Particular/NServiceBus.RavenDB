@@ -36,10 +36,10 @@ namespace NServiceBus.RavenDB.Tests
             var store = new EmbeddableDocumentStore
             {
                 RunInMemory = true,
-                Conventions =
-                {
-                    DefaultQueryingConsistency = ConsistencyOptions.AlwaysWaitForNonStaleResultsAsOfLastWrite,
-                },
+//                Conventions =
+//                {
+//                    DefaultQueryingConsistency = ConsistencyOptions.AlwaysWaitForNonStaleResultsAsOfLastWrite,
+//                },
                 Configuration =
                 {
                     RunInUnreliableYetFastModeThatIsNotSuitableForProduction = true,
