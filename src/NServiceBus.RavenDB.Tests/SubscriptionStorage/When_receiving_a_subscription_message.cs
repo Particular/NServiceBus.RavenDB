@@ -2,12 +2,13 @@
 using System.Transactions;
 using NServiceBus;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+using NServiceBus.RavenDB.Tests;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]
-public class When_receiving_a_subscription_message 
+public class When_receiving_a_subscription_message : RavenTestBase
 {
     [Test]
     public void A_subscription_entry_should_be_added_to_the_database()
@@ -20,7 +21,7 @@ public class When_receiving_a_subscription_message
                 new MessageType("MessageType2", "1.0.0.0")
             };
 
-        using (var store = DocumentStoreBuilder.Build())
+        using (var store = NewDocumentStore())
         {
             var storage = new SubscriptionPersister
             {

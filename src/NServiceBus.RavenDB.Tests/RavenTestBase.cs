@@ -35,6 +35,7 @@ namespace NServiceBus.RavenDB.Tests
         {
             var store = new EmbeddableDocumentStore
             {
+                DefaultDatabase = Guid.NewGuid().ToString("N").Substring(0, 8),
                 RunInMemory = true,
 //                Conventions =
 //                {

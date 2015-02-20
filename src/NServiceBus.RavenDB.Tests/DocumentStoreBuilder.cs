@@ -4,6 +4,7 @@ using Raven.Client.Embedded;
 
 public class DocumentStoreBuilder
 {
+    // TODO deprecate in favor of using the one in RavenTestBase
     public static EmbeddableDocumentStore Build()
     {
         var store = new EmbeddableDocumentStore
