@@ -28,11 +28,7 @@ public class When_receiving_a_subscription_message : RavenTestBase
                 DocumentStore = store
             };
 
-            using (var transaction = new TransactionScope())
-            {
-                storage.Subscribe(clientEndpoint, messageTypes);
-                transaction.Complete();
-            }
+            storage.Subscribe(clientEndpoint, messageTypes);
 
             using (var session = store.OpenSession())
             {
