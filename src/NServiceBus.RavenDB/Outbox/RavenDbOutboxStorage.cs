@@ -36,11 +36,14 @@ namespace NServiceBus.RavenDB.Outbox
 
             context.Container.ConfigureComponent<OutboxPersister>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(x => x.DocumentStore, store);
+
+            context.Container.ConfigureComponent<OutboxRecordsCleaner>(DependencyLifecycle.InstancePerCall)
+                .ConfigureProperty(x => x.DocumentStore, store);
         }
 
         class OutboxCleaner : FeatureStartupTask, IDisposable
         {
-            public OutboxPersister OutboxPersister { get; set; }
+            public OutboxRecordsCleaner Cleaner { get; set; }
 
             protected override void OnStart()
             {
@@ -87,7 +90,7 @@ namespace NServiceBus.RavenDB.Outbox
 
             void PerformCleanup(object state)
             {
-                OutboxPersister.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData);
+                Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData);
             }
 
             public void Dispose()

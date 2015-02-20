@@ -6,8 +6,6 @@ namespace NServiceBus.RavenDB.Outbox
     using System.Linq;
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Persistence;
-    using Raven.Abstractions.Commands;
-    using Raven.Abstractions.Data;
     using Raven.Client;
 
     class OutboxPersister : IOutboxStorage
@@ -76,51 +74,6 @@ namespace NServiceBus.RavenDB.Outbox
                 outboxMessage.DispatchedAt = DateTime.UtcNow;
 
                 session.SaveChanges();
-            }
-        }
-
-        volatile bool doingCleanup;
-
-        public bool RemoveEntriesOlderThan(DateTime dateTime)
-        {
-            lock (this)
-            {
-                if (doingCleanup)
-                    return false;
-
-                doingCleanup = true;                
-            }
-
-            try
-            {
-                var deletionCommands = new List<ICommandData>();
-
-                using (var session = DocumentStore.OpenSession())
-                {
-                    var query = session.Query<OutboxRecord, OutboxRecordsIndex>()
-                        .Where(o => o.Dispatched)
-                        .OrderBy(o => o.DispatchedAt);
-
-                    QueryHeaderInformation qhi;
-                    using (var enumerator = session.Advanced.Stream(query, out qhi))
-                    {
-                        while (enumerator.MoveNext())
-                        {
-                            if (enumerator.Current.Document.DispatchedAt >= dateTime)
-                                break; // break streaming if we went past the threshold
-
-                            deletionCommands.Add(new DeleteCommandData { Key = enumerator.Current.Key });
-                        }
-                    }
-                }
-
-                DocumentStore.DatabaseCommands.Batch(deletionCommands);
-
-                return true;
-            }
-            finally
-            {
-                doingCleanup = false;
             }
         }
 
