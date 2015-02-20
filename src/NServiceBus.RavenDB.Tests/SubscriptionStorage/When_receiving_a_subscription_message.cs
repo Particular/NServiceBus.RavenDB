@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Transactions;
 using NServiceBus;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.RavenDB.Tests;
@@ -16,29 +15,26 @@ public class When_receiving_a_subscription_message : RavenTestBase
         var clientEndpoint = Address.Parse("TestEndpoint");
 
         var messageTypes = new[]
-            {
-                new MessageType("MessageType1", "1.0.0.0"),
-                new MessageType("MessageType2", "1.0.0.0")
-            };
-
-        using (var store = NewDocumentStore())
         {
-            var storage = new SubscriptionPersister
-            {
-                DocumentStore = store
-            };
+            new MessageType("MessageType1", "1.0.0.0"),
+            new MessageType("MessageType2", "1.0.0.0")
+        };
 
-            storage.Subscribe(clientEndpoint, messageTypes);
+        var storage = new SubscriptionPersister
+        {
+            DocumentStore = store
+        };
 
-            using (var session = store.OpenSession())
-            {
-                var subscriptions = session
-                    .Query<Subscription>()
-                    .Customize(c => c.WaitForNonStaleResults())
-                    .Count();
+        storage.Subscribe(clientEndpoint, messageTypes);
 
-                Assert.AreEqual(2, subscriptions);
-            }
+        using (var session = store.OpenSession())
+        {
+            var subscriptions = session
+                .Query<Subscription>()
+                .Customize(c => c.WaitForNonStaleResults())
+                .Count();
+
+            Assert.AreEqual(2, subscriptions);
         }
     }
 }
