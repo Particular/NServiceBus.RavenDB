@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace NServiceBus.RavenDB.Outbox
+﻿namespace NServiceBus.RavenDB.Outbox
 {
+    using System;
+    using System.Collections.Generic;
+
     class OutboxRecord
     {
         public string MessageId { get; set; }

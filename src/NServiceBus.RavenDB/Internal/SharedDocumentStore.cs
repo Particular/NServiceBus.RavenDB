@@ -1,10 +1,10 @@
 ﻿namespace NServiceBus.RavenDB
 {
-    using Features;
-    using Internal;
+    using NServiceBus.Features;
+    using NServiceBus.RavenDB.Internal;
+    using NServiceBus.Settings;
     using Raven.Client;
     using Raven.Client.Document;
-    using Settings;
 
     class SharedDocumentStore : Feature
     {
@@ -28,12 +28,12 @@
                 if (p != null)
                 {
                     holder.DocumentStore = new DocumentStore
-                                           {
-                                               Url = p.Url,
-                                               DefaultDatabase = p.DatabaseName ?? settings.EndpointName(),
-                                               ApiKey = p.ApiKey,
-                                               Credentials = p.Credentials,
-                                           };
+                    {
+                        Url = p.Url,
+                        DefaultDatabase = p.DatabaseName ?? settings.EndpointName(),
+                        ApiKey = p.ApiKey,
+                        Credentials = p.Credentials
+                    };
                     Helpers.ApplyRavenDBConventions(settings, holder.DocumentStore);
                     holder.DocumentStore.Initialize();
                 }

@@ -3,12 +3,12 @@
     using System;
     using NServiceBus.Configuration.AdvanceExtensibility;
     using NServiceBus.Persistence;
-    using RavenDB;
-    using RavenDB.SessionManagement;
+    using NServiceBus.RavenDB;
+    using NServiceBus.RavenDB.SessionManagement;
     using Raven.Client;
 
     /// <summary>
-    /// Provides configurations methods for the Raven storages
+    ///     Provides configurations methods for the Raven storages
     /// </summary>
     public static class RavenDbSettingsExtensions
     {
@@ -17,7 +17,7 @@
         internal const string SharedSessionSettingsKey = "RavenDbSharedSession";
 
         /// <summary>
-        /// Configures the storages to use the given document store supplied
+        ///     Configures the storages to use the given document store supplied
         /// </summary>
         /// <param name="cfg"></param>
         /// <param name="documentStore">Document store managed by me as a user</param>
@@ -29,7 +29,7 @@
         }
 
         /// <summary>
-        /// Configures the persisters to connection to the server specified
+        ///     Configures the persisters to connection to the server specified
         /// </summary>
         /// <param name="cfg"></param>
         /// <param name="connectionParameters">Connection details</param>
@@ -42,7 +42,8 @@
         }
 
         /// <summary>
-        /// Specifies the session that the shared persisters (saga + outbox) that should be used. The lifecycle is controled by me
+        ///     Specifies the session that the shared persisters (saga + outbox) that should be used. The lifecycle is controled by
+        ///     me
         /// </summary>
         /// <param name="cfg"></param>
         /// <param name="getSessionFunc">A func returning the session to be used</param>
@@ -54,10 +55,13 @@
         }
 
         /// <summary>
-        /// Specifies the mapping to use for when resolving the database name to use for each message.
+        ///     Specifies the mapping to use for when resolving the database name to use for each message.
         /// </summary>
         /// <param name="cfg">The configuration object.</param>
-        /// <param name="convention">The method referenced by a Func delegate for finding the database name for the specified message.</param>
+        /// <param name="convention">
+        ///     The method referenced by a Func delegate for finding the database name for the specified
+        ///     message.
+        /// </param>
         /// <returns>The configuration object.</returns>
         public static PersistenceExtentions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IMessageContext, string> convention)
         {
@@ -66,7 +70,7 @@
         }
 
         /// <summary>
-        /// Tells the persister to not setup user permissions for the database
+        ///     Tells the persister to not setup user permissions for the database
         /// </summary>
         /// <param name="cfg"></param>
         /// <returns></returns>

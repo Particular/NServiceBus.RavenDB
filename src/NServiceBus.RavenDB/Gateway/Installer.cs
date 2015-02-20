@@ -4,6 +4,5 @@ namespace NServiceBus.RavenDB.Gateway.Deduplication
 
     class Installer : RavenUserInstaller
     {
-        
     }
 }

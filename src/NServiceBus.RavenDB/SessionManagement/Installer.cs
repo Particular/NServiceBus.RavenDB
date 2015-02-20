@@ -4,6 +4,5 @@ namespace NServiceBus.RavenDB.SessionManagement
 
     class Installer : RavenUserInstaller
     {
-        
     }
 }

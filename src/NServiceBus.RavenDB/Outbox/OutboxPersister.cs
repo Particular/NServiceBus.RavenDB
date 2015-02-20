@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace NServiceBus.RavenDB.Outbox
+﻿namespace NServiceBus.RavenDB.Outbox
 {
+    using System;
+    using System.Collections.Generic;
     using System.Linq;
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Persistence;
@@ -10,6 +9,8 @@ namespace NServiceBus.RavenDB.Outbox
 
     class OutboxPersister : IOutboxStorage
     {
+        readonly ISessionProvider sessionProvider;
+
         public OutboxPersister(ISessionProvider sessionProvider)
         {
             this.sessionProvider = sessionProvider;
@@ -56,7 +57,7 @@ namespace NServiceBus.RavenDB.Outbox
                     Message = t.Body,
                     Headers = t.Headers,
                     MessageId = t.MessageId,
-                    Options = t.Options,
+                    Options = t.Options
                 }).ToList()
             }, GetOutboxRecordId(messageId));
         }
@@ -68,7 +69,9 @@ namespace NServiceBus.RavenDB.Outbox
                 session.Advanced.UseOptimisticConcurrency = true;
                 var outboxMessage = session.Load<OutboxRecord>(GetOutboxRecordId(messageId));
                 if (outboxMessage == null || outboxMessage.Dispatched)
+                {
                     return;
+                }
 
                 outboxMessage.Dispatched = true;
                 outboxMessage.DispatchedAt = DateTime.UtcNow;
@@ -77,9 +80,7 @@ namespace NServiceBus.RavenDB.Outbox
             }
         }
 
-        readonly ISessionProvider sessionProvider;
-
-        private static string GetOutboxRecordId(string messageId)
+        static string GetOutboxRecordId(string messageId)
         {
             return "Outbox/" + messageId;
         }

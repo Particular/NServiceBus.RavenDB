@@ -12,7 +12,7 @@
                 {
                     doc.MessageId,
                     doc.Dispatched,
-                    doc.DispatchedAt,
+                    doc.DispatchedAt
                 };
 
             DisableInMemoryIndexing = true;

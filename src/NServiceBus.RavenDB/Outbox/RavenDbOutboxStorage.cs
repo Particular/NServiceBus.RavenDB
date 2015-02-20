@@ -1,7 +1,6 @@
-﻿using System;
-
-namespace NServiceBus.RavenDB.Outbox
+﻿namespace NServiceBus.RavenDB.Outbox
 {
+    using System;
     using System.Configuration;
     using System.Threading;
     using NServiceBus.Features;
@@ -43,7 +42,19 @@ namespace NServiceBus.RavenDB.Outbox
 
         class OutboxCleaner : FeatureStartupTask, IDisposable
         {
+            Timer cleanupTimer;
+            TimeSpan frequencyToRunDeduplicationDataCleanup;
+            TimeSpan timeToKeepDeduplicationData;
             public OutboxRecordsCleaner Cleaner { get; set; }
+
+            public void Dispose()
+            {
+                if (cleanupTimer != null)
+                {
+                    cleanupTimer.Dispose();
+                    cleanupTimer = null;
+                }
+            }
 
             protected override void OnStart()
             {
@@ -92,19 +103,6 @@ namespace NServiceBus.RavenDB.Outbox
             {
                 Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData);
             }
-
-            public void Dispose()
-            {
-                if (cleanupTimer != null)
-                {
-                    cleanupTimer.Dispose();
-                    cleanupTimer = null;
-                }
-            }
-
-            Timer cleanupTimer;
-            TimeSpan timeToKeepDeduplicationData;
-            TimeSpan frequencyToRunDeduplicationDataCleanup;
         }
     }
 }

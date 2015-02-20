@@ -9,16 +9,17 @@
 
     class OutboxRecordsCleaner
     {
-        public IDocumentStore DocumentStore { get; set; }
-
         volatile bool doingCleanup;
+        public IDocumentStore DocumentStore { get; set; }
 
         public void RemoveEntriesOlderThan(DateTime dateTime)
         {
             lock (this)
             {
                 if (doingCleanup)
+                {
                     return;
+                }
 
                 doingCleanup = true;
             }
@@ -39,20 +40,24 @@
                         while (enumerator.MoveNext())
                         {
                             if (enumerator.Current.Document.DispatchedAt >= dateTime)
+                            {
                                 break; // break streaming if we went past the threshold
+                            }
 
-                            deletionCommands.Add(new DeleteCommandData { Key = enumerator.Current.Key });
+                            deletionCommands.Add(new DeleteCommandData
+                            {
+                                Key = enumerator.Current.Key
+                            });
                         }
                     }
                 }
 
-                DocumentStore.DatabaseCommands.Batch(deletionCommands);;
+                DocumentStore.DatabaseCommands.Batch(deletionCommands);
             }
             finally
             {
                 doingCleanup = false;
             }
         }
-
     }
 }

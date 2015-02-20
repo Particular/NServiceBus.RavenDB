@@ -1,8 +1,8 @@
 namespace NServiceBus.RavenDB
 {
-using System;
-using Raven.Abstractions.Extensions;
-using Raven.Abstractions.Logging;
+    using System;
+    using Raven.Abstractions.Extensions;
+    using Raven.Abstractions.Logging;
 
     class NoOpLogManager : ILogManager
     {
