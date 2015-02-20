@@ -26,7 +26,7 @@ public class When_storing_a_saga_with_a_long_namespace
         }
     }
 
-    public class SagaWithUniquePropertyAndALongNamespace : IContainSagaData
+    class SagaWithUniquePropertyAndALongNamespace : IContainSagaData
     {
         public Guid Id { get; set; }
         public string Originator { get; set; }

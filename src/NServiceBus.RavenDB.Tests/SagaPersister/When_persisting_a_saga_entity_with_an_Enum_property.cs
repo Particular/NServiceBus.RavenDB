@@ -30,7 +30,7 @@ public class When_persisting_a_saga_entity_with_an_Enum_property
         }
     }
 
-    public class SagaData : IContainSagaData
+    class SagaData : IContainSagaData
     {
         public Guid Id { get; set; }
         public string Originator { get; set; }
@@ -38,7 +38,7 @@ public class When_persisting_a_saga_entity_with_an_Enum_property
         public StatusEnum Status { get; set; }
     }
 
-    public enum StatusEnum
+    enum StatusEnum
     {
         SomeStatus,
         AnotherStatus

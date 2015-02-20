@@ -41,7 +41,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
         }
     }
 
-    public class SagaData : IContainSagaData
+    class SagaData : IContainSagaData
     {
         public Guid Id { get; set; }
         public string Originator { get; set; }

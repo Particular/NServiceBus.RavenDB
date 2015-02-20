@@ -35,7 +35,7 @@ public class When_persisting_a_saga_entity_with_inherited_property
         }
     }
 
-    public class SagaData : IContainSagaData
+    class SagaData : IContainSagaData
     {
         public Guid Id { get; set; }
         public string Originator { get; set; }
@@ -43,12 +43,12 @@ public class When_persisting_a_saga_entity_with_inherited_property
         public PolymorphicPropertyBase PolymorphicRelatedProperty { get; set; }
     }
 
-    public class PolymorphicProperty : PolymorphicPropertyBase
+    class PolymorphicProperty : PolymorphicPropertyBase
     {
         public int SomeInt { get; set; }
     }
 
-    public class PolymorphicPropertyBase
+    class PolymorphicPropertyBase
     {
         public virtual Guid Id { get; set; }
     }

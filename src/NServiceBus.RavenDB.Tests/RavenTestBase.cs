@@ -63,12 +63,12 @@ namespace NServiceBus.RavenDB.Tests
             Assert.True(spinUntil);
         }
 
-        public static void WaitForIndexing(IDocumentStore store)
+        protected static void WaitForIndexing(IDocumentStore store)
         {
             Assert.IsTrue(SpinWait.SpinUntil(() => store.DatabaseCommands.GetStatistics().StaleIndexes.Length == 0, TimeSpan.FromMinutes(5)));
         }
 
-        public static void WaitForUserToContinueTheTest(IDocumentStore documentStore, bool debug = true, int port = 8079)
+        static void WaitForUserToContinueTheTest(IDocumentStore documentStore, bool debug = true, int port = 8079)
         {
             if (debug && Debugger.IsAttached == false)
                 return;
@@ -153,7 +153,7 @@ namespace NServiceBus.RavenDB.Tests
         /// <summary>
         ///     Let the studio knows that it shouldn't display the warning about sys db access
         /// </summary>
-        public static void SetStudioConfigToAllowSingleDb(IDocumentStore documentDatabase)
+        static void SetStudioConfigToAllowSingleDb(IDocumentStore documentDatabase)
         {
             var jsonDocument = documentDatabase.DatabaseCommands.Get("Raven/StudioConfig");
             RavenJObject doc;

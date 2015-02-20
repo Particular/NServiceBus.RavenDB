@@ -52,7 +52,7 @@ public class When_updating_a_saga_property_on_a_existing_sagaInstance_that_just_
         }
     }
 
-    public class SagaData : IContainSagaData
+    class SagaData : IContainSagaData
     {
         public Guid Id { get; set; }
         public string Originator { get; set; }

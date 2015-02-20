@@ -249,7 +249,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             Assert.True(spinUntil);
         }
 
-        public static class RandomProvider
+        static class RandomProvider
         {
             private static int seed = Environment.TickCount;
 

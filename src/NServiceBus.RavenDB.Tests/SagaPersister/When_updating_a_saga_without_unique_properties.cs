@@ -36,7 +36,7 @@ public class When_updating_a_saga_without_unique_properties
         }
     }
 
-    public class SagaData : IContainSagaData
+    class SagaData : IContainSagaData
     {
         public Guid Id { get; set; }
         public string Originator { get; set; }

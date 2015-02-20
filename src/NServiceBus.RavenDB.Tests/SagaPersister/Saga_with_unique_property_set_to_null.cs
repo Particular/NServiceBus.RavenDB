@@ -24,7 +24,8 @@ public class Saga_with_unique_property_set_to_null
             factory.SaveChanges();
         }
     }
-    public class SagaWithUniqueProperty : IContainSagaData
+
+    class SagaWithUniqueProperty : IContainSagaData
     {
         public Guid Id { get; set; }
         public string Originator { get; set; }

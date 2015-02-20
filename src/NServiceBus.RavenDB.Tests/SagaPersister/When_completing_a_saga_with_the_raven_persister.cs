@@ -32,7 +32,7 @@ public class When_completing_a_saga_with_the_raven_persister
         }
     }
 
-    public class SagaData : IContainSagaData
+    class SagaData : IContainSagaData
     {
         public Guid Id { get; set; }
         public string Originator { get; set; }

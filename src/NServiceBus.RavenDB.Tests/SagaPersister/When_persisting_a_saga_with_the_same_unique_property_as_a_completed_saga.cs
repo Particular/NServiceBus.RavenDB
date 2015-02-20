@@ -42,15 +42,15 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
         }
     }
 
-    public class SagaData : IContainSagaData
+    sealed class SagaData : IContainSagaData
     {
-        public virtual Guid Id { get; set; }
+        public Guid Id { get; set; }
 
-        public virtual string Originator { get; set; }
+        public string Originator { get; set; }
 
-        public virtual string OriginalMessageId { get; set; }
+        public string OriginalMessageId { get; set; }
 
         [Unique]
-        public virtual string UniqueString { get; set; }
+        public string UniqueString { get; set; }
     }
 }
