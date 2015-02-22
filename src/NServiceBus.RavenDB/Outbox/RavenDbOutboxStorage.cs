@@ -30,6 +30,8 @@
 
             ConnectionVerifier.VerifyConnectionToRavenDBServer(store);
 
+            new OutboxRecordsIndex().Execute(store);
+
             context.Container.ConfigureComponent<Installer>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(c => c.StoreToInstall, store);
 
