@@ -10,7 +10,7 @@ public class ConfigureRavenDBPersistence
         var store = new DocumentStore
         {
             Url = "http://localhost:8083",
-            DefaultDatabase = Guid.NewGuid().ToString(),
+            DefaultDatabase = Guid.NewGuid().ToString("N").Substring(0, 8),
         };
 
         store.Initialize();
