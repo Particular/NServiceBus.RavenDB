@@ -74,6 +74,7 @@
 
                 public class TestSagaData : ContainSagaData
                 {
+                    [Unique]
                     public string SomeId { get; set; }
                 }
             }
@@ -98,7 +99,8 @@
         [Serializable]
         public class StartSagaMessage : ICommand
         {
-            public string SomeId { get; set; }
+            [Unique]
+            public virtual string SomeId { get; set; }
         }
 
 
