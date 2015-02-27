@@ -33,10 +33,10 @@
                    .Done(context => context.InterceptingHandlerCalled)
                    .Repeat(r => r.For(Transports.Default))
                    .Should(c =>
-                        {
-                            Assert.True(c.InterceptingHandlerCalled, "The intercepting handler should be called");
-                            Assert.False(c.SagaStarted, "The saga should not have been started since the intercepting handler stops the pipeline");
-                        })
+                   {
+                       Assert.True(c.InterceptingHandlerCalled, "The intercepting handler should be called");
+                       Assert.False(c.SagaStarted, "The saga should not have been started since the intercepting handler stops the pipeline");
+                   })
                     .Run();
         }
 
@@ -68,18 +68,18 @@
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<TestSagaData> mapper)
                 {
-                    mapper.ConfigureMapping<StartSagaMessage>(m=>m.SomeId)
-                        .ToSaga(s=>s.SomeId);
+                    mapper.ConfigureMapping<StartSagaMessage>(m => m.SomeId)
+                        .ToSaga(s => s.SomeId);
                 }
 
                 public class TestSagaData : ContainSagaData
                 {
                     [Unique]
-                    public string SomeId { get; set; }
+                    public virtual string SomeId { get; set; }
                 }
             }
 
-            
+
             public class InterceptingHandler : IHandleMessages<StartSagaMessage>
             {
                 public SagaEndpointContext Context { get; set; }
@@ -99,11 +99,7 @@
         [Serializable]
         public class StartSagaMessage : ICommand
         {
-            [Unique]
-            public virtual string SomeId { get; set; }
+            public string SomeId { get; set; }
         }
-
-
     }
-
 }
