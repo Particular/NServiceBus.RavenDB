@@ -146,7 +146,6 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Mutators\When_defining_outgoing_message_mutators.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Mutators\When_outgoing_mutator_replaces_instance.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\NonDTC\When_blowing_up_just_after_dispatch.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\NonDTC\When_outbox_with_auditing.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\NonDTC\When_receiving_a_message.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\NonDTC\When_sending_from_a_non_dtc_endpoint.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\NonTx\When_sending_inside_ambient_tx.cs" />
