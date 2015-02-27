@@ -59,6 +59,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Messaging" />
     <Reference Include="System.Reactive.Core, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Rx-Core.2.2.5\lib\net45\System.Reactive.Core.dll</HintPath>
@@ -108,6 +109,7 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Basic\When_using_callbacks_with_messageid_eq_cid_.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Basic\When_using_callback_to_get_message.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Basic\When_using_ineedinitialization.cs" />
+    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\ConfigureMsmqTransport.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Config\When_a_config_override_is_found.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Config\When_IWantToRunWhenBusStartsAndStops_Start_throws.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Config\When__startup_is_complete.cs" />
