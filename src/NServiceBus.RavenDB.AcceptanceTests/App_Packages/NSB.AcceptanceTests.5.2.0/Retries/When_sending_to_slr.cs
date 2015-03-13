@@ -28,7 +28,7 @@
             Assert.AreEqual(context.OriginalBodyChecksum, context.SlrChecksum, "The body of the message sent to slr should be the same as the original message coming off the queue");
 
         }
-        
+
         [Test]
         public void Should_raise_FinishedMessageProcessing_event()
         {
@@ -47,9 +47,9 @@
         public void Should_preserve_the_original_body_for_serialization_exceptions()
         {
             var context = new Context
-                {
-                    SimulateSerializationException = true
-                };
+            {
+                SimulateSerializationException = true
+            };
 
             Scenario.Define(context)
                     .WithEndpoint<RetryEndpoint>(b => b.Given(bus => bus.SendLocal(new MessageToBeRetried())))
@@ -125,8 +125,8 @@
 
                     var decryptedBody = new byte[originalBody.Length];
 
-                    Buffer.BlockCopy(originalBody,0,decryptedBody,0,originalBody.Length);
-                   
+                    Buffer.BlockCopy(originalBody, 0, decryptedBody, 0, originalBody.Length);
+
                     //decrypt
                     decryptedBody[0]++;
 
