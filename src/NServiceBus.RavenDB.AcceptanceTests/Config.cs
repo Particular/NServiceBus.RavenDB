@@ -13,7 +13,7 @@ public class ConfigureRavenDBPersistence
         {
             Url = "http://localhost:8081",
             DefaultDatabase = Guid.NewGuid().ToString(),
-
+            ResourceManagerId = Guid.NewGuid() /* This is OK for ATT purposes */
         };
 
         documentStore.Initialize();
