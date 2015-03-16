@@ -43,7 +43,7 @@
                 remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
             }
 
-            new TimeoutsIndex().Execute(store);
+            Helpers.SafelyCreateIndex(store, new TimeoutsIndex());
 
             context.Container.ConfigureComponent<Installer>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(c => c.StoreToInstall, store);
