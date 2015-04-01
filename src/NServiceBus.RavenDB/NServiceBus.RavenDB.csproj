@@ -45,9 +45,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="NServiceBus.Core, Version=5.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
+    <Reference Include="NServiceBus.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NServiceBus.5.2.1\lib\net45\NServiceBus.Core.dll</HintPath>
+      <HintPath>..\packages\NServiceBus.6.0.0-making\lib\net45\NServiceBus.Core.dll</HintPath>
     </Reference>
     <Reference Include="Raven.Abstractions, Version=3.0.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
       <HintPath>..\packages\RavenDB.Client.3.0.3785\lib\net45\Raven.Abstractions.dll</HintPath>
@@ -95,6 +96,8 @@
     <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />
     <Compile Include="SagaPersister\SagaPersister.cs" />
     <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />
+    <Compile Include="Subscriptions\AddressConverter.cs" />
+    <Compile Include="Subscriptions\Installer.cs" />
     <Compile Include="Subscriptions\MessageTypeConverter.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionSettingsExtensions.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionStorage.cs" />

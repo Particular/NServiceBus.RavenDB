@@ -14,7 +14,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
         {
         }
 
-        public void Subscribe(Address client, IEnumerable<MessageType> messageTypes)
+        public void Subscribe(string client, IEnumerable<MessageType> messageTypes)
         {
             var messageTypeLookup = messageTypes.ToDictionary(Subscription.FormatId);
 
@@ -37,7 +37,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             }
         }
 
-        public void Unsubscribe(Address client, IEnumerable<MessageType> messageTypes)
+        public void Unsubscribe(string client, IEnumerable<MessageType> messageTypes)
         {
             using (var session = OpenSession())
             {
@@ -54,7 +54,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             }
         }
 
-        public IEnumerable<Address> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes)
+        public IEnumerable<string> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes)
         {
             using (var session = OpenSession())
             {
@@ -83,7 +83,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
         {
             var subscription = new Subscription
             {
-                Clients = new List<Address>(),
+                    Clients = new List<string>(),
                 Id = id,
                 MessageType = messageType
             };

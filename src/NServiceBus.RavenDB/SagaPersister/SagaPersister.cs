@@ -36,7 +36,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
             {
                 return;
             }
-
+            
             var uniqueProperty = p.Value;
 
             var metadata = sessionProvider.Session.Advanced.GetMetadataFor(saga);
@@ -98,6 +98,11 @@ namespace NServiceBus.SagaPersisters.RavenDB
             }
 
             DeleteUniqueProperty(saga, uniqueProperty.Value);
+        }
+
+        public void Initialize(SagaMetaModel model)
+        {
+            this.model = model;
         }
 
         static bool IsUniqueProperty<T>(string property)
@@ -170,5 +175,6 @@ namespace NServiceBus.SagaPersisters.RavenDB
                 Key = id
             });
         }
+        SagaMetaModel model;
     }
 }

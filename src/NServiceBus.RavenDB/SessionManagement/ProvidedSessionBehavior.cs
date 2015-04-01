@@ -2,14 +2,13 @@
 {
     using System;
     using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
     using Raven.Client;
 
-    class ProvidedSessionBehavior : IBehavior<IncomingContext>
+    class ProvidedSessionBehavior : PhysicalMessageProcessingStageBehavior
     {
         public Func<IDocumentSession> GetSession { get; set; }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             context.Set(GetSession);
             next();

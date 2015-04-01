@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using NServiceBus;
 using NServiceBus.Unicast.Subscriptions;
 
 public interface ISomeInterface
@@ -34,7 +33,7 @@ public class MessageTypes
 
 public class TestClients
 {
-    public static Address ClientA = Address.Parse("ClientA");
-    public static Address ClientB = Address.Parse("ClientB");
-    public static Address ClientC = Address.Parse("ClientC");
+    public static string ClientA = "ClientA";
+    public static string ClientB = "ClientB";
+    public static string ClientC = "ClientC";
 }

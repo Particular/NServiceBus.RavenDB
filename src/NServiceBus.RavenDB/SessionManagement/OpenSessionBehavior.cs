@@ -4,16 +4,22 @@
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.RavenDB.Internal;
-    using NServiceBus.RavenDB.Persistence;
     using NServiceBus.Unicast;
     using Raven.Client;
 
-    class OpenSessionBehavior : IBehavior<IncomingContext>
+    class OpenSessionBehavior : PhysicalMessageProcessingStageBehavior
     {
-        public static Func<IMessageContext, string> GetDatabaseName = context => String.Empty;
-        public IDocumentStoreWrapper DocumentStoreWrapper { get; set; }
+        readonly IDocumentStoreWrapper documentStoreWrapper;
 
-        public void Invoke(IncomingContext context, Action next)
+        public static Func<IMessageContext, string> GetDatabaseName = context => String.Empty;
+
+
+        public OpenSessionBehavior(IDocumentStoreWrapper documentStoreWrapper)
+        {
+            this.documentStoreWrapper = documentStoreWrapper;
+        }
+
+        public override void Invoke(Context context, Action next)
         {
             using (var session = OpenSession(context))
             {
@@ -23,10 +29,10 @@
             }
         }
 
-        IDocumentSession OpenSession(IncomingContext context)
+        IDocumentSession OpenSession(Context context)
         {
             var databaseName = GetDatabaseName(new MessageContext(context.PhysicalMessage));
-            var documentSession = string.IsNullOrEmpty(databaseName) ? DocumentStoreWrapper.DocumentStore.OpenSession() : DocumentStoreWrapper.DocumentStore.OpenSession(databaseName);
+            var documentSession = string.IsNullOrEmpty(databaseName) ? documentStoreWrapper.DocumentStore.OpenSession() : documentStoreWrapper.DocumentStore.OpenSession(databaseName);
             documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
             return documentSession;
@@ -47,11 +53,13 @@
 
     class RavenSessionProvider : ISessionProvider
     {
-        public PipelineExecutor PipelineExecutor { get; set; }
+        readonly BehaviorContext context;
 
-        public IDocumentSession Session
+        public RavenSessionProvider(BehaviorContext context)
         {
-            get { return PipelineExecutor.CurrentContext.Get<IDocumentSession>(); }
+            this.context = context;
         }
+
+        public IDocumentSession Session { get { return context.Get<IDocumentSession>(); } }
     }
 }

@@ -52,7 +52,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                    var td = new TimeoutData
                                             {
                                                 SagaId = sagaId,
-                                                Destination = new Address("queue", "machine"),
+                                                Destination = "queue@machine",
                                                 Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                                                 OwningTimeoutManager = string.Empty,
                                             };
@@ -149,7 +149,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                    var td = new TimeoutData
                                             {
                                                 SagaId = sagaId,
-                                                Destination = new Address("queue", "machine"),
+                                                Destination = "queue@machine",
                                                 Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                                                 OwningTimeoutManager = string.Empty,
                                             };
@@ -181,7 +181,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                        var td = new TimeoutData
                                                 {
                                                     SagaId = sagaId,
-                                                    Destination = new Address("queue", "machine"),
+                                                    Destination = "queue@machine",
                                                     Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                                                     OwningTimeoutManager = string.Empty,
                                                 };
