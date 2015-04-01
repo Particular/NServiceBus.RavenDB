@@ -28,7 +28,7 @@
                 };
                 if (docStore.DefaultDatabase == null)
                 {
-                    docStore.DefaultDatabase = settings.EndpointName();
+                    docStore.DefaultDatabase = settings.EndpointName().ToString();
                 }
                 ApplyRavenDBConventions(settings, docStore);
 
@@ -46,7 +46,7 @@
 
             if (docStore.DefaultDatabase == null)
             {
-                docStore.DefaultDatabase = settings.EndpointName();
+                docStore.DefaultDatabase = settings.EndpointName().ToString();
             }
 
             ApplyRavenDBConventions(settings, docStore);

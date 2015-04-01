@@ -14,7 +14,7 @@
             this.store = store;
         }
 
-        public IDocumentSession Session { get { return session ?? (session = OpenSession()); }}
+        public IDocumentSession Session => session ?? (session = OpenSession());
 
         IDocumentSession OpenSession()
         {
@@ -35,10 +35,7 @@
 
         public void SaveChanges()
         {
-            if (session == null)
-                return;
-
-            session.SaveChanges();
+            session?.SaveChanges();
         }
     }
 }

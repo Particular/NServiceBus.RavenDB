@@ -30,7 +30,7 @@
                     holder.DocumentStore = new DocumentStore
                     {
                         Url = p.Url,
-                        DefaultDatabase = p.DatabaseName ?? settings.EndpointName(),
+                        DefaultDatabase = p.DatabaseName ?? settings.EndpointName().ToString(),
                         ApiKey = p.ApiKey,
                         Credentials = p.Credentials
                     };

@@ -1,4 +1,6 @@
 using System.Linq;
+using System.Threading.Tasks;
+using NServiceBus.Extensibility;
 using NServiceBus.RavenDB.Tests;
 using NServiceBus.Unicast.Subscriptions.RavenDB;
 using NUnit.Framework;
@@ -7,18 +9,17 @@ using NUnit.Framework;
 public class When_receiving_an_unsubscribe_message : RavenDBPersistenceTestBase
 {
     [Test]
-    public void All_subscription_entries_for_specified_message_types_should_be_removed()
+    public async Task All_subscription_entries_for_specified_message_types_should_be_removed()
     {
-        var storage = new SubscriptionPersister
-        {
-            DocumentStore = store
-        };
+        var storage = new SubscriptionPersister(store);
+        var context = new ContextBag();
 
-        storage.Subscribe(TestClients.ClientA, MessageTypes.All);
+        await storage.Subscribe(TestClients.ClientA, MessageTypes.All, context);
 
-        storage.Unsubscribe(TestClients.ClientA, MessageTypes.All);
+        await storage.Unsubscribe(TestClients.ClientA, MessageTypes.All, context);
 
-        var clients = storage.GetSubscriberAddressesForMessage(MessageTypes.All);
+        var clients = await storage.GetSubscriberAddressesForMessage(MessageTypes.All, context);
+
         Assert.IsFalse(clients.Any(a => a == TestClients.ClientA));
     }
 }

@@ -1,18 +1,18 @@
 ﻿namespace NServiceBus.RavenDB.SessionManagement
 {
     using System;
+    using System.Threading.Tasks;
     using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
     using Raven.Client;
 
-    class ProvidedSessionBehavior : IBehavior<IncomingContext>
+    class ProvidedSessionBehavior : Behavior<PhysicalMessageProcessingContext>
     {
         public Func<IDocumentSession> GetSession { get; set; }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override Task Invoke(PhysicalMessageProcessingContext context, Func<Task> next)
         {
             context.Set(GetSession);
-            next();
+            return next();
         }
 
         public class Registration : RegisterStep

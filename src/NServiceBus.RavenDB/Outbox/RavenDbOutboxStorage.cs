@@ -32,8 +32,7 @@
 
             Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
 
-            context.Container.ConfigureComponent<OutboxPersister>(DependencyLifecycle.InstancePerCall)
-                .ConfigureProperty(x => x.DocumentStore, store);
+            context.Container.ConfigureComponent(b => new OutboxPersister(store), DependencyLifecycle.InstancePerCall);
 
             context.Container.ConfigureComponent<OutboxRecordsCleaner>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(x => x.DocumentStore, store);
@@ -41,8 +40,6 @@
 
         class OutboxCleaner : FeatureStartupTask, IDisposable
         {
-            Timer cleanupTimer;
-            TimeSpan timeToKeepDeduplicationData;
             public OutboxRecordsCleaner Cleaner { get; set; }
             public ReadOnlySettings Settings { get; set; }
 
@@ -78,6 +75,9 @@
             {
                 Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData);
             }
+
+            Timer cleanupTimer;
+            TimeSpan timeToKeepDeduplicationData;
         }
     }
 }

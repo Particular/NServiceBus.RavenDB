@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
+    using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
@@ -20,33 +22,48 @@
         }
 
         [Test]
-        public void Should_delete_all_OutboxRecords_that_have_been_dispatched()
+        public async Task Should_delete_all_OutboxRecords_that_have_been_dispatched()
         {
             var id = Guid.NewGuid().ToString("N");
+            var context = new ContextBag();
 
-            var sessionFactory = new RavenSessionFactory(store);
 
-            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store };
-            persister.Store("NotDispatched", Enumerable.Empty<TransportOperation>());
-            persister.Store(id, new List<TransportOperation>
+            var persister = new OutboxPersister(store);
+
+            using (var transaction = await persister.BeginTransaction(context))
             {
-                new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>()),
+                await persister.Store(new OutboxMessage("NotDispatched", new List<TransportOperation>()), transaction, context);
+
+                await transaction.Commit();
+            }
+
+            var outboxMessage = new OutboxMessage(id, new List<TransportOperation>
+            {
+                new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>())
             });
 
-            sessionFactory.SaveChanges();
-            sessionFactory.ReleaseSession();
 
-            persister.SetAsDispatched(id);
+            using (var transaction = await persister.BeginTransaction(context))
+            {
+                await persister.Store(outboxMessage, transaction, context);
+                await transaction.Commit();
+            }
+
+
+            await persister.SetAsDispatched(id, context);
             Thread.Sleep(TimeSpan.FromSeconds(1)); //Need to wait for dispatch logic to finish
 
             WaitForIndexing(store);
 
-            var cleaner = new OutboxRecordsCleaner { DocumentStore = store };
+            var cleaner = new OutboxRecordsCleaner
+            {
+                DocumentStore = store
+            };
             cleaner.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));
 
-            using (var session = store.OpenSession())
+            using (var s = store.OpenSession())
             {
-                var result = session.Query<OutboxRecord>().ToList();
+                var result = s.Query<OutboxRecord>().ToList();
 
                 Assert.AreEqual(1, result.Count);
                 Assert.AreEqual("NotDispatched", result[0].MessageId);

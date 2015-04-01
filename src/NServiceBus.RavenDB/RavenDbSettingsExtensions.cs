@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using System.Collections.Generic;
     using NServiceBus.Configuration.AdvanceExtensibility;
     using NServiceBus.Persistence;
     using NServiceBus.RavenDB;
@@ -63,7 +64,8 @@
         ///     message.
         /// </param>
         /// <returns>The configuration object.</returns>
-        public static PersistenceExtentions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IMessageContext, string> convention)
+     //todo: obsolete
+        public static PersistenceExtentions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDictionary<string,string>, string> convention)
         {
             OpenSessionBehavior.GetDatabaseName = convention;
             return cfg;
@@ -81,7 +83,7 @@
         }
 
         /// <summary>
-        ///     Confirms the usage of a storage engine (i.ex. voron) which doesn't support distributed transactions 
+        ///     Confirms the usage of a storage engine (i.ex. voron) which doesn't support distributed transactions
         ///     whilst leaving the distributed transaction support enabled.
         /// </summary>
         /// <param name="cfg"></param>

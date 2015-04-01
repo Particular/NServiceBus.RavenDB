@@ -3,7 +3,6 @@
     using System;
     using NServiceBus.Gateway.Deduplication;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
-    using NServiceBus.Saga;
     using NServiceBus.TimeoutPersisters.RavenDB;
     using Raven.Abstractions.Data;
     using Raven.Client;
@@ -46,7 +45,7 @@
 
             if (IsASagaEntity(t))
             {
-                tagName = tagName.Replace("Data", String.Empty);
+                tagName = tagName.Replace("Data", string.Empty);
             }
 
             return tagName;

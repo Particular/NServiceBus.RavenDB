@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using NServiceBus;
+using NServiceBus.Extensibility;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.RavenDB.Tests;
 using NServiceBus.Unicast.Subscriptions;
@@ -12,7 +12,7 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
     [Test]
     public void A_subscription_entry_should_be_added_to_the_database()
     {
-        var clientEndpoint = Address.Parse("TestEndpoint");
+        var clientEndpoint = "TestEndpoint";
 
         var messageTypes = new[]
         {
@@ -20,12 +20,9 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
             new MessageType("MessageType2", "1.0.0.0")
         };
 
-        var storage = new SubscriptionPersister
-        {
-            DocumentStore = store
-        };
+        var storage = new SubscriptionPersister(store);
 
-        storage.Subscribe(clientEndpoint, messageTypes);
+        storage.Subscribe(clientEndpoint, messageTypes, new ContextBag());
 
         using (var session = store.OpenSession())
         {

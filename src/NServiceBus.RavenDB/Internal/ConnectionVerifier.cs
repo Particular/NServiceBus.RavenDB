@@ -26,11 +26,10 @@
                 Logger.InfoFormat("Connection to RavenDB at {0} verified. Server version: {1}", store.Url, serverVersion);
                 return;
             }
-            var message = string.Format(
-                @"Incompatible RavenDB client and server version combination detected. 
+            var message = $@"Incompatible RavenDB client and server version combination detected. 
 The RavenDB server version must be within the same Major+Minor range as the client version OR be greater than the client version. 
-Server Version: {0}
-Client Version: {1}", serverVersion, clientVersion);
+Server Version: {serverVersion}
+Client Version: {clientVersion}";
             throw new Exception(message);
         }
 
@@ -67,7 +66,7 @@ Client Version: {1}", serverVersion, clientVersion);
             }
             try
             {
-                var request = WebRequest.Create(string.Format("{0}/build/version", store.Url));
+                var request = WebRequest.Create($"{store.Url}/build/version");
                 request.Timeout = 2000;
                 using (var response = (HttpWebResponse)request.GetResponse())
                 {

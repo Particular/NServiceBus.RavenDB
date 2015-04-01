@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -9,11 +9,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NServiceBus.RavenDB.Tests</RootNamespace>
     <AssemblyName>NServiceBus.RavenDB.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,6 +25,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,12 +36,36 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="NServiceBus.Core, Version=5.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Data.Edm, Version=5.6.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NServiceBus.5.2.1\lib\net45\NServiceBus.Core.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Data.Edm.5.6.2\lib\net40\Microsoft.Data.Edm.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.OData, Version=5.6.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Data.OData.5.6.2\lib\net40\Microsoft.Data.OData.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.Services.Client, Version=5.6.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.2\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Configuration, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.2.0.3\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Storage, Version=4.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\WindowsAzure.Storage.4.3.0\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NServiceBus.6.0.0-unstable1008\lib\net451\NServiceBus.Core.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
@@ -86,14 +113,18 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LegacyAddress.cs" />
     <Compile Include="Outbox\When_adding_outbox_messages.cs" />
     <Compile Include="Outbox\When_cleaning_outbox_messages.cs" />
     <Compile Include="Persistence\DocumentStoreExtensionsForVoron.cs" />
     <Compile Include="Persistence\TestConnectionVerifier.cs" />
     <Compile Include="Persistence\TestStorageEngineVerifier.cs" />
     <Compile Include="RavenDBPersistenceTestBase.cs" />
+    <Compile Include="RavenDBPersistenceTestBaseExtensions.cs" />
+    <Compile Include="SagaPersister\RavenTestBaseForSagaPersistenceOptions.cs" />
     <Compile Include="SagaPersister\Saga_with_unique_property_set_to_null.cs" />
-    <Compile Include="SagaPersister\When_completing_a_saga_with_the_raven_persister.cs" />
+    <Compile Include="SagaPersister\When_completing_a_version3_saga.cs" />
+    <Compile Include="SagaPersister\When_completing_a_saga_with_unique_property.cs" />
     <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_an_Enum_property.cs" />
     <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_a_concrete_class_property.cs" />
     <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_a_date_time_property.cs" />
@@ -102,20 +133,23 @@
     <Compile Include="SagaPersister\When_persisting_a_saga_with_the_same_unique_property_as_a_completed_saga.cs" />
     <Compile Include="SagaPersister\When_storing_a_saga_with_a_long_namespace.cs" />
     <Compile Include="SagaPersister\When_trying_to_fetch_a_non_existing_saga_by_its_unique_property.cs" />
-    <Compile Include="SagaPersister\When_updating_a_saga_property_on_a_existing_sagaInstance_that_just_got_a_unique_attribute_set.cs" />
     <Compile Include="SagaPersister\When_updating_a_saga_property_that_does_not_have_a_unique_attribute.cs" />
     <Compile Include="SagaPersister\When_updating_a_saga_property_that_has_a_unique_attribute.cs" />
     <Compile Include="SagaPersister\When_updating_a_saga_without_unique_properties.cs" />
     <Compile Include="RavenSessionFactory.cs" />
     <Compile Include="SubscriptionStorage\TestData.cs" />
+    <Compile Include="SubscriptionStorage\When_converting_old_subscription_to_new_subscription.cs" />
     <Compile Include="SubscriptionStorage\When_listing_subscribers_for_a_non_existing_message_type.cs" />
     <Compile Include="SubscriptionStorage\When_listing_subscribers_for_message_types.cs" />
     <Compile Include="SubscriptionStorage\When_receiving_an_unsubscription_message.cs" />
     <Compile Include="SubscriptionStorage\When_receiving_a_subscription_message.cs" />
     <Compile Include="SubscriptionStorage\When_receiving_duplicate_subscription_messages.cs" />
+    <Compile Include="Timeouts\FakeLegacyTimoutDataClrTypeConversionListener.cs" />
+    <Compile Include="Timeouts\LegacyTimeoutData.cs" />
     <Compile Include="Timeouts\Should_not_skip_timeouts.cs" />
+    <Compile Include="Timeouts\When_converting_old_timeout_to_new_timeout.cs" />
+    <Compile Include="Timeouts\When_fetching_old_timeouts_from_storage.cs" />
     <Compile Include="Timeouts\When_fetching_timeouts_from_storage.cs" />
-    <Compile Include="Timeouts\When_removing_timeouts_from_the_storage.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

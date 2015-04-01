@@ -3,6 +3,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
+    using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
@@ -20,51 +22,63 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         }
 
         [Test]
-        public void Should_throw_if__trying_to_insert_same_messageid()
+        public async Task Should_throw_if__trying_to_insert_same_messageid_concurrently()
         {
-            var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory);
-
-            using (sessionFactory.Session)
+            var persister = new OutboxPersister(store);
+            var exception = await Catch<NonUniqueObjectException>(async () =>
             {
-                persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>());
-                Assert.Throws<NonUniqueObjectException>(() => persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>()));
-
-                sessionFactory.SaveChanges();
-            }
-        }
-
-        [Test]
-        public void Should_throw_if__trying_to_insert_same_messageid2()
-        {
-            var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory);
-
-            persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>());
-            sessionFactory.SaveChanges();
-            sessionFactory.ReleaseSession();
-
-            persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>());
-            Assert.Throws<ConcurrencyException>(sessionFactory.SaveChanges);
-        }
-
-        [Test]
-        public void Should_save_with_not_dispatched()
-        {
-            var id = Guid.NewGuid().ToString("N");
-            var sessionFactory = new RavenSessionFactory(store);
-
-            var persister = new OutboxPersister(sessionFactory){DocumentStore = store};
-            persister.Store(id, new List<TransportOperation>
-            {
-                new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>()),
+                using (var transaction = await persister.BeginTransaction(new ContextBag()))
+                {
+                    await persister.Store(new OutboxMessage("MySpecialId", new List<TransportOperation>()), transaction, new ContextBag());
+                    await persister.Store(new OutboxMessage("MySpecialId", new List<TransportOperation>()), transaction, new ContextBag());
+                    await transaction.Commit();
+                }
             });
 
-            sessionFactory.SaveChanges();
-            sessionFactory.ReleaseSession();
+            Assert.NotNull(exception);
+        }
 
-            OutboxMessage result;
-            persister.TryGet(id, out result);
+        [Test]
+        public async Task Should_throw_if__trying_to_insert_same_messageid()
+        {
+            var persister = new OutboxPersister(store);
+            using (var transaction = await persister.BeginTransaction(new ContextBag()))
+            {
+                await persister.Store(new OutboxMessage("MySpecialId", new List<TransportOperation>()), transaction, new ContextBag());
+
+                await transaction.Commit();
+            }
+
+            var exception = await Catch<ConcurrencyException>(async () =>
+            {
+                using (var transaction = await persister.BeginTransaction(new ContextBag()))
+                {
+                    await persister.Store(new OutboxMessage("MySpecialId", new List<TransportOperation>()), transaction, new ContextBag());
+
+                    await transaction.Commit();
+                }
+            });
+            Assert.NotNull(exception);
+        }
+
+        [Test]
+        public async Task Should_save_with_not_dispatched()
+        {
+            var persister = new OutboxPersister(store);
+            var id = Guid.NewGuid().ToString("N");
+            var message = new OutboxMessage(id, new List<TransportOperation>
+            {
+                new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>())
+            });
+
+            using (var transaction = await persister.BeginTransaction(new ContextBag()))
+            {
+                await persister.Store(message, transaction, new ContextBag());
+
+                await transaction.Commit();
+            }
+
+            var result = await persister.Get(id, new ContextBag());
 
             var operation = result.TransportOperations.Single();
 
@@ -72,28 +86,29 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         }
 
         [Test]
-        public void Should_update_dispatched_flag()
+        public async Task Should_update_dispatched_flag()
         {
+            var persister = new OutboxPersister(store);
             var id = Guid.NewGuid().ToString("N");
-
-            var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store };
-            persister.Store(id, new List<TransportOperation>
+            var message = new OutboxMessage(id, new List<TransportOperation>
             {
-                new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>()),
+                new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>())
             });
 
-            sessionFactory.SaveChanges();
-            sessionFactory.ReleaseSession();
+            using (var transaction = await persister.BeginTransaction(new ContextBag()))
+            {
+                await persister.Store(message, transaction, new ContextBag());
 
-            persister.SetAsDispatched(id);
+                await transaction.Commit();
+            }
+            await persister.SetAsDispatched(id, new ContextBag());
 
             WaitForIndexing(store);
 
-            using (var session = store.OpenSession())
+            using (var s = store.OpenSession())
             {
-                var result = session.Query<OutboxRecord>().Where(o => o.MessageId == id)
-                    .SingleOrDefault();
+                var result = s.Query<OutboxRecord>()
+                    .SingleOrDefault(o => o.MessageId == id);
 
                 Assert.NotNull(result);
                 Assert.True(result.Dispatched);

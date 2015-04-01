@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB", "NServiceBus.RavenDB\NServiceBus.RavenDB.csproj", "{281646E3-32E0-4F4D-BCF6-1DC5EFC6C268}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.Tests", "NServiceBus.RavenDB.Tests\NServiceBus.RavenDB.Tests.csproj", "{7F6284D7-8DBE-44D3-875C-C59FC7489287}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.AcceptanceTests", "NServiceBus.RavenDB.AcceptanceTests\NServiceBus.RavenDB.AcceptanceTests.csproj", "{8BF5E2C0-8F97-4746-9A8B-10CB38CF8B97}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "Sample\Sample.csproj", "{B07C8077-C14A-4C62-BF45-9E0AF56D42B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +27,6 @@ Global
 		{8BF5E2C0-8F97-4746-9A8B-10CB38CF8B97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BF5E2C0-8F97-4746-9A8B-10CB38CF8B97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BF5E2C0-8F97-4746-9A8B-10CB38CF8B97}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B07C8077-C14A-4C62-BF45-9E0AF56D42B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B07C8077-C14A-4C62-BF45-9E0AF56D42B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B07C8077-C14A-4C62-BF45-9E0AF56D42B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B07C8077-C14A-4C62-BF45-9E0AF56D42B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

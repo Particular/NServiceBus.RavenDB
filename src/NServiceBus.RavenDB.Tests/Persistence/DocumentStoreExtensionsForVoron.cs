@@ -10,7 +10,7 @@
         public static IDisposable SetupVoronTest(this DocumentStore store)
         {
             store.Initialize();
-            var dataDir = string.Format("~/VoronTest-{0}", Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper());
+            var dataDir = $"~/VoronTest-{Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper()}";
             store.DatabaseCommands.GlobalAdmin.CreateDatabase(new DatabaseDocument
             {
                 Id = "VoronTest",
