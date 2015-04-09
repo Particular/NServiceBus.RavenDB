@@ -39,6 +39,8 @@
             {
                 InsertAfter(WellKnownStep.ExecuteUnitOfWork);
                 InsertBeforeIfExists(WellKnownStep.InvokeSaga);
+                InsertAfterIfExists("OutboxDeduplication");
+                InsertBeforeIfExists("OutboxRecorder");
             }
         }
     }
