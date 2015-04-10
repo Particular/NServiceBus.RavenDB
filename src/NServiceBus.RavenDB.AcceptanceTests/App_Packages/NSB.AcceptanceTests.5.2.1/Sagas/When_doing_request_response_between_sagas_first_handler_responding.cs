@@ -1,4 +1,4 @@
-namespace NServiceBus.AcceptanceTests.Sagas
+﻿namespace NServiceBus.AcceptanceTests.Sagas
 {
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTesting.Support;
