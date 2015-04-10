@@ -146,7 +146,6 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Mutators\When_defining_outgoing_message_mutators.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Mutators\When_outgoing_mutator_replaces_instance.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\NonDTC\When_blowing_up_just_after_dispatch.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\NonDTC\When_outbox_with_auditing.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\NonDTC\When_receiving_a_message.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\NonDTC\When_sending_from_a_non_dtc_endpoint.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\NonTx\When_sending_inside_ambient_tx.cs" />
@@ -178,6 +177,11 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Retries\When_fails_with_retries_set_to_0.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Retries\When_sending_to_slr.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Retries\When_Subscribing_to_errors.cs" />
+    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Sagas\When_receiving_that_should_start_a_saga_without_interception.cs" />
+    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Sagas\When_receiving_that_should_start_a_saga_with_interception.cs" />
+    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Sagas\When_doing_request_response_between_sagas_with_timeout.cs" />
+    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Sagas\When_doing_request_response_between_sagas_response_from_noninitiating.cs" />
+    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Sagas\When_doing_request_response_between_sagas_first_handler_responding.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Sagas\Issue_1819.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Sagas\Issue_2044.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Sagas\When_an_endpoint_replies_to_a_saga.cs" />
