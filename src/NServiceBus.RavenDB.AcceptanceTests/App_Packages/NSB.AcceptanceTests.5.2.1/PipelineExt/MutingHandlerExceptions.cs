@@ -20,7 +20,7 @@ namespace NServiceBus.AcceptanceTests.PipelineExt
             Scenario.Define(context)
                 .WithEndpoint<EndpointWithCustomExceptionMuting>(b => b.Given(bus => bus.SendLocal(new MessageThatWillBlowUpButExWillBeMuted())))
                 .WithEndpoint<AuditSpy>()
-                .Done(c => c.IsMessageHandlingComplete)
+                .Done(c => c.IsMessageHandlingComplete && context.MessageAudited)
                 .Run();
 
             Assert.IsTrue(context.MessageAudited);
@@ -79,7 +79,8 @@ namespace NServiceBus.AcceptanceTests.PipelineExt
 
                 class MyExceptionFilteringRegistration : RegisterStep
                 {
-                    public MyExceptionFilteringRegistration() : base("ExceptionFiltering", typeof(MyExceptionFilteringBehavior), "Custom exception filtering")
+                    public MyExceptionFilteringRegistration()
+                        : base("ExceptionFiltering", typeof(MyExceptionFilteringBehavior), "Custom exception filtering")
                     {
                         InsertAfter(WellKnownStep.AuditProcessedMessage);
                         InsertBefore(WellKnownStep.InvokeHandlers);
