@@ -19,6 +19,8 @@ public class ConfigureRavenDBPersistence
         documentStore.Initialize();
 
         config.UsePersistence<RavenDBPersistence>().DoNotSetupDatabasePermissions().SetDefaultDocumentStore(documentStore);
+
+        Console.WriteLine("Created '{0}' database", documentStore.DefaultDatabase);
     }
 
     public void Cleanup()
@@ -28,5 +30,7 @@ public class ConfigureRavenDBPersistence
         var deleteUrl = string.Format("/admin/databases/{0}?hard-delete=true", Uri.EscapeDataString(documentStore.DefaultDatabase));
 
         client.CreateRequest(deleteUrl, "DELETE").ExecuteRequestAsync().Wait();
+
+        Console.WriteLine("Deleted '{0}' database", documentStore.DefaultDatabase);
     }
 }
