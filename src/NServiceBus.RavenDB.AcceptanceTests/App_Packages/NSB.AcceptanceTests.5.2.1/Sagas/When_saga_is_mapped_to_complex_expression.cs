@@ -64,6 +64,7 @@
                 public virtual Guid Id { get; set; }
                 public virtual string Originator { get; set; }
                 public virtual string OriginalMessageId { get; set; }
+                [Unique]
                 public virtual string KeyValue { get; set; }
             }
         }

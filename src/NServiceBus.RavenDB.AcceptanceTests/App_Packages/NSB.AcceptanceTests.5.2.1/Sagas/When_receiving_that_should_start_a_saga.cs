@@ -74,6 +74,7 @@
 
                 public class TestSagaData : ContainSagaData
                 {
+                    [Unique]
                     public string SomeId { get; set; }
                 }
             }

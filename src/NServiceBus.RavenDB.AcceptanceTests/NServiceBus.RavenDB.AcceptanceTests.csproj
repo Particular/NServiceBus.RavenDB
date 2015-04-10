@@ -109,6 +109,7 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Basic\When_using_callbacks_with_messageid_eq_cid_.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Basic\When_using_callback_to_get_message.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Basic\When_using_ineedinitialization.cs" />
+    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\ConfigureMsmqTransport.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Config\When_a_config_override_is_found.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Config\When_IWantToRunWhenBusStartsAndStops_Start_throws.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Config\When__startup_is_complete.cs" />
