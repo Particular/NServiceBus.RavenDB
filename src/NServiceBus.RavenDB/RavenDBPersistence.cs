@@ -23,10 +23,10 @@
                 s.EnableFeatureByDefault<SharedDocumentStore>();
             });
 
-            Supports(Storage.GatewayDeduplication, s => s.EnableFeatureByDefault<RavenDbGatewayDeduplication>());
-            Supports(Storage.Timeouts, s => s.EnableFeatureByDefault<RavenDbTimeoutStorage>());
-            Supports(Storage.Sagas, s => s.EnableFeatureByDefault<RavenDbSagaStorage>());
-            Supports(Storage.Subscriptions, s => s.EnableFeatureByDefault<RavenDbSubscriptionStorage>());
+            Supports<StorageType.GatewayDeduplication>(s => s.EnableFeatureByDefault<RavenDbGatewayDeduplication>());
+            Supports<StorageType.Timeouts>(s => s.EnableFeatureByDefault<RavenDbTimeoutStorage>());
+            Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<RavenDbSagaStorage>());
+            Supports<StorageType.Subscriptions>(s => s.EnableFeatureByDefault<RavenDbSubscriptionStorage>());
         }
     }
 }
