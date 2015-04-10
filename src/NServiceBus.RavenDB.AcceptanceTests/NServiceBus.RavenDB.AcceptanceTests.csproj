@@ -49,11 +49,11 @@
     </Reference>
     <Reference Include="Raven.Abstractions, Version=3.0.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\RavenDB.Client.3.0.3599\lib\net45\Raven.Abstractions.dll</HintPath>
+      <HintPath>..\packages\RavenDB.Client.3.0.3660\lib\net45\Raven.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Raven.Client.Lightweight, Version=3.0.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\RavenDB.Client.3.0.3599\lib\net45\Raven.Client.Lightweight.dll</HintPath>
+      <HintPath>..\packages\RavenDB.Client.3.0.3660\lib\net45\Raven.Client.Lightweight.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -195,7 +195,6 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Sagas\When_doing_request_response_between_sagas_with_timeout.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Sagas\When_message_has_a_saga_id.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Sagas\When_receiving_that_completes_the_saga.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Sagas\When_receiving_that_should_start_a_saga.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Sagas\When_receiving_that_should_start_a_saga_without_interception.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Sagas\When_receiving_that_should_start_a_saga_with_interception.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.0\Sagas\When_replies_to_message_published_by_a_saga.cs" />
