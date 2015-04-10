@@ -34,8 +34,8 @@
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<TestSagaData> mapper)
                 {
-                    mapper.ConfigureMapping<StartSagaMessage>(m=>m.SomeId)
-                        .ToSaga(s=>s.SomeId);
+                    mapper.ConfigureMapping<StartSagaMessage>(m => m.SomeId)
+                        .ToSaga(s => s.SomeId);
                 }
 
                 public class TestSagaData : ContainSagaData
@@ -45,7 +45,7 @@
                 }
             }
 
-            
+
             public class InterceptingHandler : IHandleMessages<StartSagaMessage>
             {
                 public SagaEndpointContext Context { get; set; }
