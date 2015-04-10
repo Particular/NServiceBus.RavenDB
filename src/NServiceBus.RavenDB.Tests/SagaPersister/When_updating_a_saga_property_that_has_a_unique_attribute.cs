@@ -5,44 +5,40 @@ using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]
-public class When_updating_a_saga_property_that_has_a_unique_attribute 
+public class When_updating_a_saga_property_that_has_a_unique_attribute : RavenDBPersistenceTestBase
 {
     [Test]
     public void It_should_allow_the_update()
     {
-        using (var store = DocumentStoreBuilder.Build())
-        {
+        var factory = new RavenSessionFactory(store);
+        factory.ReleaseSession();
+        var persister = new SagaPersister(factory);
+        var uniqueString = Guid.NewGuid().ToString();
+        var saga1 = new SagaData
+            {
+                Id = Guid.NewGuid(),
+                UniqueString = uniqueString
+            };
 
-            var factory = new RavenSessionFactory(store);
-            factory.ReleaseSession();
-            var persister = new SagaPersister(factory);
-            var uniqueString = Guid.NewGuid().ToString();
-            var saga1 = new SagaData
-                {
-                    Id = Guid.NewGuid(),
-                    UniqueString = uniqueString
-                };
+        persister.Save(saga1);
+        factory.SaveChanges();
+        factory.ReleaseSession();
 
-            persister.Save(saga1);
-            factory.SaveChanges();
-            factory.ReleaseSession();
+        var saga = persister.Get<SagaData>(saga1.Id);
+        saga.UniqueString = Guid.NewGuid().ToString();
+        persister.Update(saga);
+        factory.SaveChanges();
+        factory.ReleaseSession();
 
-            var saga = persister.Get<SagaData>(saga1.Id);
-            saga.UniqueString = Guid.NewGuid().ToString();
-            persister.Update(saga);
-            factory.SaveChanges();
-            factory.ReleaseSession();
+        var saga2 = new SagaData
+            {
+                Id = Guid.NewGuid(),
+                UniqueString = uniqueString
+            };
 
-            var saga2 = new SagaData
-                {
-                    Id = Guid.NewGuid(),
-                    UniqueString = uniqueString
-                };
-
-            //this should not blow since we changed the unique value in the previous saga
-            persister.Save(saga2);
-            factory.SaveChanges();
-        }
+        //this should not blow since we changed the unique value in the previous saga
+        persister.Save(saga2);
+        factory.SaveChanges();
     }
 
     class SagaData : IContainSagaData
@@ -52,7 +48,7 @@ public class When_updating_a_saga_property_that_has_a_unique_attribute
         public string OriginalMessageId { get; set; }
 
         [Unique]
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
+        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
     }
 }

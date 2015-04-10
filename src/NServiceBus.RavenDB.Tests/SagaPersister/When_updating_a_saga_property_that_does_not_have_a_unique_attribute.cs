@@ -5,34 +5,30 @@ using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]
-public class When_updating_a_saga_property_that_does_not_have_a_unique_attribute 
+public class When_updating_a_saga_property_that_does_not_have_a_unique_attribute : RavenDBPersistenceTestBase
 {
     [Test]
     public void It_should_persist_successfully()
     {
+        var factory = new RavenSessionFactory(store);
+        factory.ReleaseSession();
+        var persister = new SagaPersister(factory);
+        var uniqueString = Guid.NewGuid().ToString();
 
-        using (var store = DocumentStoreBuilder.Build())
+        var saga1 = new SagaData
         {
-            var factory = new RavenSessionFactory(store);
-            factory.ReleaseSession();
-            var persister = new SagaPersister(factory);
-            var uniqueString = Guid.NewGuid().ToString();
+            Id = Guid.NewGuid(),
+            UniqueString = uniqueString,
+            NonUniqueString = "notUnique"
+        };
 
-            var saga1 = new SagaData
-                {
-                    Id = Guid.NewGuid(),
-                    UniqueString = uniqueString,
-                    NonUniqueString = "notUnique"
-                };
+        persister.Save(saga1);
+        factory.SaveChanges();
 
-            persister.Save(saga1);
-            factory.SaveChanges();
-
-            var saga = persister.Get<SagaData>(saga1.Id);
-            saga.NonUniqueString = "notUnique2";
-            persister.Update(saga);
-            factory.SaveChanges();
-        }
+        var saga = persister.Get<SagaData>(saga1.Id);
+        saga.NonUniqueString = "notUnique2";
+        persister.Update(saga);
+        factory.SaveChanges();
     }
 
 

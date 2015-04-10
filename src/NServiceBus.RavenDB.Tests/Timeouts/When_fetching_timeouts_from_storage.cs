@@ -8,7 +8,7 @@
     using TimeoutPersisters.RavenDB;
     using TimeoutData = Timeout.Core.TimeoutData;
 
-    public class When_fetching_timeouts_from_storage : RavenTestBase
+    public class When_fetching_timeouts_from_storage : RavenDBPersistenceTestBase
     {
         [Test]
         public void Should_return_the_complete_list_of_timeouts()

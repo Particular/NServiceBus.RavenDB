@@ -7,7 +7,7 @@ using NServiceBus.Unicast.Subscriptions.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]
-public class When_receiving_a_subscription_message : RavenTestBase
+public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
 {
     [Test]
     public void A_subscription_entry_should_be_added_to_the_database()

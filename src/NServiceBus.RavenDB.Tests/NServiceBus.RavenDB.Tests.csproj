@@ -43,9 +43,9 @@
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="Raven.Abstractions">
-      <HintPath>..\packages\RavenDB.Client.3.0.3660\lib\net45\Raven.Abstractions.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Raven.Abstractions, Version=3.0.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\RavenDB.Tests.Helpers.3.0.3660\lib\net45\Raven.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Raven.Client.Lightweight, Version=3.0.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -54,6 +54,12 @@
     <Reference Include="Raven.Database, Version=3.0.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\RavenDB.Database.3.0.3660\lib\net45\Raven.Database.dll</HintPath>
+    </Reference>
+    <Reference Include="Raven.Server">
+      <HintPath>..\packages\RavenDB.Tests.Helpers.3.0.3660\lib\net45\Raven.Server.exe</HintPath>
+    </Reference>
+    <Reference Include="Raven.Tests.Helpers">
+      <HintPath>..\packages\RavenDB.Tests.Helpers.3.0.3660\lib\net45\Raven.Tests.Helpers.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -80,7 +86,7 @@
   <ItemGroup>
     <Compile Include="Persistence\RavenUserInstallerTests.cs" />
     <Compile Include="Persistence\TestConnectionVerifier.cs" />
-    <Compile Include="RavenTestBase.cs" />
+    <Compile Include="RavenDBPersistenceTestBase.cs" />
     <Compile Include="SagaPersister\Saga_with_unique_property_set_to_null.cs" />
     <Compile Include="SagaPersister\When_completing_a_saga_with_the_raven_persister.cs" />
     <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_an_Enum_property.cs" />
@@ -95,7 +101,6 @@
     <Compile Include="SagaPersister\When_updating_a_saga_property_that_does_not_have_a_unique_attribute.cs" />
     <Compile Include="SagaPersister\When_updating_a_saga_property_that_has_a_unique_attribute.cs" />
     <Compile Include="SagaPersister\When_updating_a_saga_without_unique_properties.cs" />
-    <Compile Include="DocumentStoreBuilder.cs" />
     <Compile Include="RavenSessionFactory.cs" />
     <Compile Include="SubscriptionStorage\TestData.cs" />
     <Compile Include="SubscriptionStorage\When_listing_subscribers_for_a_non_existing_message_type.cs" />

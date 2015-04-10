@@ -11,7 +11,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
 
     [TestFixture]
     [Ignore("These tests currently operate under the assumption TimeoutData.Id gets assigned by the persistence layer; need to revisit this")]
-    class When_removing_timeouts_from_the_storage:RavenTestBase
+    class When_removing_timeouts_from_the_storage:RavenDBPersistenceTestBase
     {
         [Test]
         public void Should_return_the_correct_headers()

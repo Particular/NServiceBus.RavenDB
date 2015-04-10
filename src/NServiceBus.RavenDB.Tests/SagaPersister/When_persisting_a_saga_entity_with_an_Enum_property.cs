@@ -5,7 +5,7 @@ using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]
-public class When_persisting_a_saga_entity_with_an_Enum_property 
+public class When_persisting_a_saga_entity_with_an_Enum_property : RavenDBPersistenceTestBase
 {
     [Test]
     public void Enums_should_be_persisted()
@@ -16,18 +16,14 @@ public class When_persisting_a_saga_entity_with_an_Enum_property
                 Status = StatusEnum.AnotherStatus
             };
 
-        using (var store = DocumentStoreBuilder.Build())
-        {
+        var factory = new RavenSessionFactory(store);
+        factory.ReleaseSession();
+        var persister = new SagaPersister(factory);
+        persister.Save(entity);
+        factory.SaveChanges();
 
-            var factory = new RavenSessionFactory(store);
-            factory.ReleaseSession();
-            var persister = new SagaPersister(factory);
-            persister.Save(entity);
-            factory.SaveChanges();
-            
-            var savedEntity = persister.Get<SagaData>(entity.Id);
-            Assert.AreEqual(entity.Status, savedEntity.Status);
-        }
+        var savedEntity = persister.Get<SagaData>(entity.Id);
+        Assert.AreEqual(entity.Status, savedEntity.Status);
     }
 
     class SagaData : IContainSagaData

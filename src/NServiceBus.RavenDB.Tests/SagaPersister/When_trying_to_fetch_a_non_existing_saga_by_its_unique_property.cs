@@ -5,19 +5,15 @@ using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]
-public class When_trying_to_fetch_a_non_existing_saga_by_its_unique_property 
+public class When_trying_to_fetch_a_non_existing_saga_by_its_unique_property : RavenDBPersistenceTestBase
 {
     [Test]
     public void It_should_return_null()
     {
-
-        using (var store = DocumentStoreBuilder.Build())
-        {
-            var factory = new RavenSessionFactory(store);
-            factory.ReleaseSession();
-            var persister = new SagaPersister(factory);
-            Assert.Null(persister.Get<SagaData>("UniqueString", Guid.NewGuid().ToString()));
-        }
+        var factory = new RavenSessionFactory(store);
+        factory.ReleaseSession();
+        var persister = new SagaPersister(factory);
+        Assert.Null(persister.Get<SagaData>("UniqueString", Guid.NewGuid().ToString()));
     }
 
     class SagaData : IContainSagaData
