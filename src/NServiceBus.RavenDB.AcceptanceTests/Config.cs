@@ -25,11 +25,7 @@ public class ConfigureRavenDBPersistence
 
     public void Cleanup()
     {
-        var client = documentStore.AsyncDatabaseCommands.ForSystemDatabase();
-
-        var deleteUrl = string.Format("/admin/databases/{0}?hard-delete=true", Uri.EscapeDataString(documentStore.DefaultDatabase));
-
-        client.CreateRequest(deleteUrl, "DELETE").ExecuteRequestAsync().Wait();
+        documentStore.DatabaseCommands.GlobalAdmin.DeleteDatabase(documentStore.DefaultDatabase, hardDelete: true);
 
         Console.WriteLine("Deleted '{0}' database", documentStore.DefaultDatabase);
     }
