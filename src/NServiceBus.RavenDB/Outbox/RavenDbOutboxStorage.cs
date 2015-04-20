@@ -1,11 +1,11 @@
 ﻿namespace NServiceBus.RavenDB.Outbox
 {
     using System;
-    using System.Configuration;
     using System.Threading;
     using NServiceBus.Features;
     using NServiceBus.Outbox.RavenDB;
     using NServiceBus.RavenDB.Internal;
+    using NServiceBus.Settings;
     using Raven.Client;
 
     class RavenDbOutboxStorage : Feature
@@ -45,9 +45,9 @@
         class OutboxCleaner : FeatureStartupTask, IDisposable
         {
             Timer cleanupTimer;
-            TimeSpan frequencyToRunDeduplicationDataCleanup;
             TimeSpan timeToKeepDeduplicationData;
             public OutboxRecordsCleaner Cleaner { get; set; }
+            public ReadOnlySettings Settings { get; set; }
 
             public void Dispose()
             {
@@ -60,32 +60,18 @@
 
             protected override void OnStart()
             {
-                var configValue = ConfigurationManager.AppSettings.Get("NServiceBus/Outbox/RavenDB/TimeToKeepDeduplicationData");
+                timeToKeepDeduplicationData = Settings.GetOrDefault<TimeSpan>("Outbox.TimeToKeepDeduplicationData");
 
-                if (configValue == null)
+                if (timeToKeepDeduplicationData == default(TimeSpan))
                 {
                     timeToKeepDeduplicationData = TimeSpan.FromDays(7);
                 }
-                else
-                {
-                    if (TimeSpan.TryParse(configValue, out timeToKeepDeduplicationData))
-                    {
-                        throw new Exception("Invalid value in \"NServiceBus/Outbox/RavenDB/TimeToKeepDeduplicationData\" AppSetting. Please ensure it is a TimeSpan.");
-                    }
-                }
 
-                configValue = ConfigurationManager.AppSettings.Get("NServiceBus/Outbox/RavenDB/FrequencyToRunDeduplicationDataCleanup");
+                var frequencyToRunDeduplicationDataCleanup = Settings.GetOrDefault<TimeSpan>("Outbox.FrequencyToRunDeduplicationDataCleanup");
 
-                if (configValue == null)
+                if (frequencyToRunDeduplicationDataCleanup == default(TimeSpan))
                 {
                     frequencyToRunDeduplicationDataCleanup = TimeSpan.FromMinutes(1);
-                }
-                else
-                {
-                    if (TimeSpan.TryParse(configValue, out frequencyToRunDeduplicationDataCleanup))
-                    {
-                        throw new Exception("Invalid value in \"NServiceBus/Outbox/RavenDB/FrequencyToRunDeduplicationDataCleanup\" AppSetting. Please ensure it is a TimeSpan.");
-                    }
                 }
 
                 cleanupTimer = new Timer(PerformCleanup, null, TimeSpan.FromMinutes(1), frequencyToRunDeduplicationDataCleanup);
