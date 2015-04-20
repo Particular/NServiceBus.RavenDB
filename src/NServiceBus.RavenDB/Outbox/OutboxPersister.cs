@@ -16,8 +16,6 @@
             this.sessionProvider = sessionProvider;
         }
 
-        // TODO this is a friction point, as it potentially allows for TryGet and SetAsDispatched to work
-        // TODO against a different DocumentStore than the one sessionProvider is working against
         public IDocumentStore DocumentStore { get; set; }
 
         public bool TryGet(string messageId, out OutboxMessage message)
