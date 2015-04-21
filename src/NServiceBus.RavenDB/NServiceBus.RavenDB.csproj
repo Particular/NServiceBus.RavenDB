@@ -79,6 +79,7 @@
     <Compile Include="Outbox\OutboxRecord.cs" />
     <Compile Include="Outbox\OutboxRecordsCleaner.cs" />
     <Compile Include="Outbox\OutboxRecordsIndex.cs" />
+    <Compile Include="Outbox\RavenDBOutboxExtensions.cs" />
     <Compile Include="Outbox\RavenDbOutboxStorage.cs" />
     <Compile Include="RavenDbSettingsExtensions.cs" />
     <Compile Include="SessionManagement\Installer.cs" />
