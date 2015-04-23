@@ -1,23 +1,22 @@
 ﻿namespace NServiceBus.RavenDB.SessionManagement
 {
     using System;
-    using Internal;
-    using Persistence;
-    using Pipeline;
-    using Pipeline.Contexts;
+    using NServiceBus.Pipeline;
+    using NServiceBus.Pipeline.Contexts;
+    using NServiceBus.RavenDB.Internal;
+    using NServiceBus.RavenDB.Persistence;
+    using NServiceBus.Unicast;
     using Raven.Client;
-    using Unicast;
 
     class OpenSessionBehavior : IBehavior<IncomingContext>
     {
-        public IDocumentStoreWrapper DocumentStoreWrapper { get; set; }
-
         public static Func<IMessageContext, string> GetDatabaseName = context => String.Empty;
+        public IDocumentStoreWrapper DocumentStoreWrapper { get; set; }
 
         public void Invoke(IncomingContext context, Action next)
         {
             using (var session = OpenSession(context))
-            {             
+            {
                 context.Set(session);
                 next();
                 session.SaveChanges();
@@ -40,6 +39,8 @@
             {
                 InsertAfter(WellKnownStep.ExecuteUnitOfWork);
                 InsertBeforeIfExists(WellKnownStep.InvokeSaga);
+                InsertAfterIfExists("OutboxDeduplication");
+                InsertBeforeIfExists("OutboxRecorder");
             }
         }
     }
@@ -48,6 +49,9 @@
     {
         public PipelineExecutor PipelineExecutor { get; set; }
 
-        public IDocumentSession Session { get { return PipelineExecutor.CurrentContext.Get<IDocumentSession>(); } }
+        public IDocumentSession Session
+        {
+            get { return PipelineExecutor.CurrentContext.Get<IDocumentSession>(); }
+        }
     }
 }

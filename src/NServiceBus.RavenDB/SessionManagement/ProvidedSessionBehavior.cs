@@ -1,8 +1,8 @@
 ﻿namespace NServiceBus.RavenDB.SessionManagement
 {
     using System;
-    using Pipeline;
-    using Pipeline.Contexts;
+    using NServiceBus.Pipeline;
+    using NServiceBus.Pipeline.Contexts;
     using Raven.Client;
 
     class ProvidedSessionBehavior : IBehavior<IncomingContext>

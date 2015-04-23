@@ -4,6 +4,5 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
     class Installer : RavenUserInstaller
     {
-        
     }
 }

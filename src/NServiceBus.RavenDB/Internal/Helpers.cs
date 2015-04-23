@@ -5,15 +5,18 @@
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
-    using Logging;
+    using NServiceBus.Logging;
     using NServiceBus.Persistence;
+    using NServiceBus.Settings;
     using Raven.Client;
     using Raven.Client.Document;
+    using Raven.Client.Indexes;
     using Raven.Json.Linq;
-    using Settings;
 
     class Helpers
     {
+        static readonly ILog Logger = LogManager.GetLogger(typeof(RavenDBPersistence));
+
         public static IDocumentStore CreateDocumentStoreByConnectionStringName(ReadOnlySettings settings, params string[] connectionStringNames)
         {
             var connectionStringName = GetFirstNonEmptyConnectionString(connectionStringNames);
@@ -34,17 +37,20 @@
             return null;
         }
 
-        public static IDocumentStore CreateDocumentStoreByUrl(ReadOnlySettings settings,string url)
+        public static IDocumentStore CreateDocumentStoreByUrl(ReadOnlySettings settings, string url)
         {
-            var docStore = new DocumentStore{Url = url};
+            var docStore = new DocumentStore
+            {
+                Url = url
+            };
 
             if (docStore.DefaultDatabase == null)
             {
                 docStore.DefaultDatabase = settings.EndpointName();
             }
-            
+
             ApplyRavenDBConventions(settings, docStore);
-            
+
             return docStore.Initialize();
         }
 
@@ -81,8 +87,6 @@
             }
         }
 
-        static readonly ILog Logger = LogManager.GetLogger(typeof(RavenDBPersistence));
-
         static string GetFirstNonEmptyConnectionString(params string[] connectionStringNames)
         {
             try
@@ -96,7 +100,7 @@
         }
 
         /// <summary>
-        /// Apply the NServiceBus conventions to a <see cref="DocumentStore"/> .
+        ///     Apply the NServiceBus conventions to a <see cref="DocumentStore" /> .
         /// </summary>
         public static void ApplyRavenDBConventions(ReadOnlySettings settings, IDocumentStore documentStore)
         {
@@ -127,6 +131,27 @@
                 var hashBytes = provider.ComputeHash(inputBytes);
                 // generate a guid from the hash:
                 return new Guid(hashBytes);
+            }
+        }
+
+        /// <summary>
+        /// Safely add the index to the RavenDB database, protect against possible failures caused by documented
+        /// and undocumented possibilities of failure.
+        /// Will throw iff index registration failed and index doesn't exist or it exists but with a non-current definition.
+        /// </summary>
+        /// <param name="store"></param>
+        /// <param name="index"></param>
+        internal static void SafelyCreateIndex(IDocumentStore store, AbstractIndexCreationTask index)
+        {
+            try
+            {
+                index.Execute(store);
+            }
+            catch (Exception) // Apparently ArgumentException can be thrown as well as a WebException; not taking any chances
+            {
+                var existingIndex = store.DatabaseCommands.GetIndex(index.IndexName);
+                if (existingIndex == null || !index.CreateIndexDefinition().Equals(existingIndex))
+                    throw;
             }
         }
     }
