@@ -3,21 +3,16 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Timeout.Core;
+    using NServiceBus.Timeout.Core;
     using Raven.Abstractions.Commands;
     using Raven.Abstractions.Data;
     using Raven.Client;
     using Raven.Client.Linq;
-    using CoreTimeoutData = Timeout.Core.TimeoutData;
+    using CoreTimeoutData = NServiceBus.Timeout.Core.TimeoutData;
     using Timeout = TimeoutData;
 
     class TimeoutPersister : IPersistTimeouts
     {
-        public IDocumentStore DocumentStore { get; set; }
-        public string EndpointName { get; set; }
-
-        public TimeSpan CleanupGapFromTimeslice { get; set; }
-        public TimeSpan TriggerCleanupEvery { get; set; }
         DateTime lastCleanupTime = DateTime.MinValue;
 
         public TimeoutPersister()
@@ -26,37 +21,10 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             CleanupGapFromTimeslice = TimeSpan.FromMinutes(1);
         }
 
-        private IRavenQueryable<Timeout> GetChunkQuery(IDocumentSession session)
-        {
-            session.Advanced.AllowNonAuthoritativeInformation = true;
-            return session.Query<Timeout, TimeoutsIndex>()
-                .OrderBy(t => t.Time)
-                .Where(
-                    t =>
-                        t.OwningTimeoutManager == String.Empty ||
-                        t.OwningTimeoutManager == EndpointName);
-        }
-
-        public IEnumerable<Tuple<string, DateTime>> GetCleanupChunk(DateTime startSlice)
-        {
-            using (var session = DocumentStore.OpenSession())
-            {
-                var chunk = GetChunkQuery(session)
-                    .Where(t => t.Time <= startSlice.Subtract(CleanupGapFromTimeslice))
-                    .Select(t => new
-                    {
-                        t.Id,
-                        t.Time
-                    })
-                    .Take(1024)
-                    .ToList()
-                    .Select(arg => new Tuple<string, DateTime>(arg.Id, arg.Time));
-
-                lastCleanupTime = DateTime.UtcNow;
-
-                return chunk;
-            }
-        }
+        public IDocumentStore DocumentStore { get; set; }
+        public string EndpointName { get; set; }
+        public TimeSpan CleanupGapFromTimeslice { get; set; }
+        public TimeSpan TriggerCleanupEvery { get; set; }
 
         public IEnumerable<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
         {
@@ -83,10 +51,10 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 var query = GetChunkQuery(session)
                     .Where(t => t.Time > startSlice)
                     .Select(t => new
-                                 {
-                                     t.Id,
-                                     t.Time
-                                 });
+                    {
+                        t.Id,
+                        t.Time
+                    });
 
                 QueryHeaderInformation qhi;
                 using (var enumerator = session.Advanced.Stream(query, out qhi))
@@ -96,7 +64,10 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                         var dateTime = enumerator.Current.Document.Time;
                         nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time < now
 
-                        if (dateTime > DateTime.UtcNow) break; // break on first future timeout
+                        if (dateTime > DateTime.UtcNow)
+                        {
+                            break; // break on first future timeout
+                        }
 
                         results.Add(new Tuple<string, DateTime>(enumerator.Current.Document.Id, dateTime));
                     }
@@ -152,10 +123,45 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 {
                     while (enumerator.MoveNext())
                     {
-                        session.Advanced.Defer(new DeleteCommandData{Key = enumerator.Current.Key});
+                        session.Advanced.Defer(new DeleteCommandData
+                        {
+                            Key = enumerator.Current.Key
+                        });
                     }
                 }
                 session.SaveChanges();
+            }
+        }
+
+        IRavenQueryable<Timeout> GetChunkQuery(IDocumentSession session)
+        {
+            session.Advanced.AllowNonAuthoritativeInformation = true;
+            return session.Query<Timeout, TimeoutsIndex>()
+                .OrderBy(t => t.Time)
+                .Where(
+                    t =>
+                        t.OwningTimeoutManager == String.Empty ||
+                        t.OwningTimeoutManager == EndpointName);
+        }
+
+        public IEnumerable<Tuple<string, DateTime>> GetCleanupChunk(DateTime startSlice)
+        {
+            using (var session = DocumentStore.OpenSession())
+            {
+                var chunk = GetChunkQuery(session)
+                    .Where(t => t.Time <= startSlice.Subtract(CleanupGapFromTimeslice))
+                    .Select(t => new
+                    {
+                        t.Id,
+                        t.Time
+                    })
+                    .Take(1024)
+                    .ToList()
+                    .Select(arg => new Tuple<string, DateTime>(arg.Id, arg.Time));
+
+                lastCleanupTime = DateTime.UtcNow;
+
+                return chunk;
             }
         }
     }

@@ -17,10 +17,10 @@
                 session.Advanced.AllowNonAuthoritativeInformation = false;
 
                 session.Store(new GatewayMessage
-                    {
-                        Id = EscapeMessageId(messageId),
-                        TimeReceived = timeReceived
-                    });
+                {
+                    Id = EscapeMessageId(messageId),
+                    TimeReceived = timeReceived
+                });
 
                 try
                 {

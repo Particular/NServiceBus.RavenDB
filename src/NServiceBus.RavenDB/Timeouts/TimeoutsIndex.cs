@@ -9,11 +9,11 @@
         {
             Map = docs => from doc in docs
                 select new
-                       {
-                           doc.Time,
-                           doc.SagaId,
-                           doc.OwningTimeoutManager,
-                       };
+                {
+                    doc.Time,
+                    doc.SagaId,
+                    doc.OwningTimeoutManager
+                };
 
             DisableInMemoryIndexing = true;
         }

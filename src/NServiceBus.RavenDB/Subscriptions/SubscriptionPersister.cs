@@ -2,10 +2,10 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 {
     using System.Collections.Generic;
     using System.Linq;
-    using MessageDrivenSubscriptions;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+    using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using Raven.Client;
-    
+
     class SubscriptionPersister : ISubscriptionStorage
     {
         public IDocumentStore DocumentStore { get; set; }
@@ -82,11 +82,11 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
         static Subscription StoreNewSubscription(IDocumentSession session, string id, MessageType messageType)
         {
             var subscription = new Subscription
-                {
-                    Clients = new List<Address>(),
-                    Id = id,
-                    MessageType = messageType
-                };
+            {
+                Clients = new List<Address>(),
+                Id = id,
+                MessageType = messageType
+            };
             session.Store(subscription);
 
             return subscription;

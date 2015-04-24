@@ -6,15 +6,21 @@ namespace NServiceBus.SagaPersisters.RavenDB
     using System.Linq;
     using NServiceBus.RavenDB.Persistence;
     using NServiceBus.RavenDB.Persistence.SagaPersister;
+    using NServiceBus.Saga;
     using Raven.Abstractions.Commands;
-    using Saga;
 
     class SagaPersister : ISagaPersister
     {
+        internal const string UniqueValueMetadataKey = "NServiceBus-UniqueValue";
+        static readonly ConcurrentDictionary<string, bool> PropertyCache = new ConcurrentDictionary<string, bool>();
+        readonly ISessionProvider sessionProvider;
+
         public SagaPersister(ISessionProvider sessionProvider)
         {
             this.sessionProvider = sessionProvider;
         }
+
+        public bool AllowUnsafeLoads { get; set; }
 
         public void Save(IContainSagaData saga)
         {
@@ -53,7 +59,6 @@ namespace NServiceBus.SagaPersisters.RavenDB
 
             DeleteUniqueProperty(saga, new KeyValuePair<string, object>(uniqueProperty.Key, storedValue));
             StoreUniqueProperty(saga);
-
         }
 
         public T Get<T>(Guid sagaId) where T : IContainSagaData
@@ -64,8 +69,10 @@ namespace NServiceBus.SagaPersisters.RavenDB
         public T Get<T>(string property, object value) where T : IContainSagaData
         {
             if (IsUniqueProperty<T>(property))
+            {
                 return GetByUniqueProperty<T>(property, value);
-            
+            }
+
             if (!AllowUnsafeLoads)
             {
                 var message = string.Format("Correlating on saga properties not marked as unique is not safe due to the high risk for stale results. Please add a [Unique] attribute to the '{0}' property on your '{1}' saga data class. If you still want to allow this please add .UsePersistence<RavenDBPersistence>().AllowStaleSagaReads() to your config",
@@ -75,11 +82,9 @@ namespace NServiceBus.SagaPersisters.RavenDB
             }
 
             return sessionProvider.Session.Advanced.DocumentQuery<T>()
-                    .WhereEquals(property, value)
-                    .FirstOrDefault();
+                .WhereEquals(property, value)
+                .FirstOrDefault();
         }
-
-        public bool AllowUnsafeLoads { get; set; }
 
         public void Complete(IContainSagaData saga)
         {
@@ -88,7 +93,9 @@ namespace NServiceBus.SagaPersisters.RavenDB
             var uniqueProperty = UniqueAttribute.GetUniqueProperty(saga);
 
             if (!uniqueProperty.HasValue)
+            {
                 return;
+            }
 
             DeleteUniqueProperty(saga, uniqueProperty.Value);
         }
@@ -106,7 +113,6 @@ namespace NServiceBus.SagaPersisters.RavenDB
 
             return value;
         }
-
 
         T GetByUniqueProperty<T>(string property, object value) where T : IContainSagaData
         {
@@ -130,20 +136,22 @@ namespace NServiceBus.SagaPersisters.RavenDB
         {
             var uniqueProperty = UniqueAttribute.GetUniqueProperty(saga);
 
-            if (!uniqueProperty.HasValue) return;
+            if (!uniqueProperty.HasValue)
+            {
+                return;
+            }
 
             var id = SagaUniqueIdentity.FormatId(saga.GetType(), uniqueProperty.Value);
             var sagaDocId = sessionProvider.Session.Advanced.DocumentStore.Conventions.FindFullDocumentKeyFromNonStringIdentifier(saga.Id, saga.GetType(), false);
 
-            
 
             sessionProvider.Session.Store(new SagaUniqueIdentity
-                {
-                    Id = id,
-                    SagaId = saga.Id,
-                    UniqueValue = uniqueProperty.Value.Value,
-                    SagaDocId = sagaDocId
-                });
+            {
+                Id = id,
+                SagaId = saga.Id,
+                UniqueValue = uniqueProperty.Value.Value,
+                SagaDocId = sagaDocId
+            });
 
             SetUniqueValueMetadata(saga, uniqueProperty.Value);
         }
@@ -158,14 +166,9 @@ namespace NServiceBus.SagaPersisters.RavenDB
             var id = SagaUniqueIdentity.FormatId(saga.GetType(), uniqueProperty);
 
             sessionProvider.Session.Advanced.Defer(new DeleteCommandData
-                {
-                    Key = id
-                });
+            {
+                Key = id
+            });
         }
-
-        readonly ISessionProvider sessionProvider;
-        internal const string UniqueValueMetadataKey = "NServiceBus-UniqueValue";
-
-        static readonly ConcurrentDictionary<string, bool> PropertyCache = new ConcurrentDictionary<string, bool>();
     }
 }

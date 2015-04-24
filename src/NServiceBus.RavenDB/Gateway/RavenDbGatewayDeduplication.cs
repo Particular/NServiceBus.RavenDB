@@ -1,14 +1,14 @@
 ﻿namespace NServiceBus.Features
 {
     using System;
+    using NServiceBus.RavenDB;
+    using NServiceBus.RavenDB.Gateway.Deduplication;
+    using NServiceBus.RavenDB.Internal;
     using Raven.Client;
     using Raven.Client.Document;
     using Raven.Client.Document.DTC;
-    using RavenDB;
-    using RavenDB.Gateway.Deduplication;
-    using RavenDB.Internal;
 
-    class RavenDbGatewayDeduplication: Feature
+    class RavenDbGatewayDeduplication : Feature
     {
         RavenDbGatewayDeduplication()
         {
@@ -20,9 +20,9 @@
             var store =
                 // Try getting a document store object specific to this Feature that user may have wired in
                 context.Settings.GetOrDefault<IDocumentStore>(RavenDbGatewayDeduplicationSettingsExtensions.SettingsKey)
-                // Init up a new DocumentStore based on a connection string specific to this feature
+                    // Init up a new DocumentStore based on a connection string specific to this feature
                 ?? Helpers.CreateDocumentStoreByConnectionStringName(context.Settings, "NServiceBus/Persistence/RavenDB/GatewayDeduplication")
-                // Trying pulling a shared DocumentStore set by the user or other Feature
+                    // Trying pulling a shared DocumentStore set by the user or other Feature
                 ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtensions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context.Settings);
 
             if (store == null)

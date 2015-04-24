@@ -6,24 +6,22 @@ namespace NServiceBus.RavenDB.Persistence
     using System.Net;
     using System.Reflection;
     using Microsoft.CSharp.RuntimeBinder;
+    using NServiceBus.Installation;
+    using NServiceBus.Logging;
+    using NServiceBus.Settings;
     using Raven.Abstractions.Data;
     using Raven.Client;
     using Raven.Client.Connection;
     using Raven.Client.Document;
     using Raven.Json.Linq;
-    using Installation;
-    using Logging;
-    using Settings;
 
     /// <summary>
-    /// Add the identity to the Raven users group 
+    ///     Add the identity to the Raven users group
     /// </summary>
     abstract class RavenUserInstaller : INeedToInstallSomething
     {
         static readonly ILog logger = LogManager.GetLogger(typeof(RavenUserInstaller));
-        
         public DocumentStore StoreToInstall { get; set; }
-
         public ReadOnlySettings Settings { get; set; }
 
         public void Install(string identity, Configure config)
@@ -127,9 +125,9 @@ namespace NServiceBus.RavenDB.Persistence
             if (windowsAuthForUser == null)
             {
                 windowsAuthForUser = new WindowsAuthData
-                    {
-                        Name = identity
-                    };
+                {
+                    Name = identity
+                };
                 windowsAuthDocument.RequiredUsers.Add(windowsAuthForUser);
             }
             windowsAuthForUser.Enabled = true;
@@ -145,9 +143,9 @@ namespace NServiceBus.RavenDB.Persistence
             if (dataAccess == null)
             {
                 dataAccess = new ResourceAccess
-                    {
-                        TenantId = tenantId
-                    };
+                {
+                    TenantId = tenantId
+                };
                 windowsAuthForUser.Databases.Add(dataAccess);
             }
             dataAccess.ReadOnly = false;
@@ -168,5 +166,4 @@ namespace NServiceBus.RavenDB.Persistence
             public List<ResourceAccess> Databases = new List<ResourceAccess>();
         }
     }
-
 }

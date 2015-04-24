@@ -1,4 +1,4 @@
-namespace NServiceBus.RavenDB.Gateway.Deduplication
+namespace NServiceBus.Outbox.RavenDB
 {
     using NServiceBus.RavenDB.Persistence;
 

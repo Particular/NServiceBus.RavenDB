@@ -4,6 +4,5 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 
     class Installer : RavenUserInstaller
     {
-        
     }
 }

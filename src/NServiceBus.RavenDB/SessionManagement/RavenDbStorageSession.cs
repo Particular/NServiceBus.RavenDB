@@ -1,8 +1,9 @@
 ﻿namespace NServiceBus.RavenDB.SessionManagement
 {
     using System;
-    using Features;
-    using Internal;
+    using NServiceBus.Features;
+    using NServiceBus.RavenDB.Internal;
+    using NServiceBus.RavenDB.Outbox;
     using Raven.Client;
     using Raven.Client.Document;
     using Raven.Client.Document.DTC;
@@ -11,7 +12,7 @@
     {
         public RavenDbStorageSession()
         {
-            DependsOn<RavenDbSagaStorage>();
+            DependsOnAtLeastOne(typeof(RavenDbSagaStorage), typeof(RavenDbOutboxStorage));
         }
 
         protected override void Setup(FeatureConfigurationContext context)
@@ -29,9 +30,9 @@
             var store =
                 // Try getting a document store object specific to this Feature that user may have wired in
                 context.Settings.GetOrDefault<IDocumentStore>(RavenDbSagaSettingsExtensions.DocumentStoreSettingsKey)
-                // Init up a new DocumentStore based on a connection string specific to this feature
+                    // Init up a new DocumentStore based on a connection string specific to this feature
                 ?? Helpers.CreateDocumentStoreByConnectionStringName(context.Settings, "NServiceBus/Persistence/RavenDB/Saga")
-                // Trying pulling a shared DocumentStore set by the user or other Feature
+                    // Trying pulling a shared DocumentStore set by the user or other Feature
                 ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtensions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context.Settings);
 
             if (store == null)

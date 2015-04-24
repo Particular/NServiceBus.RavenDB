@@ -9,13 +9,13 @@
         protected IDocumentStore store;
 
         [SetUp]
-        public void SetUp()
+        public virtual void SetUp()
         {
             store = NewDocumentStore();
         }
 
         [TearDown]
-        public void TearDown()
+        public virtual void TearDown()
         {
             store.Dispose();
         }

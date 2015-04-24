@@ -1,7 +1,7 @@
 namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
 {
     using System;
-    using Unicast.Subscriptions;
+    using NServiceBus.Unicast.Subscriptions;
     using Raven.Imports.Newtonsoft.Json;
 
     class MessageTypeConverter : JsonConverter
@@ -13,7 +13,6 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-
             return new MessageType(serializer.Deserialize<string>(reader));
         }
 
