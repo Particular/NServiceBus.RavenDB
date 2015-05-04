@@ -16,7 +16,7 @@
                 return;
             }
 
-            if (settings.Get<bool>("RavenDB.IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled"))
+            if (settings.GetOrDefault<bool>("RavenDB.IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled"))
             {
                 return;
             }
