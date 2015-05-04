@@ -23,6 +23,21 @@
         }
 
         [Test]
+        public void DoesntThrow_when_voron_combined_with_dtc_including_confirmation()
+        {
+            using (var documentStore = new DocumentStore { Url = "http://localhost:8083" })
+            using (documentStore.SetupVoronTest())
+            {
+
+                var settings = new SettingsHolder();
+                settings.Set("Transactions.SuppressDistributedTransactions", false);
+                settings.Set("RavenDB.IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled", true);
+
+                Assert.DoesNotThrow(() => StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(documentStore, settings));
+            }
+        }
+
+        [Test]
         public void DoesntThrow_when_voron_without_dtc()
         {
             using (var documentStore = new DocumentStore { Url = "http://localhost:8083" })
