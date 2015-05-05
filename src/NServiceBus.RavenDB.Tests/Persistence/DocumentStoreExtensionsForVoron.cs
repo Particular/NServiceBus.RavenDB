@@ -10,13 +10,14 @@
         public static IDisposable SetupVoronTest(this DocumentStore store)
         {
             store.Initialize();
+            var dataDir = string.Format("~/VoronTest-{0}", Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper());
             store.DatabaseCommands.GlobalAdmin.CreateDatabase(new DatabaseDocument
             {
                 Id = "VoronTest",
                 Settings = new Dictionary<string, string>
                     {
                         { "Raven/StorageTypeName", "voron" },
-                        { "Raven/DataDir", "~/VoronTest" }
+                        { "Raven/DataDir", dataDir }
                     }
             });
             store.DefaultDatabase = "VoronTest";
