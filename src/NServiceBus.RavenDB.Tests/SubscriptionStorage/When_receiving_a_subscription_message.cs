@@ -1,13 +1,13 @@
 ﻿using System.Linq;
-using System.Transactions;
 using NServiceBus;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+using NServiceBus.RavenDB.Tests;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]
-public class When_receiving_a_subscription_message 
+public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
 {
     [Test]
     public void A_subscription_entry_should_be_added_to_the_database()
@@ -15,33 +15,26 @@ public class When_receiving_a_subscription_message
         var clientEndpoint = Address.Parse("TestEndpoint");
 
         var messageTypes = new[]
-            {
-                new MessageType("MessageType1", "1.0.0.0"),
-                new MessageType("MessageType2", "1.0.0.0")
-            };
-
-        using (var store = DocumentStoreBuilder.Build())
         {
-            var storage = new SubscriptionPersister
-            {
-                DocumentStore = store
-            };
+            new MessageType("MessageType1", "1.0.0.0"),
+            new MessageType("MessageType2", "1.0.0.0")
+        };
 
-            using (var transaction = new TransactionScope())
-            {
-                storage.Subscribe(clientEndpoint, messageTypes);
-                transaction.Complete();
-            }
+        var storage = new SubscriptionPersister
+        {
+            DocumentStore = store
+        };
 
-            using (var session = store.OpenSession())
-            {
-                var subscriptions = session
-                    .Query<Subscription>()
-                    .Customize(c => c.WaitForNonStaleResults())
-                    .Count();
+        storage.Subscribe(clientEndpoint, messageTypes);
 
-                Assert.AreEqual(2, subscriptions);
-            }
+        using (var session = store.OpenSession())
+        {
+            var subscriptions = session
+                .Query<Subscription>()
+                .Customize(c => c.WaitForNonStaleResults())
+                .Count();
+
+            Assert.AreEqual(2, subscriptions);
         }
     }
 }

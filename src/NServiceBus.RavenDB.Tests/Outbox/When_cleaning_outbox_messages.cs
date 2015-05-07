@@ -9,12 +9,13 @@
     using NUnit.Framework;
 
     [TestFixture]
-    public class When_cleaning_outbox_messages : RavenTestBase
+    public class When_cleaning_outbox_messages : RavenDBPersistenceTestBase
     {
         [SetUp]
         public override void SetUp()
         {
             base.SetUp();
+
             new OutboxRecordsIndex().Execute(store);
         }
 

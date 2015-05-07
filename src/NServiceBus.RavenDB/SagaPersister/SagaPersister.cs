@@ -81,7 +81,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
                 throw new Exception(message);
             }
 
-            return sessionProvider.Session.Advanced.LuceneQuery<T>()
+            return sessionProvider.Session.Advanced.DocumentQuery<T>()
                 .WhereEquals(property, value)
                 .FirstOrDefault();
         }

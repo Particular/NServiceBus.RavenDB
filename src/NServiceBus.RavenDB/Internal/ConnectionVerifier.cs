@@ -11,7 +11,7 @@
     class ConnectionVerifier
     {
         const string WrongRavenVersionMessage =
-            @"The RavenDB server you have specified is detected to be {0}. NServiceBus requires RavenDB version 2.5 build 2900 (or a higher build number for version 2.5) to operate correctly. Please update your RavenDB server.
+            @"The RavenDB server you have specified is detected to be {0}. NServiceBus requires RavenDB version 3.0 build 3660 (or a higher build number for version 3.0) to operate correctly. Please update your RavenDB server.
 Further instructions can be found at: http://particular.net/articles/using-ravendb-in-nservicebus-installing";
 
         static readonly ILog Logger = LogManager.GetLogger(typeof(ConnectionVerifier));
@@ -100,7 +100,7 @@ Further instructions can be found at: http://particular.net/articles/using-raven
                 {
                     return false;
                 }
-                return !string.IsNullOrEmpty(ProductVersion) && ProductVersion.StartsWith("2.5") && buildVersion >= 2900;
+                return !string.IsNullOrEmpty(ProductVersion) && ProductVersion.StartsWith("3.0");
             }
 
             public override string ToString()
