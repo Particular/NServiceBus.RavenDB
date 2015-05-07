@@ -10,7 +10,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using Raven.Client.Exceptions;
 
     [TestFixture]
-    public class When_adding_outbox_messages : RavenTestBase
+    public class When_adding_outbox_messages : RavenDBPersistenceTestBase
     {
         [SetUp]
         public override void SetUp()

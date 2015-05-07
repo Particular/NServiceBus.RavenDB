@@ -31,6 +31,7 @@
             }
 
             ConnectionVerifier.VerifyConnectionToRavenDBServer(store);
+            StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(store, context.Settings);
 
             BackwardsCompatibilityHelper.SupportOlderClrTypes(store);
 

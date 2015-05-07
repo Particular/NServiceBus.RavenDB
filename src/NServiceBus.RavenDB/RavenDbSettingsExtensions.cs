@@ -79,5 +79,17 @@
             cfg.GetSettings().Set("RavenDB.DoNotSetupPermissions", true);
             return cfg;
         }
+
+        /// <summary>
+        ///     Confirms the usage of a storage engine (i.ex. voron) which doesn't support distributed transactions 
+        ///     whilst leaving the distributed transaction support enabled.
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <returns></returns>
+        public static PersistenceExtentions<RavenDBPersistence> IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled(this PersistenceExtentions<RavenDBPersistence> cfg)
+        {
+            cfg.GetSettings().Set("RavenDB.IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled", true);
+            return cfg;
+        }
     }
 }

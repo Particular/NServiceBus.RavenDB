@@ -5,11 +5,12 @@ namespace NServiceBus.RavenDB.Persistence
     using System.Linq;
     using System.Net;
     using System.Reflection;
+    using Microsoft.CSharp.RuntimeBinder;
     using NServiceBus.Installation;
     using NServiceBus.Logging;
     using NServiceBus.Settings;
     using Raven.Abstractions.Data;
-    using Raven.Abstractions.Extensions;
+    using Raven.Client;
     using Raven.Client.Connection;
     using Raven.Client.Document;
     using Raven.Json.Linq;
@@ -46,47 +47,64 @@ namespace NServiceBus.RavenDB.Persistence
             }
         }
 
-        internal static void AddUserToDatabase(string identity, DocumentStore documentStore)
+        internal static bool AddUserToDatabase(string identity, dynamic documentStore)
         {
-            var database = documentStore.DefaultDatabase ?? "<system>";
-
-            var credentials = documentStore.Credentials as NetworkCredential;
-            if (credentials != null && !string.IsNullOrWhiteSpace(credentials.UserName) && !string.IsNullOrWhiteSpace(credentials.Password))
+            // We are using dynamic because the DefaultDatabase and Credentials properties aren't available on the IDocumentStore interface,
+            // and EmbeddableDocumentStore (which isn't available without referencing additional assemblies) needs to supported as well.
+            if (!(documentStore is IDocumentStore))
             {
-                logger.InfoFormat("Skipping adding user '{0}' to RavenDB, because credentials were provided via connection string", identity);
-                return;
+                logger.ErrorFormat("Skipping adding user '{0}' to RavenDB, documentStore object passed wasn't of a recognized type", identity);
+                return false;
             }
 
-            logger.Info(string.Format("Adding user '{0}' to raven. Instance:'{1}', Database:'{2}'.", identity, documentStore.Url, database));
-
-            var systemCommands = documentStore
-                .DatabaseCommands
-                .ForSystemDatabase();
-            var existing = systemCommands.Get("Raven/Authorization/WindowsSettings");
-
-            WindowsAuthDocument windowsAuthDocument;
-            if (existing == null)
+            try
             {
-                windowsAuthDocument = new WindowsAuthDocument();
+                var database = documentStore.DefaultDatabase ?? "<system>";
+
+                var credentials = documentStore.Credentials as NetworkCredential;
+                if (credentials != null && !string.IsNullOrWhiteSpace(credentials.UserName) && !string.IsNullOrWhiteSpace(credentials.Password))
+                {
+                    logger.InfoFormat("Skipping adding user '{0}' to RavenDB, because credentials were provided via connection string", identity);
+                    return false;
+                }
+
+                logger.Info(string.Format("Adding user '{0}' to raven. Instance:'{1}', Database:'{2}'.", identity, documentStore.Url, database));
+
+                var systemCommands = documentStore
+                    .DatabaseCommands
+                    .ForSystemDatabase();
+                var existing = systemCommands.Get("Raven/Authorization/WindowsSettings");
+
+                WindowsAuthDocument windowsAuthDocument;
+                if (existing == null)
+                {
+                    windowsAuthDocument = new WindowsAuthDocument();
+                }
+                else
+                {
+                    windowsAuthDocument = existing
+                        .DataAsJson
+                        .JsonDeserialization<WindowsAuthDocument>();
+                }
+                AddOrUpdateAuthUser(windowsAuthDocument, identity, database);
+
+                var ravenJObject = RavenJObject.FromObject(windowsAuthDocument);
+
+                return InvokePut(systemCommands, ravenJObject);
             }
-            else
+            catch (RuntimeBinderException e) // to make sure nothing breaks in the future, due to our use of dynamic
             {
-                windowsAuthDocument = existing
-                    .DataAsJson
-                    .JsonDeserialization<WindowsAuthDocument>();
+                logger.Error(string.Format("Skipping adding user '{0}' to RavenDB, because credentials were provided via connection string", identity), e);
+                return false;
             }
-            AddOrUpdateAuthUser(windowsAuthDocument, identity, database);
-
-            var ravenJObject = RavenJObject.FromObject(windowsAuthDocument);
-
-            InvokePut(systemCommands, ravenJObject);
         }
 
-        static void InvokePut(IDatabaseCommands systemCommands, RavenJObject ravenJObject)
+        static bool InvokePut(IDatabaseCommands systemCommands, RavenJObject ravenJObject)
         {
             try
             {
                 systemCommands.Put("Raven/Authorization/WindowsSettings", null, ravenJObject, new RavenJObject());
+                return true;
             }
             catch (TargetInvocationException exception)
             {
@@ -124,7 +142,7 @@ namespace NServiceBus.RavenDB.Persistence
                 .FirstOrDefault(x => x.TenantId == tenantId);
             if (dataAccess == null)
             {
-                dataAccess = new DatabaseAccess
+                dataAccess = new ResourceAccess
                 {
                     TenantId = tenantId
                 };
@@ -145,7 +163,7 @@ namespace NServiceBus.RavenDB.Persistence
             public string Name;
 // ReSharper disable once NotAccessedField.Local
             public bool Enabled;
-            public List<DatabaseAccess> Databases = new List<DatabaseAccess>();
+            public List<ResourceAccess> Databases = new List<ResourceAccess>();
         }
     }
 }

@@ -5,34 +5,31 @@ using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]
-public class When_completing_a_saga_with_the_raven_persister
+public class When_completing_a_saga_with_the_raven_persister : RavenDBPersistenceTestBase
 {
 
     [Test]
     public void Should_delete_the_saga()
     {
-        using (var store = DocumentStoreBuilder.Build())
-        {
-            var sagaId = Guid.NewGuid();
+        var sagaId = Guid.NewGuid();
 
-            var factory = new RavenSessionFactory(store);
-            factory.ReleaseSession();
-            var persister = new SagaPersister(factory);
-            persister.Save(new SagaData
-                {
-                    Id = sagaId
-                });
-            factory.SaveChanges();
+        var factory = new RavenSessionFactory(store);
+        factory.ReleaseSession();
+        var persister = new SagaPersister(factory);
+        persister.Save(new SagaData
+            {
+                Id = sagaId
+            });
+        factory.SaveChanges();
 
-            var saga = persister.Get<SagaData>(sagaId);
-            persister.Complete(saga);
-            factory.SaveChanges();
+        var saga = persister.Get<SagaData>(sagaId);
+        persister.Complete(saga);
+        factory.SaveChanges();
 
-            Assert.Null(persister.Get<SagaData>(sagaId));
-        }
+        Assert.Null(persister.Get<SagaData>(sagaId));
     }
 
-    public class SagaData : IContainSagaData
+    class SagaData : IContainSagaData
     {
         public Guid Id { get; set; }
         public string Originator { get; set; }

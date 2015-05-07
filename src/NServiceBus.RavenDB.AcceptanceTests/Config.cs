@@ -11,7 +11,7 @@ public class ConfigureRavenDBPersistence
     {
         documentStore = new DocumentStore
         {
-            Url = "http://localhost:8081",
+            Url = "http://localhost:8083",
             DefaultDatabase = Guid.NewGuid().ToString(),
             ResourceManagerId = Guid.NewGuid() /* This is OK for ATT purposes */
         };
@@ -25,11 +25,7 @@ public class ConfigureRavenDBPersistence
 
     public void Cleanup()
     {
-        var client = documentStore.AsyncDatabaseCommands.ForSystemDatabase();
-
-        var deleteUrl = string.Format("/admin/databases/{0}?hard-delete=true", Uri.EscapeDataString(documentStore.DefaultDatabase));
-
-        client.CreateRequest(deleteUrl, "DELETE").ExecuteRequestAsync().Wait();
+        documentStore.DatabaseCommands.GlobalAdmin.DeleteDatabase(documentStore.DefaultDatabase, hardDelete: true);
 
         Console.WriteLine("Deleted '{0}' database", documentStore.DefaultDatabase);
     }
