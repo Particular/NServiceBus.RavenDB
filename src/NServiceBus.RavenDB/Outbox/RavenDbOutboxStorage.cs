@@ -29,6 +29,7 @@
             }
 
             ConnectionVerifier.VerifyConnectionToRavenDBServer(store);
+            StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(store, context.Settings);
 
             Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
 
