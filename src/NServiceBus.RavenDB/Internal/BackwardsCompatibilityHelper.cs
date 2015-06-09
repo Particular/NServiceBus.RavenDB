@@ -17,6 +17,12 @@
             {
                 var clrtype = metadata.Value<string>(Constants.RavenClrType);
 
+                // The CLR type cannot be assumed to be always there
+                if (clrtype == null)
+                {
+                    return null;
+                }
+
                 if (clrtype.EndsWith(".Subscription, NServiceBus.Core"))
                 {
                     clrtype = ReflectionUtil.GetFullNameWithoutVersionInformation(typeof(Subscription));
