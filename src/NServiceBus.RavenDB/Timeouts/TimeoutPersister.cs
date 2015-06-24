@@ -4,7 +4,6 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     using System.Collections.Generic;
     using System.Linq;
     using Timeout.Core;
-    using Raven.Abstractions.Commands;
     using Raven.Abstractions.Data;
     using Raven.Client;
     using Raven.Client.Linq;
@@ -144,20 +143,8 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
         public void RemoveTimeoutBy(Guid sagaId)
         {
-            using (var session = DocumentStore.OpenSession())
-            {
-                session.Advanced.UseOptimisticConcurrency = true;
-
-                var query = session.Query<Timeout, TimeoutsIndex>().Where(x => x.SagaId == sagaId).Select(x => x.Id);
-                using (var enumerator = session.Advanced.Stream(query))
-                {
-                    while (enumerator.MoveNext())
-                    {
-                        session.Advanced.Defer(new DeleteCommandData{Key = enumerator.Current.Key});
-                    }
-                }
-                session.SaveChanges();
-            }
+            var operation = DocumentStore.DatabaseCommands.DeleteByIndex("TimeoutsIndex", new IndexQuery { Query = string.Format("SagaId:{0}", sagaId) }, true);
+            operation.WaitForCompletion();
         }
     }
 }
