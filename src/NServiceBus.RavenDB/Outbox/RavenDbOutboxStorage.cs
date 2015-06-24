@@ -3,7 +3,6 @@
     using System;
     using System.Threading;
     using NServiceBus.Features;
-    using NServiceBus.Outbox.RavenDB;
     using NServiceBus.RavenDB.Internal;
     using NServiceBus.Settings;
     using Raven.Client;
@@ -32,9 +31,6 @@
             StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(store, context.Settings);
 
             Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
-
-            context.Container.ConfigureComponent<Installer>(DependencyLifecycle.InstancePerCall)
-                .ConfigureProperty(c => c.StoreToInstall, store);
 
             context.Container.ConfigureComponent<OutboxPersister>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(x => x.DocumentStore, store);

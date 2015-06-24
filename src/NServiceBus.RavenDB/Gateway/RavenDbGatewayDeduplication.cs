@@ -42,9 +42,6 @@
                 remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
             }
 
-            context.Container.ConfigureComponent<Installer>(DependencyLifecycle.InstancePerCall)
-                .ConfigureProperty(c => c.StoreToInstall, store);
-
             context.Container.ConfigureComponent<RavenDeduplication>(DependencyLifecycle.SingleInstance)
                 .ConfigureProperty(x => x.DocumentStore, store);
         }

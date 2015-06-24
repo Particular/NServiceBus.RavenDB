@@ -67,7 +67,6 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Gateway\GatewayMessage.cs" />
-    <Compile Include="Gateway\Installer.cs" />
     <Compile Include="Gateway\RavenDbTimeoutSettingsExtensions.cs" />
     <Compile Include="Gateway\RavenDbGatewayDeduplication.cs" />
     <Compile Include="Internal\BackwardsCompatibilityHelper.cs" />
@@ -76,7 +75,6 @@
     <Compile Include="Internal\Helpers.cs" />
     <Compile Include="ConnectionParameters.cs" />
     <Compile Include="Internal\StorageEngineVerifier.cs" />
-    <Compile Include="Outbox\Installer.cs" />
     <Compile Include="Outbox\OutboxPersister.cs" />
     <Compile Include="Outbox\OutboxRecord.cs" />
     <Compile Include="Outbox\OutboxRecordsCleaner.cs" />
@@ -84,7 +82,6 @@
     <Compile Include="Outbox\RavenDBOutboxExtensions.cs" />
     <Compile Include="Outbox\RavenDbOutboxStorage.cs" />
     <Compile Include="RavenDbSettingsExtensions.cs" />
-    <Compile Include="SessionManagement\Installer.cs" />
     <Compile Include="SagaPersister\RavenDbSagaSettingsExtensions.cs" />
     <Compile Include="SessionManagement\ISessionProvider.cs" />
     <Compile Include="Gateway\RavenDeduplication.cs" />
@@ -94,17 +91,14 @@
     <Compile Include="SessionManagement\ProvidedSessionBehavior.cs" />
     <Compile Include="SessionManagement\OpenSessionBehavior.cs" />
     <Compile Include="SessionManagement\RavenDbStorageSession.cs" />
-    <Compile Include="Internal\RavenUserInstaller.cs" />
     <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />
     <Compile Include="SagaPersister\SagaPersister.cs" />
     <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />
-    <Compile Include="Subscriptions\Installer.cs" />
     <Compile Include="Subscriptions\MessageTypeConverter.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionSettingsExtensions.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionStorage.cs" />
     <Compile Include="Subscriptions\SubscriptionPersister.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
-    <Compile Include="Timeouts\Installer.cs" />
     <Compile Include="Timeouts\RavenDbTimeoutSettingsExtensions.cs" />
     <Compile Include="Timeouts\RavenDbTimeoutStorage.cs" />
     <Compile Include="Timeouts\TimeoutPersister.cs" />

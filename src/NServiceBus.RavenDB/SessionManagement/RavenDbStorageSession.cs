@@ -47,9 +47,6 @@
                 remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
             }
 
-            context.Container.ConfigureComponent<Installer>(DependencyLifecycle.InstancePerCall)
-                .ConfigureProperty(c => c.StoreToInstall, store);
-
             context.Container.ConfigureComponent<RavenSessionProvider>(DependencyLifecycle.InstancePerCall);
             context.Container.RegisterSingleton<IDocumentStoreWrapper>(new DocumentStoreWrapper(store));
             context.Pipeline.Register<OpenSessionBehavior.Registration>();

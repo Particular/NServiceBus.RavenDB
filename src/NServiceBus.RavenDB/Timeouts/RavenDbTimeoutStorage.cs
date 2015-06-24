@@ -45,9 +45,6 @@
 
             Helpers.SafelyCreateIndex(store, new TimeoutsIndex());
 
-            context.Container.ConfigureComponent<Installer>(DependencyLifecycle.InstancePerCall)
-                .ConfigureProperty(c => c.StoreToInstall, store);
-
             context.Container.ConfigureComponent<TimeoutPersister>(DependencyLifecycle.SingleInstance)
                 .ConfigureProperty(x => x.DocumentStore, store)
                 .ConfigureProperty(x => x.EndpointName, context.Settings.EndpointName());

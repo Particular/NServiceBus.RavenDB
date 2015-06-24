@@ -43,9 +43,6 @@
                 remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
             }
 
-            context.Container.ConfigureComponent<Installer>(DependencyLifecycle.InstancePerCall)
-                .ConfigureProperty(c => c.StoreToInstall, store);
-
             context.Container.ConfigureComponent<SubscriptionPersister>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(x => x.DocumentStore, store);
         }
