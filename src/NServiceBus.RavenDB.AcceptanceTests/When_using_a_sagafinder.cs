@@ -1,28 +1,33 @@
 ﻿namespace NServiceBus.AcceptanceTests.Sagas
 {
     using System;
+    using System.Threading.Tasks;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
-    using NServiceBus.RavenDB.Persistence;
     using NServiceBus.Saga;
     using NUnit.Framework;
+    using Raven.Client;
 
     public class When_using_a_sagafinder : NServiceBusAcceptanceTest
     {
         [Test]
-        public void Should_be_able_to_access_session()
+        public async Task Should_be_able_to_access_session()
         {
-            var context = new Context();
-
-            Scenario.Define(context)
-                .WithEndpoint<SagaFinderEndpoint>(b => b.Given(bus => bus.SendLocal(new StartSagaMessage()))
-                    .When(c => c.SagaId != Guid.Empty, bus => bus.SendLocal(new StartSagaMessage())))
+            var context = await Scenario.Define<Context>()
+                .WithEndpoint<SagaFinderEndpoint>(b => b.Given(bus =>
+                {
+                    bus.SendLocal(new StartSagaMessage());
+                    return Task.FromResult(0);
+                })
+                    .When(c => c.SagaId != Guid.Empty, bus =>
+                    {
+                        bus.SendLocal(new StartSagaMessage());
+                        return Task.FromResult(0);
+                    }))
                 .Done(c =>c.SecondMessageProcessed)
                 .Run();
 
-
             Assert.True(context.SameSagaInstanceFound,"If the finder is used the same sagas instance should be found");
-
         }
 
         public class Context : ScenarioContext
@@ -41,23 +46,22 @@
             }
 
 
-            class MySagaFinder:IFindSagas<TestSagaData>.Using<StartSagaMessage>
+            class MySagaFinder: IFindSagas<SagaFinderSagaData>.Using<StartSagaMessage>
             {
-                public ISessionProvider SessionProvider { get; set; }
-
                 public Context Context { get; set; }
-                public TestSagaData FindBy(StartSagaMessage message)
+                public SagaFinderSagaData FindBy(StartSagaMessage message, SagaPersistenceOptions options)
                 {
                     if (Context.SagaId == Guid.Empty)
                     {
                         return null;
                     }
 
-                    return SessionProvider.Session.Load<TestSagaData>(Context.SagaId);
+                    var session = options.Context.Get<IDocumentSession>();
+                    return session.Load<SagaFinderSagaData>(Context.SagaId);
                 }
             }
 
-            public class TestSaga : Saga<TestSagaData>, IAmStartedByMessages<StartSagaMessage>
+            public class SagaFinderSaga : Saga<SagaFinderSagaData>, IAmStartedByMessages<StartSagaMessage>
             {
                 public Context Context { get; set; }
                 public void Handle(StartSagaMessage message)
@@ -73,25 +77,21 @@
                     Context.SagaId = Data.Id;
                 }
 
-
-                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<TestSagaData> mapper)
+                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaFinderSagaData> mapper)
                 {
                 }
 
             }
 
-            public class TestSagaData : IContainSagaData
+            public class SagaFinderSagaData : IContainSagaData
             {
                 public virtual Guid Id { get; set; }
                 public virtual string Originator { get; set; }
                 public virtual string OriginalMessageId { get; set; }
 
-                [Unique]
                 public virtual Guid SomeId { get; set; }
             }
         }
-
-
 
         public class StartSagaMessage : ICommand
         {

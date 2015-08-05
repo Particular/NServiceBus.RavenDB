@@ -3,6 +3,7 @@
     using System;
     using NServiceBus.RavenDB;
     using NServiceBus.RavenDB.Internal;
+    using NServiceBus.RavenDB.Timeouts;
     using NServiceBus.Unicast.Subscriptions.RavenDB;
     using Raven.Client;
     using Raven.Client.Document;
@@ -12,7 +13,6 @@
     {
         RavenDbSubscriptionStorage()
         {
-            DependsOn<StorageDrivenPublishing>();
             DependsOn<SharedDocumentStore>();
         }
 
@@ -43,8 +43,10 @@
                 remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
             }
 
-            context.Container.ConfigureComponent<SubscriptionPersister>(DependencyLifecycle.InstancePerCall)
-                .ConfigureProperty(x => x.DocumentStore, store);
+            store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
+
+            context.Container.ConfigureComponent(() => new SubscriptionPersister(store), DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(() => new QuerySubscriptions(store), DependencyLifecycle.InstancePerCall);
         }
     }
 }

@@ -1,99 +1,33 @@
 namespace NServiceBus.TimeoutPersisters.RavenDB
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using NServiceBus.Timeout.Core;
     using Raven.Abstractions.Data;
     using Raven.Client;
-    using Raven.Client.Linq;
-    using CoreTimeoutData = NServiceBus.Timeout.Core.TimeoutData;
+    using CoreTimeoutData = Timeout.Core.TimeoutData;
     using Timeout = TimeoutData;
 
     class TimeoutPersister : IPersistTimeouts
     {
-        DateTime lastCleanupTime = DateTime.MinValue;
+        readonly IDocumentStore documentStore;
 
-        public TimeoutPersister()
+        public TimeoutPersister(IDocumentStore store)
         {
-            TriggerCleanupEvery = TimeSpan.FromMinutes(2);
-            CleanupGapFromTimeslice = TimeSpan.FromMinutes(1);
+            documentStore = store;
         }
 
-        public IDocumentStore DocumentStore { get; set; }
-        public string EndpointName { get; set; }
-        public TimeSpan CleanupGapFromTimeslice { get; set; }
-        public TimeSpan TriggerCleanupEvery { get; set; }
-
-        public IEnumerable<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
+        public void Add(CoreTimeoutData timeout, TimeoutPersistenceOptions options)
         {
-            var now = DateTime.UtcNow;
-            List<Tuple<string, DateTime>> results;
-
-            // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
-            // added after startSlice have been set to a later timout and we might have missed them
-            // because of stale indexes.
-            if (lastCleanupTime == DateTime.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) < now)
-            {
-                results = GetCleanupChunk(startSlice).ToList();
-            }
-            else
-            {
-                results = new List<Tuple<string, DateTime>>();
-            }
-
-            // default return value for when no results are found
-            nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10);
-
-            using (var session = DocumentStore.OpenSession())
-            {
-                var query = GetChunkQuery(session)
-                    .Where(t => t.Time > startSlice)
-                    .Select(t => new
-                    {
-                        t.Id,
-                        t.Time
-                    });
-
-                QueryHeaderInformation qhi;
-                using (var enumerator = session.Advanced.Stream(query, out qhi))
-                {
-                    while (enumerator.MoveNext())
-                    {
-                        var dateTime = enumerator.Current.Document.Time;
-                        nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time < now
-
-                        if (dateTime > DateTime.UtcNow)
-                        {
-                            break; // break on first future timeout
-                        }
-
-                        results.Add(new Tuple<string, DateTime>(enumerator.Current.Document.Id, dateTime));
-                    }
-                }
-
-                // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
-                if (qhi != null && qhi.IsStale && results.Count == 0)
-                {
-                    nextTimeToRunQuery = now;
-                }
-            }
-
-            return results;
-        }
-
-        public void Add(CoreTimeoutData timeout)
-        {
-            using (var session = DocumentStore.OpenSession())
+            using (var session = documentStore.OpenSession())
             {
                 session.Store(new Timeout(timeout));
                 session.SaveChanges();
             }
         }
 
-        public bool TryRemove(string timeoutId, out CoreTimeoutData timeoutData)
+        public bool TryRemove(string timeoutId, TimeoutPersistenceOptions options, out CoreTimeoutData timeoutData)
         {
-            using (var session = DocumentStore.OpenSession())
+            using (var session = documentStore.OpenSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
 
@@ -111,42 +45,10 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             }
         }
 
-        public void RemoveTimeoutBy(Guid sagaId)
+        public void RemoveTimeoutBy(Guid sagaId, TimeoutPersistenceOptions options)
         {
-            var operation = DocumentStore.DatabaseCommands.DeleteByIndex("TimeoutsIndex", new IndexQuery { Query = string.Format("SagaId:{0}", sagaId) }, new BulkOperationOptions { AllowStale = true });
+            var operation = documentStore.DatabaseCommands.DeleteByIndex("TimeoutsIndex", new IndexQuery { Query = string.Format("SagaId:{0}", sagaId) }, new BulkOperationOptions { AllowStale = true });
             operation.WaitForCompletion();
-        }
-
-        IRavenQueryable<Timeout> GetChunkQuery(IDocumentSession session)
-        {
-            session.Advanced.AllowNonAuthoritativeInformation = true;
-            return session.Query<Timeout, TimeoutsIndex>()
-                .OrderBy(t => t.Time)
-                .Where(
-                    t =>
-                        t.OwningTimeoutManager == String.Empty ||
-                        t.OwningTimeoutManager == EndpointName);
-        }
-
-        public IEnumerable<Tuple<string, DateTime>> GetCleanupChunk(DateTime startSlice)
-        {
-            using (var session = DocumentStore.OpenSession())
-            {
-                var chunk = GetChunkQuery(session)
-                    .Where(t => t.Time <= startSlice.Subtract(CleanupGapFromTimeslice))
-                    .Select(t => new
-                    {
-                        t.Id,
-                        t.Time
-                    })
-                    .Take(1024)
-                    .ToList()
-                    .Select(arg => new Tuple<string, DateTime>(arg.Id, arg.Time));
-
-                lastCleanupTime = DateTime.UtcNow;
-
-                return chunk;
-            }
         }
     }
 }

@@ -7,6 +7,7 @@
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
+    using Raven.Client;
 
     [TestFixture]
     public class When_cleaning_outbox_messages : RavenDBPersistenceTestBase
@@ -24,19 +25,22 @@
         {
             var id = Guid.NewGuid().ToString("N");
 
-            var sessionFactory = new RavenSessionFactory(store);
 
-            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store };
-            persister.Store("NotDispatched", Enumerable.Empty<TransportOperation>());
+            IDocumentSession sesssion;
+            var options = this.NewOptions(out sesssion);
+
+            var persister = new OutboxPersister { DocumentStore = store };
+            persister.Store("NotDispatched", Enumerable.Empty<TransportOperation>(), options);
             persister.Store(id, new List<TransportOperation>
             {
                 new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>()),
-            });
+            }, options);
 
-            sessionFactory.SaveChanges();
-            sessionFactory.ReleaseSession();
+            sesssion.SaveChanges();
+            sesssion.Dispose();
 
-            persister.SetAsDispatched(id);
+            options = this.NewOptions(out sesssion);
+            persister.SetAsDispatched(id, options);
             Thread.Sleep(TimeSpan.FromSeconds(1)); //Need to wait for dispatch logic to finish
 
             WaitForIndexing(store);
@@ -44,9 +48,9 @@
             var cleaner = new OutboxRecordsCleaner { DocumentStore = store };
             cleaner.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));
 
-            using (var session = store.OpenSession())
+            using (var s = store.OpenSession())
             {
-                var result = session.Query<OutboxRecord>().ToList();
+                var result = s.Query<OutboxRecord>().ToList();
 
                 Assert.AreEqual(1, result.Count);
                 Assert.AreEqual("NotDispatched", result[0].MessageId);

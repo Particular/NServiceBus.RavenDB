@@ -1,6 +1,8 @@
 ﻿namespace NServiceBus.AcceptanceTests.Sagas
 {
     using System;
+    using System.Linq;
+    using System.Threading.Tasks;
     using EndpointTemplates;
     using AcceptanceTesting;
     using NServiceBus.Persistence;
@@ -10,20 +12,22 @@
     public class When_loading_sagas_with_no_unique : NServiceBusAcceptanceTest
     {
         [Test,Ignore("Flaky, issue raised")]
-        public void Should_blow_up()
+        public async Task Should_blow_up()
         {
-            var context = new Context();
-
-            Scenario.Define(context)
-                .WithEndpoint<SagaEndpoint>(b => b.Given(bus => bus.SendLocal(new StartSagaMessage
+            var context = await Scenario.Define<Context>()
+                .WithEndpoint<SagaEndpoint>(b => b.Given(bus =>
                 {
-                    SomeId = Guid.NewGuid()
-                })))
+                    bus.SendLocal(new StartSagaMessage
+                    {
+                        SomeId = Guid.NewGuid()
+                    });
+                    return Task.FromResult(0);
+                }))
                 .Done(c =>
                 {
-                    if(!string.IsNullOrEmpty(c.Exceptions))
+                    if(c.Exceptions.Any())
                     {
-                        context.AddTrace("Exceptions found: " + c.Exceptions);
+                        c.AddTrace("Exceptions found: " + c.Exceptions);
 
                         return true;
                     }
@@ -36,16 +40,18 @@
 
             Assert.False(context.SagaStarted, "Saga should not have started");
             Assert.NotNull(context.Exceptions,"An exception should have been thrown");
-            Assert.True(context.Exceptions.Contains(" Please add a [Unique] attribute to the 'SomeId' property on your 'TestSagaData'"));
+            Assert.True(context.Exceptions.Any(e => e.Message == " Please add a [Unique] attribute to the 'SomeId' property on your 'NonUniqueSagaData'"));
         }
 
         [Test]
-        public void Should_not_blow_up_if_there_is_no_mapping()
+        public async Task Should_not_blow_up_if_there_is_no_mapping()
         {
-            var context = new Context();
-
-            Scenario.Define(context)
-                .WithEndpoint<SagaEndpoint>(b=>b.Given(bus => bus.SendLocal(new StartSagaMessageWithNoMapping())))
+            var context = await Scenario.Define<Context>()
+                .WithEndpoint<SagaEndpoint>(b=>b.Given(bus =>
+                {
+                    bus.SendLocal(new StartSagaMessageWithNoMapping());
+                    return Task.FromResult(0);
+                }))
                 .Done(c => c.SagaStarted)
                 .Run();
 
@@ -53,15 +59,16 @@
         }
 
         [Test]
-        public void Should_not_blow_up_if_user_opts_in()
+        public async Task Should_not_blow_up_if_user_opts_in()
         {
-            var context = new Context();
-
-            Scenario.Define(context)
-                .WithEndpoint<SagaEndpointWithOptIn>(b=>b.Given(bus => bus.SendLocal(new StartSagaMessage
-                {
-                    SomeId = Guid.NewGuid()
-                })))
+            var context = await Scenario.Define<Context>()
+                .WithEndpoint<SagaEndpointWithOptIn>(b=>b.Given(bus => {
+                    bus.SendLocal(new StartSagaMessage
+                    {
+                        SomeId = Guid.NewGuid()
+                    });
+                    return Task.FromResult(0);
+                }))
                 .Done(c => c.SagaStarted)
                 .Run();
 
@@ -80,7 +87,7 @@
                 EndpointSetup<DefaultServer>();
             }
 
-            public class TestSaga : Saga<TestSagaData>, IAmStartedByMessages<StartSagaMessage>, IAmStartedByMessages<StartSagaMessageWithNoMapping>
+            public class NonUniqueSaga : Saga<NonUniqueSagaData>, IAmStartedByMessages<StartSagaMessage>, IAmStartedByMessages<StartSagaMessageWithNoMapping>
             {
                 public Context Context { get; set; }
                 public void Handle(StartSagaMessage message)
@@ -95,7 +102,7 @@
                     Context.SagaStarted = true;
                 }
 
-                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<TestSagaData> mapper)
+                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<NonUniqueSagaData> mapper)
                 {
                     mapper.ConfigureMapping<StartSagaMessage>(m => m.SomeId)
                         .ToSaga(s=>s.SomeId);
@@ -103,7 +110,7 @@
 
             }
 
-            public class TestSagaData : IContainSagaData
+            public class NonUniqueSagaData : IContainSagaData
             {
                 public virtual Guid Id { get; set; }
                 public virtual string Originator { get; set; }
@@ -121,7 +128,7 @@
                 EndpointSetup<DefaultServer>(c => c.UsePersistence<RavenDBPersistence>().AllowStaleSagaReads());
             }
 
-            public class TestSaga : Saga<TestSagaData>, IAmStartedByMessages<StartSagaMessage>
+            public class OptInSaga : Saga<OptInSagaData>, IAmStartedByMessages<StartSagaMessage>
             {
                 public Context Context { get; set; }
                 public void Handle(StartSagaMessage message)
@@ -130,7 +137,7 @@
                 }
 
          
-                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<TestSagaData> mapper)
+                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<OptInSagaData> mapper)
                 {
                     mapper.ConfigureMapping<StartSagaMessage>(m => m.SomeId)
                         .ToSaga(s => s.SomeId);
@@ -138,7 +145,7 @@
 
             }
 
-            public class TestSagaData : IContainSagaData
+            public class OptInSagaData : IContainSagaData
             {
                 public virtual Guid Id { get; set; }
                 public virtual string Originator { get; set; }

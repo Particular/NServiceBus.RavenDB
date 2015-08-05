@@ -6,6 +6,8 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
 {
     using System.Diagnostics;
     using System.Threading;
+    using NServiceBus.Extensibility;
+    using NServiceBus.Timeout.Core;
     using NUnit.Framework;
     using Raven.Client;
     using Raven.Client.Document;
@@ -29,16 +31,17 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             {
                 new TimeoutsIndex().Execute(documentStore);
 
-                var persister = new TimeoutPersister
-                            {
-                                DocumentStore = documentStore,
-                                EndpointName = "foo",
-                                TriggerCleanupEvery = TimeSpan.FromHours(1), // Make sure cleanup doesn't run automatically
-                            };
+                var query = new QueryTimeouts(documentStore)
+                {
+                    EndpointName = "foo",
+                    TriggerCleanupEvery = TimeSpan.FromHours(1), // Make sure cleanup doesn't run automatically
+                };
+                var persister = new TimeoutPersister(documentStore);
+                var options = new TimeoutPersistenceOptions(new ContextBag());
 
                 var startSlice = DateTime.UtcNow.AddYears(-10);
                 // avoid cleanup from running during the test by making it register as being run
-                Assert.AreEqual(0, persister.GetCleanupChunk(startSlice).Count());
+                Assert.AreEqual(0, query.GetCleanupChunk(startSlice).Count());
 
                 var expected = new List<Tuple<string, DateTime>>();
                 var lastTimeout = DateTime.UtcNow;
@@ -56,7 +59,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                                 Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                                                 OwningTimeoutManager = string.Empty,
                                             };
-                                   persister.Add(td);
+                                   persister.Add(td, options);
                                    expected.Add(new Tuple<string, DateTime>(td.Id, td.Time));
                                    lastTimeout = (td.Time > lastTimeout) ? td.Time : lastTimeout;
                                }
@@ -70,7 +73,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                 while (!finishedAdding || startSlice < lastTimeout)
                 {
                     DateTime nextRetrieval;
-                    var timeoutDatas = persister.GetNextChunk(startSlice, out nextRetrieval);
+                    var timeoutDatas = query.GetNextChunk(startSlice, out nextRetrieval);
                     foreach (var timeoutData in timeoutDatas)
                     {
                         if (startSlice < timeoutData.Item2)
@@ -78,7 +81,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                             startSlice = timeoutData.Item2;
                         }
 
-                        Assert.IsTrue(persister.TryRemove(timeoutData.Item1, out tmptd));
+                        Assert.IsTrue(persister.TryRemove(timeoutData.Item1, options, out tmptd));
                         found++;
                     }
                 }
@@ -89,13 +92,13 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                 // we need to perform manual cleaup.
                 while (true)
                 {
-                    var chunkToCleanup = persister.GetCleanupChunk(DateTime.UtcNow.AddDays(1)).ToArray();
+                    var chunkToCleanup = query.GetCleanupChunk(DateTime.UtcNow.AddDays(1)).ToArray();
                     if (chunkToCleanup.Length == 0) break;
 
                     found += chunkToCleanup.Length;
                     foreach (var tuple in chunkToCleanup)
                     {
-                        Assert.IsTrue(persister.TryRemove(tuple.Item1, out tmptd));
+                        Assert.IsTrue(persister.TryRemove(tuple.Item1, options, out tmptd));
                     }
 
                     WaitForIndexing(documentStore);
@@ -124,16 +127,17 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             {
                 new TimeoutsIndex().Execute(documentStore);
 
-                var persister = new TimeoutPersister
-                                {
-                                    DocumentStore = documentStore,
-                                    EndpointName = "foo",
-                                    TriggerCleanupEvery = TimeSpan.FromDays(1), // Make sure cleanup doesn't run automatically
-                                };
+                var query = new QueryTimeouts(documentStore)
+                {
+                    EndpointName = "foo",
+                    TriggerCleanupEvery = TimeSpan.FromDays(1), // Make sure cleanup doesn't run automatically
+                };
+                var persister = new TimeoutPersister(documentStore);
+                var options = new TimeoutPersistenceOptions(new ContextBag());
 
                 var startSlice = DateTime.UtcNow.AddYears(-10);
                 // avoid cleanup from running during the test by making it register as being run
-                Assert.AreEqual(0, persister.GetCleanupChunk(startSlice).Count());
+                Assert.AreEqual(0, query.GetCleanupChunk(startSlice).Count());
 
                 const int insertsPerThread = 1000;
                 var expected = 0;
@@ -153,7 +157,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                                 Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                                                 OwningTimeoutManager = string.Empty,
                                             };
-                                   persister.Add(td);
+                                   persister.Add(td, options);
                                    Interlocked.Increment(ref expected);
                                    lastExpectedTimeout = (td.Time > lastExpectedTimeout) ? td.Time : lastExpectedTimeout;
                                }
@@ -169,11 +173,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                    DefaultDatabase = db,
                                }.Initialize())
                                {
-                                   var persister2 = new TimeoutPersister
-                                                    {
-                                                        DocumentStore = store,
-                                                        EndpointName = "bar",
-                                                    };
+                                   var persister2 = new TimeoutPersister(store);
 
                                    var sagaId = Guid.NewGuid();
                                    for (var i = 0; i < insertsPerThread; i++)
@@ -185,7 +185,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                                     Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                                                     OwningTimeoutManager = string.Empty,
                                                 };
-                                       persister2.Add(td);
+                                       persister2.Add(td, options);
                                        Interlocked.Increment(ref expected);
                                        lastExpectedTimeout = (td.Time > lastExpectedTimeout) ? td.Time : lastExpectedTimeout;
                                    }
@@ -200,7 +200,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                 while (!finishedAdding1 || !finishedAdding2 || startSlice < lastExpectedTimeout)
                 {
                     DateTime nextRetrieval;
-                    var timeoutDatas = persister.GetNextChunk(startSlice, out nextRetrieval);
+                    var timeoutDatas = query.GetNextChunk(startSlice, out nextRetrieval);
                     foreach (var timeoutData in timeoutDatas)
                     {
                         if (startSlice < timeoutData.Item2)
@@ -208,7 +208,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                             startSlice = timeoutData.Item2;
                         }
 
-                        Assert.IsTrue(persister.TryRemove(timeoutData.Item1, out tmptd));
+                        Assert.IsTrue(persister.TryRemove(timeoutData.Item1, options, out tmptd));
                         found++;
                     }
                 }
@@ -219,14 +219,14 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                 // we need to perform manual cleaup.
                 while (true)
                 {
-                    var chunkToCleanup = persister.GetCleanupChunk(DateTime.UtcNow.AddDays(1)).ToArray();
+                    var chunkToCleanup = query.GetCleanupChunk(DateTime.UtcNow.AddDays(1)).ToArray();
                     Console.WriteLine("Cleanup: got a chunk of size " + chunkToCleanup.Length);
                     if (chunkToCleanup.Length == 0) break;
 
                     found += chunkToCleanup.Length;
                     foreach (var tuple in chunkToCleanup)
                     {
-                        Assert.IsTrue(persister.TryRemove(tuple.Item1, out tmptd));
+                        Assert.IsTrue(persister.TryRemove(tuple.Item1, options, out tmptd));
                     }
 
                     WaitForIndexing(documentStore);

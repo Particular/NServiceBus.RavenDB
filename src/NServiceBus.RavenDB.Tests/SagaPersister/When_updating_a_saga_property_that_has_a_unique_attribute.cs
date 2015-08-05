@@ -3,6 +3,7 @@ using NServiceBus.RavenDB.Tests;
 using NServiceBus.Saga;
 using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
+using Raven.Client;
 
 [TestFixture]
 public class When_updating_a_saga_property_that_has_a_unique_attribute : RavenDBPersistenceTestBase
@@ -10,9 +11,9 @@ public class When_updating_a_saga_property_that_has_a_unique_attribute : RavenDB
     [Test]
     public void It_should_allow_the_update()
     {
-        var factory = new RavenSessionFactory(store);
-        factory.ReleaseSession();
-        var persister = new SagaPersister(factory);
+        IDocumentSession session;
+        var options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
+        var persister = new SagaPersister();
         var uniqueString = Guid.NewGuid().ToString();
         var saga1 = new SagaData
             {
@@ -20,15 +21,16 @@ public class When_updating_a_saga_property_that_has_a_unique_attribute : RavenDB
                 UniqueString = uniqueString
             };
 
-        persister.Save(saga1);
-        factory.SaveChanges();
-        factory.ReleaseSession();
+        persister.Save(saga1, options);
+        session.SaveChanges();
+        session.Dispose();
 
-        var saga = persister.Get<SagaData>(saga1.Id);
+        options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
+        var saga = persister.Get<SagaData>(saga1.Id, options);
         saga.UniqueString = Guid.NewGuid().ToString();
-        persister.Update(saga);
-        factory.SaveChanges();
-        factory.ReleaseSession();
+        persister.Update(saga, options);
+        session.SaveChanges();
+        session.Dispose();
 
         var saga2 = new SagaData
             {
@@ -37,8 +39,16 @@ public class When_updating_a_saga_property_that_has_a_unique_attribute : RavenDB
             };
 
         //this should not blow since we changed the unique value in the previous saga
-        persister.Save(saga2);
-        factory.SaveChanges();
+        options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
+        persister.Save(saga2, options);
+        session.SaveChanges();
+    }
+
+    class SomeSaga : Saga<SagaData>
+    {
+        protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
+        {
+        }
     }
 
     class SagaData : IContainSagaData
@@ -47,7 +57,6 @@ public class When_updating_a_saga_property_that_has_a_unique_attribute : RavenDB
         public string Originator { get; set; }
         public string OriginalMessageId { get; set; }
 
-        [Unique]
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
     }

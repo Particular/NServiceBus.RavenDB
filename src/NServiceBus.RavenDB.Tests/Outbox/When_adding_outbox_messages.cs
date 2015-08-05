@@ -7,6 +7,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
     using Raven.Abstractions.Exceptions;
+    using Raven.Client;
     using Raven.Client.Exceptions;
 
     [TestFixture]
@@ -22,49 +23,54 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public void Should_throw_if__trying_to_insert_same_messageid()
         {
-            var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory);
+            IDocumentSession session;
+            var options = this.NewOptions(out session);
+            var persister = new OutboxPersister();
 
-            using (sessionFactory.Session)
+            using (session)
             {
-                persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>());
-                Assert.Throws<NonUniqueObjectException>(() => persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>()));
+                persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>(), options);
+                Assert.Throws<NonUniqueObjectException>(() => persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>(), options));
 
-                sessionFactory.SaveChanges();
+                session.SaveChanges();
             }
         }
 
         [Test]
         public void Should_throw_if__trying_to_insert_same_messageid2()
         {
-            var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory);
+            IDocumentSession session;
+            var options = this.NewOptions(out session);
+            var persister = new OutboxPersister();
 
-            persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>());
-            sessionFactory.SaveChanges();
-            sessionFactory.ReleaseSession();
+            persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>(), options);
+            session.SaveChanges();
+            session.Dispose();
 
-            persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>());
-            Assert.Throws<ConcurrencyException>(sessionFactory.SaveChanges);
+            options = this.NewOptions(out session);
+            persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>(), options);
+            Assert.Throws<ConcurrencyException>(session.SaveChanges);
         }
 
         [Test]
         public void Should_save_with_not_dispatched()
         {
             var id = Guid.NewGuid().ToString("N");
-            var sessionFactory = new RavenSessionFactory(store);
+            IDocumentSession session;
+            var options = this.NewOptions(out session);
 
-            var persister = new OutboxPersister(sessionFactory){DocumentStore = store};
+            var persister = new OutboxPersister { DocumentStore = store };
             persister.Store(id, new List<TransportOperation>
             {
                 new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>()),
-            });
+            }, options);
 
-            sessionFactory.SaveChanges();
-            sessionFactory.ReleaseSession();
+            session.SaveChanges();
+            session.Dispose();
 
+            options = this.NewOptions(out session);
             OutboxMessage result;
-            persister.TryGet(id, out result);
+            persister.TryGet(id, options, out result);
 
             var operation = result.TransportOperations.Single();
 
@@ -76,24 +82,26 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         {
             var id = Guid.NewGuid().ToString("N");
 
-            var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store };
+            IDocumentSession session;
+            var options = this.NewOptions(out session);
+            var persister = new OutboxPersister{ DocumentStore = store };
             persister.Store(id, new List<TransportOperation>
             {
                 new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>()),
-            });
+            }, options);
 
-            sessionFactory.SaveChanges();
-            sessionFactory.ReleaseSession();
+            session.SaveChanges();
+            session.Dispose();
 
-            persister.SetAsDispatched(id);
+            options = this.NewOptions(out session);
+            persister.SetAsDispatched(id, options);
 
             WaitForIndexing(store);
 
-            using (var session = store.OpenSession())
+            using (var s = store.OpenSession())
             {
-                var result = session.Query<OutboxRecord>().Where(o => o.MessageId == id)
-                    .SingleOrDefault();
+                var result = s.Query<OutboxRecord>()
+                    .SingleOrDefault(o => o.MessageId == id);
 
                 Assert.NotNull(result);
                 Assert.True(result.Dispatched);

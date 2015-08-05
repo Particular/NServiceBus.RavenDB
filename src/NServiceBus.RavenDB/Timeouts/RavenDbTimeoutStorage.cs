@@ -3,6 +3,7 @@
     using System;
     using NServiceBus.RavenDB;
     using NServiceBus.RavenDB.Internal;
+    using NServiceBus.RavenDB.Timeouts;
     using NServiceBus.TimeoutPersisters.RavenDB;
     using Raven.Client;
     using Raven.Client.Document;
@@ -43,10 +44,12 @@
                 remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
             }
 
+            store.Listeners.RegisterListener(new TimeoutDataV1toV2Converter());
+
             Helpers.SafelyCreateIndex(store, new TimeoutsIndex());
 
-            context.Container.ConfigureComponent<TimeoutPersister>(DependencyLifecycle.SingleInstance)
-                .ConfigureProperty(x => x.DocumentStore, store)
+            context.Container.ConfigureComponent(() => new TimeoutPersister(store),DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(() => new QueryTimeouts(store), DependencyLifecycle.SingleInstance) // Needs to be SingleInstance because it contains cleanup state
                 .ConfigureProperty(x => x.EndpointName, context.Settings.EndpointName());
         }
     }

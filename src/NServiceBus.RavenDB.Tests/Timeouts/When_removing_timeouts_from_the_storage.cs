@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace NServiceBus.RavenDB.Tests.Timeouts
 {
+    using NServiceBus.Extensibility;
+    using NServiceBus.Timeout.Core;
     using NUnit.Framework;
     using Support;
     using TimeoutPersisters.RavenDB;
@@ -16,11 +18,8 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
         [Test]
         public void Should_return_the_correct_headers()
         {
-            var persister = new TimeoutPersister
-            {
-                DocumentStore = store,
-                EndpointName = "MyTestEndpoint",
-            };
+
+            var persister = new TimeoutPersister(store);
 
             var headers = new Dictionary<string, string>
                           {
@@ -38,10 +37,11 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                 Headers = headers,
                 OwningTimeoutManager = "MyTestEndpoint",
             };
-            persister.Add(timeout);
+            var options = new TimeoutPersistenceOptions(new ContextBag());
+            persister.Add(timeout, options);
 
             TimeoutData timeoutData;
-            persister.TryRemove(timeout.Id, out timeoutData);
+            persister.TryRemove(timeout.Id, options, out timeoutData);
 
             CollectionAssert.AreEqual(headers, timeoutData.Headers);
         }
@@ -51,11 +51,11 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
         {
             new TimeoutsIndex().Execute(store);
 
-            var persister = new TimeoutPersister
+            var query = new QueryTimeouts(store)
             {
-                DocumentStore = store,
                 EndpointName = "MyTestEndpoint",
             };
+            var persister = new TimeoutPersister(store);
 
             var t1 = new TimeoutData
             {
@@ -66,6 +66,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                        {"Header1", "Value1"}
                                    }
             };
+            var options = new TimeoutPersistenceOptions(new ContextBag());
             var t2 = new TimeoutData
             {
                 Time = DateTime.Now.AddYears(-1),
@@ -76,18 +77,18 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                    }
             };
 
-            persister.Add(t1);
-            persister.Add(t2);
+            persister.Add(t1, options);
+            persister.Add(t2, options);
 
             WaitForIndexing(store);
 
             DateTime nextTimeToRunQuery;
-            var timeouts = persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
+            var timeouts = query.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
 
             foreach (var timeout in timeouts)
             {
                 TimeoutData timeoutData;
-                persister.TryRemove(timeout.Item1, out timeoutData);
+                persister.TryRemove(timeout.Item1, options, out timeoutData);
             }
 
             using (var session = store.OpenSession())
@@ -102,11 +103,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
         {
             new TimeoutsIndex().Execute(store);
 
-            var persister = new TimeoutPersister
-            {
-                DocumentStore = store,
-                EndpointName = "MyTestEndpoint",
-            };
+            var persister = new TimeoutPersister(store);
 
             var sagaId1 = Guid.NewGuid();
             var sagaId2 = Guid.NewGuid();
@@ -131,13 +128,14 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                    }
             };
 
-            persister.Add(t1);
-            persister.Add(t2);
+            var options = new TimeoutPersistenceOptions(new ContextBag());
+            persister.Add(t1, options);
+            persister.Add(t2, options);
 
             WaitForIndexing(store);
 
-            persister.RemoveTimeoutBy(sagaId1);
-            persister.RemoveTimeoutBy(sagaId2);
+            persister.RemoveTimeoutBy(sagaId1, options);
+            persister.RemoveTimeoutBy(sagaId2, options);
 
             using (var session = store.OpenSession())
             {

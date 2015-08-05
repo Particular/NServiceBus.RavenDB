@@ -8,13 +8,14 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 
     class SubscriptionPersister : ISubscriptionStorage
     {
-        public IDocumentStore DocumentStore { get; set; }
+        readonly IDocumentStore documentStore;
 
-        public void Init()
+        public SubscriptionPersister(IDocumentStore store)
         {
+            documentStore = store;
         }
 
-        public void Subscribe(string client, IEnumerable<MessageType> messageTypes)
+        public void Subscribe(string client, IEnumerable<MessageType> messageTypes, SubscriptionStorageOptions options)
         {
             var messageTypeLookup = messageTypes.ToDictionary(Subscription.FormatId);
 
@@ -37,7 +38,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             }
         }
 
-        public void Unsubscribe(string client, IEnumerable<MessageType> messageTypes)
+        public void Unsubscribe(string client, IEnumerable<MessageType> messageTypes, SubscriptionStorageOptions options)
         {
             using (var session = OpenSession())
             {
@@ -54,19 +55,9 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             }
         }
 
-        public IEnumerable<string> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes)
-        {
-            using (var session = OpenSession())
-            {
-                return GetSubscriptions(messageTypes, session)
-                    .SelectMany(s => s.Clients)
-                    .Distinct();
-            }
-        }
-
         IDocumentSession OpenSession()
         {
-            var session = DocumentStore.OpenSession();
+            var session = documentStore.OpenSession();
             session.Advanced.AllowNonAuthoritativeInformation = false;
             return session;
         }

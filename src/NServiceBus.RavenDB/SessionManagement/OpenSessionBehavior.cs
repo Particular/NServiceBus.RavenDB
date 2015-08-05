@@ -2,8 +2,8 @@
 {
     using System;
     using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
     using NServiceBus.RavenDB.Internal;
+    using NServiceBus.RavenDB.Persistence;
     using NServiceBus.Unicast;
     using Raven.Client;
 
@@ -31,7 +31,7 @@
 
         IDocumentSession OpenSession(Context context)
         {
-            var databaseName = GetDatabaseName(new MessageContext(context.PhysicalMessage));
+            var databaseName = GetDatabaseName(new MessageContext(context.GetPhysicalMessage()));
             var documentSession = string.IsNullOrEmpty(databaseName) ? documentStoreWrapper.DocumentStore.OpenSession() : documentStoreWrapper.DocumentStore.OpenSession(databaseName);
             documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;

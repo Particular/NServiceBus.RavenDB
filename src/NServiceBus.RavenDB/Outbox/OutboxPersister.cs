@@ -4,21 +4,13 @@
     using System.Collections.Generic;
     using System.Linq;
     using NServiceBus.Outbox;
-    using NServiceBus.RavenDB.Persistence;
     using Raven.Client;
 
     class OutboxPersister : IOutboxStorage
     {
-        readonly ISessionProvider sessionProvider;
-
-        public OutboxPersister(ISessionProvider sessionProvider)
-        {
-            this.sessionProvider = sessionProvider;
-        }
-
         public IDocumentStore DocumentStore { get; set; }
 
-        public bool TryGet(string messageId, out OutboxMessage message)
+        public bool TryGet(string messageId, OutboxStorageOptions options, out OutboxMessage message)
         {
             OutboxRecord result;
             using (var session = DocumentStore.OpenSession())
@@ -41,9 +33,9 @@
             return true;
         }
 
-        public void Store(string messageId, IEnumerable<TransportOperation> transportOperations)
+        public void Store(string messageId, IEnumerable<TransportOperation> transportOperations, OutboxStorageOptions options)
         {
-            var session = sessionProvider.Session;
+            var session = options.GetSession();
             session.Advanced.UseOptimisticConcurrency = true;
 
             session.Store(new OutboxRecord
@@ -60,7 +52,7 @@
             }, GetOutboxRecordId(messageId));
         }
 
-        public void SetAsDispatched(string messageId)
+        public void SetAsDispatched(string messageId, OutboxStorageOptions options)
         {
             using (var session = DocumentStore.OpenSession())
             {

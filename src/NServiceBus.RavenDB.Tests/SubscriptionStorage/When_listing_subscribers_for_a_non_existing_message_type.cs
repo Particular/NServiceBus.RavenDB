@@ -9,13 +9,8 @@ public class When_listing_subscribers_for_a_non_existing_message_type : RavenDBP
     [Test]
     public void No_subscribers_should_be_returned()
     {
-        var storage = new SubscriptionPersister
-        {
-            DocumentStore = store
-        };
-
-        storage.Init();
-        var subscriptionsForMessageType = storage.GetSubscriberAddressesForMessage(MessageTypes.MessageA);
+        var query = new QuerySubscriptions(store);
+        var subscriptionsForMessageType = query.GetSubscriberAddressesForMessage(MessageTypes.MessageA);
 
         Assert.AreEqual(0, subscriptionsForMessageType.Count());
     }
