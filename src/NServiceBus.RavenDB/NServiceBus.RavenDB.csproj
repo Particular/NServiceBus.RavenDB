@@ -76,6 +76,7 @@
     <Compile Include="Internal\Helpers.cs" />
     <Compile Include="ConnectionParameters.cs" />
     <Compile Include="Internal\StorageEngineVerifier.cs" />
+    <Compile Include="Internal\TransactionRecoveryStorageVerifier.cs" />
     <Compile Include="Outbox\Installer.cs" />
     <Compile Include="Outbox\OutboxPersister.cs" />
     <Compile Include="Outbox\OutboxRecord.cs" />
