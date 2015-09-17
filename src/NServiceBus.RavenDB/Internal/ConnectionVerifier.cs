@@ -28,7 +28,7 @@
             }
             var message = string.Format(
                 @"Incompatible RavenDB client and server versions combination detected. 
-The RavenDB server versioing must be within the same Major+Minor range as the client verison OR be greater than the client verison. 
+The RavenDB server version must be within the same Major+Minor range as the client verison OR be greater than the client verison. 
 Server Version: {0}
 Client Version: {1}", serverVersion, clientVersion);
             throw new Exception(message);
@@ -97,7 +97,8 @@ Client Version: {1}", serverVersion, clientVersion);
         {
             var message = string.Format(
                 @"RavenDB could not be contacted. We tried to access Raven using the following url: {0}.
-Please ensure that you can open the RavenDB Management Studio by navigating to {0}.
+Please ensure that RavenDB is running on that url and port.
+If you have enable Raven Studio you should be able to verify it by navigating to {0}/studio/index.html.
 To configure NServiceBus to use a different Raven connection string add a connection string named ""NServiceBus/Persistence"" in your config file, example:
 <connectionStrings>
     <add name=""NServiceBus/Persistence"" connectionString=""Url = http://localhost:9090"" />
