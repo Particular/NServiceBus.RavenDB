@@ -1,112 +1,110 @@
 ﻿namespace NServiceBus.RavenDB.Internal
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Net;
-    using System.Text;
     using NServiceBus.Logging;
     using Raven.Client;
     using Raven.Imports.Newtonsoft.Json;
 
     class ConnectionVerifier
     {
-        const string WrongRavenVersionMessage =
-            @"The RavenDB server you have specified is detected to be {0}. NServiceBus requires RavenDB version 3.0 build 3660 (or a higher build number for version 3.0) to operate correctly. Please update your RavenDB server.
-Further instructions can be found at: http://particular.net/articles/using-ravendb-in-nservicebus-installing";
 
-        static readonly ILog Logger = LogManager.GetLogger(typeof(ConnectionVerifier));
+        static ILog Logger = LogManager.GetLogger(typeof(ConnectionVerifier));
 
         internal static void VerifyConnectionToRavenDBServer(IDocumentStore store)
         {
-            RavenBuildInfo ravenBuildInfo = null;
-            var connectionSuccessful = false;
-            Exception exception = null;
+            Version serverVersion;
+            if (!TryGetServerVersion(store, out serverVersion))
+            {
+                return;
+            }
+            var clientVersion = GetClientVersion();
+            if (AreVersionsCompatible(serverVersion, clientVersion))
+            {
+                Logger.InfoFormat("Connection to RavenDB at {0} verified. Server version: {1}", store.Url, serverVersion);
+                return;
+            }
+            var message = string.Format(
+                @"Incompatible RavenDB client and server versions combination detected. 
+The RavenDB server versioing must be within the same Major+Minor range as the client verison OR be greater than the client verison. 
+Server Version: {0}
+Client Version: {1}", serverVersion, clientVersion);
+            throw new Exception(message);
+        }
+
+        static Version GetClientVersion()
+        {
+            var clientAssembly = typeof(IDocumentStore).Assembly;
+            var versionInfo = FileVersionInfo.GetVersionInfo(clientAssembly.Location);
+            return Version.Parse(versionInfo.FileVersion);
+        }
+
+        internal static bool AreVersionsCompatible(Version server, Version client)
+        {
+            // check that server is higher OR within same major+minor as client 
+            if (server.Major == client.Major && server.Minor == client.Minor)
+            {
+                return true;
+            }
+            if (server > client)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        static bool TryGetServerVersion(IDocumentStore store, out Version version)
+        {
+            store.Initialize();
+
+            // for embedded databases
+            if (store.Url == null)
+            {
+                version = null;
+                return false;
+            }
             try
             {
-                store.Initialize();
-
-                // for embedded databases
-                if (store.Url == null)
-                {
-                    return;
-                }
-
                 var request = WebRequest.Create(string.Format("{0}/build/version", store.Url));
                 request.Timeout = 2000;
                 using (var response = (HttpWebResponse) request.GetResponse())
                 {
                     if (response.StatusCode != HttpStatusCode.OK)
                     {
-                        throw new InvalidOperationException("Call failed - " + response.StatusDescription);
+                        throw new Exception("Call failed - " + response.StatusDescription);
                     }
 
                     using (var stream = response.GetResponseStream())
+                    using (var reader = new StreamReader(stream))
                     {
-                        using (var reader = new StreamReader(stream))
-                        {
-                            ravenBuildInfo = JsonConvert.DeserializeObject<RavenBuildInfo>(reader.ReadToEnd());
-                        }
+                        var buildInfo = JsonConvert.DeserializeObject<RavenBuildInfo>(reader.ReadToEnd());
+                        version = buildInfo.ConvertToVersion();
+                        return true;
                     }
-
-                    connectionSuccessful = true;
                 }
             }
-            catch (Exception ex)
-            {
-                exception = ex;
-            }
-            if (!connectionSuccessful)
+            catch (Exception exception)
             {
                 ShowUncontactableRavenWarning(store, exception);
-                return;
+                version = null;
+                return false;
             }
-
-            if (!ravenBuildInfo.IsSufficientVersion())
-            {
-                throw new InvalidOperationException(string.Format(WrongRavenVersionMessage, ravenBuildInfo));
-            }
-
-            Logger.InfoFormat("Connection to RavenDB at {0} verified. Detected version: {1}", store.Url, ravenBuildInfo);
         }
 
         static void ShowUncontactableRavenWarning(IDocumentStore store, Exception exception)
         {
-            var sb = new StringBuilder();
-            sb.AppendFormat("RavenDB could not be contacted. We tried to access Raven using the following url: {0}.",
-                store.Url);
-            sb.AppendLine();
-            sb.AppendFormat("Please ensure that you can open the RavenDB Management Studio by navigating to {0}.", store.Url);
-            sb.AppendLine();
-            sb.AppendLine(
-                @"To configure NServiceBus to use a different Raven connection string add a connection string named ""NServiceBus/Persistence"" in your config file, example:");
-            sb.AppendLine(
-                @"<connectionStrings>
+            var message = string.Format(
+                @"RavenDB could not be contacted. We tried to access Raven using the following url: {0}.
+Please ensure that you can open the RavenDB Management Studio by navigating to {0}.
+To configure NServiceBus to use a different Raven connection string add a connection string named ""NServiceBus/Persistence"" in your config file, example:
+<connectionStrings>
     <add name=""NServiceBus/Persistence"" connectionString=""Url = http://localhost:9090"" />
-</connectionStrings>");
-            sb.AppendLine("Reason: " + exception);
-
-            Logger.Warn(sb.ToString());
+</connectionStrings>
+Reason: {1}", store.Url, exception);
+            Logger.Warn(message);
         }
 
-        class RavenBuildInfo
-        {
-            public string ProductVersion { get; set; }
-            public string BuildVersion { get; set; }
-
-            public bool IsSufficientVersion()
-            {
-                int buildVersion;
-                if (!int.TryParse(BuildVersion, out buildVersion))
-                {
-                    return false;
-                }
-                return !string.IsNullOrEmpty(ProductVersion) && ProductVersion.StartsWith("3.0");
-            }
-
-            public override string ToString()
-            {
-                return string.Format("Product version: {0}, Build version: {1}", ProductVersion, BuildVersion);
-            }
-        }
     }
 }
