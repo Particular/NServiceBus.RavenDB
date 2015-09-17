@@ -98,7 +98,7 @@ Client Version: {1}", serverVersion, clientVersion);
             var message = string.Format(
                 @"RavenDB could not be contacted. We tried to access Raven using the following url: {0}.
 Please ensure that RavenDB is running on that url and port.
-If you have enable Raven Studio you should be able to verify it by navigating to {0}/studio/index.html.
+If you have enabled Raven Studio you should be able to verify it by navigating to {0}/studio/index.html.
 To configure NServiceBus to use a different Raven connection string add a connection string named ""NServiceBus/Persistence"" in your config file, example:
 <connectionStrings>
     <add name=""NServiceBus/Persistence"" connectionString=""Url = http://localhost:9090"" />
