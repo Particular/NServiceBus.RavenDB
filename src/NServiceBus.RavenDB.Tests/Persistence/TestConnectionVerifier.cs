@@ -52,7 +52,8 @@
             {
                 documentStore.Initialize();
 
-                Assert.Throws<Exception>(() => ConnectionVerifier.VerifyConnectionToRavenDBServer(documentStore));
+                var exception = Assert.Throws<Exception>(() => ConnectionVerifier.VerifyConnectionToRavenDBServer(documentStore));
+                Assert.IsTrue(exception.Message.StartsWith("Incompatible RavenDB client and server version combination detected"));
             }
         }
 
