@@ -28,7 +28,7 @@
             {
                 throw new Exception(string.Format("Could not convert RavenDB server build version '{0}' to an int.", BuildVersion));
             }
-            return new Version(productVersion.Major,productVersion.Minor,buildVersion);
+            return new Version(productVersion.Major, productVersion.Minor, buildVersion);
         }
 
     }

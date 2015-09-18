@@ -27,8 +27,8 @@
                 return;
             }
             var message = string.Format(
-                @"Incompatible RavenDB client and server versions combination detected. 
-The RavenDB server version must be within the same Major+Minor range as the client verison OR be greater than the client verison. 
+                @"Incompatible RavenDB client and server version combination detected. 
+The RavenDB server version must be within the same Major+Minor range as the client version OR be greater than the client version. 
 Server Version: {0}
 Client Version: {1}", serverVersion, clientVersion);
             throw new Exception(message);
