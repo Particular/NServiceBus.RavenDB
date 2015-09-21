@@ -47,12 +47,12 @@
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="Raven.Abstractions, Version=3.0.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\RavenDB.Client.3.0.3660\lib\net45\Raven.Abstractions.dll</HintPath>
+      <HintPath>..\packages\RavenDB.Client.3.0.3785\lib\net45\Raven.Abstractions.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Raven.Client.Lightweight, Version=3.0.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\RavenDB.Client.3.0.3660\lib\net45\Raven.Client.Lightweight.dll</HintPath>
+      <HintPath>..\packages\RavenDB.Client.3.0.3785\lib\net45\Raven.Client.Lightweight.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -124,20 +124,6 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\EndpointTemplates\ContextAppender.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\EndpointTemplates\DefaultPublisher.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\EndpointTemplates\DefaultServer.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\Cant_convert_to_TransportMessage\SerializerCorrupter.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\Cant_convert_to_TransportMessage\When_cant_convert_to_TransportMessage.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\Cant_convert_to_TransportMessage\When_cant_convert_to_TransportMessage_NoTransactions.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\Cant_convert_to_TransportMessage\When_cant_convert_to_TransportMessage_SuppressedDTC.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\Message_without_an_id.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\StackTraceAssert.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_handler_and_Uow_End_throws.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_handler_throws.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_handler_throws_AggregateException.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_handler_throws_serialization_exception.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_serialization_throws.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_Uow_Begin_and_different_End_throws.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_Uow_Begin_throws.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_Uow_End_throws.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\HostInformation\When_a_message_is_received.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\HostInformation\When_customising_hostinfo.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\HostInformation\When_feature_overrides_hostinfo.cs" />
