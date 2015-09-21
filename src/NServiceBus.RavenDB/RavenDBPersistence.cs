@@ -1,9 +1,11 @@
 ﻿namespace NServiceBus.Persistence
 {
+    using System;
     using NServiceBus.Features;
     using NServiceBus.RavenDB;
     using NServiceBus.RavenDB.Outbox;
     using NServiceBus.RavenDB.SessionManagement;
+    using Raven.Client;
     using RavenLogManager = Raven.Abstractions.Logging.LogManager;
 
     /// <summary>
@@ -11,6 +13,21 @@
     /// </summary>
     public class RavenDBPersistence : PersistenceDefinition
     {
+        // ReSharper disable once NotAccessedField.Local
+        static Type documentStoreType;
+
+        static RavenDBPersistence()
+        {
+            //HACK: can be removed if RavenDB ever stops using Costura
+            // Raven.Abstractions.Logging.LogManager exists in Raven.Abstractions.dll.
+            // Raven.Abstractions references Sparrow.dll.
+            // But Raven.Client.Lightweight.dll is the one that is Costura merged when we try to 
+            // set CurrentLogManager it will try to load Sparrow.dll before Raven.Client.Lightweight
+            // has had a chance to plug into the assembly load pipeline.
+            // Doing the below typeof forces Raven.Client.Lightweight to load before Raven.Abstractions
+            documentStoreType = typeof(IDocumentStore);
+        }
+
         /// <summary>
         ///     Defines the capabilities
         /// </summary>
