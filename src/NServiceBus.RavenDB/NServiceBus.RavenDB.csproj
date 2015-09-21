@@ -70,6 +70,7 @@
     <Compile Include="Gateway\RavenDbTimeoutSettingsExtensions.cs" />
     <Compile Include="Gateway\RavenDbGatewayDeduplication.cs" />
     <Compile Include="Internal\BackwardsCompatibilityHelper.cs" />
+    <Compile Include="Internal\RavenBuildInfo.cs" />
     <Compile Include="Internal\ConnectionVerifier.cs" />
     <Compile Include="Internal\DocumentStoreWrapper.cs" />
     <Compile Include="Internal\Helpers.cs" />
