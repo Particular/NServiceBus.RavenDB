@@ -112,6 +112,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
         }
 
         [TestCase]
+        [Explicit]
         public void Should_not_skip_timeouts_also_with_multiple_clients_adding_timeouts()
         {
             var db = Guid.NewGuid().ToString();
