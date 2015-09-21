@@ -17,6 +17,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
     public class Should_not_skip_timeouts
     {
         [TestCase]
+        [Explicit]
         public void Never_ever()
         {
             var db = Guid.NewGuid().ToString();
