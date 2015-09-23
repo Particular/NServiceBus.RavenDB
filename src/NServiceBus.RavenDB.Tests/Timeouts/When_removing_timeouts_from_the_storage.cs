@@ -2,9 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using NServiceBus.Persistence.InMemory.TimeoutPersister;
-    using NServiceBus.Persistence.Raven;
-    using NServiceBus.Persistence.Raven.TimeoutPersister;
+    using System.Threading;
+    using System.Transactions;
+    using RavenDB.Persistence;
+    using RavenDB.Persistence.TimeoutPersister;
     using NServiceBus.Timeout.Core;
     using NUnit.Framework;
     using Raven.Client;
@@ -12,42 +13,10 @@
     using Raven.Client.Embedded;
 
     [TestFixture]
-    public class When_removing_timeouts_from_the_storage_with_raven : When_removing_timeouts_from_the_storage
+    public class When_removing_timeouts_from_the_storage
     {
-        private IDocumentStore store;
-
-        protected override IPersistTimeouts CreateTimeoutPersister()
-        {
-            store = new EmbeddableDocumentStore {RunInMemory = true};
-            //store = new DocumentStore { Url = "http://localhost:8081", DefaultDatabase = "TempTest" };
-            store.Conventions.DefaultQueryingConsistency = ConsistencyOptions.AlwaysWaitForNonStaleResultsAsOfLastWrite;
-            store.Conventions.MaxNumberOfRequestsPerSession = 10;
-            store.Initialize();
-
-            return new RavenTimeoutPersistence(new StoreAccessor(store));
-        }
-
-        [TearDown]
-        public void Cleanup()
-        {
-            store.Dispose();
-        }
-    }
-
-    [TestFixture]
-    public class When_removing_timeouts_from_the_storage_with_inMemory : When_removing_timeouts_from_the_storage
-    {
-        protected override IPersistTimeouts CreateTimeoutPersister()
-        {
-            return new InMemoryTimeoutPersistence();
-        }
-    }
-
-    public abstract class When_removing_timeouts_from_the_storage
-    {
-        protected IPersistTimeouts persister;
-
-        protected abstract IPersistTimeouts CreateTimeoutPersister();
+        IDocumentStore store;
+        RavenTimeoutPersistence persister;
 
         [SetUp]
         public void Setup()
@@ -56,16 +25,28 @@
 
             Configure.GetEndpointNameAction = () => "MyEndpoint";
 
-            persister = CreateTimeoutPersister();
+            store = new EmbeddableDocumentStore {RunInMemory = true};
+            //store = new DocumentStore { Url = "http://localhost:8081", DefaultDatabase = "TempTest" };
+            store.Conventions.DefaultQueryingConsistency = ConsistencyOptions.AlwaysWaitForNonStaleResultsAsOfLastWrite;
+            store.Conventions.MaxNumberOfRequestsPerSession = 10;
+            store.Initialize();
+
+            persister = new RavenTimeoutPersistence(new StoreAccessor(store));
+        }
+
+        [TearDown]
+        public void Cleanup()
+        {
+            store.Dispose();
         }
 
         [Test]
-        public void Should_remove_timeouts_by_id()
+        public void TryRemove_should_remove_timeouts_by_id()
         {
-            var t1 = new TimeoutData {Id = "1", Time = DateTime.UtcNow.AddHours(-1)};
+            var t1 = new TimeoutData { Id = "1", Time = DateTime.UtcNow.AddHours(-1) };
             persister.Add(t1);
 
-            var t2 = new TimeoutData {Id = "2", Time = DateTime.UtcNow.AddHours(-1)};
+            var t2 = new TimeoutData { Id = "2", Time = DateTime.UtcNow.AddHours(-1) };
             persister.Add(t2);
 
             var timeouts = GetNextChunk();
@@ -79,7 +60,51 @@
             Assert.AreEqual(0, GetNextChunk().Count);
         }
 
-        protected List<Tuple<string, DateTime>> GetNextChunk()
+        [Test]
+        public void TryRemove_should_work_with_concurrent_operations()
+        {
+            var timeoutData = new TimeoutData { Id = "1", Time = DateTime.UtcNow.AddHours(-1) };
+            persister.Add(timeoutData);
+
+            AutoResetEvent t1EnteredTx = new AutoResetEvent(false);
+            AutoResetEvent t2EnteredTx = new AutoResetEvent(false);
+
+            bool? t1Remove = null;
+            bool? t2Remove = null;
+            var t1 = new Thread(() =>
+            {
+                using (var tx = new TransactionScope())
+                {
+                    t1EnteredTx.Set();
+                    t2EnteredTx.WaitOne();
+
+                    t1Remove = persister.TryRemove(timeoutData.Id);
+                    tx.Complete();
+                }
+            });
+
+            var t2 = new Thread(() =>
+            {
+                using (var tx = new TransactionScope())
+                {
+                    t2EnteredTx.Set();
+                    t1EnteredTx.WaitOne();
+
+                    t2Remove = persister.TryRemove(timeoutData.Id);
+                    tx.Complete();
+                }
+            });
+
+            t1.Start();
+            t2.Start();
+            t1.Join();
+            t2.Join();
+
+            Assert.IsTrue(t1Remove.Value || t2Remove.Value);
+            Assert.IsFalse(t1Remove.Value && t2Remove.Value);
+        }
+
+        List<Tuple<string, DateTime>> GetNextChunk()
         {
             DateTime nextTimeToRunQuery;
             return persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
