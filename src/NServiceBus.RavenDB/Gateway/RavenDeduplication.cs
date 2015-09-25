@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.RavenDB.Gateway.Deduplication
 {
     using System;
+    using System.Threading.Tasks;
     using NServiceBus.Gateway.Deduplication;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
@@ -9,14 +10,14 @@
     {
         public IDocumentStore DocumentStore { get; set; }
 
-        public bool DeduplicateMessage(string messageId, DateTime timeReceived)
+        public async Task<bool> DeduplicateMessage(string messageId, DateTime timeReceived)
         {
-            using (var session = DocumentStore.OpenSession())
+            using (var session = DocumentStore.OpenAsyncSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
                 session.Advanced.AllowNonAuthoritativeInformation = false;
 
-                session.Store(new GatewayMessage
+                await session.StoreAsync(new GatewayMessage
                 {
                     Id = EscapeMessageId(messageId),
                     TimeReceived = timeReceived
@@ -24,7 +25,7 @@
 
                 try
                 {
-                    session.SaveChanges();
+                    await session.SaveChangesAsync();
                 }
                 catch (ConcurrencyException)
                 {

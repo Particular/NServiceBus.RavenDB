@@ -1,13 +1,13 @@
 namespace NServiceBus.SagaPersisters.RavenDB
 {
-    using NServiceBus.Saga;
+    using NServiceBus.Sagas;
     using Raven.Client;
 
     static class SagaPersistenceOptionsExtensions
     {
-        public static IDocumentSession GetSession(this SagaPersistenceOptions options)
+        public static IAsyncDocumentSession GetSession(this SagaPersistenceOptions options)
         {
-            return options.Context.Get<IDocumentSession>();
+            return options.Context.Get<IAsyncDocumentSession>();
         }
     }
 }

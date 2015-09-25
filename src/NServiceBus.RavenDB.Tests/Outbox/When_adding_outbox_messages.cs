@@ -3,6 +3,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
@@ -21,56 +22,58 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         }
 
         [Test]
-        public void Should_throw_if__trying_to_insert_same_messageid()
+        public async Task Should_throw_if__trying_to_insert_same_messageid()
         {
-            IDocumentSession session;
+            IAsyncDocumentSession session;
             var options = this.NewOptions(out session);
             var persister = new OutboxPersister();
 
             using (session)
             {
-                persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>(), options);
-                Assert.Throws<NonUniqueObjectException>(() => persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>(), options));
+                await persister.Store(new OutboxMessage("MySpecialId"), options);
 
-                session.SaveChanges();
+                var exception = await Catch<NonUniqueObjectException>(async () => await persister.Store(new OutboxMessage("MySpecialId"), options));
+                Assert.NotNull(exception);
+
+                await session.SaveChangesAsync();
             }
         }
 
         [Test]
-        public void Should_throw_if__trying_to_insert_same_messageid2()
+        public async Task Should_throw_if__trying_to_insert_same_messageid2()
         {
-            IDocumentSession session;
+            IAsyncDocumentSession session;
             var options = this.NewOptions(out session);
             var persister = new OutboxPersister();
 
-            persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>(), options);
-            session.SaveChanges();
+            await persister.Store(new OutboxMessage("MySpecialId"), options);
+            await session.SaveChangesAsync();
             session.Dispose();
 
             options = this.NewOptions(out session);
-            persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>(), options);
-            Assert.Throws<ConcurrencyException>(session.SaveChanges);
+            await persister.Store(new OutboxMessage("MySpecialId"), options);
+
+            var exception = await Catch<ConcurrencyException>(async () => await session.SaveChangesAsync());
+            Assert.NotNull(exception);
         }
 
         [Test]
-        public void Should_save_with_not_dispatched()
+        public async Task Should_save_with_not_dispatched()
         {
             var id = Guid.NewGuid().ToString("N");
-            IDocumentSession session;
+            IAsyncDocumentSession session;
             var options = this.NewOptions(out session);
 
             var persister = new OutboxPersister { DocumentStore = store };
-            persister.Store(id, new List<TransportOperation>
-            {
-                new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>()),
-            }, options);
+            var message = new OutboxMessage(id);
+            message.TransportOperations.Add(new TransportOperation(id, new Dictionary<string, string>(), new byte[1024 * 5], new Dictionary<string, string>()));
+            await persister.Store(message, options);
 
-            session.SaveChanges();
+            await session.SaveChangesAsync();
             session.Dispose();
 
             options = this.NewOptions(out session);
-            OutboxMessage result;
-            persister.TryGet(id, options, out result);
+            var result = await persister.Get(id, options);
 
             var operation = result.TransportOperations.Single();
 
@@ -78,23 +81,22 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         }
 
         [Test]
-        public void Should_update_dispatched_flag()
+        public async Task Should_update_dispatched_flag()
         {
             var id = Guid.NewGuid().ToString("N");
 
-            IDocumentSession session;
+            IAsyncDocumentSession session;
             var options = this.NewOptions(out session);
             var persister = new OutboxPersister{ DocumentStore = store };
-            persister.Store(id, new List<TransportOperation>
-            {
-                new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>()),
-            }, options);
+            var message = new OutboxMessage(id);
+            message.TransportOperations.Add(new TransportOperation(id, new Dictionary<string, string>(), new byte[1024 * 5], new Dictionary<string, string>()));
+            await persister.Store(message, options);
 
-            session.SaveChanges();
+            await session.SaveChangesAsync();
             session.Dispose();
 
             options = this.NewOptions(out session);
-            persister.SetAsDispatched(id, options);
+            await persister.SetAsDispatched(id, options);
 
             WaitForIndexing(store);
 

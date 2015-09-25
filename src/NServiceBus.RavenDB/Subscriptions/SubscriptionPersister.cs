@@ -2,6 +2,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using Raven.Client;
@@ -15,7 +16,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             documentStore = store;
         }
 
-        public void Subscribe(string client, IEnumerable<MessageType> messageTypes, SubscriptionStorageOptions options)
+        public async Task Subscribe(string client, IEnumerable<MessageType> messageTypes, SubscriptionStorageOptions options)
         {
             var messageTypeLookup = messageTypes.ToDictionary(Subscription.FormatId);
 
@@ -23,54 +24,60 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             {
                 session.Advanced.UseOptimisticConcurrency = true;
 
-                var existingSubscriptions = GetSubscriptions(messageTypeLookup.Values, session).ToLookup(m => m.Id);
+                var existingSubscriptions = (await GetSubscriptions(messageTypeLookup.Values, session)).Where(s => s != null).ToLookup(m => m.Id);
 
-                var newAndExistingSubscriptions = messageTypeLookup
-                    .Select(id => existingSubscriptions[id.Key].SingleOrDefault() ?? StoreNewSubscription(session, id.Key, id.Value))
-                    .Where(subscription => subscription.Clients.All(c => c != client)).ToArray();
+                var newAndExistingSubscriptions = new List<Subscription>();
+                foreach (var messageType in messageTypeLookup)
+                {
+                    var subscription = existingSubscriptions[messageType.Key].SingleOrDefault() ?? (await StoreNewSubscription(session, messageType.Key, messageType.Value));
+                    if (subscription.Clients.All(c => c != client))
+                    {
+                        newAndExistingSubscriptions.Add(subscription);
+                    }
+                }
 
                 foreach (var subscription in newAndExistingSubscriptions)
                 {
                     subscription.Clients.Add(client);
                 }
 
-                session.SaveChanges();
+                await session.SaveChangesAsync();
             }
         }
 
-        public void Unsubscribe(string client, IEnumerable<MessageType> messageTypes, SubscriptionStorageOptions options)
+        public async Task Unsubscribe(string client, IEnumerable<MessageType> messageTypes, SubscriptionStorageOptions options)
         {
             using (var session = OpenSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
 
-                var subscriptions = GetSubscriptions(messageTypes, session);
+                var subscriptions = await GetSubscriptions(messageTypes, session);
 
                 foreach (var subscription in subscriptions)
                 {
                     subscription.Clients.Remove(client);
                 }
 
-                session.SaveChanges();
+                await session.SaveChangesAsync();
             }
         }
 
-        IDocumentSession OpenSession()
+        IAsyncDocumentSession OpenSession()
         {
-            var session = documentStore.OpenSession();
+            var session = documentStore.OpenAsyncSession();
             session.Advanced.AllowNonAuthoritativeInformation = false;
             return session;
         }
 
-        static IEnumerable<Subscription> GetSubscriptions(IEnumerable<MessageType> messageTypes, IDocumentSession session)
+        static Task<Subscription[]> GetSubscriptions(IEnumerable<MessageType> messageTypes, IAsyncDocumentSession session)
         {
             var ids = messageTypes
                 .Select(Subscription.FormatId);
 
-            return session.Load<Subscription>(ids).Where(s => s != null);
+            return session.LoadAsync<Subscription>(ids);
         }
 
-        static Subscription StoreNewSubscription(IDocumentSession session, string id, MessageType messageType)
+        static async Task<Subscription> StoreNewSubscription(IAsyncDocumentSession session, string id, MessageType messageType)
         {
             var subscription = new Subscription
             {
@@ -78,7 +85,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                 Id = id,
                 MessageType = messageType
             };
-            session.Store(subscription);
+            await session.StoreAsync(subscription);
 
             return subscription;
         }

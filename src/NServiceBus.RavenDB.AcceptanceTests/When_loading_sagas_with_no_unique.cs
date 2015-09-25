@@ -7,7 +7,6 @@
     using AcceptanceTesting;
     using NServiceBus.Persistence;
     using NUnit.Framework;
-    using Saga;
 
     public class When_loading_sagas_with_no_unique : NServiceBusAcceptanceTest
     {
@@ -15,14 +14,10 @@
         public async Task Should_blow_up()
         {
             var context = await Scenario.Define<Context>()
-                .WithEndpoint<SagaEndpoint>(b => b.Given(bus =>
+                .WithEndpoint<SagaEndpoint>(b => b.Given(bus => bus.SendLocalAsync(new StartSagaMessage
                 {
-                    bus.SendLocal(new StartSagaMessage
-                    {
-                        SomeId = Guid.NewGuid()
-                    });
-                    return Task.FromResult(0);
-                }))
+                    SomeId = Guid.NewGuid()
+                })))
                 .Done(c =>
                 {
                     if(c.Exceptions.Any())
@@ -47,11 +42,7 @@
         public async Task Should_not_blow_up_if_there_is_no_mapping()
         {
             var context = await Scenario.Define<Context>()
-                .WithEndpoint<SagaEndpoint>(b=>b.Given(bus =>
-                {
-                    bus.SendLocal(new StartSagaMessageWithNoMapping());
-                    return Task.FromResult(0);
-                }))
+                .WithEndpoint<SagaEndpoint>(b=>b.Given(bus => bus.SendLocalAsync(new StartSagaMessageWithNoMapping())))
                 .Done(c => c.SagaStarted)
                 .Run();
 
@@ -62,13 +53,10 @@
         public async Task Should_not_blow_up_if_user_opts_in()
         {
             var context = await Scenario.Define<Context>()
-                .WithEndpoint<SagaEndpointWithOptIn>(b=>b.Given(bus => {
-                    bus.SendLocal(new StartSagaMessage
-                    {
-                        SomeId = Guid.NewGuid()
-                    });
-                    return Task.FromResult(0);
-                }))
+                .WithEndpoint<SagaEndpointWithOptIn>(b=>b.Given(bus => bus.SendLocalAsync(new StartSagaMessage
+                {
+                    SomeId = Guid.NewGuid()
+                })))
                 .Done(c => c.SagaStarted)
                 .Run();
 
@@ -90,16 +78,19 @@
             public class NonUniqueSaga : Saga<NonUniqueSagaData>, IAmStartedByMessages<StartSagaMessage>, IAmStartedByMessages<StartSagaMessageWithNoMapping>
             {
                 public Context Context { get; set; }
-                public void Handle(StartSagaMessage message)
+
+                public Task Handle(StartSagaMessage message)
                 {
                     Context.AddTrace("Saga started by StartSagaMessage");
                     Context.SagaStarted = true;
+                    return Task.FromResult(0);
                 }
 
-                public void Handle(StartSagaMessageWithNoMapping message)
+                public Task Handle(StartSagaMessageWithNoMapping message)
                 {
                     Context.AddTrace("Saga started by StartSagaMessageWithNoMapping");
                     Context.SagaStarted = true;
+                    return Task.FromResult(0);
                 }
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<NonUniqueSagaData> mapper)
@@ -131,11 +122,12 @@
             public class OptInSaga : Saga<OptInSagaData>, IAmStartedByMessages<StartSagaMessage>
             {
                 public Context Context { get; set; }
-                public void Handle(StartSagaMessage message)
+
+                public Task Handle(StartSagaMessage message)
                 {
                     Context.SagaStarted = true;
+                    return Task.FromResult(0);
                 }
-
          
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<OptInSagaData> mapper)
                 {

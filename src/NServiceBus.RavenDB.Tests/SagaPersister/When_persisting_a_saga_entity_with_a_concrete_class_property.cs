@@ -1,6 +1,7 @@
 using System;
+using System.Threading.Tasks;
+using NServiceBus;
 using NServiceBus.RavenDB.Tests;
-using NServiceBus.Saga;
 using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 using Raven.Client;
@@ -9,7 +10,7 @@ using Raven.Client;
 public class When_persisting_a_saga_entity_with_a_concrete_class_property : RavenDBPersistenceTestBase
 {
     [Test]
-    public void Public_setters_and_getters_of_concrete_classes_should_be_persisted()
+    public async Task Public_setters_and_getters_of_concrete_classes_should_be_persisted()
     {
         var entity = new SagaData
                 {
@@ -20,12 +21,12 @@ public class When_persisting_a_saga_entity_with_a_concrete_class_property : Rave
                         }
                 };
 
-        IDocumentSession session;
+        IAsyncDocumentSession session;
         var options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
         var persister = new SagaPersister();
-        persister.Save(entity, options);
-        session.SaveChanges();
-        var savedEntity = persister.Get<SagaData>(entity.Id, options);
+        await persister.Save(entity, options);
+        await session.SaveChangesAsync();
+        var savedEntity = await persister.Get<SagaData>(entity.Id, options);
         Assert.AreEqual(entity.TestComponent.Property, savedEntity.TestComponent.Property);
         Assert.AreEqual(entity.TestComponent.AnotherProperty, savedEntity.TestComponent.AnotherProperty);
     }

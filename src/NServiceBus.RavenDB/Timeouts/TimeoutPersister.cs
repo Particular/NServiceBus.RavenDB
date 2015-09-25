@@ -1,6 +1,7 @@
 namespace NServiceBus.TimeoutPersisters.RavenDB
 {
     using System;
+    using System.Threading.Tasks;
     using NServiceBus.Timeout.Core;
     using Raven.Abstractions.Data;
     using Raven.Client;
@@ -16,39 +17,37 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             documentStore = store;
         }
 
-        public void Add(CoreTimeoutData timeout, TimeoutPersistenceOptions options)
+        public async Task Add(CoreTimeoutData timeout, TimeoutPersistenceOptions options)
         {
-            using (var session = documentStore.OpenSession())
+            using (var session = documentStore.OpenAsyncSession())
             {
-                session.Store(new Timeout(timeout));
-                session.SaveChanges();
+                await session.StoreAsync(new Timeout(timeout)).ConfigureAwait(false);
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
-        public bool TryRemove(string timeoutId, TimeoutPersistenceOptions options, out CoreTimeoutData timeoutData)
+        public async Task<CoreTimeoutData> Remove(string timeoutId, TimeoutPersistenceOptions options)
         {
-            using (var session = documentStore.OpenSession())
+            using (var session = documentStore.OpenAsyncSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
 
-                var timeout = session.Load<Timeout>(timeoutId);
+                var timeout = await session.LoadAsync<Timeout>(timeoutId).ConfigureAwait(false);
                 if (timeout == null)
                 {
-                    timeoutData = null;
-                    return false;
+                    return null;
                 }
 
-                timeoutData = timeout.ToCoreTimeoutData();
+                var timeoutData = timeout.ToCoreTimeoutData();
                 session.Delete(timeout);
-                session.SaveChanges();
-                return true;
+                await session.SaveChangesAsync().ConfigureAwait(false);
+                return timeoutData;
             }
         }
 
-        public void RemoveTimeoutBy(Guid sagaId, TimeoutPersistenceOptions options)
+        public Task RemoveTimeoutBy(Guid sagaId, TimeoutPersistenceOptions options)
         {
-            var operation = documentStore.DatabaseCommands.DeleteByIndex("TimeoutsIndex", new IndexQuery { Query = string.Format("SagaId:{0}", sagaId) }, new BulkOperationOptions { AllowStale = true });
-            operation.WaitForCompletion();
+            return documentStore.AsyncDatabaseCommands.DeleteByIndexAsync("TimeoutsIndex", new IndexQuery { Query = $"SagaId:{sagaId}" }, new BulkOperationOptions { AllowStale = true });
         }
     }
 }

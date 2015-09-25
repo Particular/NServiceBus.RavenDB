@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace NServiceBus.RavenDB.Tests.Timeouts
+﻿namespace NServiceBus.RavenDB.Tests.Timeouts
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Timeout.Core;
     using NUnit.Framework;
@@ -13,10 +13,10 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
 
     [TestFixture]
     [Ignore("These tests currently operate under the assumption TimeoutData.Id gets assigned by the persistence layer; need to revisit this")]
-    class When_removing_timeouts_from_the_storage:RavenDBPersistenceTestBase
+    class When_removing_timeouts_from_the_storage : RavenDBPersistenceTestBase
     {
         [Test]
-        public void Should_return_the_correct_headers()
+        public async Task Should_return_the_correct_headers()
         {
 
             var persister = new TimeoutPersister(store);
@@ -38,16 +38,15 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                 OwningTimeoutManager = "MyTestEndpoint",
             };
             var options = new TimeoutPersistenceOptions(new ContextBag());
-            persister.Add(timeout, options);
+            await persister.Add(timeout, options);
 
-            TimeoutData timeoutData;
-            persister.TryRemove(timeout.Id, options, out timeoutData);
+            var timeoutData = await persister.Remove(timeout.Id, options);
 
             CollectionAssert.AreEqual(headers, timeoutData.Headers);
         }
 
         [Test]
-        public void Should_remove_timeouts_by_id()
+        public async Task Should_remove_timeouts_by_id()
         {
             new TimeoutsIndex().Execute(store);
 
@@ -77,18 +76,16 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                    }
             };
 
-            persister.Add(t1, options);
-            persister.Add(t2, options);
+            await persister.Add(t1, options);
+            await persister.Add(t2, options);
 
             WaitForIndexing(store);
 
-            DateTime nextTimeToRunQuery;
-            var timeouts = query.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
+            var timeouts = await query.GetNextChunk(DateTime.UtcNow.AddYears(-3));
 
-            foreach (var timeout in timeouts)
+            foreach (var timeout in timeouts.DueTimeouts)
             {
-                TimeoutData timeoutData;
-                persister.TryRemove(timeout.Item1, options, out timeoutData);
+                await persister.Remove(timeout.Id, options);
             }
 
             using (var session = store.OpenSession())
@@ -99,7 +96,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
         }
 
         [Test]
-        public void Should_remove_timeouts_by_sagaid()
+        public async Task Should_remove_timeouts_by_sagaid()
         {
             new TimeoutsIndex().Execute(store);
 
@@ -129,13 +126,13 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             };
 
             var options = new TimeoutPersistenceOptions(new ContextBag());
-            persister.Add(t1, options);
-            persister.Add(t2, options);
+            await persister.Add(t1, options);
+            await persister.Add(t2, options);
 
             WaitForIndexing(store);
 
-            persister.RemoveTimeoutBy(sagaId1, options);
-            persister.RemoveTimeoutBy(sagaId2, options);
+            await persister.RemoveTimeoutBy(sagaId1, options);
+            await persister.RemoveTimeoutBy(sagaId2, options);
 
             using (var session = store.OpenSession())
             {

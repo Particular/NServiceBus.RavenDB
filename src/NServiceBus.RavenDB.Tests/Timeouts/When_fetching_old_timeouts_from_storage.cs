@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using NServiceBus.Support;
     using NServiceBus.TimeoutPersisters.RavenDB;
     using NUnit.Framework;
@@ -27,14 +28,14 @@
         }
 
         [Test]
-        public void Should_return_the_complete_list_of_timeouts()
+        public async Task Should_return_the_complete_list_of_timeouts()
         {
             const int numberOfTimeoutsToAdd = 10;
 
-            var session = store.OpenSession();
+            var session = store.OpenAsyncSession();
             for (var i = 0; i < numberOfTimeoutsToAdd; i++)
             {
-                session.Store(new LegacyTimeoutData
+                await session.StoreAsync(new LegacyTimeoutData
                 {
                     Time = DateTime.UtcNow.AddHours(-1),
                     Destination = new LegacyAddress("timeouts", RuntimeEnvironment.MachineName),
@@ -44,25 +45,24 @@
                     OwningTimeoutManager = "MyTestEndpoint",
                 });
             }
-            session.SaveChanges();
+            await session.SaveChangesAsync();
 
             WaitForIndexing(store);
 
-            DateTime nextTimeToRunQuery;
-            Assert.AreEqual(numberOfTimeoutsToAdd, query.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery).Count());
+            Assert.AreEqual(numberOfTimeoutsToAdd, (await query.GetNextChunk(DateTime.UtcNow.AddYears(-3))).DueTimeouts.Count());
         }
 
         [Test]
-        public void Should_return_the_complete_list_of_timeouts_even_when_mixed_old_and_new()
+        public async Task Should_return_the_complete_list_of_timeouts_even_when_mixed_old_and_new()
         {
             const int numberOfTimeoutsToAdd = 10;
 
-            var session = store.OpenSession();
+            var session = store.OpenAsyncSession();
             for (var i = 0; i < numberOfTimeoutsToAdd; i++)
             {
                 if (i % 2 == 0)
                 {
-                    session.Store(new LegacyTimeoutData
+                    await session.StoreAsync(new LegacyTimeoutData
                     {
                         Time = DateTime.UtcNow.AddHours(-1),
                         Destination = new LegacyAddress("timeouts", RuntimeEnvironment.MachineName),
@@ -84,7 +84,7 @@
                 }
                 else
                 {
-                    session.Store(new TimeoutData
+                    await session.StoreAsync(new TimeoutData
                     {
                         Time = DateTime.UtcNow.AddHours(-1),
                         Destination = "timeouts" + "@" + RuntimeEnvironment.MachineName,
@@ -95,24 +95,23 @@
                     });
                 }
             }
-            session.SaveChanges();
+            await session.SaveChangesAsync();
 
             WaitForIndexing(store);
 
-            DateTime nextTimeToRunQuery;
-            Assert.AreEqual(numberOfTimeoutsToAdd, query.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery).Count());
+            Assert.AreEqual(numberOfTimeoutsToAdd, (await query.GetNextChunk(DateTime.UtcNow.AddYears(-3))).DueTimeouts.Count());
         }
 
         [Test]
-        public void Should_return_the_next_time_of_retrieval()
+        public async Task Should_return_the_next_time_of_retrieval()
         {
             query.CleanupGapFromTimeslice = TimeSpan.FromSeconds(1);
             query.TriggerCleanupEvery = TimeSpan.MinValue;
 
             var nextTime = DateTime.UtcNow.AddHours(1);
 
-            var session = store.OpenSession();
-            session.Store(new LegacyTimeoutData
+            var session = store.OpenAsyncSession();
+            await session.StoreAsync(new LegacyTimeoutData
             {
                 Time = nextTime,
                 Destination = new LegacyAddress("timeouts", RuntimeEnvironment.MachineName),
@@ -121,12 +120,11 @@
                 Headers = new Dictionary<string, string> { { "Bar", "34234" }, { "Foo", "aString1" }, { "Super", "aString2" } },
                 OwningTimeoutManager = "MyTestEndpoint",
             });
-            session.SaveChanges();
+            await session.SaveChangesAsync();
 
             WaitForIndexing(store);
 
-            DateTime nextTimeToRunQuery;
-            query.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
+            var nextTimeToRunQuery = (await query.GetNextChunk(DateTime.UtcNow.AddYears(-3))).NextTimeToQuery;
 
             Assert.IsTrue((nextTime - nextTimeToRunQuery).TotalSeconds < 1);
         }

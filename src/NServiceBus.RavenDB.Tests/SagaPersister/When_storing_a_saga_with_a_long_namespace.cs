@@ -1,6 +1,7 @@
 using System;
+using System.Threading.Tasks;
+using NServiceBus;
 using NServiceBus.RavenDB.Tests;
-using NServiceBus.Saga;
 using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 using Raven.Client;
@@ -9,9 +10,9 @@ using Raven.Client;
 public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestBase
 {
     [Test]
-    public void Should_not_generate_a_to_long_unique_property_id()
+    public async Task Should_not_generate_a_to_long_unique_property_id()
     {
-        IDocumentSession session;
+        IAsyncDocumentSession session;
         var options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
         var persister = new SagaPersister();
         var uniqueString = Guid.NewGuid().ToString();
@@ -20,8 +21,8 @@ public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestB
                 Id = Guid.NewGuid(),
                 UniqueString = uniqueString
             };
-        persister.Save(saga, options);
-        session.SaveChanges();
+        await persister.Save(saga, options);
+        await session.SaveChangesAsync();
     }
 
     class SomeSaga : Saga<SagaWithUniquePropertyAndALongNamespace>

@@ -1,11 +1,12 @@
 ﻿namespace NServiceBus.RavenDB.Tests
 {
+    using System.Threading.Tasks;
     using NServiceBus.RavenDB.Persistence;
     using Raven.Client;
 
     class RavenSessionFactory : ISessionProvider
     {
-        IDocumentSession session;
+        IAsyncDocumentSession session;
         readonly IDocumentStore store;
 
         public RavenSessionFactory(IDocumentStore store)
@@ -14,11 +15,11 @@
             this.store = store;
         }
 
-        public IDocumentSession Session { get { return session ?? (session = OpenSession()); }}
+        public IAsyncDocumentSession Session { get { return session ?? (session = OpenSession()); }}
 
-        IDocumentSession OpenSession()
+        IAsyncDocumentSession OpenSession()
         {
-            var documentSession = store.OpenSession();
+            var documentSession = store.OpenAsyncSession();
             documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
             return documentSession;
@@ -33,12 +34,12 @@
             session = null;
         }
 
-        public void SaveChanges()
+        public Task SaveChanges()
         {
             if (session == null)
-                return;
+                return Task.FromResult(0);
 
-            session.SaveChanges();
+            return session.SaveChangesAsync();
         }
     }
 }

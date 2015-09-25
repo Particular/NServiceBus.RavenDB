@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
-    using NServiceBus.Saga;
+    using NServiceBus.Sagas;
     using NUnit.Framework;
     using Raven.Client;
 
@@ -14,16 +14,8 @@
         public async Task Should_be_able_to_access_session()
         {
             var context = await Scenario.Define<Context>()
-                .WithEndpoint<SagaFinderEndpoint>(b => b.Given(bus =>
-                {
-                    bus.SendLocal(new StartSagaMessage());
-                    return Task.FromResult(0);
-                })
-                    .When(c => c.SagaId != Guid.Empty, bus =>
-                    {
-                        bus.SendLocal(new StartSagaMessage());
-                        return Task.FromResult(0);
-                    }))
+                .WithEndpoint<SagaFinderEndpoint>(b => b.Given(bus => bus.SendLocalAsync(new StartSagaMessage()))
+                    .When(c => c.SagaId != Guid.Empty, bus => bus.SendLocalAsync(new StartSagaMessage())))
                 .Done(c =>c.SecondMessageProcessed)
                 .Run();
 
@@ -49,22 +41,24 @@
             class MySagaFinder: IFindSagas<SagaFinderSagaData>.Using<StartSagaMessage>
             {
                 public Context Context { get; set; }
-                public SagaFinderSagaData FindBy(StartSagaMessage message, SagaPersistenceOptions options)
+
+                public Task<SagaFinderSagaData> FindBy(StartSagaMessage message, SagaPersistenceOptions options)
                 {
                     if (Context.SagaId == Guid.Empty)
                     {
                         return null;
                     }
 
-                    var session = options.Context.Get<IDocumentSession>();
-                    return session.Load<SagaFinderSagaData>(Context.SagaId);
+                    var session = options.Context.Get<IAsyncDocumentSession>();
+                    return session.LoadAsync<SagaFinderSagaData>(Context.SagaId);
                 }
             }
 
             public class SagaFinderSaga : Saga<SagaFinderSagaData>, IAmStartedByMessages<StartSagaMessage>
             {
                 public Context Context { get; set; }
-                public void Handle(StartSagaMessage message)
+
+                public Task Handle(StartSagaMessage message)
                 {
                     if (Context.SagaId != Guid.Empty)
                     {
@@ -72,15 +66,16 @@
 
                         Context.SecondMessageProcessed = true;
 
-                        return;
+                        return Task.FromResult(0);
                     }
                     Context.SagaId = Data.Id;
+
+                    return Task.FromResult(0);
                 }
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaFinderSagaData> mapper)
                 {
                 }
-
             }
 
             public class SagaFinderSagaData : IContainSagaData

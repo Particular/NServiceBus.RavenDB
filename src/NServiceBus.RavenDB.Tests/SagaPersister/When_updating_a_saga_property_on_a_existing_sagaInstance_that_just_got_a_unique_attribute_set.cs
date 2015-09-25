@@ -1,6 +1,7 @@
 using System;
+using System.Threading.Tasks;
+using NServiceBus;
 using NServiceBus.RavenDB.Tests;
-using NServiceBus.Saga;
 using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 using Raven.Client;
@@ -9,9 +10,9 @@ using Raven.Client;
 public class When_updating_a_saga_property_on_a_existing_sagaInstance_that_just_got_a_unique_attribute_set : RavenDBPersistenceTestBase
 {
     [Test]
-    public void It_should_set_the_attribute_and_allow_the_update()
+    public async Task It_should_set_the_attribute_and_allow_the_update()
     {
-        IDocumentSession session;
+        IAsyncDocumentSession session;
         var options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
         var persister = new SagaPersister();
         var uniqueString = Guid.NewGuid().ToString();
@@ -25,27 +26,27 @@ public class When_updating_a_saga_property_on_a_existing_sagaInstance_that_just_
                 NonUniqueString = "notUnique"
             };
 
-        persister.Save(saga1, options);
-        session.SaveChanges();
+        await persister.Save(saga1, options);
+        await session.SaveChangesAsync();
         session.Dispose();
 
-        using (session = store.OpenSession())
+        using (session = store.OpenAsyncSession())
         {
             //fake that the attribute was just added by removing the metadata
-            session.Advanced.GetMetadataFor(saga1).Remove(SagaPersister.UniqueValueMetadataKey);
-            session.SaveChanges();
+            (await session.Advanced.GetMetadataForAsync(saga1)).Remove(SagaPersister.UniqueValueMetadataKey);
+            await session.SaveChangesAsync();
         }
 
         options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
-        var saga = persister.Get<SagaData>(saga1.Id, options);
+        var saga = await persister.Get<SagaData>(saga1.Id, options);
         saga.UniqueString = anotherUniqueString;
-        persister.Update(saga, options);
-        session.SaveChanges();
+        await persister.Update(saga, options);
+        await session.SaveChangesAsync();
         session.Dispose();
 
-        using (session = store.OpenSession())
+        using (session = store.OpenAsyncSession())
         {
-            var value = session.Advanced.GetMetadataFor(saga1)[SagaPersister.UniqueValueMetadataKey].ToString();
+            var value = (await session.Advanced.GetMetadataForAsync(saga1))[SagaPersister.UniqueValueMetadataKey].ToString();
             Assert.AreEqual(anotherUniqueString, value);
         }
     }

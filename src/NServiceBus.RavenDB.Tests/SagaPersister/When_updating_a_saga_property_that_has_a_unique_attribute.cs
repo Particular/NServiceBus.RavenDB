@@ -1,6 +1,7 @@
 using System;
+using System.Threading.Tasks;
+using NServiceBus;
 using NServiceBus.RavenDB.Tests;
-using NServiceBus.Saga;
 using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 using Raven.Client;
@@ -9,9 +10,9 @@ using Raven.Client;
 public class When_updating_a_saga_property_that_has_a_unique_attribute : RavenDBPersistenceTestBase
 {
     [Test]
-    public void It_should_allow_the_update()
+    public async Task It_should_allow_the_update()
     {
-        IDocumentSession session;
+        IAsyncDocumentSession session;
         var options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
         var persister = new SagaPersister();
         var uniqueString = Guid.NewGuid().ToString();
@@ -21,15 +22,15 @@ public class When_updating_a_saga_property_that_has_a_unique_attribute : RavenDB
                 UniqueString = uniqueString
             };
 
-        persister.Save(saga1, options);
-        session.SaveChanges();
+        await persister.Save(saga1, options);
+        await session.SaveChangesAsync();
         session.Dispose();
 
         options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
-        var saga = persister.Get<SagaData>(saga1.Id, options);
+        var saga = await persister.Get<SagaData>(saga1.Id, options);
         saga.UniqueString = Guid.NewGuid().ToString();
-        persister.Update(saga, options);
-        session.SaveChanges();
+        await persister.Update(saga, options);
+        await session.SaveChangesAsync();
         session.Dispose();
 
         var saga2 = new SagaData
@@ -40,8 +41,8 @@ public class When_updating_a_saga_property_that_has_a_unique_attribute : RavenDB
 
         //this should not blow since we changed the unique value in the previous saga
         options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
-        persister.Save(saga2, options);
-        session.SaveChanges();
+        await persister.Save(saga2, options);
+        await session.SaveChangesAsync();
     }
 
     class SomeSaga : Saga<SagaData>

@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Threading.Tasks;
+using NServiceBus;
 using NServiceBus.RavenDB.Tests;
-using NServiceBus.Saga;
 using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 using Raven.Client;
@@ -9,12 +10,12 @@ using Raven.Client;
 public class When_trying_to_fetch_a_non_existing_saga_by_its_unique_property : RavenDBPersistenceTestBase
 {
     [Test]
-    public void It_should_return_null()
+    public async Task It_should_return_null()
     {
-        IDocumentSession session;
+        IAsyncDocumentSession session;
         var options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
         var persister = new SagaPersister();
-        Assert.Null(persister.Get<SagaData>("UniqueString", Guid.NewGuid().ToString(), options));
+        Assert.Null(await persister.Get<SagaData>("UniqueString", Guid.NewGuid().ToString(), options));
     }
 
     class SomeSaga : Saga<SagaData>

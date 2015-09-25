@@ -6,7 +6,7 @@
 
     class ProvidedSessionBehavior : PhysicalMessageProcessingStageBehavior
     {
-        public Func<IDocumentSession> GetSession { get; set; }
+        public Func<IAsyncDocumentSession> GetSession { get; set; }
 
         public override void Invoke(Context context, Action next)
         {

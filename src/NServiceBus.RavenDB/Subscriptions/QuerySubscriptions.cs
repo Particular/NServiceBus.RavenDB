@@ -2,6 +2,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using Raven.Client;
@@ -15,27 +16,29 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             documentStore = store;
         }
 
-        public IEnumerable<string> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes)
+        public async Task<IEnumerable<string>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes)
         {
             using (var session = OpenSession())
             {
-                return GetSubscriptions(messageTypes, session)
+                var subscriptions = await GetSubscriptions(messageTypes, session);
+                return subscriptions
+                    .Where(s => s != null)
                     .SelectMany(s => s.Clients)
                     .Distinct();
             }
         }
 
-        static IEnumerable<Subscription> GetSubscriptions(IEnumerable<MessageType> messageTypes, IDocumentSession session)
+        static Task<Subscription[]> GetSubscriptions(IEnumerable<MessageType> messageTypes, IAsyncDocumentSession session)
         {
             var ids = messageTypes
                 .Select(Subscription.FormatId);
 
-            return session.Load<Subscription>(ids).Where(s => s != null);
+            return session.LoadAsync<Subscription>(ids);
         }
 
-        IDocumentSession OpenSession()
+        IAsyncDocumentSession OpenSession()
         {
-            var session = documentStore.OpenSession();
+            var session = documentStore.OpenAsyncSession();
             session.Advanced.AllowNonAuthoritativeInformation = false;
             return session;
         }

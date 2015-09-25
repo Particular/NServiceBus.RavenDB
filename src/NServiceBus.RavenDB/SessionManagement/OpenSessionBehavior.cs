@@ -11,7 +11,7 @@
     {
         readonly IDocumentStoreWrapper documentStoreWrapper;
 
-        public static Func<IMessageContext, string> GetDatabaseName = context => String.Empty;
+        public static Func<IMessageContext, string> GetDatabaseName = context => string.Empty;
 
 
         public OpenSessionBehavior(IDocumentStoreWrapper documentStoreWrapper)
@@ -25,14 +25,14 @@
             {
                 context.Set(session);
                 next();
-                session.SaveChanges();
+                session.SaveChangesAsync().GetAwaiter().GetResult();
             }
         }
 
-        IDocumentSession OpenSession(Context context)
+        IAsyncDocumentSession OpenSession(Context context)
         {
             var databaseName = GetDatabaseName(new MessageContext(context.GetPhysicalMessage()));
-            var documentSession = string.IsNullOrEmpty(databaseName) ? documentStoreWrapper.DocumentStore.OpenSession() : documentStoreWrapper.DocumentStore.OpenSession(databaseName);
+            var documentSession = string.IsNullOrEmpty(databaseName) ? documentStoreWrapper.DocumentStore.OpenAsyncSession() : documentStoreWrapper.DocumentStore.OpenAsyncSession(databaseName);
             documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
             return documentSession;
@@ -60,6 +60,6 @@
             this.context = context;
         }
 
-        public IDocumentSession Session { get { return context.Get<IDocumentSession>(); } }
+        public IAsyncDocumentSession Session { get { return context.Get<IAsyncDocumentSession>(); } }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using System;
-using NServiceBus.Saga;
+using NServiceBus;
 
 public class MySagaData : IContainSagaData
 {

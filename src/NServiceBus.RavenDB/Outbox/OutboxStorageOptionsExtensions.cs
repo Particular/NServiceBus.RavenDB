@@ -5,9 +5,9 @@ namespace NServiceBus.RavenDB.Outbox
 
     static class OutboxStorageOptionsExtensions
     {
-        public static IDocumentSession GetSession(this OutboxStorageOptions options)
+        public static IAsyncDocumentSession GetSession(this OutboxStorageOptions options)
         {
-            return options.Context.Get<IDocumentSession>();
+            return options.Context.Get<IAsyncDocumentSession>();
         }
     }
 }

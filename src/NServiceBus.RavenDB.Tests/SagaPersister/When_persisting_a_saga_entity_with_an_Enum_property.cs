@@ -1,6 +1,7 @@
 using System;
+using System.Threading.Tasks;
+using NServiceBus;
 using NServiceBus.RavenDB.Tests;
-using NServiceBus.Saga;
 using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 using Raven.Client;
@@ -9,7 +10,7 @@ using Raven.Client;
 public class When_persisting_a_saga_entity_with_an_Enum_property : RavenDBPersistenceTestBase
 {
     [Test]
-    public void Enums_should_be_persisted()
+    public async Task Enums_should_be_persisted()
     {
         var entity = new SagaData
         {
@@ -17,13 +18,13 @@ public class When_persisting_a_saga_entity_with_an_Enum_property : RavenDBPersis
             Status = StatusEnum.AnotherStatus
         };
 
-        IDocumentSession session;
+        IAsyncDocumentSession session;
         var options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
         var persister = new SagaPersister();
-        persister.Save(entity, options);
-        session.SaveChanges();
+        await persister.Save(entity, options);
+        await session.SaveChangesAsync();
 
-        var savedEntity = persister.Get<SagaData>(entity.Id, options);
+        var savedEntity = await persister.Get<SagaData>(entity.Id, options);
         Assert.AreEqual(entity.Status, savedEntity.Status);
     }
 

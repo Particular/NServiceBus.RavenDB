@@ -1,6 +1,7 @@
 using System;
+using System.Threading.Tasks;
+using NServiceBus;
 using NServiceBus.RavenDB.Tests;
-using NServiceBus.Saga;
 using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 using Raven.Client;
@@ -9,9 +10,9 @@ using Raven.Client;
 public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPersistenceTestBase
 {
     [Test]
-    public void Inherited_property_classes_should_be_persisted()
+    public async Task Inherited_property_classes_should_be_persisted()
     {
-        IDocumentSession session;
+        IAsyncDocumentSession session;
         var options = this.NewSagaPersistenceOptions<SomeSaga>(out session);
         var persister = new SagaPersister();
         var entity = new SagaData
@@ -22,10 +23,10 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
                         SomeInt = 9
                     }
             };
-        persister.Save(entity, options);
-        session.SaveChanges();
+        await persister.Save(entity, options);
+        await session.SaveChangesAsync();
 
-        var savedEntity = persister.Get<SagaData>(entity.Id, options);
+        var savedEntity = await persister.Get<SagaData>(entity.Id, options);
         var expected = (PolymorphicProperty)entity.PolymorphicRelatedProperty;
         var actual = (PolymorphicProperty)savedEntity.PolymorphicRelatedProperty;
         Assert.AreEqual(expected.SomeInt, actual.SomeInt);
