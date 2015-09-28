@@ -8,6 +8,7 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
     using Raven.Client;
     using Raven.Client.Linq;
     using Logging;
+    using Raven.Abstractions.Exceptions;
     using Timeout.Core;
 
     class RavenTimeoutPersistence : IPersistTimeouts, IPersistTimeoutsV2
@@ -181,8 +182,15 @@ namespace NServiceBus.RavenDB.Persistence.TimeoutPersister
 
         public bool TryRemove(string timeoutId)
         {
-            TimeoutData timeoutData;
-            return TryRemove(timeoutId, out timeoutData);
+            try
+            {
+                TimeoutData timeoutData;
+                return TryRemove(timeoutId, out timeoutData);
+            }
+            catch (ConcurrencyException)
+            {
+                return false;
+            }
         }
 
         IDocumentSession OpenSession()
