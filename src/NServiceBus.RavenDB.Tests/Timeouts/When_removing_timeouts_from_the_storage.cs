@@ -66,8 +66,8 @@
             var timeoutData = new TimeoutData { Id = "1", Time = DateTime.UtcNow.AddHours(-1) };
             persister.Add(timeoutData);
 
-            AutoResetEvent t1EnteredTx = new AutoResetEvent(false);
-            AutoResetEvent t2EnteredTx = new AutoResetEvent(false);
+            var t1EnteredTx = new AutoResetEvent(false);
+            var t2EnteredTx = new AutoResetEvent(false);
 
             bool? t1Remove = null;
             bool? t2Remove = null;
