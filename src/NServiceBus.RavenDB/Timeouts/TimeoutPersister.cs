@@ -5,12 +5,13 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     using System.Linq;
     using Timeout.Core;
     using Raven.Abstractions.Data;
+    using Raven.Abstractions.Exceptions;
     using Raven.Client;
     using Raven.Client.Linq;
     using CoreTimeoutData = Timeout.Core.TimeoutData;
     using Timeout = TimeoutData;
 
-    class TimeoutPersister : IPersistTimeouts
+    class TimeoutPersister : IPersistTimeouts, IPersistTimeoutsV2
     {
         public IDocumentStore DocumentStore { get; set; }
         public string EndpointName { get; set; }
@@ -145,6 +146,33 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
         {
             var operation = DocumentStore.DatabaseCommands.DeleteByIndex("TimeoutsIndex", new IndexQuery { Query = string.Format("SagaId:{0}", sagaId) }, true);
             operation.WaitForCompletion();
+        }
+
+        public CoreTimeoutData Peek(string timeoutId)
+        {
+            using (var session = DocumentStore.OpenSession())
+            {
+                var timeoutData = session.Load<Timeout>(timeoutId);
+                if (timeoutData != null)
+                {
+                    return timeoutData.ToCoreTimeoutData();
+                }
+
+                return null;
+            }
+        }
+
+        public bool TryRemove(string timeoutId)
+        {
+            try
+            {
+                CoreTimeoutData timeoutData;
+                return TryRemove(timeoutId, out timeoutData);
+            }
+            catch (ConcurrencyException)
+            {
+                return false;
+            }
         }
     }
 }
