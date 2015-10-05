@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace NServiceBus.RavenDB.Tests.Timeouts
 {
+    using System.Linq;
     using NUnit.Framework;
     using Support;
     using TimeoutPersisters.RavenDB;
@@ -10,12 +11,13 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
     using Timeout = TimeoutPersisters.RavenDB.TimeoutData;
 
     [TestFixture]
-    [Ignore("These tests currently operate under the assumption TimeoutData.Id gets assigned by the persistence layer; need to revisit this")]
-    class When_removing_timeouts_from_the_storage:RavenTestBase
+    class When_removing_timeouts_from_the_storage : RavenTestBase
     {
         [Test]
         public void Should_return_the_correct_headers()
         {
+            new TimeoutsIndex().Execute(store);
+
             var persister = new TimeoutPersister
             {
                 DocumentStore = store,
@@ -31,7 +33,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
 
             var timeout = new TimeoutData
             {
-                Time = DateTime.UtcNow.AddHours(-1),
+                Time = DateTime.UtcNow.AddYears(-1),
                 Destination = new Address("timeouts", RuntimeEnvironment.MachineName),
                 SagaId = Guid.NewGuid(),
                 State = new byte[] { 1, 1, 133, 200 },
@@ -40,8 +42,14 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             };
             persister.Add(timeout);
 
+            WaitForIndexing(store);
+            DateTime nextRun;
+
+            var timeouts = persister.GetNextChunk(DateTime.Now.AddYears(-3), out nextRun).ToList();
+            Assert.AreEqual(1, timeouts.Count());
+
             TimeoutData timeoutData;
-            persister.TryRemove(timeout.Id, out timeoutData);
+            persister.TryRemove(timeouts.First().Item1, out timeoutData);
 
             CollectionAssert.AreEqual(headers, timeoutData.Headers);
         }
@@ -82,7 +90,8 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             WaitForIndexing(store);
 
             DateTime nextTimeToRunQuery;
-            var timeouts = persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
+            var timeouts = persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery).ToList();
+            Assert.AreEqual(2, timeouts.Count());
 
             foreach (var timeout in timeouts)
             {
@@ -90,10 +99,12 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                 persister.TryRemove(timeout.Item1, out timeoutData);
             }
 
-            using (var session = store.OpenSession())
+            foreach (var timeout in timeouts)
             {
-                Assert.Null(session.Load<Timeout>(new Guid(t1.Id)));
-                Assert.Null(session.Load<Timeout>(new Guid(t2.Id)));
+                using (var session = store.OpenSession())
+                {
+                    Assert.Null(session.Load<Timeout>(timeout.Item1));
+                }
             }
         }
 
@@ -113,7 +124,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             var t1 = new TimeoutData
             {
                 SagaId = sagaId1,
-                Time = DateTime.Now.AddYears(1),
+                Time = DateTime.Now.AddYears(-1),
                 OwningTimeoutManager = "MyTestEndpoint",
                 Headers = new Dictionary<string, string>
                                    {
@@ -123,7 +134,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             var t2 = new TimeoutData
             {
                 SagaId = sagaId2,
-                Time = DateTime.Now.AddYears(1),
+                Time = DateTime.Now.AddYears(-1),
                 OwningTimeoutManager = "MyTestEndpoint",
                 Headers = new Dictionary<string, string>
                                    {
@@ -136,13 +147,19 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
 
             WaitForIndexing(store);
 
+            DateTime nextTimeToRunQuery;
+            var timeouts = persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery).ToList();
+            Assert.AreEqual(2, timeouts.Count());
+
             persister.RemoveTimeoutBy(sagaId1);
             persister.RemoveTimeoutBy(sagaId2);
 
-            using (var session = store.OpenSession())
+            foreach (var timeout in timeouts)
             {
-                Assert.Null(session.Load<Timeout>(new Guid(t1.Id)));
-                Assert.Null(session.Load<Timeout>(new Guid(t2.Id)));
+                using (var session = store.OpenSession())
+                {
+                    Assert.Null(session.Load<Timeout>(timeout.Item1));
+                }
             }
         }
     }
