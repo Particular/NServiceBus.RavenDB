@@ -4,6 +4,8 @@ using System.Collections.Generic;
 namespace NServiceBus.RavenDB.Tests.Timeouts
 {
     using System.Linq;
+    using System.Threading.Tasks;
+    using System.Transactions;
     using NUnit.Framework;
     using Support;
     using TimeoutPersisters.RavenDB;
@@ -14,11 +16,11 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
     class When_removing_timeouts_from_the_storage:RavenDBPersistenceTestBase
     {
         TimeoutPersister timeoutPersister;
-        TimeoutData timeoutWithHeaders = GetTimeoutWithHeaders();
 
         [SetUp]
-        public void SetUpTests()
+        public new void SetUp()
         {
+            store = NewDocumentStore(false, "esent");
             new TimeoutsIndex().Execute(store);
             timeoutPersister = new TimeoutPersister
             {
@@ -30,7 +32,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
         [Test]
         public void Should_return_the_correct_headers()
         {
-            timeoutPersister.Add(timeoutWithHeaders);
+            timeoutPersister.Add(GetTimeoutWithHeaders());
 
             var timeouts = GetTimeouts();
             Assert.AreEqual(1, timeouts.Count());
@@ -47,10 +49,36 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
         }
 
         [Test]
-        public void Should_remove_timeouts_by_id()
+        public void Peek_should_return_the_correct_headers()
         {
-            timeoutPersister.Add(timeoutWithHeaders);
-            timeoutPersister.Add(timeoutWithHeaders);
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+
+            var timeouts = GetTimeouts();
+            Assert.AreEqual(1, timeouts.Count());
+
+            var timeoutData = timeoutPersister.Peek(timeouts.First().Item1);
+
+            CollectionAssert.AreEqual(new Dictionary<string, string>
+            {
+                {"Bar", "34234"},
+                {"Foo", "aString1"},
+                {"Super", "aString2"}
+            }, timeoutData.Headers);
+        }
+
+        [Test]
+        public void Peek_should_return_null_for_non_existing_timeout()
+        {
+            var timeoutData = timeoutPersister.Peek("TimeoutDatas/1");
+
+            Assert.IsNull(timeoutData);
+        }
+
+        [Test]
+        public void Should_remove_timeouts_by_id_using_old_interface()
+        {
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+            timeoutPersister.Add(GetTimeoutWithHeaders());
             
             var timeouts = GetTimeouts();
             Assert.AreEqual(2, timeouts.Count());
@@ -62,6 +90,39 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             }
 
             AssertAllTimeoutsHaveBeenRemoved(timeouts);
+        }
+
+        [Test]
+        public void Should_remove_timeouts_by_id_and_return_true_using_new_interface()
+        {
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+
+            var timeouts = GetTimeouts();
+            Assert.AreEqual(2, timeouts.Count());
+
+            var result = false;
+            foreach (var timeout in timeouts)
+            {
+                result = timeoutPersister.TryRemove(timeout.Item1);
+            }
+
+            AssertAllTimeoutsHaveBeenRemoved(timeouts);
+            Assert.IsTrue(result);
+        }
+
+        [Test]
+        public void TryRemove_should_return_false_if_timeout_already_deleted()
+        {
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+
+            var timeouts = GetTimeouts();
+            Assert.AreEqual(1, timeouts.Count());
+
+            var timeoutId = timeouts.First().Item1;
+
+            Assert.IsTrue(timeoutPersister.TryRemove(timeoutId));
+            Assert.IsFalse(timeoutPersister.TryRemove(timeoutId));
         }
 
         [Test]
@@ -80,6 +141,36 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             timeoutPersister.RemoveTimeoutBy(sagaId2);
 
             AssertAllTimeoutsHaveBeenRemoved(timeouts);
+        }
+
+        [Test]
+        public void TryRemove_should_work_with_concurrent_operations()
+        {
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+            var timeouts = GetTimeouts();
+
+            var t1 = Task.Run(() =>
+            {
+                using (var tx = new TransactionScope())
+                {
+                    var t1Remove = timeoutPersister.TryRemove(timeouts.First().Item1);
+                    tx.Complete();
+                    return t1Remove;
+                }
+            });
+
+            var t2 = Task.Run(() =>
+            {
+                using (var tx = new TransactionScope())
+                {
+                    var t2Remove = timeoutPersister.TryRemove(timeouts.First().Item1);
+                    tx.Complete();
+                    return t2Remove;
+                }
+            });
+
+            Assert.IsTrue(t1.Result || t2.Result);
+            Assert.IsFalse(t1.Result && t2.Result);
         }
 
         static TimeoutData GetTimeoutWithHeaders()
@@ -102,8 +193,9 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
 
         TimeoutData GetTimeoutWithSagaId(Guid sagaId)
         {
-            timeoutWithHeaders.SagaId = sagaId;
-            return timeoutWithHeaders;
+            var timeoutWithHeaders1 = GetTimeoutWithHeaders();
+            timeoutWithHeaders1.SagaId = sagaId;
+            return timeoutWithHeaders1;
         }
 
         List<Tuple<string, DateTime>> GetTimeouts()
