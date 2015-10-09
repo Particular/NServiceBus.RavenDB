@@ -5,12 +5,13 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     using System.Linq;
     using NServiceBus.Timeout.Core;
     using Raven.Abstractions.Data;
+    using Raven.Abstractions.Exceptions;
     using Raven.Client;
     using Raven.Client.Linq;
     using CoreTimeoutData = NServiceBus.Timeout.Core.TimeoutData;
     using Timeout = TimeoutData;
 
-    class TimeoutPersister : IPersistTimeouts
+    class TimeoutPersister : IPersistTimeouts, IPersistTimeoutsV2
     {
         DateTime lastCleanupTime = DateTime.MinValue;
 
@@ -116,7 +117,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             var operation = DocumentStore.DatabaseCommands.DeleteByIndex("TimeoutsIndex", new IndexQuery { Query = string.Format("SagaId:{0}", sagaId) }, new BulkOperationOptions { AllowStale = true });
             operation.WaitForCompletion();
         }
-
+        
         IRavenQueryable<Timeout> GetChunkQuery(IDocumentSession session)
         {
             session.Advanced.AllowNonAuthoritativeInformation = true;
@@ -146,6 +147,33 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 lastCleanupTime = DateTime.UtcNow;
 
                 return chunk;
+            }
+        }
+
+        public CoreTimeoutData Peek(string timeoutId)
+        {
+            using (var session = DocumentStore.OpenSession())
+            {
+                var timeoutData = session.Load<Timeout>(timeoutId);
+                if (timeoutData != null)
+                {
+                    return timeoutData.ToCoreTimeoutData();
+                }
+
+                return null;
+            }
+        }
+
+        public bool TryRemove(string timeoutId)
+        {
+            try
+            {
+                CoreTimeoutData timeoutData;
+                return TryRemove(timeoutId, out timeoutData);
+            }
+            catch (ConcurrencyException)
+            {
+                return false;
             }
         }
     }
