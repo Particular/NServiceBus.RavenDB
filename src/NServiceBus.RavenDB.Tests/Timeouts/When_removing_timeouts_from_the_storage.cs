@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace NServiceBus.RavenDB.Tests.Timeouts
 {
+    using System.Linq;
+    using System.Threading.Tasks;
+    using System.Transactions;
     using NUnit.Framework;
     using Support;
     using TimeoutPersisters.RavenDB;
@@ -10,139 +13,206 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
     using Timeout = TimeoutPersisters.RavenDB.TimeoutData;
 
     [TestFixture]
-    [Ignore("These tests currently operate under the assumption TimeoutData.Id gets assigned by the persistence layer; need to revisit this")]
-    class When_removing_timeouts_from_the_storage:RavenTestBase
+    class When_removing_timeouts_from_the_storage : RavenTestBase
     {
-        [Test]
-        public void Should_return_the_correct_headers()
+        TimeoutPersister timeoutPersister;
+
+        [SetUp]
+        public void SetUpTests()
         {
-            var persister = new TimeoutPersister
+            new TimeoutsIndex().Execute(store);
+            timeoutPersister = new TimeoutPersister
             {
                 DocumentStore = store,
                 EndpointName = "MyTestEndpoint",
             };
-
-            var headers = new Dictionary<string, string>
-                          {
-                              {"Bar", "34234"},
-                              {"Foo", "aString1"},
-                              {"Super", "aString2"}
-                          };
-
-            var timeout = new TimeoutData
-            {
-                Time = DateTime.UtcNow.AddHours(-1),
-                Destination = new Address("timeouts", RuntimeEnvironment.MachineName),
-                SagaId = Guid.NewGuid(),
-                State = new byte[] { 1, 1, 133, 200 },
-                Headers = headers,
-                OwningTimeoutManager = "MyTestEndpoint",
-            };
-            persister.Add(timeout);
-
-            TimeoutData timeoutData;
-            persister.TryRemove(timeout.Id, out timeoutData);
-
-            CollectionAssert.AreEqual(headers, timeoutData.Headers);
         }
 
         [Test]
-        public void Should_remove_timeouts_by_id()
+        public void Should_return_the_correct_headers()
         {
-            new TimeoutsIndex().Execute(store);
+            timeoutPersister.Add(GetTimeoutWithHeaders());
 
-            var persister = new TimeoutPersister
+            var timeouts = GetTimeouts();
+            Assert.AreEqual(1, timeouts.Count());
+
+            TimeoutData timeoutData;
+            timeoutPersister.TryRemove(timeouts.First().Item1, out timeoutData);
+
+            CollectionAssert.AreEqual(new Dictionary<string, string>
             {
-                DocumentStore = store,
-                EndpointName = "MyTestEndpoint",
-            };
+                {"Bar", "34234"},
+                {"Foo", "aString1"},
+                {"Super", "aString2"}
+            }, timeoutData.Headers);
+        }
 
-            var t1 = new TimeoutData
+        [Test]
+        public void Peek_should_return_the_correct_headers()
+        {
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+
+            var timeouts = GetTimeouts();
+            Assert.AreEqual(1, timeouts.Count());
+
+            var timeoutData = timeoutPersister.Peek(timeouts.First().Item1);
+
+            CollectionAssert.AreEqual(new Dictionary<string, string>
             {
-                Time = DateTime.Now.AddYears(-1),
-                OwningTimeoutManager = "MyTestEndpoint",
-                Headers = new Dictionary<string, string>
-                                   {
-                                       {"Header1", "Value1"}
-                                   }
-            };
-            var t2 = new TimeoutData
-            {
-                Time = DateTime.Now.AddYears(-1),
-                OwningTimeoutManager = "MyTestEndpoint",
-                Headers = new Dictionary<string, string>
-                                   {
-                                       {"Header1", "Value1"}
-                                   }
-            };
+                {"Bar", "34234"},
+                {"Foo", "aString1"},
+                {"Super", "aString2"}
+            }, timeoutData.Headers);
+        }
 
-            persister.Add(t1);
-            persister.Add(t2);
+        [Test]
+        public void Peek_should_return_null_for_non_existing_timeout()
+        {
+            var timeoutData = timeoutPersister.Peek("TimeoutDatas/1");
 
-            WaitForIndexing(store);
+            Assert.IsNull(timeoutData);
+        }
 
-            DateTime nextTimeToRunQuery;
-            var timeouts = persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
+        [Test]
+        public void Should_remove_timeouts_by_id_using_old_interface()
+        {
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+            
+            var timeouts = GetTimeouts();
+            Assert.AreEqual(2, timeouts.Count());
 
             foreach (var timeout in timeouts)
             {
                 TimeoutData timeoutData;
-                persister.TryRemove(timeout.Item1, out timeoutData);
+                timeoutPersister.TryRemove(timeout.Item1, out timeoutData);
             }
 
-            using (var session = store.OpenSession())
+            AssertAllTimeoutsHaveBeenRemoved(timeouts);
+        }
+
+        [Test]
+        public void Should_remove_timeouts_by_id_and_return_true_using_new_interface()
+        {
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+
+            var timeouts = GetTimeouts();
+            Assert.AreEqual(2, timeouts.Count());
+
+            bool result = false;
+            foreach (var timeout in timeouts)
             {
-                Assert.Null(session.Load<Timeout>(new Guid(t1.Id)));
-                Assert.Null(session.Load<Timeout>(new Guid(t2.Id)));
+                result = timeoutPersister.TryRemove(timeout.Item1);
             }
+
+            AssertAllTimeoutsHaveBeenRemoved(timeouts);
+            Assert.IsTrue(result);
+        }
+
+        [Test]
+        public void TryRemove_should_return_false_if_timeout_already_deleted()
+        {
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+
+            var timeouts = GetTimeouts();
+            Assert.AreEqual(1, timeouts.Count());
+
+            var timeoutId = timeouts.First().Item1;
+
+            Assert.IsTrue(timeoutPersister.TryRemove(timeoutId));
+            Assert.IsFalse(timeoutPersister.TryRemove(timeoutId));
         }
 
         [Test]
         public void Should_remove_timeouts_by_sagaid()
         {
-            new TimeoutsIndex().Execute(store);
-
-            var persister = new TimeoutPersister
-            {
-                DocumentStore = store,
-                EndpointName = "MyTestEndpoint",
-            };
-
             var sagaId1 = Guid.NewGuid();
             var sagaId2 = Guid.NewGuid();
-            var t1 = new TimeoutData
-            {
-                SagaId = sagaId1,
-                Time = DateTime.Now.AddYears(1),
-                OwningTimeoutManager = "MyTestEndpoint",
-                Headers = new Dictionary<string, string>
-                                   {
-                                       {"Header1", "Value1"}
-                                   }
-            };
-            var t2 = new TimeoutData
-            {
-                SagaId = sagaId2,
-                Time = DateTime.Now.AddYears(1),
-                OwningTimeoutManager = "MyTestEndpoint",
-                Headers = new Dictionary<string, string>
-                                   {
-                                       {"Header1", "Value1"}
-                                   }
-            };
 
-            persister.Add(t1);
-            persister.Add(t2);
+            timeoutPersister.Add(GetTimeoutWithSagaId(sagaId1));
+            timeoutPersister.Add(GetTimeoutWithSagaId(sagaId2));
+            
+            var timeouts = GetTimeouts();
+            Assert.AreEqual(2, timeouts.Count());
 
+            timeoutPersister.RemoveTimeoutBy(sagaId1);
+            timeoutPersister.RemoveTimeoutBy(sagaId2);
+
+            AssertAllTimeoutsHaveBeenRemoved(timeouts);
+        }
+
+        [Test]
+        public void TryRemove_should_work_with_concurrent_operations()
+        {
+            timeoutPersister.Add(GetTimeoutWithHeaders());
+            var timeouts = GetTimeouts();
+
+            var t1 = Task.Run(() =>
+            {
+                using (var tx = new TransactionScope())
+                {
+                    var t1Remove = timeoutPersister.TryRemove(timeouts.First().Item1);
+                    tx.Complete();
+                    return t1Remove;
+                }
+            });
+
+            var t2 = Task.Run(() =>
+            {
+                using (var tx = new TransactionScope())
+                {
+                    var t2Remove = timeoutPersister.TryRemove(timeouts.First().Item1);
+                    tx.Complete();
+                    return t2Remove;
+                }
+            });
+
+            Assert.IsTrue(t1.Result || t2.Result);
+            Assert.IsFalse(t1.Result && t2.Result);
+        }
+
+        static TimeoutData GetTimeoutWithHeaders()
+        {
+            return new TimeoutData
+            {
+                Time = DateTime.UtcNow.AddYears(-1),
+                Destination = new Address("timeouts", RuntimeEnvironment.MachineName),
+                SagaId = Guid.NewGuid(),
+                State = new byte[] { 1, 1, 133, 200 },
+                Headers = new Dictionary<string, string>
+                {
+                    {"Bar", "34234"},
+                    {"Foo", "aString1"},
+                    {"Super", "aString2"}
+                },
+                OwningTimeoutManager = "MyTestEndpoint",
+            };
+        }
+
+        TimeoutData GetTimeoutWithSagaId(Guid sagaId)
+        {
+            var timeoutWithHeaders1 = GetTimeoutWithHeaders();
+            timeoutWithHeaders1.SagaId = sagaId;
+            return timeoutWithHeaders1;
+        }
+
+        List<Tuple<string, DateTime>> GetTimeouts()
+        {
             WaitForIndexing(store);
+            DateTime nextRun;
+            var timeouts = timeoutPersister.GetNextChunk(DateTime.Now.AddYears(-3), out nextRun).ToList();
+            return timeouts;
+        }
 
-            persister.RemoveTimeoutBy(sagaId1);
-            persister.RemoveTimeoutBy(sagaId2);
-
-            using (var session = store.OpenSession())
+        void AssertAllTimeoutsHaveBeenRemoved(List<Tuple<string, DateTime>> timeouts)
+        {
+            foreach (var timeout in timeouts)
             {
-                Assert.Null(session.Load<Timeout>(new Guid(t1.Id)));
-                Assert.Null(session.Load<Timeout>(new Guid(t2.Id)));
+                using (var session = store.OpenSession())
+                {
+                    Assert.Null(session.Load<Timeout>(timeout.Item1));
+                }
             }
         }
     }
