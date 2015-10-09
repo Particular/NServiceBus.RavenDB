@@ -40,8 +40,8 @@
       <HintPath>..\packages\NServiceBus.AcceptanceTesting.5.2.1\lib\net45\NServiceBus.AcceptanceTesting.dll</HintPath>
     </Reference>
     <Reference Include="NServiceBus.Core, Version=5.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NServiceBus.5.2.1\lib\net45\NServiceBus.Core.dll</HintPath>
+      <HintPath>..\packages\NServiceBus.5.2.8\lib\net45\NServiceBus.Core.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
@@ -130,9 +130,6 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\Cant_convert_to_TransportMessage\When_cant_convert_to_TransportMessage_SuppressedDTC.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\Message_without_an_id.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\StackTraceAssert.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_handler_and_Uow_End_throws.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_handler_throws.cs" />
-    <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_handler_throws_AggregateException.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_handler_throws_serialization_exception.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_serialization_throws.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Exceptions\When_Uow_Begin_and_different_End_throws.cs" />
