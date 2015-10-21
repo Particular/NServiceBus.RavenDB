@@ -3,76 +3,98 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
+    using NServiceBus.Extensibility;
+    using NServiceBus.Support;
+    using NServiceBus.TimeoutPersisters.RavenDB;
     using NUnit.Framework;
-    using Support;
-    using TimeoutPersisters.RavenDB;
-    using TimeoutData = Timeout.Core.TimeoutData;
+    using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
     public class When_fetching_timeouts_from_storage : RavenDBPersistenceTestBase
     {
-        [Test]
-        public void Should_return_the_complete_list_of_timeouts()
+        public override void SetUp()
         {
+            base.SetUp();
+
             new TimeoutsIndex().Execute(store);
 
-            var persister = new TimeoutPersister
-                            {
-                                DocumentStore = store,
-                                EndpointName = "MyTestEndpoint",
-                            };
+            persister = new TimeoutPersister(store);
+            query = new QueryTimeouts(store)
+            {
+                EndpointName = "MyTestEndpoint"
+            };
+        }
 
+        [Test]
+        public async Task Should_return_the_complete_list_of_timeouts()
+        {
             const int numberOfTimeoutsToAdd = 10;
-
+            var context = new ContextBag();
             for (var i = 0; i < numberOfTimeoutsToAdd; i++)
             {
-                persister.Add(new TimeoutData
+                await persister.Add(new TimeoutData
                 {
                     Time = DateTime.UtcNow.AddHours(-1),
-                    Destination = new Address("timeouts", RuntimeEnvironment.MachineName),
+                    Destination = "timeouts@" + RuntimeEnvironment.MachineName,
                     SagaId = Guid.NewGuid(),
-                    State = new byte[] { 0, 0, 133 },
-                    Headers = new Dictionary<string, string> { { "Bar", "34234" }, { "Foo", "aString1" }, { "Super", "aString2" } },
-                    OwningTimeoutManager = "MyTestEndpoint",
-                });
+                    State = new byte[]
+                    {
+                        0,
+                        0,
+                        133
+                    },
+                    Headers = new Dictionary<string, string>
+                    {
+                        {"Bar", "34234"},
+                        {"Foo", "aString1"},
+                        {"Super", "aString2"}
+                    },
+                    OwningTimeoutManager = "MyTestEndpoint"
+                }, context);
             }
 
             WaitForIndexing(store);
 
-            DateTime nextTimeToRunQuery;
-            Assert.AreEqual(numberOfTimeoutsToAdd, persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery).Count());            
+            Assert.AreEqual(numberOfTimeoutsToAdd, (await query.GetNextChunk(DateTime.UtcNow.AddYears(-3))).DueTimeouts.Count());
         }
 
         [Test]
-        public void Should_return_the_next_time_of_retrieval()
+        public async Task Should_return_the_next_time_of_retrieval()
         {
-            new TimeoutsIndex().Execute(store);
-
-            var persister = new TimeoutPersister
-            {
-                DocumentStore = store,
-                EndpointName = "MyTestEndpoint",
-                CleanupGapFromTimeslice = TimeSpan.FromSeconds(1),
-                TriggerCleanupEvery = TimeSpan.MinValue,
-            };
+            query.CleanupGapFromTimeslice = TimeSpan.FromSeconds(1);
+            query.TriggerCleanupEvery = TimeSpan.MinValue;
 
             var nextTime = DateTime.UtcNow.AddHours(1);
+            var context = new ContextBag();
 
-            persister.Add(new TimeoutData
+            await persister.Add(new TimeoutData
             {
                 Time = nextTime,
-                Destination = new Address("timeouts", RuntimeEnvironment.MachineName),
+                Destination = "timeouts@" + RuntimeEnvironment.MachineName,
                 SagaId = Guid.NewGuid(),
-                State = new byte[] { 0, 0, 133 },
-                Headers = new Dictionary<string, string> { { "Bar", "34234" }, { "Foo", "aString1" }, { "Super", "aString2" } },
-                OwningTimeoutManager = "MyTestEndpoint",
-            });
+                State = new byte[]
+                {
+                    0,
+                    0,
+                    133
+                },
+                Headers = new Dictionary<string, string>
+                {
+                    {"Bar", "34234"},
+                    {"Foo", "aString1"},
+                    {"Super", "aString2"}
+                },
+                OwningTimeoutManager = "MyTestEndpoint"
+            }, context);
 
             WaitForIndexing(store);
 
-            DateTime nextTimeToRunQuery;
-            persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
+            var nextTimeToRunQuery = (await query.GetNextChunk(DateTime.UtcNow.AddYears(-3))).NextTimeToQuery;
 
             Assert.IsTrue((nextTime - nextTimeToRunQuery).TotalSeconds < 1);
         }
+
+        TimeoutPersister persister;
+        QueryTimeouts query;
     }
 }

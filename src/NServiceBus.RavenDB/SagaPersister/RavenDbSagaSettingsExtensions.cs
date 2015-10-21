@@ -29,6 +29,7 @@
         /// </summary>
         /// <param name="cfg">Object to attach to</param>
         /// <returns></returns>
+       [ObsoleteEx(RemoveInVersion = "5", TreatAsErrorFromVersion = "4",Message = "As of Version 6 of NServiceBus core all correlated properties are unique by default so you can safely remove this setting.")]
         public static PersistenceExtentions<RavenDBPersistence> AllowStaleSagaReads(this PersistenceExtentions<RavenDBPersistence> cfg)
         {
             cfg.GetSettings().Set(AllowStaleSagaReadsKey, true);

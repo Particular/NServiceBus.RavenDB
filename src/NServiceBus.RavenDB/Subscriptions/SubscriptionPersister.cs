@@ -2,42 +2,64 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
+    using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
+    using Raven.Abstractions.Exceptions;
     using Raven.Client;
 
     class SubscriptionPersister : ISubscriptionStorage
     {
-        public IDocumentStore DocumentStore { get; set; }
-
-        public void Init()
+        public SubscriptionPersister(IDocumentStore store)
         {
+            documentStore = store;
         }
 
-        public void Subscribe(Address client, IEnumerable<MessageType> messageTypes)
+        public Task Subscribe(string client, IEnumerable<MessageType> messageTypes, ContextBag context)
         {
             var messageTypeLookup = messageTypes.ToDictionary(Subscription.FormatId);
 
-            using (var session = OpenSession())
+            var attempts = 0;
+
+            //note: since we have a design that can run into concurrency exceptions we perform a few retries
+            // we should redesign this in the future to use a separate doc per subscriber and message type
+            do
             {
-                session.Advanced.UseOptimisticConcurrency = true;
-
-                var existingSubscriptions = GetSubscriptions(messageTypeLookup.Values, session).ToLookup(m => m.Id);
-
-                var newAndExistingSubscriptions = messageTypeLookup
-                    .Select(id => existingSubscriptions[id.Key].SingleOrDefault() ?? StoreNewSubscription(session, id.Key, id.Value))
-                    .Where(subscription => subscription.Clients.All(c => c != client)).ToArray();
-
-                foreach (var subscription in newAndExistingSubscriptions)
+                try
                 {
-                    subscription.Clients.Add(client);
-                }
+                    using (var session = OpenSession())
+                    {
+                        session.Advanced.UseOptimisticConcurrency = true;
 
-                session.SaveChanges();
+                        var existingSubscriptions = GetSubscriptions(messageTypeLookup.Values, session).ToLookup(m => m.Id);
+
+                        var newAndExistingSubscriptions = messageTypeLookup
+                            .Select(id => existingSubscriptions[id.Key].SingleOrDefault() ?? StoreNewSubscription(session, id.Key, id.Value))
+                            .Where(subscription => subscription.Clients.All(c => c != client)).ToArray();
+
+                        foreach (var subscription in newAndExistingSubscriptions)
+                        {
+                            subscription.Clients.Add(client);
+                        }
+
+                        session.SaveChanges();
+                    }
+
+                    return Task.FromResult(0);
+                }
+                catch (ConcurrencyException)
+                {
+                    attempts++;
+                } 
             }
+            while (attempts < 5);
+            
+
+            return Task.FromResult(0);
         }
 
-        public void Unsubscribe(Address client, IEnumerable<MessageType> messageTypes)
+        public Task Unsubscribe(string client, IEnumerable<MessageType> messageTypes, ContextBag context)
         {
             using (var session = OpenSession())
             {
@@ -52,21 +74,22 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 
                 session.SaveChanges();
             }
+            return Task.FromResult(0);
         }
 
-        public IEnumerable<Address> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes)
+        public Task<IEnumerable<string>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
             using (var session = OpenSession())
             {
-                return GetSubscriptions(messageTypes, session)
+                return Task.FromResult(GetSubscriptions(messageTypes, session)
                     .SelectMany(s => s.Clients)
-                    .Distinct();
+                    .Distinct());
             }
         }
 
         IDocumentSession OpenSession()
         {
-            var session = DocumentStore.OpenSession();
+            var session = documentStore.OpenSession();
             session.Advanced.AllowNonAuthoritativeInformation = false;
             return session;
         }
@@ -83,7 +106,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
         {
             var subscription = new Subscription
             {
-                Clients = new List<Address>(),
+                Clients = new List<string>(),
                 Id = id,
                 MessageType = messageType
             };
@@ -91,5 +114,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 
             return subscription;
         }
+
+        readonly IDocumentStore documentStore;
     }
 }

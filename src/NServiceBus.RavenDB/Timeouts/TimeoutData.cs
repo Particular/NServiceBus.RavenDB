@@ -27,7 +27,7 @@
         /// <summary>
         ///     The address of the client who requested the timeout.
         /// </summary>
-        public Address Destination { get; set; }
+        public string Destination { get; set; }
 
         /// <summary>
         ///     The saga ID.

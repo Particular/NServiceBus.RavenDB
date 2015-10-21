@@ -15,7 +15,7 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
 // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public MessageType MessageType { get; set; }
 
-        public List<Address> Clients { get; set; }
+        public List<string> Clients { get; set; }
 
         public static string FormatId(MessageType messageType)
         {
@@ -27,7 +27,7 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
                 // generate a guid from the hash:
                 var id = new Guid(hashBytes);
 
-                return string.Format("Subscriptions/{0}", id);
+                return $"Subscriptions/{id}";
             }
         }
     }
