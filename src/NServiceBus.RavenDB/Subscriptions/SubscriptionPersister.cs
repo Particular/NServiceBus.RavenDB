@@ -1,5 +1,6 @@
 namespace NServiceBus.Unicast.Subscriptions.RavenDB
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -18,6 +19,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 
         public Task Subscribe(string client, IEnumerable<MessageType> messageTypes, ContextBag context)
         {
+            Console.Out.WriteLine("Performing subscribe");
             var messageTypeLookup = messageTypes.ToDictionary(Subscription.FormatId);
 
             var attempts = 0;
@@ -30,6 +32,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                 {
                     using (var session = OpenSession())
                     {
+                        Console.Out.WriteLine("Open session");
                         session.Advanced.UseOptimisticConcurrency = true;
 
                         var existingSubscriptions = GetSubscriptions(messageTypeLookup.Values, session).ToLookup(m => m.Id);
@@ -43,6 +46,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                             subscription.Clients.Add(client);
                         }
 
+                        Console.Out.WriteLine("save changes session");
                         session.SaveChanges();
                     }
 
@@ -50,9 +54,13 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                 }
                 catch (ConcurrencyException)
                 {
+                    Console.Out.WriteLine("boom");
+
                     attempts++;
                 }
             } while (attempts < 5);
+
+            Console.Out.WriteLine("Done");
 
 
             return Task.FromResult(0);
