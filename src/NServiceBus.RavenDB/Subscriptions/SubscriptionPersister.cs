@@ -3,7 +3,6 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using System.Transactions;
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
@@ -25,39 +24,35 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 
             //note: since we have a design that can run into concurrency exceptions we perform a few retries
             // we should redesign this in the future to use a separate doc per subscriber and message type
-            using (new TransactionScope(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled))
+            do
             {
-                do
+                try
                 {
-                    try
+                    using (var session = OpenSession())
                     {
-                        using (var session = OpenSession())
+                        session.Advanced.UseOptimisticConcurrency = true;
+
+                        var existingSubscriptions = GetSubscriptions(messageTypeLookup.Values, session).ToLookup(m => m.Id);
+
+                        var newAndExistingSubscriptions = messageTypeLookup
+                            .Select(id => existingSubscriptions[id.Key].SingleOrDefault() ?? StoreNewSubscription(session, id.Key, id.Value))
+                            .Where(subscription => subscription.Clients.All(c => c != client)).ToArray();
+
+                        foreach (var subscription in newAndExistingSubscriptions)
                         {
-                            session.Advanced.UseOptimisticConcurrency = true;
-
-                            var existingSubscriptions = GetSubscriptions(messageTypeLookup.Values, session).ToLookup(m => m.Id);
-
-                            var newAndExistingSubscriptions = messageTypeLookup
-                                .Select(id => existingSubscriptions[id.Key].SingleOrDefault() ?? StoreNewSubscription(session, id.Key, id.Value))
-                                .Where(subscription => subscription.Clients.All(c => c != client)).ToArray();
-
-                            foreach (var subscription in newAndExistingSubscriptions)
-                            {
-                                subscription.Clients.Add(client);
-                            }
-
-                            session.SaveChanges();
+                            subscription.Clients.Add(client);
                         }
 
-                        return Task.FromResult(0);
+                        session.SaveChanges();
                     }
-                    catch (ConcurrencyException)
-                    {
-                        attempts++;
-                    }
+
+                    return Task.FromResult(0);
                 }
-                while (attempts < 5);
-            }
+                catch (ConcurrencyException)
+                {
+                    attempts++;
+                }
+            } while (attempts < 5);
 
 
             return Task.FromResult(0);
