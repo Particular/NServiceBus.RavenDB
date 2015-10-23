@@ -19,7 +19,6 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 
         public Task Subscribe(string client, IEnumerable<MessageType> messageTypes, ContextBag context)
         {
-            Console.Out.WriteLine("Performing subscribe");
             var messageTypeLookup = messageTypes.ToDictionary(Subscription.FormatId);
 
             var attempts = 0;
@@ -32,7 +31,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                 {
                     using (var session = OpenSession())
                     {
-                        Console.Out.WriteLine("Open session");
+                        Console.Out.WriteLine("Session is open");
                         session.Advanced.UseOptimisticConcurrency = true;
 
                         var existingSubscriptions = GetSubscriptions(messageTypeLookup.Values, session).ToLookup(m => m.Id);
@@ -104,9 +103,17 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
         static IEnumerable<Subscription> GetSubscriptions(IEnumerable<MessageType> messageTypes, IDocumentSession session)
         {
             var ids = messageTypes
-                .Select(Subscription.FormatId);
+                .Select(Subscription.FormatId)
+                .ToList();
 
-            return session.Load<Subscription>(ids).Where(s => s != null);
+            var idsToLoad = string.Join(",", ids);
+            Console.Out.WriteLine($"About to load: {idsToLoad}");
+
+            var result = session.Load<Subscription>(ids).Where(s => s != null).ToList();
+
+            Console.Out.WriteLine($"Loaded: {result.Count} subscriptions");
+
+            return result;
         }
 
         static Subscription StoreNewSubscription(IDocumentSession session, string id, MessageType messageType)
