@@ -57,7 +57,6 @@
             {
                 EndpointSetup<DefaultPublisher>(b =>
                 {
-                    b.LimitMessageProcessingConcurrencyTo(1);
                     b.OnEndpointSubscribed<Context>((args, context) =>
                     {
                         context.AddTrace("Publisher1 OnEndpointSubscribed " + args.MessageType);
@@ -76,8 +75,6 @@
             {
                 EndpointSetup<DefaultPublisher>(b =>
                 {
-                    b.LimitMessageProcessingConcurrencyTo(1);
-
                     b.OnEndpointSubscribed<Context>((args, context) =>
                     {
                         context.AddTrace("Publisher2 OnEndpointSubscribed " + args.MessageType);
