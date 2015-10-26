@@ -7,6 +7,7 @@
     using NServiceBus.Unicast.Subscriptions.RavenDB;
     using Raven.Client;
     using Raven.Client.Document;
+    using Raven.Client.Document.DTC;
 
     class RavenDbSubscriptionStorage : Feature
     {
@@ -39,7 +40,7 @@
             var remoteStorage = store as DocumentStore;
             if (remoteStorage != null)
             {
-                //remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
+                remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
             }
 
             store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());

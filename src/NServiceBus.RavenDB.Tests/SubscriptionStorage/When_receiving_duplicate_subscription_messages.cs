@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NServiceBus.Extensibility;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.RavenDB.Tests;
@@ -11,18 +12,19 @@ using NUnit.Framework;
 public class When_receiving_duplicate_subscription_messages : RavenDBPersistenceTestBase
 {
     [Test]
-    public void shouldnt_create_additional_db_rows()
+    public async Task shouldnt_create_additional_db_rows()
     {
         var storage = new SubscriptionPersister(store);
 
-        storage.Subscribe("testEndPoint@localhost", new List<MessageType>
+        await storage.Subscribe("testEndPoint@localhost", new List<MessageType>
         {
             new MessageType("SomeMessageType", "1.0.0.0")
-        }, new ContextBag());
-        storage.Subscribe("testEndPoint@localhost", new List<MessageType>
+        }, new ContextBag()).ConfigureAwait(false);
+
+        await storage.Subscribe("testEndPoint@localhost", new List<MessageType>
         {
             new MessageType("SomeMessageType", "1.0.0.0")
-        }, new ContextBag());
+        }, new ContextBag()).ConfigureAwait(false);
 
         using (var session = store.OpenSession())
         {

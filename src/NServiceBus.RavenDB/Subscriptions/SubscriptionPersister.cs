@@ -17,10 +17,8 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             documentStore = store;
         }
 
-        public Task Subscribe(string client, IEnumerable<MessageType> messageTypes, ContextBag context)
+        public async Task Subscribe(string client, IEnumerable<MessageType> messageTypes, ContextBag context)
         {
-            var messageTypeLookup = messageTypes.ToDictionary(Subscription.FormatId);
-
             var attempts = 0;
 
             //note: since we have a design that can run into concurrency exceptions we perform a few retries
@@ -31,25 +29,35 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                 {
                     using (var session = OpenSession())
                     {
-                        Console.Out.WriteLine("Session is open");
                         session.Advanced.UseOptimisticConcurrency = true;
 
-                        var existingSubscriptions = GetSubscriptions(messageTypeLookup.Values, session).ToLookup(m => m.Id);
-
-                        var newAndExistingSubscriptions = messageTypeLookup
-                            .Select(id => existingSubscriptions[id.Key].SingleOrDefault() ?? StoreNewSubscription(session, id.Key, id.Value))
-                            .Where(subscription => subscription.Clients.All(c => c != client)).ToArray();
-
-                        foreach (var subscription in newAndExistingSubscriptions)
+                        foreach (var messageType in messageTypes.ToList())
                         {
-                            subscription.Clients.Add(client);
-                        }
+                            var subscriptionDocId = Subscription.FormatId(messageType);
 
-                        Console.Out.WriteLine("save changes session");
-                        session.SaveChanges();
+                            var subcription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
+
+                            if (subcription == null)
+                            {
+                                subcription = new Subscription
+                                {
+                                    Id = subscriptionDocId,
+                                    MessageType = messageType,
+                                    Clients = new List<string>()
+                                };
+                                await session.StoreAsync(subcription).ConfigureAwait(false);
+                            }
+
+
+                            if (!subcription.Clients.Contains(client))
+                            {
+                                subcription.Clients.Add(client);
+                            }
+                        }
+                        await session.SaveChangesAsync().ConfigureAwait(false);
                     }
 
-                    return Task.FromResult(0);
+                    return;
                 }
                 catch (ConcurrencyException)
                 {
@@ -58,65 +66,65 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                     attempts++;
                 }
             } while (attempts < 5);
-
-            Console.Out.WriteLine("Done");
-
-
-            return Task.FromResult(0);
         }
 
-        public Task Unsubscribe(string client, IEnumerable<MessageType> messageTypes, ContextBag context)
+        public async Task Unsubscribe(string client, IEnumerable<MessageType> messageTypes, ContextBag context)
         {
             using (var session = OpenSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
 
-                var subscriptions = GetSubscriptions(messageTypes, session);
-
-                foreach (var subscription in subscriptions)
+                foreach (var messageType in messageTypes)
                 {
-                    subscription.Clients.Remove(client);
+                    var subscriptionDocId = Subscription.FormatId(messageType);
+
+                    var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
+
+                    if (subscription == null)
+                    {
+                        continue;
+                    }
+
+                    if (subscription.Clients.Contains(client))
+                    {
+                        subscription.Clients.Remove(client);
+                    }
                 }
 
-                session.SaveChanges();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
-            return Task.FromResult(0);
         }
 
-        public Task<IEnumerable<string>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
+        public async Task<IEnumerable<string>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
             using (var session = OpenSession())
             {
-                return Task.FromResult(GetSubscriptions(messageTypes, session)
-                    .SelectMany(s => s.Clients)
-                    .Distinct());
+                var subscriptions = await GetSubscriptions(messageTypes, session).ConfigureAwait(false);
+
+                return subscriptions.SelectMany(s => s.Clients)
+                     .Distinct();
             }
         }
 
-        IDocumentSession OpenSession()
+        IAsyncDocumentSession OpenSession()
         {
-            var session = documentStore.OpenSession();
+            var session = documentStore.OpenAsyncSession();
             session.Advanced.AllowNonAuthoritativeInformation = false;
             return session;
         }
 
-        static IEnumerable<Subscription> GetSubscriptions(IEnumerable<MessageType> messageTypes, IDocumentSession session)
+        static async Task<IEnumerable<Subscription>> GetSubscriptions(IEnumerable<MessageType> messageTypes, IAsyncDocumentSession session)
         {
             var ids = messageTypes
                 .Select(Subscription.FormatId)
                 .ToList();
 
-            var idsToLoad = string.Join(",", ids);
-            Console.Out.WriteLine($"About to load: {idsToLoad}");
+            var result = await session.LoadAsync<Subscription>(ids).ConfigureAwait(false);
 
-            var result = session.Load<Subscription>(ids).Where(s => s != null).ToList();
-
-            Console.Out.WriteLine($"Loaded: {result.Count} subscriptions");
-
-            return result;
+            return result.Where(s => s != null).ToList();
         }
 
-        static Subscription StoreNewSubscription(IDocumentSession session, string id, MessageType messageType)
+        static async Task<Subscription> StoreNewSubscription(IAsyncDocumentSession session, string id, MessageType messageType)
         {
             var subscription = new Subscription
             {
@@ -124,7 +132,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                 Id = id,
                 MessageType = messageType
             };
-            session.Store(subscription);
+            await session.StoreAsync(subscription);
 
             return subscription;
         }
