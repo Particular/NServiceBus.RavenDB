@@ -16,55 +16,54 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             documentStore = store;
         }
 
-        public Task Add(CoreTimeoutData timeout, ContextBag context)
+        public async Task Add(CoreTimeoutData timeout, ContextBag context)
         {
-            using (var session = documentStore.OpenSession())
+            using (var session = documentStore.OpenAsyncSession())
             {
-                session.Store(new Timeout(timeout));
-                session.SaveChanges();
+                await session.StoreAsync(new Timeout(timeout)).ConfigureAwait(false);
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
-            return Task.FromResult(0);
         }
 
-        public Task<bool> TryRemove(string timeoutId, ContextBag context)
+        public async Task<bool> TryRemove(string timeoutId, ContextBag context)
         {
-            using (var session = documentStore.OpenSession())
+            using (var session = documentStore.OpenAsyncSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
 
-                var timeout = session.Load<Timeout>(timeoutId);
+                var timeout = await session.LoadAsync<Timeout>(timeoutId).ConfigureAwait(false);
                 if (timeout == null)
                 {
-                     return Task.FromResult(false);
+                     return false;
                 }
 
+                //deletes are performed on SaveChanges so this call is sync
                 session.Delete(timeout);
-                session.SaveChanges();
-                return Task.FromResult(true);
+               
+                await session.SaveChangesAsync().ConfigureAwait(false);
+                return true;
             }
         }
 
-        public Task<CoreTimeoutData> Peek(string timeoutId, ContextBag context)
+        public async Task<CoreTimeoutData> Peek(string timeoutId, ContextBag context)
         {
-            using (var session = documentStore.OpenSession())
+            using (var session = documentStore.OpenAsyncSession())
             {
-                var timeoutData = session.Load<Timeout>(timeoutId);
+                var timeoutData = await session.LoadAsync<Timeout>(timeoutId).ConfigureAwait(false);
 
-                return  Task.FromResult(timeoutData?.ToCoreTimeoutData());
+                return  timeoutData?.ToCoreTimeoutData();
             }
         }
 
         public Task RemoveTimeoutBy(Guid sagaId, ContextBag context)
         {
-            var operation = documentStore.DatabaseCommands.DeleteByIndex("TimeoutsIndex", new IndexQuery
+            return documentStore.AsyncDatabaseCommands.DeleteByIndexAsync("TimeoutsIndex", new IndexQuery
             {
                 Query = $"SagaId:{sagaId}"
             }, new BulkOperationOptions
             {
                 AllowStale = true
             });
-            operation.WaitForCompletion();
-            return Task.FromResult(0);
         }
 
         readonly IDocumentStore documentStore;
