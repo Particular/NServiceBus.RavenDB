@@ -147,9 +147,11 @@
     <Compile Include="Timeouts\FakeLegacyTimoutDataClrTypeConversionListener.cs" />
     <Compile Include="Timeouts\LegacyTimeoutData.cs" />
     <Compile Include="Timeouts\Should_not_skip_timeouts.cs" />
+    <Compile Include="Timeouts\When_adding_timeouts.cs" />
     <Compile Include="Timeouts\When_converting_old_timeout_to_new_timeout.cs" />
     <Compile Include="Timeouts\When_fetching_old_timeouts_from_storage.cs" />
     <Compile Include="Timeouts\When_fetching_timeouts_from_storage.cs" />
+    <Compile Include="Timeouts\When_removing_timeouts_from_storage.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

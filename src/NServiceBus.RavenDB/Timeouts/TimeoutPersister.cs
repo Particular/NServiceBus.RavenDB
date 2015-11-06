@@ -5,6 +5,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     using NServiceBus.Extensibility;
     using NServiceBus.Timeout.Core;
     using Raven.Abstractions.Data;
+    using Raven.Abstractions.Exceptions;
     using Raven.Client;
     using CoreTimeoutData = NServiceBus.Timeout.Core.TimeoutData;
     using Timeout = TimeoutData;
@@ -20,8 +21,10 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
         {
             using (var session = documentStore.OpenAsyncSession())
             {
-                await session.StoreAsync(new Timeout(timeout)).ConfigureAwait(false);
+                var timeoutData = new Timeout(timeout);
+                await session.StoreAsync(timeoutData).ConfigureAwait(false);
                 await session.SaveChangesAsync().ConfigureAwait(false);
+                timeout.Id = timeoutData.Id;
             }
         }
 
@@ -39,8 +42,16 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
                 //deletes are performed on SaveChanges so this call is sync
                 session.Delete(timeout);
-               
-                await session.SaveChangesAsync().ConfigureAwait(false);
+
+                try
+                {
+                    await session.SaveChangesAsync().ConfigureAwait(false);
+                }
+                catch (ConcurrencyException)
+                {
+                    return false;
+                }
+
                 return true;
             }
         }

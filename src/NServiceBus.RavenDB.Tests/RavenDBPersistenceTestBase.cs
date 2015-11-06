@@ -12,7 +12,7 @@
         [SetUp]
         public virtual void SetUp()
         {
-            store = NewDocumentStore();
+            store = DocumentStoreFactory(this);
         }
 
         [TearDown]
@@ -55,5 +55,6 @@
 
         List<IDocumentSession> sessions = new List<IDocumentSession>();
         protected IDocumentStore store;
+        protected Func<RavenTestBase, IDocumentStore> DocumentStoreFactory { get; set; } = t => t.NewDocumentStore();
     }
 }
