@@ -23,6 +23,7 @@
             OutboxRecord result;
             using (var session = DocumentStore.OpenSession())
             {
+                session.Advanced.AllowNonAuthoritativeInformation = false;
                 // We use Load operation and not queries to avoid stale results
                 result = session.Load<OutboxRecord>(GetOutboxRecordId(messageId));
             }
@@ -34,10 +35,12 @@
             }
 
             message = new OutboxMessage(result.MessageId);
-            message.TransportOperations.AddRange(
-                result.TransportOperations.Select(t => new TransportOperation(t.MessageId, t.Options, t.Message, t.Headers))
-                );
-
+            if (!result.Dispatched)
+            {
+                message.TransportOperations.AddRange(
+                    result.TransportOperations.Select(t => new TransportOperation(t.MessageId, t.Options, t.Message, t.Headers))
+                    );
+            }
             return true;
         }
 
@@ -45,7 +48,6 @@
         {
             var session = sessionProvider.Session;
             session.Advanced.UseOptimisticConcurrency = true;
-
             session.Store(new OutboxRecord
             {
                 MessageId = messageId,
@@ -65,6 +67,7 @@
             using (var session = DocumentStore.OpenSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
+                session.Advanced.AllowNonAuthoritativeInformation = false;
                 var outboxMessage = session.Load<OutboxRecord>(GetOutboxRecordId(messageId));
                 if (outboxMessage == null || outboxMessage.Dispatched)
                 {
