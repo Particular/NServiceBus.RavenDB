@@ -118,6 +118,8 @@
     <Compile Include="Timeouts\When_fetching_timeouts_from_storage.cs" />
     <Compile Include="Timeouts\When_removing_timeouts_from_the_storage.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
