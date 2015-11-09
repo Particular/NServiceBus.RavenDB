@@ -23,7 +23,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public void Should_throw_if__trying_to_insert_same_messageid()
         {
             var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory);
+            var persister = new OutboxPersister(sessionFactory) { EndpointName = "TestEndpoint" };
+            persister.EndpointName = "TestEndpoint";
 
             using (sessionFactory.Session)
             {
@@ -38,7 +39,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public void Should_throw_if__trying_to_insert_same_messageid2()
         {
             var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory);
+            var persister = new OutboxPersister(sessionFactory) { EndpointName = "TestEndpoint" };
 
             persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>());
             sessionFactory.SaveChanges();
@@ -54,7 +55,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var id = Guid.NewGuid().ToString("N");
             var sessionFactory = new RavenSessionFactory(store);
 
-            var persister = new OutboxPersister(sessionFactory){DocumentStore = store};
+            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store, EndpointName = "TestEndpoint" };
             persister.Store(id, new List<TransportOperation>
             {
                 new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>()),
@@ -77,7 +78,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var id = Guid.NewGuid().ToString("N");
 
             var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store };
+            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store, EndpointName = "TestEndpoint" };
             persister.Store(id, new List<TransportOperation>
             {
                 new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>()),
