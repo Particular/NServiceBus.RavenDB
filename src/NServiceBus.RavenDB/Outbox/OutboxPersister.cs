@@ -10,6 +10,7 @@
     class OutboxPersister : IOutboxStorage
     {
         readonly ISessionProvider sessionProvider;
+        public string EndpointName { get; set; }
 
         public OutboxPersister(ISessionProvider sessionProvider)
         {
@@ -25,7 +26,7 @@
             {
                 session.Advanced.AllowNonAuthoritativeInformation = false;
                 // We use Load operation and not queries to avoid stale results
-                result = session.Load<OutboxRecord>(GetOutboxRecordId(messageId));
+                result = session.Load<OutboxRecord>(new[] { GetOutboxRecordId(messageId), GetOutboxRecordIdWithoutEndpointName(messageId) }).FirstOrDefault(o => o != null);
             }
 
             if (result == null)
@@ -48,6 +49,7 @@
         {
             var session = sessionProvider.Session;
             session.Advanced.UseOptimisticConcurrency = true;
+
             session.Store(new OutboxRecord
             {
                 MessageId = messageId,
@@ -68,7 +70,8 @@
             {
                 session.Advanced.UseOptimisticConcurrency = true;
                 session.Advanced.AllowNonAuthoritativeInformation = false;
-                var outboxMessage = session.Load<OutboxRecord>(GetOutboxRecordId(messageId));
+                var outboxMessage = session.Load<OutboxRecord>(new[] { GetOutboxRecordId(messageId), GetOutboxRecordIdWithoutEndpointName(messageId) }).FirstOrDefault(o => o != null);
+
                 if (outboxMessage == null || outboxMessage.Dispatched)
                 {
                     return;
@@ -81,9 +84,8 @@
             }
         }
 
-        static string GetOutboxRecordId(string messageId)
-        {
-            return "Outbox/" + messageId;
-        }
+        static string GetOutboxRecordIdWithoutEndpointName(string messageId) => $"Outbox/{messageId}";
+
+        string GetOutboxRecordId(string messageId) => $"Outbox/{EndpointName}/{messageId}";
     }
 }
