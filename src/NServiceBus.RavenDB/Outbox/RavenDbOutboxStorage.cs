@@ -36,7 +36,8 @@
                 .ConfigureProperty(c => c.StoreToInstall, store);
 
             context.Container.ConfigureComponent<OutboxPersister>(DependencyLifecycle.InstancePerCall)
-                .ConfigureProperty(x => x.DocumentStore, store);
+                .ConfigureProperty(x => x.DocumentStore, store)
+                .ConfigureProperty(x => x.EndpointName, context.Settings.EndpointName());
 
             context.Container.ConfigureComponent<OutboxRecordsCleaner>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(x => x.DocumentStore, store);

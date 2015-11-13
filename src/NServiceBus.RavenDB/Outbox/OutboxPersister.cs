@@ -10,6 +10,7 @@
     class OutboxPersister : IOutboxStorage
     {
         readonly ISessionProvider sessionProvider;
+        public string EndpointName { get; set; }
 
         public OutboxPersister(ISessionProvider sessionProvider)
         {
@@ -23,8 +24,9 @@
             OutboxRecord result;
             using (var session = DocumentStore.OpenSession())
             {
+                session.Advanced.AllowNonAuthoritativeInformation = false;
                 // We use Load operation and not queries to avoid stale results
-                result = session.Load<OutboxRecord>(GetOutboxRecordId(messageId));
+                result = session.Load<OutboxRecord>(new[] { GetOutboxRecordId(messageId), GetOutboxRecordIdWithoutEndpointName(messageId) }).FirstOrDefault(o => o != null);
             }
 
             if (result == null)
@@ -34,10 +36,12 @@
             }
 
             message = new OutboxMessage(result.MessageId);
-            message.TransportOperations.AddRange(
-                result.TransportOperations.Select(t => new TransportOperation(t.MessageId, t.Options, t.Message, t.Headers))
-                );
-
+            if (!result.Dispatched)
+            {
+                message.TransportOperations.AddRange(
+                    result.TransportOperations.Select(t => new TransportOperation(t.MessageId, t.Options, t.Message, t.Headers))
+                    );
+            }
             return true;
         }
 
@@ -65,7 +69,9 @@
             using (var session = DocumentStore.OpenSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
-                var outboxMessage = session.Load<OutboxRecord>(GetOutboxRecordId(messageId));
+                session.Advanced.AllowNonAuthoritativeInformation = false;
+                var outboxMessage = session.Load<OutboxRecord>(new[] { GetOutboxRecordId(messageId), GetOutboxRecordIdWithoutEndpointName(messageId) }).FirstOrDefault(o => o != null);
+
                 if (outboxMessage == null || outboxMessage.Dispatched)
                 {
                     return;
@@ -78,9 +84,8 @@
             }
         }
 
-        static string GetOutboxRecordId(string messageId)
-        {
-            return "Outbox/" + messageId;
-        }
+        static string GetOutboxRecordIdWithoutEndpointName(string messageId) => $"Outbox/{messageId}";
+
+        string GetOutboxRecordId(string messageId) => $"Outbox/{EndpointName}/{messageId}";
     }
 }
