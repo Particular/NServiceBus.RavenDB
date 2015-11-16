@@ -58,7 +58,7 @@
                             Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                             OwningTimeoutManager = string.Empty
                         };
-                        persister.Add(td, context);
+                        persister.Add(td, context).Wait();
                         expected.Add(new Tuple<string, DateTime>(td.Id, td.Time));
                         lastTimeout = (td.Time > lastTimeout) ? td.Time : lastTimeout;
                     }
@@ -157,7 +157,7 @@
                             Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                             OwningTimeoutManager = string.Empty
                         };
-                        persister.Add(td, context);
+                        persister.Add(td, context).Wait();
                         Interlocked.Increment(ref expected);
                         lastExpectedTimeout = (td.Time > lastExpectedTimeout) ? td.Time : lastExpectedTimeout;
                     }
@@ -185,7 +185,7 @@
                                 Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                                 OwningTimeoutManager = string.Empty
                             };
-                            persister2.Add(td, context);
+                            persister2.Add(td, context).Wait();
                             Interlocked.Increment(ref expected);
                             lastExpectedTimeout = (td.Time > lastExpectedTimeout) ? td.Time : lastExpectedTimeout;
                         }
