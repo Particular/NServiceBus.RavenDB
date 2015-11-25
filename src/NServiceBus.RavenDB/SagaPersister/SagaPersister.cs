@@ -78,7 +78,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
                     : await Get<T>(lookup.SagaId, context); //if not this is a saga that was created pre 3.0.4 so we fallback to a get instead
             }
 
-            return await Task.FromResult(default(T));
+            return default(T);
         }
 
         public async Task Complete(IContainSagaData saga, ContextBag context)
