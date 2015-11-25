@@ -50,9 +50,9 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             };
             var context = new ContextBag();
 
-            var session = store.OpenSession();
-            session.Store(timeout);
-            session.SaveChanges();
+            var session = store.OpenAsyncSession();
+            await session.StoreAsync(timeout);
+            await session.SaveChangesAsync();
 
             Assert.True(await persister.TryRemove(timeout.Id, context));
         }
@@ -84,9 +84,9 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             };
             var context = new ContextBag();
 
-            var session = store.OpenSession();
-            session.Store(timeout);
-            session.SaveChanges();
+            var session = store.OpenAsyncSession();
+            await session.StoreAsync(timeout);
+            await session.SaveChangesAsync();
 
             Assert.True(await persister.TryRemove(timeout.Id, context));
         }

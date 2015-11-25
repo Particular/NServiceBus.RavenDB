@@ -104,9 +104,9 @@
                     WaitForIndexing(documentStore);
                 }
 
-                using (var session = documentStore.OpenSession())
+                using (var session = documentStore.OpenAsyncSession())
                 {
-                    var results = session.Query<TimeoutData>().ToList();
+                    var results = await session.Query<TimeoutData>().ToListAsync();
                     Assert.AreEqual(0, results.Count);
                 }
 
@@ -233,9 +233,9 @@
                     WaitForIndexing(documentStore);
                 }
 
-                using (var session = documentStore.OpenSession())
+                using (var session = documentStore.OpenAsyncSession())
                 {
-                    var results = session.Query<TimeoutData>().ToList();
+                    var results = await session.Query<TimeoutData>().ToListAsync();
                     Assert.AreEqual(0, results.Count);
                 }
 

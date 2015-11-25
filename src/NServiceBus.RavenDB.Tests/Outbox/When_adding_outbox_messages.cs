@@ -9,6 +9,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
     using Raven.Abstractions.Exceptions;
+    using Raven.Client;
     using Raven.Client.Exceptions;
 
     [TestFixture]
@@ -105,10 +106,10 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             WaitForIndexing(store);
 
-            using (var s = store.OpenSession())
+            using (var s = store.OpenAsyncSession())
             {
-                var result = s.Query<OutboxRecord>()
-                    .SingleOrDefault(o => o.MessageId == id);
+                var result = await s.Query<OutboxRecord>()
+                    .SingleOrDefaultAsync(o => o.MessageId == id);
 
                 Assert.NotNull(result);
                 Assert.True(result.Dispatched);

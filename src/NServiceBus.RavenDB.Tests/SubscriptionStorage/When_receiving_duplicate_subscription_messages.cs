@@ -7,6 +7,7 @@ using NServiceBus.RavenDB.Tests;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.RavenDB;
 using NUnit.Framework;
+using Raven.Client;
 
 [TestFixture]
 public class When_receiving_duplicate_subscription_messages : RavenDBPersistenceTestBase
@@ -26,12 +27,12 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
             new MessageType("SomeMessageType", "1.0.0.0")
         }, new ContextBag());
 
-        using (var session = store.OpenSession())
+        using (var session = store.OpenAsyncSession())
         {
-            var subscriptions = session
+            var subscriptions = await session
                 .Query<Subscription>()
                 .Customize(c => c.WaitForNonStaleResults())
-                .Count();
+                .CountAsync();
 
             Assert.AreEqual(1, subscriptions);
         }
