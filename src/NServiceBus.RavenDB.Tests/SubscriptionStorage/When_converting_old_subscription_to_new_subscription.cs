@@ -30,9 +30,9 @@
         [Test]
         public async Task Should_allow_old_subscriptions()
         {
-            var session = store.OpenSession();
+            var session = store.OpenAsyncSession();
             var messageType = MessageTypes.MessageA.Single();
-            session.Store(new OldSubscription
+            await session.StoreAsync(new OldSubscription
             {
                 Clients = new List<LegacyAddress>
                 {
@@ -40,8 +40,9 @@
                     new LegacyAddress("mytestendpoint", RuntimeEnvironment.MachineName)
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType));
-            session.SaveChanges();
+            }, Subscription.FormatId(messageType))
+            .ConfigureAwait(false);
+            await session.SaveChangesAsync().ConfigureAwait(false);
 
             List<string> subscriptions = null;
 
@@ -54,9 +55,9 @@
         [Test]
         public async Task Should_allow_old_subscriptions_without_machine_name()
         {
-            var session = store.OpenSession();
+            var session = store.OpenAsyncSession();
             var messageType = MessageTypes.MessageA.Single();
-            session.Store(new OldSubscription
+            await session.StoreAsync(new OldSubscription
             {
                 Clients = new List<LegacyAddress>
                 {
@@ -64,8 +65,8 @@
                     new LegacyAddress("mytestendpoint", null)
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType));
-            session.SaveChanges();
+            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+            await session.SaveChangesAsync().ConfigureAwait(false);
 
             List<string> subscriptions = null;
             var exception = await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag())).ToList(); });
@@ -77,14 +78,14 @@
         [Test]
         public async Task Should_allow_old_subscriptions_with_empty_clients()
         {
-            var session = store.OpenSession();
+            var session = store.OpenAsyncSession();
             var messageType = MessageTypes.MessageA.Single();
-            session.Store(new OldSubscription
+            await session.StoreAsync(new OldSubscription
             {
                 Clients = new List<LegacyAddress>(),
                 MessageType = messageType
-            }, Subscription.FormatId(messageType));
-            session.SaveChanges();
+            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+            await session.SaveChangesAsync().ConfigureAwait(false);
 
             List<string> subscriptions = null;
             var exception = await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag())).ToList(); });
@@ -95,9 +96,9 @@
         [Test]
         public async Task Should_allow_new_subscriptions()
         {
-            var session = store.OpenSession();
+            var session = store.OpenAsyncSession();
             var messageType = MessageTypes.MessageA.Single();
-            session.Store(new Subscription
+            await session.StoreAsync(new Subscription
             {
                 Clients = new List<string>
                 {
@@ -105,8 +106,8 @@
                     "mytestendpoint" + "@" + RuntimeEnvironment.MachineName
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType));
-            session.SaveChanges();
+            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+            await session.SaveChangesAsync().ConfigureAwait(false);
 
             var exception = await Catch(async () => { (await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag())).ToList(); });
             Assert.Null(exception);
