@@ -95,12 +95,13 @@
     <Compile Include="RavenDbSettingsExtensions.cs" />
     <Compile Include="SagaPersister\RavenDbSagaSettingsExtensions.cs" />
     <Compile Include="SessionManagement\ISessionProvider.cs" />
+    <Compile Include="SessionManagement\IAsyncSessionProvider.cs" />
     <Compile Include="Gateway\RavenDeduplication.cs" />
     <Compile Include="Internal\NoOpLogManager.cs" />
     <Compile Include="Internal\SharedDocumentStore.cs" />
     <Compile Include="RavenDBPersistence.cs" />
-    <Compile Include="SessionManagement\ProvidedSessionBehavior.cs" />
-    <Compile Include="SessionManagement\OpenSessionBehavior.cs" />
+    <Compile Include="SessionManagement\ProvidedAsyncSessionBehavior.cs" />
+    <Compile Include="SessionManagement\OpenAsyncSessionBehavior.cs" />
     <Compile Include="SessionManagement\RavenDbStorageSession.cs" />
     <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />
     <Compile Include="SagaPersister\SagaPersister.cs" />

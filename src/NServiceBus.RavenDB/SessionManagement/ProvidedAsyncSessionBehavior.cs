@@ -5,20 +5,21 @@
     using NServiceBus.Pipeline;
     using Raven.Client;
 
-    class ProvidedSessionBehavior : Behavior<PhysicalMessageProcessingContext>
+    class ProvidedAsyncSessionBehavior : Behavior<PhysicalMessageProcessingContext>
     {
-        public Func<IDocumentSession> GetSession { get; set; }
+
+        public Func<IAsyncDocumentSession> GetAsyncSession { get; set; }
 
         public override Task Invoke(PhysicalMessageProcessingContext context, Func<Task> next)
         {
-            context.Set(GetSession);
+            context.Set(GetAsyncSession);
             return next();
         }
 
         public class Registration : RegisterStep
         {
             public Registration()
-                : base("ProvidedRavenDbSession", typeof(ProvidedSessionBehavior), "Makes sure that there is a RavenDB IDocumentSession available on the pipeline")
+                : base("ProvidedRavenDbAsyncSession", typeof(ProvidedAsyncSessionBehavior), "Makes sure that there is a RavenDB IAsyncDocumentSession available on the pipeline")
             {
                 InsertAfter(WellKnownStep.ExecuteUnitOfWork);
                 InsertBeforeIfExists(WellKnownStep.InvokeSaga);
