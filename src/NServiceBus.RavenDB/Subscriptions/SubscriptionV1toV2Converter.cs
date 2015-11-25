@@ -1,4 +1,4 @@
-namespace NServiceBus.RavenDB.Timeouts
+namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
 {
     using NServiceBus.RavenDB.Internal;
     using Raven.Client.Listeners;
@@ -17,22 +17,23 @@ namespace NServiceBus.RavenDB.Timeouts
 
         public void BeforeConversionToEntity(string key, RavenJObject document, RavenJObject metadata)
         {
-            if (!IsSubscription(metadata))
-            {
-                return;
-            }
-
-            document["Clients"] = LegacyAddress.ParseMultiple(() => (RavenJArray)document["Clients"]);
         }
 
         public void AfterConversionToEntity(string key, RavenJObject document, RavenJObject metadata, object entity)
         {
-        }
+            var subscription = entity as Subscription;
 
-        static bool IsSubscription(RavenJObject ravenJObject)
-        {
-            var clrType = ravenJObject["Raven-Clr-Type"].Value<string>();
-            return !string.IsNullOrEmpty(clrType) && clrType == "NServiceBus.RavenDB.Persistence.SubscriptionStorage.Subscription, NServiceBus.RavenDB";
+            if (subscription == null)
+            {
+                return;
+            }
+
+            var clients = document["Clients"];
+
+            if (clients != null)
+            {
+                subscription.Subscribers = LegacyAddress.ParseMultipleToSubscriptionClient((RavenJArray)document["Clients"]);
+            }
         }
     }
 }

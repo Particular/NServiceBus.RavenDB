@@ -1,22 +1,31 @@
 namespace NServiceBus.RavenDB.Internal
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using Raven.Imports.Newtonsoft.Json.Linq;
     using Raven.Json.Linq;
 
     static class LegacyAddress
     {
-        public static RavenJToken ParseMultiple(Func<RavenJArray> tokenSelector)
+        public static List<SubscriptionClient> ParseMultipleToSubscriptionClient(RavenJArray array) => array.Select(token => ParseToSubscriptionClient(token)).ToList();
+
+        public static SubscriptionClient ParseToSubscriptionClient(RavenJToken token)
         {
-            var array = tokenSelector() ;
+            var queue = token.Value<string>("Queue");
+            var machine = token.Value<string>("Machine");
 
-            var clients = array.Select(token => Parse(() => token)).ToList();
+            // Previously known as IgnoreMachineName (for brokers)
+            if (string.IsNullOrEmpty(machine))
+            {
+                return new SubscriptionClient { TransportAddress = queue, Endpoint = queue };
+            }
 
-            return new RavenJArray(clients);
+            return new SubscriptionClient { TransportAddress = queue + "@" + machine, Endpoint = queue };
         }
 
-        public static string Parse(Func<RavenJToken> tokenSelector)
+        public static string ParseToString(Func<RavenJToken> tokenSelector)
         {
             var token = tokenSelector();
 

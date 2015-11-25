@@ -50,9 +50,9 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             };
             var context = new ContextBag();
 
-            var session = store.OpenSession();
-            session.Store(timeout);
-            session.SaveChanges();
+            var session = store.OpenAsyncSession();
+            await session.StoreAsync(timeout);
+            await session.SaveChangesAsync();
 
             Assert.True(await persister.TryRemove(timeout.Id, context));
         }
@@ -84,9 +84,9 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             };
             var context = new ContextBag();
 
-            var session = store.OpenSession();
-            session.Store(timeout);
-            session.SaveChanges();
+            var session = store.OpenAsyncSession();
+            await session.StoreAsync(timeout);
+            await session.SaveChangesAsync();
 
             Assert.True(await persister.TryRemove(timeout.Id, context));
         }
@@ -105,7 +105,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             var timeout = new TimeoutData
             {
                 Time = DateTime.UtcNow.AddHours(-1),
-                Destination = "timouts" + "@" + RuntimeEnvironment.MachineName,
+                Destination = "timeouts" + "@" + RuntimeEnvironment.MachineName,
                 SagaId = Guid.NewGuid(),
                 State = new byte[]
                 {
@@ -117,10 +117,15 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                 Headers = headers,
                 OwningTimeoutManager = "MyTestEndpoint"
             };
+
+            var session = store.OpenAsyncSession();
+            await session.StoreAsync(timeout);
+            await session.SaveChangesAsync();
             var context = new ContextBag();
 
-            var exception = await Catch(async () => { await persister.Add(timeout, context); });
-            Assert.Null(exception);
+            var retreievedTimeout = await persister.Peek(timeout.Id, context);
+
+            Assert.AreEqual(timeout.Destination, retreievedTimeout.Destination);
         }
 
         TimeoutPersister persister;

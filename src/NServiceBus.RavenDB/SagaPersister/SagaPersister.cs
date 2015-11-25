@@ -2,9 +2,9 @@ namespace NServiceBus.SagaPersisters.RavenDB
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
+    using NServiceBus.Persistence;
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.Sagas;
     using Raven.Abstractions.Commands;
@@ -15,111 +15,124 @@ namespace NServiceBus.SagaPersisters.RavenDB
     {
         const string UniqueDocIdKey = "NServiceBus-UniqueDocId";
 
-        public Task Save(IContainSagaData sagaInstance, IDictionary<string, object> correlationProperties, ContextBag context)
+        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
-            var session = context.Get<IDocumentSession>();
+            var ravenSession = (RavenDBSynchronizedStorageSession)session;
 
-            session.Store(sagaInstance);
-
-            if (!correlationProperties.Any())
+            await ravenSession.Enlist(async documentSession =>
             {
-                return Task.FromResult(0);
-            }
+                if (sagaData == null)
+                {
+                    return;
+                }
 
-            var correlationProperty = correlationProperties.SingleOrDefault();
+                await documentSession.StoreAsync(sagaData).ConfigureAwait(false);
 
+                if (correlationProperty == null)
+                {
+                    return;
+                }
 
-            var value = correlationProperty.Value;
-            var id = SagaUniqueIdentity.FormatId(sagaInstance.GetType(), new KeyValuePair<string, object>(correlationProperty.Key, value));
-
-
-            var sagaDocId = session.Advanced.DocumentStore.Conventions.FindFullDocumentKeyFromNonStringIdentifier(sagaInstance.Id, sagaInstance.GetType(), false);
-
-            session.Store(new SagaUniqueIdentity
-            {
-                Id = id,
-                SagaId = sagaInstance.Id,
-                UniqueValue = value,
-                SagaDocId = sagaDocId
+                await CreateSagaUniqueIdentity(sagaData, correlationProperty, documentSession);
             });
+        }
 
-            session.Advanced.GetMetadataFor(sagaInstance)[UniqueDocIdKey] = id;
+        private static async Task CreateSagaUniqueIdentity(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, IAsyncDocumentSession documentSession)
+        {
+            var sagaDocId = documentSession.Advanced.DocumentStore.Conventions.FindFullDocumentKeyFromNonStringIdentifier(sagaData.Id, sagaData.GetType(), false);
+            var propertyKeyValuePair = new KeyValuePair<string, object>(correlationProperty.Name, correlationProperty.Value);
+            var sagaUniqueIdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), propertyKeyValuePair);
 
+            await documentSession.StoreAsync(new SagaUniqueIdentity
+            {
+                Id = sagaUniqueIdentityDocId,
+                SagaId = sagaData.Id,
+                UniqueValue = propertyKeyValuePair.Value,
+                SagaDocId = sagaDocId
+            }, id: sagaUniqueIdentityDocId).ConfigureAwait(false);
 
+            var metadata = await documentSession.Advanced.GetMetadataForAsync(sagaData).ConfigureAwait(false);
+            metadata[UniqueDocIdKey] = sagaUniqueIdentityDocId;
+        }
+
+        public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
+        {
+            //no-op since the dirty tracking will handle the update for us
             return Task.FromResult(0);
         }
 
-        public Task Update(IContainSagaData saga, ContextBag context)
+        public async Task<T> Get<T>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where T : IContainSagaData
         {
-            //np-op since the dirty tracking will handle the update for us
-            return Task.FromResult(0);
+            var ravenSession = (RavenDBSynchronizedStorageSession)session;
+            var documentSession = ravenSession.Transaction;
+            return await documentSession.LoadAsync<T>(sagaId).ConfigureAwait(false);
         }
 
-        public Task<T> Get<T>(Guid sagaId, ContextBag context) where T : IContainSagaData
+        public async Task<T> Get<T>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where T : IContainSagaData
         {
-            var session = context.Get<IDocumentSession>();
-            return Task.FromResult(session.Load<T>(sagaId));
-        }
+            var ravenSession = (RavenDBSynchronizedStorageSession)session;
+            var documentSession = ravenSession.Transaction;
 
-        public Task<T> Get<T>(string property, object value, ContextBag context) where T : IContainSagaData
-        {
-            var session = context.Get<IDocumentSession>();
-
-            var lookupId = SagaUniqueIdentity.FormatId(typeof(T), new KeyValuePair<string, object>(property, value));
+            var lookupId = SagaUniqueIdentity.FormatId(typeof(T), new KeyValuePair<string, object>(propertyName, propertyValue));
 
             //store it in the context to be able to optimize deletes for legacy sagas that don't have the id in metadata
             context.Set(UniqueDocIdKey, lookupId);
 
-            var lookup = session
+            var lookup = await documentSession
                 .Include("SagaDocId") //tell raven to pull the saga doc as well to save us a round-trip
-                .Load<SagaUniqueIdentity>(lookupId);
+                .LoadAsync<SagaUniqueIdentity>(lookupId)
+                .ConfigureAwait(false);
 
             if (lookup != null)
             {
                 return lookup.SagaDocId != null
-                    ? Task.FromResult(session.Load<T>(lookup.SagaDocId)) //if we have a saga id we can just load it
-                    : Get<T>(lookup.SagaId, context); //if not this is a saga that was created pre 3.0.4 so we fallback to a get instead
+                    ? await documentSession.LoadAsync<T>(lookup.SagaDocId).ConfigureAwait(false) //if we have a saga id we can just load it
+                    : await Get<T>(lookup.SagaId, session, context); //if not this is a saga that was created pre 3.0.4 so we fallback to a get instead
             }
 
-            return Task.FromResult(default(T));
+            return default(T);
         }
 
-        public Task Complete(IContainSagaData saga, ContextBag context)
+        public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
-            var session = context.Get<IDocumentSession>();
-            session.Delete(saga);
+            var ravenSession = (RavenDBSynchronizedStorageSession)session;
 
-            string uniqueDocumentId;
-            RavenJToken uniqueDocumentIdMetadata;
-
-            if (session.Advanced.GetMetadataFor(saga).TryGetValue(UniqueDocIdKey, out uniqueDocumentIdMetadata))
+            await ravenSession.Enlist(async documentSession =>
             {
-                uniqueDocumentId = uniqueDocumentIdMetadata.Value<string>();
-            }
-            else
-            {
-                context.TryGet(UniqueDocIdKey, out uniqueDocumentId);
-            }
+                documentSession.Delete(sagaData);
 
-            if (string.IsNullOrEmpty(uniqueDocumentId))
-            {
-                var uniqueDoc = session.Query<SagaUniqueIdentity>()
-                    .SingleOrDefault(d => d.SagaId == saga.Id);
-
-                if (uniqueDoc != null)
+                string uniqueDocumentId;
+                RavenJToken uniqueDocumentIdMetadata;
+                var metadata = await documentSession.Advanced.GetMetadataForAsync(sagaData).ConfigureAwait(false);
+                if (metadata.TryGetValue(UniqueDocIdKey, out uniqueDocumentIdMetadata))
                 {
-                    session.Delete(uniqueDoc);
+                    uniqueDocumentId = uniqueDocumentIdMetadata.Value<string>();
+                }
+                else
+                {
+                    context.TryGet(UniqueDocIdKey, out uniqueDocumentId);
                 }
 
-                return Task.FromResult(0);
-            }
+                if (string.IsNullOrEmpty(uniqueDocumentId))
+                {
+                    var uniqueDoc = await documentSession.Query<SagaUniqueIdentity>()
+                        .SingleOrDefaultAsync(d => d.SagaId == sagaData.Id)
+                        .ConfigureAwait(false);
 
-            session.Advanced.Defer(new DeleteCommandData
-            {
-                Key = uniqueDocumentId
+                    if (uniqueDoc != null)
+                    {
+                        documentSession.Delete(uniqueDoc);
+                    }
+                }
+                else
+                {
+                    documentSession.Advanced.Defer(new DeleteCommandData
+                    {
+                        Key = uniqueDocumentId
+                    });
+                }
             });
 
-            return Task.FromResult(0);
         }
     }
 }

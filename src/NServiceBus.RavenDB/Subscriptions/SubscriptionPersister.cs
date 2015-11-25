@@ -16,11 +16,13 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             documentStore = store;
         }
 
-        public async Task Subscribe(string client, IEnumerable<MessageType> messageTypes, ContextBag context)
+        public async Task Subscribe(Subscriber subscriber, IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
         {
-            var attempts = 0;
+            //When the subscriber is running V6 and UseLegacyMessageDrivenSubscriptionMode is enabled at the subscriber the 'subcriber.Endpoint' value is null
+            var endpoint = subscriber.Endpoint?.ToString() ?? subscriber.TransportAddress.Split('@').First();
+            var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = endpoint };
 
-            var msgTypes = messageTypes.ToList();
+            var attempts = 0;
 
             //note: since we have a design that can run into concurrency exceptions we perform a few retries
             // we should redesign this in the future to use a separate doc per subscriber and message type
@@ -28,9 +30,9 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             {
                 try
                 {
-                    using (var session = OpenSession())
+                    using (var session = OpenAsyncSession())
                     {
-                        foreach (var messageType in msgTypes)
+                        foreach (var messageType in messageTypes)
                         {
                             var subscriptionDocId = Subscription.FormatId(messageType);
 
@@ -42,16 +44,18 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                                 {
                                     Id = subscriptionDocId,
                                     MessageType = messageType,
-                                    Clients = new List<string>()
+                                    Subscribers = new List<SubscriptionClient>()
                                 };
+
                                 await session.StoreAsync(subscription).ConfigureAwait(false);
                             }
 
-                            if (!subscription.Clients.Contains(client))
+                            if (!subscription.Subscribers.Contains(subscriptionClient))
                             {
-                                subscription.Clients.Add(client);
+                                subscription.Subscribers.Add(subscriptionClient);
                             }
                         }
+
                         await session.SaveChangesAsync().ConfigureAwait(false);
                     }
 
@@ -64,9 +68,11 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             } while (attempts < 5);
         }
 
-        public async Task Unsubscribe(string client, IEnumerable<MessageType> messageTypes, ContextBag context)
+        public async Task Unsubscribe(Subscriber subscriber, IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
         {
-            using (var session = OpenSession())
+            var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint.ToString() };
+
+            using (var session = OpenAsyncSession())
             {
                 foreach (var messageType in messageTypes)
                 {
@@ -79,9 +85,9 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                         continue;
                     }
 
-                    if (subscription.Clients.Contains(client))
+                    if (subscription.Subscribers.Contains(subscriptionClient))
                     {
-                        subscription.Clients.Remove(client);
+                        subscription.Subscribers.Remove(subscriptionClient);
                     }
                 }
 
@@ -89,22 +95,22 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             }
         }
 
-        public async Task<IEnumerable<string>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
+        public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
         {
-            var ids = messageTypes.Select(Subscription.FormatId)
-                .ToList();
+            var ids = messageTypes.Select(Subscription.FormatId).ToList();
 
-            using (var session = OpenSession())
+            using (var session = OpenAsyncSession())
             {
                 var subscriptions = await session.LoadAsync<Subscription>(ids).ConfigureAwait(false);
 
                 return subscriptions.Where(s => s != null)
-                    .SelectMany(s => s.Clients)
-                    .Distinct();
+                                    .SelectMany(s => s.Subscribers)
+                                    .Distinct()
+                                    .Select(c => new Subscriber(c.TransportAddress, new EndpointName(c.Endpoint)));
             }
         }
 
-        IAsyncDocumentSession OpenSession()
+        IAsyncDocumentSession OpenAsyncSession()
         {
             var session = documentStore.OpenAsyncSession();
             session.Advanced.AllowNonAuthoritativeInformation = false;

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using NServiceBus.Features;
     using NServiceBus.RavenDB.Internal;
     using NServiceBus.Settings;
@@ -13,7 +14,6 @@
         {
             DependsOn<Outbox>();
             DependsOn<SharedDocumentStore>();
-            RegisterStartupTask<OutboxCleaner>();
         }
 
         protected override void Setup(FeatureConfigurationContext context)
@@ -22,7 +22,7 @@
                 // Trying pulling a shared DocumentStore set by the user or other Feature
                 context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtensions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context.Settings);
 
-            if (store == null)
+            if(store == null)
             {
                 throw new Exception("RavenDB is configured as persistence for Outbox and no DocumentStore instance found");
             }
@@ -36,6 +36,13 @@
 
             context.Container.ConfigureComponent<OutboxRecordsCleaner>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(x => x.DocumentStore, store);
+
+            context.Container.ConfigureComponent<OutboxCleaner>(DependencyLifecycle.InstancePerCall);
+
+            context.RegisterStartupTask(builder =>
+            {
+                return builder.Build<OutboxCleaner>();
+            });
         }
 
         class OutboxCleaner : FeatureStartupTask, IDisposable
@@ -45,35 +52,41 @@
 
             public void Dispose()
             {
-                if (cleanupTimer != null)
+                if(cleanupTimer != null)
                 {
                     cleanupTimer.Dispose();
                     cleanupTimer = null;
                 }
             }
 
-            protected override void OnStart()
+            protected override Task OnStart(IBusContext context)
             {
                 timeToKeepDeduplicationData = Settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
 
                 var frequencyToRunDeduplicationDataCleanup = Settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
 
                 cleanupTimer = new Timer(PerformCleanup, null, TimeSpan.FromMinutes(1), frequencyToRunDeduplicationDataCleanup);
+
+                return Task.FromResult(0);
             }
 
-            protected override void OnStop()
+            protected override Task OnStop(IBusContext context)
             {
-                using (var waitHandle = new ManualResetEvent(false))
+                using(var waitHandle = new ManualResetEvent(false))
                 {
                     cleanupTimer.Dispose(waitHandle);
                     waitHandle.WaitOne();
                     cleanupTimer = null;
                 }
+
+                return Task.FromResult(0);
             }
 
             void PerformCleanup(object state)
             {
-                Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData);
+                Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData)
+                    .GetAwaiter()
+                    .GetResult();
             }
 
             Timer cleanupTimer;

@@ -15,7 +15,7 @@
     {
         internal const string DocumentStoreSettingsKey = "RavenDbDocumentStore";
         internal const string DefaultConnectionParameters = "RavenDbConnectionParameters";
-        internal const string SharedSessionSettingsKey = "RavenDbSharedSession";
+        internal const string SharedAsyncSessionSettingsKey = "RavenDbSharedAsyncSession";
 
         /// <summary>
         ///     Configures the storages to use the given document store supplied
@@ -49,9 +49,22 @@
         /// <param name="cfg"></param>
         /// <param name="getSessionFunc">A func returning the session to be used</param>
         /// <returns></returns>
+        [ObsoleteEx( Message = "Use the 'UseSharedAsyncSession' configuration extension method to provide an async session.", RemoveInVersion = "5", TreatAsErrorFromVersion = "4" )]
         public static PersistenceExtentions<RavenDBPersistence> UseSharedSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDocumentSession> getSessionFunc)
         {
-            cfg.GetSettings().Set(SharedSessionSettingsKey, getSessionFunc);
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        ///     Specifies the async session that the shared persisters (saga + outbox) that should be used. The lifecycle is controled by
+        ///     me
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <param name="getAsyncSessionFunc">A func returning the async session to be used</param>
+        /// <returns></returns>
+        public static PersistenceExtentions<RavenDBPersistence> UseSharedAsyncSession( this PersistenceExtentions<RavenDBPersistence> cfg, Func<IAsyncDocumentSession> getAsyncSessionFunc )
+        {
+            cfg.GetSettings().Set( SharedAsyncSessionSettingsKey, getAsyncSessionFunc );
             return cfg;
         }
 
@@ -67,7 +80,7 @@
      //todo: obsolete
         public static PersistenceExtentions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDictionary<string,string>, string> convention)
         {
-            OpenSessionBehavior.GetDatabaseName = convention;
+            OpenAsyncSessionBehavior.GetDatabaseName = convention;
             return cfg;
         }
 

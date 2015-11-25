@@ -80,17 +80,17 @@
         }
 
         [Test]
-        public void Raven_WhenConcurrentDeletesWithDtc_ShouldThrowConcurrencyException()
+        public async Task Raven_WhenConcurrentDeletesWithDtc_ShouldThrowConcurrencyException()
         {
             // Raven does not throw ConcurrencyExceptions when concurrently deleting documents without using DTC.
             // When using DTC we need to rely on Raven throwing this exception to avoid dispatching duplicate messages.
             // See issue http://issues.hibernatingrhinos.com/issue/RavenDB-4000
 
             var document = new DemoDocument();
-            using (var session = store.OpenSession())
+            using (var session = store.OpenAsyncSession())
             {
-                session.Store(document);
-                session.SaveChanges();
+                await session.StoreAsync(document);
+                await session.SaveChangesAsync();
             }
 
             var documentLoaded = new CountdownEvent(2);

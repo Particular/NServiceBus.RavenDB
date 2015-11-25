@@ -6,6 +6,7 @@
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Extensibility;
+    using NServiceBus.Persistence;
     using NServiceBus.Sagas;
     using NUnit.Framework;
     using Raven.Client;
@@ -17,8 +18,8 @@
         {
             var context = await Scenario.Define<Context>()
                 .WithEndpoint<SagaFinderEndpoint>(b => b
-                    .When(bus => bus.SendLocalAsync(new StartSagaMessage()))
-                    .When(c => c.SagaId != Guid.Empty, bus => bus.SendLocalAsync(new StartSagaMessage())))
+                    .When(bus => bus.SendLocal(new StartSagaMessage()))
+                    .When(c => c.SagaId != Guid.Empty, bus => bus.SendLocal(new StartSagaMessage())))
                 .Done(c => c.SecondMessageProcessed)
                 .Run();
 
@@ -45,15 +46,15 @@
             {
                 public Context Context { get; set; }
 
-                public Task<SagaFinderSagaData> FindBy(StartSagaMessage message, ReadOnlyContextBag options)
+                public async Task<SagaFinderSagaData> FindBy(StartSagaMessage message, SynchronizedStorageSession session, ReadOnlyContextBag options)
                 {
                     if (Context.SagaId == Guid.Empty)
                     {
-                        return Task.FromResult(default(SagaFinderSagaData));
+                        return await Task.FromResult(default(SagaFinderSagaData));
                     }
 
-                    var session = options.Get<IDocumentSession>();
-                    return Task.FromResult(session.Load<SagaFinderSagaData>(Context.SagaId));
+                    var ravenSession = options.Get<IAsyncDocumentSession>();
+                    return await ravenSession.LoadAsync<SagaFinderSagaData>(Context.SagaId).ConfigureAwait(false);
                 }
             }
 

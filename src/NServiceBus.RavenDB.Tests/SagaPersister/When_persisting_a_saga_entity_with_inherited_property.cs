@@ -12,30 +12,39 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
     [Test]
     public async Task Inherited_property_classes_should_be_persisted()
     {
-        IDocumentSession session;
-        var options = this.CreateContextWithSessionPresent(out session);
+        IAsyncDocumentSession session;
+        var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var entity = new SagaData
         {
             Id = Guid.NewGuid(),
+            UniqueString = "SomeUniqueString",
             PolymorphicRelatedProperty = new PolymorphicProperty
             {
                 SomeInt = 9
             }
         };
-        await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), options);
-        session.SaveChanges();
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
 
-        var savedEntity = await persister.Get<SagaData>(entity.Id, options);
+        await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
+        await session.SaveChangesAsync().ConfigureAwait(false);
+
+        var savedEntity = await persister.Get<SagaData>(entity.Id, synchronizedSession, options);
         var expected = (PolymorphicProperty) entity.PolymorphicRelatedProperty;
         var actual = (PolymorphicProperty) savedEntity.PolymorphicRelatedProperty;
         Assert.AreEqual(expected.SomeInt, actual.SomeInt);
     }
 
-    class SomeSaga : Saga<SagaData>
+    class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartSaga>
     {
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
         {
+            mapper.ConfigureMapping<StartSaga>(m => m.UniqueString).ToSaga(s => s.UniqueString);
+        }
+
+        public Task Handle(StartSaga message, IMessageHandlerContext context)
+        {
+            return Task.FromResult(0);
         }
     }
 
@@ -43,6 +52,7 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
     {
         public PolymorphicPropertyBase PolymorphicRelatedProperty { get; set; }
         public Guid Id { get; set; }
+        public string UniqueString { get; set; }
         public string Originator { get; set; }
         public string OriginalMessageId { get; set; }
     }
