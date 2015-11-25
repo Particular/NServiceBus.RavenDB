@@ -11,29 +11,29 @@
     {
         public IDocumentStore DocumentStore { get; set; }
 
-        public Task<bool> DeduplicateMessage(string messageId, DateTime timeReceived, ContextBag context)
+        public async Task<bool> DeduplicateMessage(string messageId, DateTime timeReceived, ContextBag context)
         {
-            using (var session = DocumentStore.OpenSession())
+            using (var session = DocumentStore.OpenAsyncSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
                 session.Advanced.AllowNonAuthoritativeInformation = false;
 
-                session.Store(new GatewayMessage
+                await session.StoreAsync(new GatewayMessage
                 {
                     Id = EscapeMessageId(messageId),
                     TimeReceived = timeReceived
-                });
+                }).ConfigureAwait(false);
 
                 try
                 {
-                    session.SaveChanges();
+                  await  session.SaveChangesAsync().ConfigureAwait(false);
                 }
                 catch (ConcurrencyException)
                 {
-                    return Task.FromResult(false);
+                    return false;
                 }
 
-                return Task.FromResult(true);
+                return true;
             }
         }
 
