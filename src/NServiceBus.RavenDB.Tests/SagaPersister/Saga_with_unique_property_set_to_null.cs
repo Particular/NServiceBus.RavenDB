@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.RavenDB.Tests;
 using NServiceBus.SagaPersisters.RavenDB;
@@ -9,7 +10,7 @@ using Raven.Client;
 public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
 {
     [Test]
-    public void should_throw_a_ArgumentNullException()
+    public async Task should_throw_a_ArgumentNullException()
     {
         var saga1 = new SagaData
         {
@@ -17,15 +18,16 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
             UniqueString = null
         };
 
-        IDocumentSession session;
-        var context = this.CreateContextWithSessionPresent(out session);
+        IAsyncDocumentSession session;
+        var context = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
 
-        Assert.Throws<ArgumentNullException>(() =>
+        var exception = await Catch<ArgumentNullException>(async () =>
         {
-            persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), context);
-            session.SaveChanges();
+            await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), context);
+            await session.SaveChangesAsync().ConfigureAwait(false);
         });
+        Assert.IsNotNull(exception);
     }
 
     class SomeSaga : Saga<SagaData>

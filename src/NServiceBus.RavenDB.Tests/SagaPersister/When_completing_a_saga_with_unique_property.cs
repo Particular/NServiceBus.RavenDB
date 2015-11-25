@@ -16,8 +16,8 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
     {
         var sagaId = Guid.NewGuid();
 
-        IDocumentSession session;
-        var options = this.CreateContextWithSessionPresent(out session);
+        IAsyncDocumentSession session;
+        var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var entity = new SagaData
         {
@@ -25,14 +25,14 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
         };
 
         await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
 
         var saga = await persister.Get<SagaData>(sagaId, options);
         await persister.Complete(saga, options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
 
         Assert.Null(await persister.Get<SagaData>(sagaId, options));
-        Assert.Null(session.Query<SagaUniqueIdentity>().Customize(c => c.WaitForNonStaleResults()).SingleOrDefault(u => u.SagaId == sagaId));
+        Assert.Null(await session.Query<SagaUniqueIdentity>().Customize(c => c.WaitForNonStaleResults()).SingleOrDefaultAsync(u => u.SagaId == sagaId).ConfigureAwait(false));
     }
 
 

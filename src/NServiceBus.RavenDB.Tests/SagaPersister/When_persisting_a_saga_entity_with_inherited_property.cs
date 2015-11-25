@@ -12,8 +12,8 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
     [Test]
     public async Task Inherited_property_classes_should_be_persisted()
     {
-        IDocumentSession session;
-        var options = this.CreateContextWithSessionPresent(out session);
+        IAsyncDocumentSession session;
+        var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var entity = new SagaData
         {
@@ -24,7 +24,7 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
             }
         };
         await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
 
         var savedEntity = await persister.Get<SagaData>(entity.Id, options);
         var expected = (PolymorphicProperty) entity.PolymorphicRelatedProperty;

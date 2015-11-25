@@ -12,8 +12,8 @@ public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestB
     [Test]
     public async Task Should_not_generate_a_to_long_unique_property_id()
     {
-        IDocumentSession session;
-        var options = this.CreateContextWithSessionPresent(out session);
+        IAsyncDocumentSession session;
+        var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var uniqueString = Guid.NewGuid().ToString();
         var saga = new SagaWithUniquePropertyAndALongNamespace
@@ -22,7 +22,7 @@ public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestB
                 UniqueString = uniqueString
             };
         await persister.Save(saga, this.CreateMetadata<SomeSaga>(saga), options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
     }
 
     class SomeSaga : Saga<SagaWithUniquePropertyAndALongNamespace>

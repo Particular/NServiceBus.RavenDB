@@ -17,11 +17,11 @@ public class When_persisting_a_saga_entity_with_a_DateTime_property : RavenDBPer
             Id = Guid.NewGuid(),
             DateTimeProperty = DateTime.Parse("12/02/2010 12:00:00.01")
         };
-        IDocumentSession session;
-        var options = this.CreateContextWithSessionPresent(out session);
+        IAsyncDocumentSession session;
+        var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
         var savedEntity = await persister.Get<SagaData>(entity.Id, options);
         Assert.AreEqual(entity.DateTimeProperty, savedEntity.DateTimeProperty);
     }
