@@ -36,7 +36,7 @@ public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
         await persister.Complete(saga, options);
         await session.SaveChangesAsync().ConfigureAwait(false);
 
-        Assert.Null(session.Query<SagaUniqueIdentity>().Customize(c => c.WaitForNonStaleResults()).SingleOrDefault(u => u.SagaId == sagaId));
+        Assert.Null(await session.Query<SagaUniqueIdentity>().Customize(c => c.WaitForNonStaleResults()).SingleOrDefaultAsync(u => u.SagaId == sagaId));
     }
 
 
