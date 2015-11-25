@@ -69,6 +69,8 @@
                 documentStore.Initialize();
 
                 ConnectionVerifier.VerifyConnectionToRavenDBServer(documentStore);
+
+                documentStore.DatabaseCommands.GlobalAdmin.DeleteDatabase("Test", hardDelete: true);
             }
         }
     }
