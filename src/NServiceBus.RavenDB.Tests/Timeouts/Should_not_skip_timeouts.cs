@@ -40,7 +40,7 @@
 
                 var startSlice = DateTime.UtcNow.AddYears(-10);
                 // avoid cleanup from running during the test by making it register as being run
-                Assert.AreEqual(0, query.GetCleanupChunk(startSlice).Count());
+                Assert.AreEqual(0, (await query.GetCleanupChunk(startSlice)).Count());
 
                 var expected = new List<Tuple<string, DateTime>>();
                 var lastTimeout = DateTime.UtcNow;
@@ -89,7 +89,7 @@
                 // we need to perform manual cleaup.
                 while (true)
                 {
-                    var chunkToCleanup = query.GetCleanupChunk(DateTime.UtcNow.AddDays(1)).ToArray();
+                    var chunkToCleanup = (await query.GetCleanupChunk(DateTime.UtcNow.AddDays(1))).ToArray();
                     if (chunkToCleanup.Length == 0)
                     {
                         break;
@@ -137,7 +137,7 @@
 
                 var startSlice = DateTime.UtcNow.AddYears(-10);
                 // avoid cleanup from running during the test by making it register as being run
-                Assert.AreEqual(0, query.GetCleanupChunk(startSlice).Count());
+                Assert.AreEqual(0, (await query.GetCleanupChunk(startSlice)).Count());
 
                 const int insertsPerThread = 1000;
                 var expected = 0;
@@ -217,7 +217,7 @@
                 // we need to perform manual cleaup.
                 while (true)
                 {
-                    var chunkToCleanup = query.GetCleanupChunk(DateTime.UtcNow.AddDays(1)).ToArray();
+                    var chunkToCleanup = (await query.GetCleanupChunk(DateTime.UtcNow.AddDays(1))).ToArray();
                     Console.WriteLine("Cleanup: got a chunk of size " + chunkToCleanup.Length);
                     if (chunkToCleanup.Length == 0)
                     {

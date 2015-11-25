@@ -6,6 +6,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     using System.Threading.Tasks;
     using NServiceBus.Timeout.Core;
     using Raven.Abstractions.Data;
+    using Raven.Abstractions.Extensions;
     using Raven.Client;
     using Raven.Client.Linq;
 
@@ -25,7 +26,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
         public TimeSpan CleanupGapFromTimeslice { get; set; }
         public TimeSpan TriggerCleanupEvery { get; set; }
 
-        public Task<TimeoutsChunk> GetNextChunk(DateTime startSlice)
+        public async Task<TimeoutsChunk> GetNextChunk(DateTime startSlice)
         {
             var now = DateTime.UtcNow;
             List<TimeoutsChunk.Timeout> results;
@@ -33,9 +34,9 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
             // added after startSlice have been set to a later timout and we might have missed them
             // because of stale indexes.
-            if (lastCleanupTime == DateTime.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) < now)
+            if(lastCleanupTime == DateTime.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) < now)
             {
-                results = GetCleanupChunk(startSlice).ToList();
+                results = (await GetCleanupChunk(startSlice)).ToList();
             }
             else
             {
@@ -45,7 +46,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             // default return value for when no results are found
             var nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10);
 
-            using (var session = documentStore.OpenSession())
+            using(var session = documentStore.OpenAsyncSession())
             {
                 var query = GetChunkQuery(session)
                     .Where(t => t.Time > startSlice)
@@ -55,15 +56,15 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                         t.Time
                     });
 
-                QueryHeaderInformation qhi;
-                using (var enumerator = session.Advanced.Stream(query, out qhi))
+                var qhi = new Reference<QueryHeaderInformation>();
+                using(var enumerator = await session.Advanced.StreamAsync(query, qhi))
                 {
-                    while (enumerator.MoveNext())
+                    while(await enumerator.MoveNextAsync())
                     {
                         var dateTime = enumerator.Current.Document.Time;
                         nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time < now
 
-                        if (dateTime > DateTime.UtcNow)
+                        if(dateTime > DateTime.UtcNow)
                         {
                             break; // break on first future timeout
                         }
@@ -73,20 +74,20 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 }
 
                 // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
-                if (qhi != null && qhi.IsStale && results.Count == 0)
+                if(qhi.Value != null && qhi.Value.IsStale && results.Count == 0)
                 {
                     nextTimeToRunQuery = now;
                 }
             }
 
-            return Task.FromResult(new TimeoutsChunk(results, nextTimeToRunQuery));
+            return new TimeoutsChunk(results, nextTimeToRunQuery);
         }
 
-        public IEnumerable<TimeoutsChunk.Timeout> GetCleanupChunk(DateTime startSlice)
+        public async Task<IEnumerable<TimeoutsChunk.Timeout>> GetCleanupChunk(DateTime startSlice)
         {
-            using (var session = documentStore.OpenSession())
+            using(var session = documentStore.OpenAsyncSession())
             {
-                var chunk = GetChunkQuery(session)
+                var query = await GetChunkQuery(session)
                     .Where(t => t.Time <= startSlice.Subtract(CleanupGapFromTimeslice))
                     .Select(t => new
                     {
@@ -94,8 +95,9 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                         t.Time
                     })
                     .Take(1024)
-                    .ToList()
-                    .Select(arg => new TimeoutsChunk.Timeout(arg.Id, arg.Time));
+                    .ToListAsync();
+
+                var chunk = query.Select(arg => new TimeoutsChunk.Timeout(arg.Id, arg.Time));
 
                 lastCleanupTime = DateTime.UtcNow;
 
@@ -103,7 +105,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             }
         }
 
-        IRavenQueryable<TimeoutData> GetChunkQuery(IDocumentSession session)
+        IRavenQueryable<TimeoutData> GetChunkQuery(IAsyncDocumentSession session)
         {
             session.Advanced.AllowNonAuthoritativeInformation = true;
             return session.Query<TimeoutData, TimeoutsIndex>()
