@@ -28,7 +28,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             {
                 try
                 {
-                    using (var session = OpenSession())
+                    using (var session = OpenAsyncSession())
                     {
                         foreach (var messageType in msgTypes)
                         {
@@ -66,7 +66,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 
         public async Task Unsubscribe(string client, IEnumerable<MessageType> messageTypes, ContextBag context)
         {
-            using (var session = OpenSession())
+            using (var session = OpenAsyncSession())
             {
                 foreach (var messageType in messageTypes)
                 {
@@ -94,7 +94,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             var ids = messageTypes.Select(Subscription.FormatId)
                 .ToList();
 
-            using (var session = OpenSession())
+            using (var session = OpenAsyncSession())
             {
                 var subscriptions = await session.LoadAsync<Subscription>(ids).ConfigureAwait(false);
 
@@ -104,7 +104,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             }
         }
 
-        IAsyncDocumentSession OpenSession()
+        IAsyncDocumentSession OpenAsyncSession()
         {
             var session = documentStore.OpenAsyncSession();
             session.Advanced.AllowNonAuthoritativeInformation = false;

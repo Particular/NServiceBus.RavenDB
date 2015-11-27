@@ -23,9 +23,9 @@
             store.Dispose();
         }
 
-        protected internal IDocumentSession OpenSession()
+        protected internal IAsyncDocumentSession OpenAsyncSession()
         {
-            var documentSession = store.OpenSession();
+            var documentSession = store.OpenAsyncSession();
             documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
             sessions.Add(documentSession);
@@ -53,7 +53,7 @@
             }
         }
 
-        List<IDocumentSession> sessions = new List<IDocumentSession>();
+        List<IAsyncDocumentSession> sessions = new List<IAsyncDocumentSession>();
         protected IDocumentStore store;
         protected Func<RavenTestBase, IDocumentStore> DocumentStoreFactory { get; set; } = t => t.NewDocumentStore();
     }

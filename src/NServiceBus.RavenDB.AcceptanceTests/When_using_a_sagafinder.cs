@@ -45,15 +45,15 @@
             {
                 public Context Context { get; set; }
 
-                public Task<SagaFinderSagaData> FindBy(StartSagaMessage message, ReadOnlyContextBag options)
+                public async Task<SagaFinderSagaData> FindBy(StartSagaMessage message, ReadOnlyContextBag options)
                 {
                     if (Context.SagaId == Guid.Empty)
                     {
-                        return Task.FromResult(default(SagaFinderSagaData));
+                        return await Task.FromResult(default(SagaFinderSagaData));
                     }
 
-                    var session = options.Get<IDocumentSession>();
-                    return Task.FromResult(session.Load<SagaFinderSagaData>(Context.SagaId));
+                    var session = options.Get<IAsyncDocumentSession>();
+                    return await session.LoadAsync<SagaFinderSagaData>(Context.SagaId).ConfigureAwait(false);
                 }
             }
 

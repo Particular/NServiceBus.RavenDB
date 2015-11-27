@@ -6,24 +6,22 @@
 
     class RavenDBOutboxTransaction : OutboxTransaction
     {
-        public RavenDBOutboxTransaction(IDocumentSession session)
+        public RavenDBOutboxTransaction(IAsyncDocumentSession session)
         {
-            Session = session;
+            AsyncSession = session;
         }
 
         public void Dispose()
         {
-            Session.Dispose();
-            Session = null;
+            AsyncSession.Dispose();
+            AsyncSession = null;
         }
 
-        public Task Commit()
+        public async Task Commit()
         {
-            Session.SaveChanges();
-
-            return Task.FromResult(0);
+            await AsyncSession.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public IDocumentSession Session { get; private set; }
+        public IAsyncDocumentSession AsyncSession { get; private set; }
     }
 }

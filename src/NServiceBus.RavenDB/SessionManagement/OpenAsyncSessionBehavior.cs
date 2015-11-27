@@ -8,56 +8,60 @@
     using NServiceBus.RavenDB.Persistence;
     using Raven.Client;
 
-    class OpenSessionBehavior : Behavior<PhysicalMessageProcessingContext>
+    class OpenAsyncSessionBehavior : Behavior<PhysicalMessageProcessingContext>
     {
         readonly IDocumentStoreWrapper documentStoreWrapper;
 
         public static Func<IDictionary<string, string>, string> GetDatabaseName = context => string.Empty;
 
 
-        public OpenSessionBehavior(IDocumentStoreWrapper documentStoreWrapper)
+        public OpenAsyncSessionBehavior(IDocumentStoreWrapper documentStoreWrapper)
         {
             this.documentStoreWrapper = documentStoreWrapper;
         }
 
         public override async Task Invoke(PhysicalMessageProcessingContext context, Func<Task> next)
         {
-            using (var session = OpenSession(context))
+            using (var session = OpenAsyncSession(context))
             {
                 context.Set(session);
                 await next().ConfigureAwait(false);
-                session.SaveChanges();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
-        IDocumentSession OpenSession(PhysicalMessageProcessingContext context)
+        IAsyncDocumentSession OpenAsyncSession(PhysicalMessageProcessingContext context)
         {
             var databaseName = GetDatabaseName(context.Message.Headers);
-            var documentSession = string.IsNullOrEmpty(databaseName) ? documentStoreWrapper.DocumentStore.OpenSession() : documentStoreWrapper.DocumentStore.OpenSession(databaseName);
+            var documentSession = string.IsNullOrEmpty(databaseName) 
+                ? documentStoreWrapper.DocumentStore.OpenAsyncSession() 
+                : documentStoreWrapper.DocumentStore.OpenAsyncSession(databaseName);
+
             documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
+
             return documentSession;
         }
 
         public class Registration : RegisterStep
         {
             public Registration()
-                : base("OpenRavenDbSession", typeof(OpenSessionBehavior), "Makes sure that there is a RavenDB IDocumentSession available on the pipeline")
+                : base("OpenRavenDbAsyncSession", typeof(OpenAsyncSessionBehavior), "Makes sure that there is a RavenDB IAsyncDocumentSession available on the pipeline")
             {
                 InsertAfter(WellKnownStep.ExecuteUnitOfWork);
             }
         }
     }
 
-    class RavenSessionProvider : ISessionProvider
+    class RavenAsyncSessionProvider : IAsyncSessionProvider
     {
         readonly BehaviorContext context;
 
-        public RavenSessionProvider(BehaviorContext context)
+        public RavenAsyncSessionProvider(BehaviorContext context)
         {
             this.context = context;
         }
 
-        public IDocumentSession Session => context.Get<IDocumentSession>();
+        public IAsyncDocumentSession AsyncSession => context.Get<IAsyncDocumentSession>();
     }
 }

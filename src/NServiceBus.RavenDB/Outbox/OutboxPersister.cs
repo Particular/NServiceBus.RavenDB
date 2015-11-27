@@ -13,43 +13,43 @@
         {
             this.documentStore = documentStore;
         }
-        public Task<OutboxMessage> Get(string messageId, ContextBag options)
+        public async Task<OutboxMessage> Get(string messageId, ContextBag options)
         {
             OutboxRecord result;
-            using (var session = documentStore.OpenSession())
+            using (var session = documentStore.OpenAsyncSession())
             {
                 // We use Load operation and not queries to avoid stale results
-                result = session.Load<OutboxRecord>(GetOutboxRecordId(messageId));
+                result = await session.LoadAsync<OutboxRecord>(GetOutboxRecordId(messageId)).ConfigureAwait(false);
             }
 
             if (result == null)
             {
-                return Task.FromResult(default(OutboxMessage));
+                return default(OutboxMessage);
             }
 
             var operations = result.TransportOperations.Select(t => new TransportOperation(t.MessageId, t.Options, t.Message, t.Headers)).ToList();
             var message = new OutboxMessage(result.MessageId, operations);
 
-            return Task.FromResult(message);
+            return message;
         }
 
 
         public Task<OutboxTransaction> BeginTransaction(ContextBag context)
         {
-            var session = documentStore.OpenSession();
+            var session = documentStore.OpenAsyncSession();
 
             session.Advanced.UseOptimisticConcurrency = true;
 
-            //todo: context.Set(session)
+            context.Set(session);
             var transaction = new RavenDBOutboxTransaction(session);
             return Task.FromResult<OutboxTransaction>(transaction);
         }
 
-        public Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
+        public async Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
         {
-            var session = ((RavenDBOutboxTransaction)transaction).Session;
+            var session = ((RavenDBOutboxTransaction)transaction).AsyncSession;
 
-            session.Store(new OutboxRecord
+            await session.StoreAsync(new OutboxRecord
             {
                 MessageId = message.MessageId,
                 Dispatched = false,
@@ -60,28 +60,25 @@
                     MessageId = t.MessageId,
                     Options = t.Options
                 }).ToList()
-            }, GetOutboxRecordId(message.MessageId));
-
-            return Task.FromResult(0);
+            }, GetOutboxRecordId(message.MessageId)).ConfigureAwait(false);
         }
 
-        public Task SetAsDispatched(string messageId, ContextBag options)
+        public async Task SetAsDispatched(string messageId, ContextBag options)
         {
-            using (var session = documentStore.OpenSession())
+            using (var session = documentStore.OpenAsyncSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
-                var outboxMessage = session.Load<OutboxRecord>(GetOutboxRecordId(messageId));
+                var outboxMessage = await session.LoadAsync<OutboxRecord>(GetOutboxRecordId(messageId)).ConfigureAwait(false);
                 if (outboxMessage == null || outboxMessage.Dispatched)
                 {
-                    return Task.FromResult(0);
+                    return;
                 }
 
                 outboxMessage.Dispatched = true;
                 outboxMessage.DispatchedAt = DateTime.UtcNow;
 
-                session.SaveChanges();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
-            return Task.FromResult(0);
         }
 
         static string GetOutboxRecordId(string messageId)

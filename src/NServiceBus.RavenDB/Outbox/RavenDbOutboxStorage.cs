@@ -73,7 +73,9 @@
 
             void PerformCleanup(object state)
             {
-                Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData);
+                Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData)
+                    .GetAwaiter()
+                    .GetResult();
             }
 
             Timer cleanupTimer;

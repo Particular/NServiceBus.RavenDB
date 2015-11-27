@@ -12,8 +12,8 @@ public class When_updating_a_saga_property_that_has_a_unique_attribute : RavenDB
     [Test]
     public async Task It_should_allow_the_update()
     {
-        IDocumentSession session;
-        var options = this.CreateContextWithSessionPresent(out session);
+        IAsyncDocumentSession session;
+        var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var uniqueString = Guid.NewGuid().ToString();
         var saga1 = new SagaData
@@ -23,14 +23,14 @@ public class When_updating_a_saga_property_that_has_a_unique_attribute : RavenDB
         };
 
         await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
         session.Dispose();
 
-        options = this.CreateContextWithSessionPresent(out session);
+        options = this.CreateContextWithAsyncSessionPresent(out session);
         var saga = await persister.Get<SagaData>(saga1.Id, options);
         saga.UniqueString = Guid.NewGuid().ToString();
         await persister.Update(saga, options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
         session.Dispose();
 
         var saga2 = new SagaData
@@ -40,9 +40,9 @@ public class When_updating_a_saga_property_that_has_a_unique_attribute : RavenDB
         };
 
         //this should not blow since we changed the unique value in the previous saga
-        options = this.CreateContextWithSessionPresent(out session);
+        options = this.CreateContextWithAsyncSessionPresent(out session);
         await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
     }
 
     class SomeSaga : Saga<SagaData>

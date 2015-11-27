@@ -13,8 +13,8 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
     [Test]
     public async Task It_should_enforce_uniqueness()
     {
-        IDocumentSession session;
-        var options = this.CreateContextWithSessionPresent(out session);
+        IAsyncDocumentSession session;
+        var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var uniqueString = Guid.NewGuid().ToString();
 
@@ -25,20 +25,21 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
         };
 
         await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
         session.Dispose();
 
-        Assert.Throws<ConcurrencyException>(() =>
+        var exception = await Catch<ConcurrencyException>(async () =>
         {
-            options = this.CreateContextWithSessionPresent(out session);
+            options = this.CreateContextWithAsyncSessionPresent(out session);
             var saga2 = new SagaData
             {
                 Id = Guid.NewGuid(),
                 UniqueString = uniqueString
             };
-            persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), options);
-            session.SaveChanges();
+            await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
         });
+        Assert.IsNotNull(exception);
     }
 
     class SomeSaga : Saga<SagaData>

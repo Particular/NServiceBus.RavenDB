@@ -12,8 +12,8 @@ public class When_updating_a_saga_property_that_does_not_have_a_unique_attribute
     [Test]
     public async Task It_should_persist_successfully()
     {
-        IDocumentSession session;
-        var options = this.CreateContextWithSessionPresent(out session);
+        IAsyncDocumentSession session;
+        var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var uniqueString = Guid.NewGuid().ToString();
 
@@ -25,12 +25,12 @@ public class When_updating_a_saga_property_that_does_not_have_a_unique_attribute
         };
 
         await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
 
         var saga = await persister.Get<SagaData>(saga1.Id, options);
         saga.NonUniqueString = "notUnique2";
         await persister.Update(saga, options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
     }
 
     class SomeSaga : Saga<SagaData>

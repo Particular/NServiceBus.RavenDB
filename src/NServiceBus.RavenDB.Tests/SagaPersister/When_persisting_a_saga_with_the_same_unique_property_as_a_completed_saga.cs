@@ -12,8 +12,8 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
     [Test]
     public async Task It_should_persist_successfully()
     {
-        IDocumentSession session;
-        var options = this.CreateContextWithSessionPresent(out session);
+        IAsyncDocumentSession session;
+        var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var uniqueString = Guid.NewGuid().ToString();
         var saga1 = new SagaData
@@ -22,16 +22,16 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
             UniqueString = uniqueString
         };
         await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
         session.Dispose();
 
-        options = this.CreateContextWithSessionPresent(out session);
+        options = this.CreateContextWithAsyncSessionPresent(out session);
         var saga = await persister.Get<SagaData>(saga1.Id, options);
         await persister.Complete(saga, options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
         session.Dispose();
 
-        options = this.CreateContextWithSessionPresent(out session);
+        options = this.CreateContextWithAsyncSessionPresent(out session);
         var saga2 = new SagaData
         {
             Id = Guid.NewGuid(),
@@ -39,7 +39,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
         };
 
         await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), options);
-        session.SaveChanges();
+        await session.SaveChangesAsync().ConfigureAwait(false);
     }
 
     class SomeSaga : Saga<SagaData>

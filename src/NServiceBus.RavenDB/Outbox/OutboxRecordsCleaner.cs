@@ -3,8 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Raven.Abstractions.Commands;
-    using Raven.Abstractions.Data;
     using Raven.Client;
 
     class OutboxRecordsCleaner
@@ -12,7 +12,7 @@
         volatile bool doingCleanup;
         public IDocumentStore DocumentStore { get; set; }
 
-        public void RemoveEntriesOlderThan(DateTime dateTime)
+        public async Task RemoveEntriesOlderThan(DateTime dateTime)
         {
             lock (this)
             {
@@ -28,16 +28,15 @@
             {
                 var deletionCommands = new List<ICommandData>();
 
-                using (var session = DocumentStore.OpenSession())
+                using (var session = DocumentStore.OpenAsyncSession())
                 {
                     var query = session.Query<OutboxRecord, OutboxRecordsIndex>()
                         .Where(o => o.Dispatched)
                         .OrderBy(o => o.DispatchedAt);
 
-                    QueryHeaderInformation qhi;
-                    using (var enumerator = session.Advanced.Stream(query, out qhi))
+                    using (var enumerator = await session.Advanced.StreamAsync(query))
                     {
-                        while (enumerator.MoveNext())
+                        while (await enumerator.MoveNextAsync())
                         {
                             if (enumerator.Current.Document.DispatchedAt >= dateTime)
                             {
@@ -52,7 +51,7 @@
                     }
                 }
 
-                DocumentStore.DatabaseCommands.Batch(deletionCommands);
+                await DocumentStore.AsyncDatabaseCommands.BatchAsync(deletionCommands);
             }
             finally
             {
