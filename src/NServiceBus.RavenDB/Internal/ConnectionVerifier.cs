@@ -100,12 +100,12 @@ Further instructions can be found at: http://particular.net/articles/using-raven
                 {
                     return false;
                 }
-                return !string.IsNullOrEmpty(ProductVersion) && ProductVersion.StartsWith("2.5") && buildVersion >= 2900;
+                return !string.IsNullOrEmpty(ProductVersion) && buildVersion >= 2908;
             }
 
             public override string ToString()
             {
-                return string.Format("Product version: {0}, Build version: {1}", ProductVersion, BuildVersion);
+                return $"Product version: {ProductVersion}, Build version: {BuildVersion}";
             }
         }
     }
