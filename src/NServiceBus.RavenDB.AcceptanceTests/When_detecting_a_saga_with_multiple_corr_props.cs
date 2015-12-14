@@ -14,13 +14,15 @@
         public void Should_blow_up()
         {
             var ex = Assert.Throws<AggregateException>(async () => await Scenario.Define<Context>()
-                .WithEndpoint<MultiPropEndpoint>()
-                .AllowExceptions()
+                .WithEndpoint<MultiPropEndpoint>(e => e.DoNotFailOnErrorMessages())
                 .Done(c => c.Exceptions.Any() || c.EndpointsStarted)
                 .Run());
 
+            const string expectedMessage = "Sagas can only have mappings that correlate on a single saga property. Please use custom finders to correlate";
 
-            Assert.True(ex.InnerException.InnerException.Message.Contains("Sagas that are correlated on multiple properties are not supported by the RavenDB saga persister"), "Should blow up telling the user multi props isn't supported for this persister");
+            var exceptionToVerify = ex.InnerException.InnerException;
+
+            Assert.True(exceptionToVerify.Message.Contains(expectedMessage), "Should tell user to use a single correlation property or custom finders");
         }
 
         public class Context : ScenarioContext

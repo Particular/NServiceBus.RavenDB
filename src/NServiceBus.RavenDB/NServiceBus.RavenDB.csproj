@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NServiceBus.RavenDB</RootNamespace>
     <AssemblyName>NServiceBus.RavenDB</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -49,7 +49,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="NServiceBus.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NServiceBus.6.0.0-unstable1008\lib\net451\NServiceBus.Core.dll</HintPath>
+      <HintPath>..\packages\NServiceBus.6.0.0-unstable1208\lib\net452\NServiceBus.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Obsolete, Version=4.0.3.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
@@ -84,6 +84,7 @@
     <Compile Include="Internal\DocumentStoreWrapper.cs" />
     <Compile Include="Internal\Helpers.cs" />
     <Compile Include="ConnectionParameters.cs" />
+    <Compile Include="Internal\RavenDBSynchronizedStorage.cs" />
     <Compile Include="Internal\StorageEngineVerifier.cs" />
     <Compile Include="Outbox\OutboxPersister.cs" />
     <Compile Include="Outbox\OutboxRecord.cs" />
@@ -94,20 +95,24 @@
     <Compile Include="Outbox\RavenDBOutboxTransaction.cs" />
     <Compile Include="RavenDbSettingsExtensions.cs" />
     <Compile Include="SagaPersister\RavenDbSagaSettingsExtensions.cs" />
+    <Compile Include="SessionManagement\RavenDBSynchronizedStorageSession.cs" />
     <Compile Include="SessionManagement\ISessionProvider.cs" />
+    <Compile Include="SessionManagement\IAsyncSessionProvider.cs" />
     <Compile Include="Gateway\RavenDeduplication.cs" />
     <Compile Include="Internal\NoOpLogManager.cs" />
     <Compile Include="Internal\SharedDocumentStore.cs" />
     <Compile Include="RavenDBPersistence.cs" />
-    <Compile Include="SessionManagement\ProvidedSessionBehavior.cs" />
-    <Compile Include="SessionManagement\OpenSessionBehavior.cs" />
+    <Compile Include="SessionManagement\ProvidedAsyncSessionBehavior.cs" />
+    <Compile Include="SessionManagement\OpenAsyncSessionBehavior.cs" />
     <Compile Include="SessionManagement\RavenDbStorageSession.cs" />
     <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />
     <Compile Include="SagaPersister\SagaPersister.cs" />
     <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />
+    <Compile Include="SessionManagement\SynchronizedStorage.cs" />
     <Compile Include="Subscriptions\MessageTypeConverter.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionSettingsExtensions.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionStorage.cs" />
+    <Compile Include="Subscriptions\SubscriptionClient.cs" />
     <Compile Include="Subscriptions\SubscriptionPersister.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionV1toV2Converter.cs" />

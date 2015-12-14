@@ -5,9 +5,9 @@
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
-    using NServiceBus.RavenDB.Timeouts;
     using NServiceBus.Support;
     using NServiceBus.Unicast.Subscriptions;
+    using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using NServiceBus.Unicast.Subscriptions.RavenDB;
     using NUnit.Framework;
     using Raven.Client.Listeners;
@@ -30,9 +30,9 @@
         [Test]
         public async Task Should_allow_old_subscriptions()
         {
-            var session = store.OpenSession();
+            var session = store.OpenAsyncSession();
             var messageType = MessageTypes.MessageA.Single();
-            session.Store(new OldSubscription
+            await session.StoreAsync(new OldSubscription
             {
                 Clients = new List<LegacyAddress>
                 {
@@ -40,23 +40,31 @@
                     new LegacyAddress("mytestendpoint", RuntimeEnvironment.MachineName)
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType));
-            session.SaveChanges();
+            }, Subscription.FormatId(messageType))
+            .ConfigureAwait(false);
+            await session.SaveChangesAsync().ConfigureAwait(false);
 
-            List<string> subscriptions = null;
+            List<Subscriber> subscriptions = null;
 
             var exception = await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag())).ToList(); });
             Assert.Null(exception);
-            Assert.AreEqual("timeouts" + "@" + RuntimeEnvironment.MachineName, subscriptions.ElementAt(0));
-            Assert.AreEqual("mytestendpoint" + "@" + RuntimeEnvironment.MachineName, subscriptions.ElementAt(1));
+
+            var timeoutsSubscriber = new Subscriber("timeouts" + "@" + RuntimeEnvironment.MachineName, new EndpointName("timeouts"));
+            var mytestendpointSubscriber = new Subscriber("mytestendpoint" + "@" + RuntimeEnvironment.MachineName, new EndpointName("mytestendpoint"));
+
+            Assert.AreEqual(timeoutsSubscriber.TransportAddress, subscriptions.ElementAt(0).TransportAddress);
+            Assert.AreEqual(timeoutsSubscriber.Endpoint, subscriptions.ElementAt(0).Endpoint);
+
+            Assert.AreEqual(mytestendpointSubscriber.TransportAddress, subscriptions.ElementAt(1).TransportAddress);
+            Assert.AreEqual(mytestendpointSubscriber.Endpoint, subscriptions.ElementAt(1).Endpoint);
         }
 
         [Test]
         public async Task Should_allow_old_subscriptions_without_machine_name()
         {
-            var session = store.OpenSession();
+            var session = store.OpenAsyncSession();
             var messageType = MessageTypes.MessageA.Single();
-            session.Store(new OldSubscription
+            await session.StoreAsync(new OldSubscription
             {
                 Clients = new List<LegacyAddress>
                 {
@@ -64,29 +72,36 @@
                     new LegacyAddress("mytestendpoint", null)
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType));
-            session.SaveChanges();
+            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+            await session.SaveChangesAsync().ConfigureAwait(false);
 
-            List<string> subscriptions = null;
+            List<Subscriber> subscriptions = null;
             var exception = await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag())).ToList(); });
             Assert.Null(exception);
-            Assert.AreEqual("timeouts", subscriptions.ElementAt(0));
-            Assert.AreEqual("mytestendpoint", subscriptions.ElementAt(1));
+
+            var timeoutsSubscriber = new Subscriber("timeouts", new EndpointName("timeouts"));
+            var mytestendpointSubscriber = new Subscriber("mytestendpoint", new EndpointName("mytestendpoint"));
+
+            Assert.AreEqual(timeoutsSubscriber.TransportAddress, subscriptions.ElementAt(0).TransportAddress);
+            Assert.AreEqual(timeoutsSubscriber.Endpoint, subscriptions.ElementAt(0).Endpoint);
+
+            Assert.AreEqual(mytestendpointSubscriber.TransportAddress, subscriptions.ElementAt(1).TransportAddress);
+            Assert.AreEqual(mytestendpointSubscriber.Endpoint, subscriptions.ElementAt(1).Endpoint);
         }
 
         [Test]
         public async Task Should_allow_old_subscriptions_with_empty_clients()
         {
-            var session = store.OpenSession();
+            var session = store.OpenAsyncSession();
             var messageType = MessageTypes.MessageA.Single();
-            session.Store(new OldSubscription
+            await session.StoreAsync(new OldSubscription
             {
                 Clients = new List<LegacyAddress>(),
                 MessageType = messageType
-            }, Subscription.FormatId(messageType));
-            session.SaveChanges();
+            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+            await session.SaveChangesAsync().ConfigureAwait(false);
 
-            List<string> subscriptions = null;
+            List<Subscriber> subscriptions = null;
             var exception = await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag())).ToList(); });
             Assert.Null(exception);
             Assert.IsEmpty(subscriptions);
@@ -95,18 +110,20 @@
         [Test]
         public async Task Should_allow_new_subscriptions()
         {
-            var session = store.OpenSession();
+            var session = store.OpenAsyncSession();
             var messageType = MessageTypes.MessageA.Single();
-            session.Store(new Subscription
+
+            await session.StoreAsync(new Subscription
             {
-                Clients = new List<string>
+                Subscribers = new List<SubscriptionClient>
                 {
-                    "timeouts" + "@" + RuntimeEnvironment.MachineName,
-                    "mytestendpoint" + "@" + RuntimeEnvironment.MachineName
+                    new SubscriptionClient { TransportAddress = "timeouts" + "@" + RuntimeEnvironment.MachineName,  Endpoint = "timeouts" },
+                    new SubscriptionClient { TransportAddress = "mytestendpoint" + "@" + RuntimeEnvironment.MachineName, Endpoint = "mytestendpoint" }
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType));
-            session.SaveChanges();
+            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+
+            await session.SaveChangesAsync().ConfigureAwait(false);
 
             var exception = await Catch(async () => { (await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag())).ToList(); });
             Assert.Null(exception);

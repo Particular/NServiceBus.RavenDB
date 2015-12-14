@@ -23,7 +23,12 @@ public class When_listing_subscribers_for_message_types : RavenDBPersistenceTest
         var subscriptionsForMessageType = await storage.GetSubscriberAddressesForMessage(MessageTypes.MessageA, context);
 
         Assert.AreEqual(2, subscriptionsForMessageType.Count());
-        Assert.AreEqual(TestClients.ClientA, subscriptionsForMessageType.First());
+
+        Assert.AreEqual(TestClients.ClientA.TransportAddress, subscriptionsForMessageType.ElementAt(0).TransportAddress);
+        Assert.AreEqual(TestClients.ClientA.Endpoint, subscriptionsForMessageType.ElementAt(0).Endpoint);
+
+        Assert.AreEqual(TestClients.ClientB.TransportAddress, subscriptionsForMessageType.ElementAt(1).TransportAddress);
+        Assert.AreEqual(TestClients.ClientB.Endpoint, subscriptionsForMessageType.ElementAt(1).Endpoint);
     }
 
     [Test]

@@ -3,22 +3,22 @@
     using NServiceBus.RavenDB.Persistence;
     using Raven.Client;
 
-    class RavenSessionFactory : ISessionProvider
+    class RavenAsyncSessionFactory : IAsyncSessionProvider
     {
-        IDocumentSession session;
+        IAsyncDocumentSession session;
         readonly IDocumentStore store;
 
-        public RavenSessionFactory(IDocumentStore store)
+        public RavenAsyncSessionFactory(IDocumentStore store)
         {
             session = null;
             this.store = store;
         }
 
-        public IDocumentSession Session => session ?? (session = OpenSession());
+        public IAsyncDocumentSession AsyncSession => session ?? (session = OpenAsyncSession());
 
-        IDocumentSession OpenSession()
+        IAsyncDocumentSession OpenAsyncSession()
         {
-            var documentSession = store.OpenSession();
+            var documentSession = store.OpenAsyncSession();
             documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
             return documentSession;
@@ -35,7 +35,10 @@
 
         public void SaveChanges()
         {
-            session?.SaveChanges();
+            session?.SaveChangesAsync()
+                .ConfigureAwait(false)
+                .GetAwaiter()
+                .GetResult();
         }
     }
 }

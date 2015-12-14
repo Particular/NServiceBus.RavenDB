@@ -15,26 +15,37 @@ public class When_persisting_a_saga_entity_with_a_concrete_class_property : Rave
         var entity = new SagaData
         {
             Id = Guid.NewGuid(),
+            UniqueString = "SomeUniqueString",
             TestComponent = new TestComponent
             {
                 Property = "Prop"
             }
         };
 
-        IDocumentSession session;
-        var options = this.CreateContextWithSessionPresent(out session);
+        IAsyncDocumentSession session;
+        var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
-        await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), options);
-        session.SaveChanges();
-        var savedEntity = await persister.Get<SagaData>(entity.Id, options);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+
+        await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
+        await session.SaveChangesAsync().ConfigureAwait(false);
+
+        var savedEntity = await persister.Get<SagaData>(entity.Id, synchronizedSession, options);
+
         Assert.AreEqual(entity.TestComponent.Property, savedEntity.TestComponent.Property);
         Assert.AreEqual(entity.TestComponent.AnotherProperty, savedEntity.TestComponent.AnotherProperty);
     }
 
-    class SomeSaga : Saga<SagaData>
+    class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartSaga>
     {
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
         {
+            mapper.ConfigureMapping<StartSaga>(m => m.UniqueString).ToSaga(s => s.UniqueString);
+        }
+
+        public Task Handle(StartSaga message, IMessageHandlerContext context)
+        {
+            return Task.FromResult(0);
         }
     }
 
@@ -42,6 +53,7 @@ public class When_persisting_a_saga_entity_with_a_concrete_class_property : Rave
     {
         public TestComponent TestComponent { get; set; }
         public Guid Id { get; set; }
+        public string UniqueString { get; set; }
         public string Originator { get; set; }
         public string OriginalMessageId { get; set; }
     }

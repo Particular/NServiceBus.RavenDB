@@ -1,24 +1,23 @@
 ﻿namespace NServiceBus.RavenDB.Tests
 {
-    using System.Collections.Generic;
     using NServiceBus.Sagas;
 
     static class RavenDBPersistenceTestBaseExtensions
     {
-        public static IDictionary<string,object> CreateMetadata<T>(this RavenDBPersistenceTestBase test, IContainSagaData sagaEntity)
+        public static SagaCorrelationProperty CreateMetadata<T>(this RavenDBPersistenceTestBase test, IContainSagaData sagaEntity)
         {
             var metadata = SagaMetadata.Create(typeof(T));
-            var result = new Dictionary<string, object>();
 
-            foreach (var correlationProperty in metadata.CorrelationProperties)
-            {
-                var propertyInfo = metadata.SagaEntityType.GetProperty(correlationProperty.Name);
-                var value = propertyInfo.GetValue(sagaEntity);
+            SagaMetadata.CorrelationPropertyMetadata correlationPropertyMetadata;
 
-                result.Add(correlationProperty.Name, value);
-            }
+            metadata.TryGetCorrelationProperty(out correlationPropertyMetadata);
 
-            return result;
+            var propertyInfo = metadata.SagaEntityType.GetProperty(correlationPropertyMetadata.Name);
+            var value = propertyInfo.GetValue(sagaEntity);
+
+            var correlationProperty = new SagaCorrelationProperty(correlationPropertyMetadata.Name, value);
+
+            return correlationProperty;
         }
     }
 }

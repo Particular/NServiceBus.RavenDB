@@ -32,10 +32,10 @@
         {
             const int numberOfTimeoutsToAdd = 10;
 
-            var session = store.OpenSession();
+            var session = store.OpenAsyncSession();
             for (var i = 0; i < numberOfTimeoutsToAdd; i++)
             {
-                session.Store(new LegacyTimeoutData
+                await session.StoreAsync(new LegacyTimeoutData
                 {
                     Time = DateTime.UtcNow.AddHours(-1),
                     Destination = new LegacyAddress("timeouts", RuntimeEnvironment.MachineName),
@@ -45,7 +45,7 @@
                     OwningTimeoutManager = "MyTestEndpoint",
                 });
             }
-            session.SaveChanges();
+            await session.SaveChangesAsync();
 
             WaitForIndexing(store);
 
@@ -57,12 +57,12 @@
         {
             const int numberOfTimeoutsToAdd = 10;
 
-            var session = store.OpenSession();
+            var session = store.OpenAsyncSession();
             for (var i = 0; i < numberOfTimeoutsToAdd; i++)
             {
                 if (i % 2 == 0)
                 {
-                    session.Store(new LegacyTimeoutData
+                    await session.StoreAsync(new LegacyTimeoutData
                     {
                         Time = DateTime.UtcNow.AddHours(-1),
                         Destination = new LegacyAddress("timeouts", RuntimeEnvironment.MachineName),
@@ -84,7 +84,7 @@
                 }
                 else
                 {
-                    session.Store(new TimeoutData
+                    await session.StoreAsync(new TimeoutData
                     {
                         Time = DateTime.UtcNow.AddHours(-1),
                         Destination = "timeouts" + "@" + RuntimeEnvironment.MachineName,
@@ -95,7 +95,7 @@
                     });
                 }
             }
-            session.SaveChanges();
+            await session.SaveChangesAsync();
 
             WaitForIndexing(store);
 
@@ -110,8 +110,8 @@
 
             var nextTime = DateTime.UtcNow.AddHours(1);
 
-            var session = store.OpenSession();
-            session.Store(new LegacyTimeoutData
+            var session = store.OpenAsyncSession();
+            await session.StoreAsync(new LegacyTimeoutData
             {
                 Time = nextTime,
                 Destination = new LegacyAddress("timeouts", RuntimeEnvironment.MachineName),
@@ -120,7 +120,7 @@
                 Headers = new Dictionary<string, string> { { "Bar", "34234" }, { "Foo", "aString1" }, { "Super", "aString2" } },
                 OwningTimeoutManager = "MyTestEndpoint",
             });
-            session.SaveChanges();
+            await session.SaveChangesAsync();
 
             WaitForIndexing(store);
 

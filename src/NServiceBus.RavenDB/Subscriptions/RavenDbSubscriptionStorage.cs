@@ -3,7 +3,7 @@
     using System;
     using NServiceBus.RavenDB;
     using NServiceBus.RavenDB.Internal;
-    using NServiceBus.RavenDB.Timeouts;
+    using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions.RavenDB;
     using Raven.Client;
     using Raven.Client.Document;

@@ -18,12 +18,12 @@
         protected override void Setup(FeatureConfigurationContext context)
         {
             // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
-            var getSessionFunc = context.Settings.GetOrDefault<Func<IDocumentSession>>(RavenDbSettingsExtensions.SharedSessionSettingsKey);
-            if (getSessionFunc != null)
+            var getAsyncSessionFunc = context.Settings.GetOrDefault<Func<IAsyncDocumentSession>>( RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey );
+            if( getAsyncSessionFunc != null )
             {
-                context.Container.ConfigureComponent<ProvidedSessionBehavior>(DependencyLifecycle.InstancePerCall)
-                    .ConfigureProperty(x => x.GetSession, getSessionFunc);
-                context.Pipeline.Register<ProvidedSessionBehavior.Registration>();
+                context.Container.ConfigureComponent<ProvidedAsyncSessionBehavior>(DependencyLifecycle.InstancePerCall)
+                    .ConfigureProperty(x => x.GetAsyncSession, getAsyncSessionFunc);
+                context.Pipeline.Register<ProvidedAsyncSessionBehavior.Registration>();
                 return;
             }
 
@@ -47,9 +47,9 @@
                 remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
             }
 
-            context.Container.ConfigureComponent<RavenSessionProvider>(DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent<RavenAsyncSessionProvider>(DependencyLifecycle.InstancePerCall);
             context.Container.RegisterSingleton<IDocumentStoreWrapper>(new DocumentStoreWrapper(store));
-            context.Pipeline.Register<OpenSessionBehavior.Registration>();
+            context.Pipeline.Register<OpenAsyncSessionBehavior.Registration>();
         }
     }
 }

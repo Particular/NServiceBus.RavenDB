@@ -22,7 +22,7 @@ namespace NServiceBus.RavenDB.Timeouts
                 return;
             }
 
-            document["Destination"] = LegacyAddress.Parse(() => document["Destination"]);
+            document["Destination"] = LegacyAddress.ParseToString(() => document["Destination"]);
         }
 
         public void AfterConversionToEntity(string key, RavenJObject document, RavenJObject metadata, object entity)

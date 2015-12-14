@@ -14,7 +14,6 @@
             using (var documentStore = new DocumentStore { Url = "http://localhost:8083" })
             using (documentStore.SetupVoronTest())
             {
-
                 var settings = new SettingsHolder();
                 settings.Set("Transactions.SuppressDistributedTransactions", false);
 

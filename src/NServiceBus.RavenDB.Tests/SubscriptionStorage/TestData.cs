@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NServiceBus.Unicast.Subscriptions;
+using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
 public interface ISomeInterface
 {
@@ -22,18 +23,18 @@ public class MessageA
 }
 public class MessageTypes
 {
-    public static IEnumerable<MessageType> MessageA = new[] { new MessageType(typeof(MessageA).FullName, new Version(1, 0, 0, 0)) };
-    public static IEnumerable<MessageType> MessageAv2 = new[] { new MessageType(typeof(MessageA).FullName, new Version(2, 0, 0, 0)) };
-    public static IEnumerable<MessageType> MessageAv11 = new[] { new MessageType(typeof(MessageA).FullName, new Version(1, 1, 0, 0)) };
+    public static IReadOnlyCollection<MessageType> MessageA = new[] { new MessageType(typeof(MessageA).FullName, new Version(1, 0, 0, 0)) };
+    public static IReadOnlyCollection<MessageType> MessageAv2 = new[] { new MessageType(typeof(MessageA).FullName, new Version(2, 0, 0, 0)) };
+    public static IReadOnlyCollection<MessageType> MessageAv11 = new[] { new MessageType(typeof(MessageA).FullName, new Version(1, 1, 0, 0)) };
 
-    public static IEnumerable<MessageType> MessageB = new[] { new MessageType(typeof(MessageB)) };
+    public static IReadOnlyCollection<MessageType> MessageB = new[] { new MessageType(typeof(MessageB)) };
 
-    public static IEnumerable<MessageType> All = new[] { new MessageType(typeof(MessageA)), new MessageType(typeof(MessageB)) };
+    public static IReadOnlyCollection<MessageType> All = new[] { new MessageType(typeof(MessageA)), new MessageType(typeof(MessageB)) };
 }
 
 public class TestClients
 {
-    public static string ClientA = "ClientA";
-    public static string ClientB = "ClientB";
-    public static string ClientC = "ClientC";
+    public static Subscriber ClientA = new Subscriber("ClientA", new NServiceBus.EndpointName("ClientA"));
+    public static Subscriber ClientB = new Subscriber("ClientB", new NServiceBus.EndpointName("ClientB"));
+    public static Subscriber ClientC = new Subscriber("ClientC", new NServiceBus.EndpointName("ClientC"));
 }

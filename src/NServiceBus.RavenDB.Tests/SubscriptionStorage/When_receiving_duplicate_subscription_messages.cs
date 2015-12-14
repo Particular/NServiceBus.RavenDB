@@ -1,12 +1,14 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using NServiceBus;
 using NServiceBus.Extensibility;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.RavenDB.Tests;
 using NServiceBus.Unicast.Subscriptions;
+using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 using NServiceBus.Unicast.Subscriptions.RavenDB;
 using NUnit.Framework;
+using Raven.Client;
 
 [TestFixture]
 public class When_receiving_duplicate_subscription_messages : RavenDBPersistenceTestBase
@@ -16,22 +18,22 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
     {
         var storage = new SubscriptionPersister(store);
 
-        await storage.Subscribe("testEndPoint@localhost", new List<MessageType>
+        await storage.Subscribe(new Subscriber("testEndPoint@localhost", new EndpointName("testEndPoint")), new List<MessageType>
         {
             new MessageType("SomeMessageType", "1.0.0.0")
         }, new ContextBag());
 
-        await storage.Subscribe("testEndPoint@localhost", new List<MessageType>
+        await storage.Subscribe(new Subscriber("testEndPoint@localhost", new EndpointName("testEndPoint")), new List<MessageType>
         {
             new MessageType("SomeMessageType", "1.0.0.0")
         }, new ContextBag());
 
-        using (var session = store.OpenSession())
+        using (var session = store.OpenAsyncSession())
         {
-            var subscriptions = session
+            var subscriptions = await session
                 .Query<Subscription>()
                 .Customize(c => c.WaitForNonStaleResults())
-                .Count();
+                .CountAsync();
 
             Assert.AreEqual(1, subscriptions);
         }

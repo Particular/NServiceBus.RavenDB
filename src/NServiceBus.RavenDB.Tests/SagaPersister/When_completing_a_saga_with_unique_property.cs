@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.RavenDB.Persistence.SagaPersister;
@@ -16,25 +15,25 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
     {
         var sagaId = Guid.NewGuid();
 
-        IDocumentSession session;
-        var options = this.CreateContextWithSessionPresent(out session);
+        IAsyncDocumentSession session;
+        var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var entity = new SagaData
         {
             Id = sagaId
         };
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
 
-        await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), options);
-        session.SaveChanges();
+        await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
+        await session.SaveChangesAsync().ConfigureAwait(false);
 
-        var saga = await persister.Get<SagaData>(sagaId, options);
-        await persister.Complete(saga, options);
-        session.SaveChanges();
+        var saga = await persister.Get<SagaData>(sagaId, synchronizedSession, options);
+        await persister.Complete(saga, synchronizedSession, options);
+        await session.SaveChangesAsync().ConfigureAwait(false);
 
-        Assert.Null(await persister.Get<SagaData>(sagaId, options));
-        Assert.Null(session.Query<SagaUniqueIdentity>().Customize(c => c.WaitForNonStaleResults()).SingleOrDefault(u => u.SagaId == sagaId));
+        Assert.Null(await persister.Get<SagaData>(sagaId, synchronizedSession, options));
+        Assert.Null(await session.Query<SagaUniqueIdentity>().Customize(c => c.WaitForNonStaleResults()).SingleOrDefaultAsync(u => u.SagaId == sagaId).ConfigureAwait(false));
     }
-
 
     class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartMessage>
     {

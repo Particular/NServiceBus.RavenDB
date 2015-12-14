@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading.Tasks;
 using NServiceBus.Extensibility;
 using NServiceBus.RavenDB.Tests;
@@ -20,6 +19,6 @@ public class When_receiving_an_unsubscribe_message : RavenDBPersistenceTestBase
 
         var clients = await storage.GetSubscriberAddressesForMessage(MessageTypes.All, context);
 
-        Assert.IsFalse(clients.Any(a => a == TestClients.ClientA));
+        Assert.IsEmpty(clients);
     }
 }
