@@ -22,7 +22,6 @@
                     }
             });
             store.DefaultDatabase = dbName;
-            store.DatabaseCommands.GlobalAdmin.EnsureDatabaseExists(dbName);
             return new VoronTestDeleter(store, dbName);
         }
 
