@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NServiceBus;
+using NServiceBus.AcceptanceTesting.Support;
 using NServiceBus.Persistence;
 using Raven.Client.Document;
 
-public class ConfigureRavenDBPersistence
+public class ConfigureRavenDBPersistence : IConfigureTestExecution
 {
-    public Task Configure(BusConfiguration config)
+    public Task Configure(BusConfiguration configuration, IDictionary<string, string> settings)
     {
         var databaseName = Guid.NewGuid().ToString();
         documentStore = new DocumentStore
@@ -18,9 +20,7 @@ public class ConfigureRavenDBPersistence
 
         documentStore.Initialize();
 
-        documentStore.DatabaseCommands.GlobalAdmin.EnsureDatabaseExists(databaseName);
-
-        config.UsePersistence<RavenDBPersistence>().DoNotSetupDatabasePermissions().SetDefaultDocumentStore(documentStore);
+        configuration.UsePersistence<RavenDBPersistence>().DoNotSetupDatabasePermissions().SetDefaultDocumentStore(documentStore);
 
         Console.WriteLine("Created '{0}' database", documentStore.DefaultDatabase);
 

@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
+    using NServiceBus.ConsistencyGuarantees;
     using NServiceBus.Logging;
     using NServiceBus.Persistence;
     using NServiceBus.Settings;
@@ -115,8 +116,8 @@
             var resourceManagerId = settings.Get<string>("NServiceBus.LocalAddress") + "-" + settings.Get<string>("EndpointVersion");
             store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
 
-            bool suppressDistributedTransactions;
-            if (settings.TryGet("Transactions.SuppressDistributedTransactions", out suppressDistributedTransactions) && suppressDistributedTransactions)
+            var suppressDistributedTransactions = settings.GetRequiredTransactionModeForReceives() != TransportTransactionMode.TransactionScope;
+            if (suppressDistributedTransactions)
             {
                 store.EnlistInDistributedTransactions = false;
             }
