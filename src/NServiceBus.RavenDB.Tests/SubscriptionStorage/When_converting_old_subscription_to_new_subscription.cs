@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+    using NServiceBus.Routing;
     using NServiceBus.Support;
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
@@ -49,8 +50,8 @@
             var exception = await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag())).ToList(); });
             Assert.Null(exception);
 
-            var timeoutsSubscriber = new Subscriber("timeouts" + "@" + RuntimeEnvironment.MachineName, new EndpointName("timeouts"));
-            var mytestendpointSubscriber = new Subscriber("mytestendpoint" + "@" + RuntimeEnvironment.MachineName, new EndpointName("mytestendpoint"));
+            var timeoutsSubscriber = new Subscriber("timeouts" + "@" + RuntimeEnvironment.MachineName, new Endpoint("timeouts"));
+            var mytestendpointSubscriber = new Subscriber("mytestendpoint" + "@" + RuntimeEnvironment.MachineName, new Endpoint("mytestendpoint"));
 
             Assert.AreEqual(timeoutsSubscriber.TransportAddress, subscriptions.ElementAt(0).TransportAddress);
             Assert.AreEqual(timeoutsSubscriber.Endpoint, subscriptions.ElementAt(0).Endpoint);
@@ -79,8 +80,8 @@
             var exception = await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag())).ToList(); });
             Assert.Null(exception);
 
-            var timeoutsSubscriber = new Subscriber("timeouts", new EndpointName("timeouts"));
-            var mytestendpointSubscriber = new Subscriber("mytestendpoint", new EndpointName("mytestendpoint"));
+            var timeoutsSubscriber = new Subscriber("timeouts", new Endpoint("timeouts"));
+            var mytestendpointSubscriber = new Subscriber("mytestendpoint", new Endpoint("mytestendpoint"));
 
             Assert.AreEqual(timeoutsSubscriber.TransportAddress, subscriptions.ElementAt(0).TransportAddress);
             Assert.AreEqual(timeoutsSubscriber.Endpoint, subscriptions.ElementAt(0).Endpoint);

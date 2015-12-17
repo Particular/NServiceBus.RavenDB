@@ -7,6 +7,7 @@
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence;
+    using NServiceBus.SagaPersisters.RavenDB;
     using NServiceBus.Sagas;
     using NUnit.Framework;
     using Raven.Client;
@@ -53,8 +54,8 @@
                         return await Task.FromResult(default(SagaFinderSagaData));
                     }
 
-                    var ravenSession = options.Get<IAsyncDocumentSession>();
-                    return await ravenSession.LoadAsync<SagaFinderSagaData>(Context.SagaId).ConfigureAwait(false);
+                    var ravenSession = (RavenDBSynchronizedStorageSession) session;
+                    return await ravenSession.Transaction.LoadAsync<SagaFinderSagaData>(Context.SagaId).ConfigureAwait(false);
                 }
             }
 

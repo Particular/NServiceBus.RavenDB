@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.RavenDB.Internal
 {
     using System;
+    using NServiceBus.ConsistencyGuarantees;
     using NServiceBus.Settings;
     using Raven.Client;
 
@@ -11,7 +12,8 @@
 
         internal static void VerifyStorageEngineSupportsDtcIfRequired(IDocumentStore store, ReadOnlySettings settings)
         {
-            if (settings.Get<bool>("Transactions.SuppressDistributedTransactions"))
+            var suppressDistributedTransactions = settings.GetRequiredTransactionModeForReceives() != TransportTransactionMode.TransactionScope;
+            if (suppressDistributedTransactions)
             {
                 return;
             }

@@ -5,6 +5,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+    using NServiceBus.Routing;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
@@ -106,7 +107,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                 return subscriptions.Where(s => s != null)
                                     .SelectMany(s => s.Subscribers)
                                     .Distinct()
-                                    .Select(c => new Subscriber(c.TransportAddress, new EndpointName(c.Endpoint)));
+                                    .Select(c => new Subscriber(c.TransportAddress, new Endpoint(c.Endpoint)));
             }
         }
 

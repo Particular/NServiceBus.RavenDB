@@ -8,7 +8,7 @@
     using NServiceBus.RavenDB.Persistence;
     using Raven.Client;
 
-    class OpenAsyncSessionBehavior : Behavior<PhysicalMessageProcessingContext>
+    class OpenAsyncSessionBehavior : Behavior<IncomingPhysicalMessageContext>
     {
         readonly IDocumentStoreWrapper documentStoreWrapper;
 
@@ -20,7 +20,7 @@
             this.documentStoreWrapper = documentStoreWrapper;
         }
 
-        public override async Task Invoke(PhysicalMessageProcessingContext context, Func<Task> next)
+        public override async Task Invoke(IncomingPhysicalMessageContext context, Func<Task> next)
         {
             using (var session = OpenAsyncSession(context))
             {
@@ -30,7 +30,7 @@
             }
         }
 
-        IAsyncDocumentSession OpenAsyncSession(PhysicalMessageProcessingContext context)
+        IAsyncDocumentSession OpenAsyncSession(IncomingPhysicalMessageContext context)
         {
             var databaseName = GetDatabaseName(context.Message.Headers);
             var documentSession = string.IsNullOrEmpty(databaseName) 
