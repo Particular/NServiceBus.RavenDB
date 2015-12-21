@@ -1,5 +1,8 @@
 ﻿namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
 {
+    /// <summary>
+    /// This is an anti-corruption layer against changes in NServiceBus Core
+    /// </summary>
     class SubscriptionClient
     {
         public string TransportAddress { get; set; }
