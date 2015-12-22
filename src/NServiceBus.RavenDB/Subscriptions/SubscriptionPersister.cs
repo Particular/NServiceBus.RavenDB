@@ -34,17 +34,20 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                     SubscriptionClient = subscriptionClient
                 };
 
-                await session.StoreAsync(subscription).ConfigureAwait(false);
+                await session.StoreAsync(subscription, subscriptionDocId).ConfigureAwait(false);
             }
         }
 
-        public Task Unsubscribe(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session)
+        public async Task Unsubscribe(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session)
         {
             var subscriptionDocId = SubscriptionDocument.FormatId(messageType, subscriptionClient);
 
-            session.Delete(subscriptionDocId);
+            var subscriptionToDelete = await session.LoadAsync<SubscriptionDocument>(subscriptionDocId).ConfigureAwait(false);
 
-            return Task.FromResult(0);
+            if (subscriptionToDelete != null)
+            {
+                session.Delete(subscriptionToDelete);
+            }
         }
     }
 
@@ -98,7 +101,15 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 
         public async Task Subscribe(Subscriber subscriber, IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
         {
-            //When the subscriber is running V6 and UseLegacyMessageDrivenSubscriptionMode is enabled at the subscriber the 'subscriber.Endpoint' value is null
+            await TrySubscriptionMethod(subscriber, messageTypes, subscriptionAccess.Subscribe);
+        }
+
+        private async Task TrySubscriptionMethod(
+            Subscriber subscriber,
+            IReadOnlyCollection<MessageType> messageTypes,
+            Func<MessageType, SubscriptionClient, IAsyncDocumentSession, Task> method)
+        {
+            // When subscriber is running V6 and UseLegacyMessageDrivenSubscriptionMode is enabled at the subscriber the 'subscriber.Endpoint' value is null
             var endpoint = subscriber.Endpoint?.ToString() ?? subscriber.TransportAddress.Split('@').First();
             var subscriptionClient = new SubscriptionClient
             {
@@ -116,15 +127,22 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                     {
                         foreach (var messageType in messageTypes)
                         {
-                            await subscriptionAccess.Subscribe(messageType, subscriptionClient, session);
+                            await method(messageType, subscriptionClient, session);
                         }
 
                         await session.SaveChangesAsync().ConfigureAwait(false);
                     }
+
+                    return;
                 }
                 catch (ConcurrencyException)
                 {
                     attempts++;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    throw;
                 }
             } while (attempts < 5);
         }
@@ -132,19 +150,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 
         public async Task Unsubscribe(Subscriber subscriber, IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
         {
-            var subscriptionClient = new SubscriptionClient
-            {
-                TransportAddress = subscriber.TransportAddress,
-                Endpoint = subscriber.Endpoint.ToString()
-            };
-
-            using (var session = OpenAsyncSession())
-            {
-                foreach (var messageType in messageTypes)
-                {
-                    await subscriptionAccess.Unsubscribe(messageType, subscriptionClient, session);
-                }
-            }
+            await TrySubscriptionMethod(subscriber, messageTypes, subscriptionAccess.Unsubscribe);
         }
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
