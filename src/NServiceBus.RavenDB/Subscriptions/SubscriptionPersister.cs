@@ -19,54 +19,87 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
 
         public async Task Subscribe(Subscriber subscriber, IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
         {
-            //When the subscriber is running V6 and UseLegacyMessageDrivenSubscriptionMode is enabled at the subscriber the 'subcriber.Endpoint' value is null
+            //When the subscriber is running V6 and UseLegacyMessageDrivenSubscriptionMode is enabled at the subscriber the 'subscriber.Endpoint' value is null
             var endpoint = subscriber.Endpoint?.ToString() ?? subscriber.TransportAddress.Split('@').First();
             var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = endpoint };
 
-            var attempts = 0;
+            using (var session = OpenAsyncSession())
+            {
+                foreach (var messageType in messageTypes)
+                {
+                    await PersistIndividualDocument(messageType, subscriptionClient, session);
+                    await TrySavingLegacySubscriptions(messageType, subscriptionClient, session);
+                }
+            }
+        }
 
-            //note: since we have a design that can run into concurrency exceptions we perform a few retries
-            // we should redesign this in the future to use a separate doc per subscriber and message type
+        private async Task TrySavingLegacySubscriptions(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session)
+        {
+            if (NoLegacyDocumentExists(messageType, session))
+            {
+                return;
+            }
+
+            var attempts = 0;
             do
             {
                 try
                 {
-                    using (var session = OpenAsyncSession())
-                    {
-                        foreach (var messageType in messageTypes)
-                        {
-                            var subscriptionDocId = Subscription.FormatId(messageType);
-
-                            var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
-
-                            if (subscription == null)
-                            {
-                                subscription = new Subscription
-                                {
-                                    Id = subscriptionDocId,
-                                    MessageType = messageType,
-                                    Subscribers = new List<SubscriptionClient>()
-                                };
-
-                                await session.StoreAsync(subscription).ConfigureAwait(false);
-                            }
-
-                            if (!subscription.Subscribers.Contains(subscriptionClient))
-                            {
-                                subscription.Subscribers.Add(subscriptionClient);
-                            }
-                        }
-
-                        await session.SaveChangesAsync().ConfigureAwait(false);
-                    }
-
-                    return;
+                    await PersistToAggregateDocument(messageType, subscriptionClient, session);
+                    break;
                 }
                 catch (ConcurrencyException)
                 {
                     attempts++;
                 }
             } while (attempts < 5);
+        }
+
+        private static async Task PersistIndividualDocument(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session)
+        {
+            var subscriptionDocId = SubscriptionDocument.FormatId(messageType, subscriptionClient);
+
+            var subscription = await session.LoadAsync<SubscriptionDocument>(subscriptionDocId).ConfigureAwait(false);
+
+            if (subscription == null)
+            {
+                subscription = new SubscriptionDocument
+                {
+                    Id = subscriptionDocId,
+                    MessageType = messageType,
+                    SubscriptionClient = subscriptionClient
+                };
+
+                await session.StoreAsync(subscription).ConfigureAwait(false);
+            }
+
+            await session.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        private async Task PersistToAggregateDocument(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session)
+        {
+            var subscriptionDocId = Subscription.FormatId(messageType);
+
+            var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
+
+            if (subscription == null)
+            {
+                subscription = new Subscription
+                {
+                    Id = subscriptionDocId,
+                    MessageType = messageType,
+                    Subscribers = new List<SubscriptionClient>()
+                };
+
+                await session.StoreAsync(subscription).ConfigureAwait(false);
+            }
+
+            if (!subscription.Subscribers.Contains(subscriptionClient))
+            {
+                subscription.Subscribers.Add(subscriptionClient);
+            }
+
+            await session.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task Unsubscribe(Subscriber subscriber, IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
@@ -77,23 +110,70 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             {
                 foreach (var messageType in messageTypes)
                 {
-                    var subscriptionDocId = Subscription.FormatId(messageType);
-
-                    var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
-
-                    if (subscription == null)
-                    {
-                        continue;
-                    }
-
-                    if (subscription.Subscribers.Contains(subscriptionClient))
-                    {
-                        subscription.Subscribers.Remove(subscriptionClient);
-                    }
+                    await RemoveSubscriptionDocument(messageType, subscriptionClient, session);
+                    await TryUnsubscribingFromLegacy(messageType, subscriptionClient, session);
                 }
 
                 await session.SaveChangesAsync().ConfigureAwait(false);
             }
+        }
+
+        private async Task TryUnsubscribingFromLegacy(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session)
+        {
+            if (NoLegacyDocumentExists(messageType, session))
+            {
+                return;
+            }
+
+            var attempts = 0;
+            do
+            {
+                try
+                {
+                    await UnsubscribeFromAggregateDocument(messageType, subscriptionClient, session);
+                    break;
+                }
+                catch (ConcurrencyException)
+                {
+                    attempts++;
+                }
+            } while (attempts < 5);
+        }
+
+        private static bool NoLegacyDocumentExists(MessageType messageType, IAsyncDocumentSession session)
+        {
+            var legacySubscriptionDocId = Subscription.FormatId(messageType);
+            //We load metadata to avoid loading the entire document if we don't have to
+            var legacyDocumentMetadata = session.Advanced.DocumentStore.DatabaseCommands.Head(legacySubscriptionDocId);
+
+            if (legacyDocumentMetadata == null)
+            {
+                // There is no need to support the legacy format
+                return true;
+            }
+            return false;
+        }
+
+        private static async Task RemoveSubscriptionDocument(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session)
+        {
+            var subscriptionDocId = SubscriptionDocument.FormatId(messageType, subscriptionClient);
+
+            session.Delete(subscriptionDocId);
+
+            await session.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        private async Task UnsubscribeFromAggregateDocument(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session)
+        {
+            var subscriptionDocId = Subscription.FormatId(messageType);
+
+            var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
+
+            if (subscription.Subscribers.Contains(subscriptionClient))
+            {
+                subscription.Subscribers.Remove(subscriptionClient);
+            }
+            await session.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
