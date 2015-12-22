@@ -23,7 +23,7 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
             new MessageType("MessageType2", "1.0.0.0")
         };
 
-        var storage = new SubscriptionPersister(store);
+        var storage = new SubscriptionPersister(store, new AggregateSubscriptionDocumentAccess());
 
         await storage.Subscribe(clientEndpoint, messageTypes, new ContextBag());
 

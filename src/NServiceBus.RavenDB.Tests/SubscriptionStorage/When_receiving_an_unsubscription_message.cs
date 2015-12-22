@@ -10,7 +10,7 @@ public class When_receiving_an_unsubscribe_message : RavenDBPersistenceTestBase
     [Test]
     public async Task All_subscription_entries_for_specified_message_types_should_be_removed()
     {
-        var storage = new SubscriptionPersister(store);
+        var storage = new SubscriptionPersister(store, new AggregateSubscriptionDocumentAccess());
         var context = new ContextBag();
 
         await storage.Subscribe(TestClients.ClientA, MessageTypes.All, context);

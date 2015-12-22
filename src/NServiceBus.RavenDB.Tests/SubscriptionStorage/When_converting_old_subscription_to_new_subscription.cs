@@ -25,7 +25,7 @@
             store.Listeners.RegisterListener(new FakeSubscriptionClrType());
             store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
 
-            persister = new SubscriptionPersister(store);
+            persister = new SubscriptionPersister(store, new AggregateSubscriptionDocumentAccess());
         }
 
         [Test]
