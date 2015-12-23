@@ -16,7 +16,7 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
     [Test]
     public async Task should_not_create_additional_db_rows()
     {
-        var storage = new SubscriptionPersister(store);
+        var storage = new SubscriptionPersister(store, new IndividualSubscriptionDocumentAccess());
 
         await storage.Subscribe(new Subscriber("testEndPoint@localhost", new Endpoint("testEndPoint")), new List<MessageType>
         {
@@ -31,7 +31,7 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
         using (var session = store.OpenAsyncSession())
         {
             var subscriptions = await session
-                .Query<Subscription>()
+                .Query<SubscriptionDocument>()
                 .Customize(c => c.WaitForNonStaleResults())
                 .CountAsync();
 

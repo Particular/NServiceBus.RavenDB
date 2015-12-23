@@ -11,6 +11,8 @@
     {
         internal const string SettingsKey = "RavenDbDocumentStore/Subscription";
 
+        internal const string DoNotUpgradeSubscriptionSchema = "RavenDbDocumentStore/Subscription/DoNotUpgradeSchema";
+
         /// <summary>
         ///     Configures the given document store to be used when storing subscriptions
         /// </summary>

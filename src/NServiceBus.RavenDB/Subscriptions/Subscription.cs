@@ -7,6 +7,9 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
     using NServiceBus.Unicast.Subscriptions;
     using Raven.Imports.Newtonsoft.Json;
 
+    /// <summary>
+    /// Legacy subscription format as of NServiceBus version 6
+    /// </summary>
     class Subscription
     {
         public string Id { get; set; }
