@@ -6,90 +6,9 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
     using System.Threading.Tasks;
     using Extensibility;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
-    using NServiceBus.Routing;
     using MessageDrivenSubscriptions;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
-
-    interface ISubscriptionAccess
-    {
-        Task Subscribe(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session);
-        Task Unsubscribe(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session);
-    }
-
-    class IndividualSubscriptionDocumentAccess : ISubscriptionAccess
-    {
-        public async Task Subscribe(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session)
-        {
-            var subscriptionDocId = SubscriptionDocument.FormatId(messageType, subscriptionClient);
-
-            var subscription = await session.LoadAsync<SubscriptionDocument>(subscriptionDocId).ConfigureAwait(false);
-
-            if (subscription == null)
-            {
-                subscription = new SubscriptionDocument
-                {
-                    Id = subscriptionDocId,
-                    MessageType = messageType,
-                    SubscriptionClient = subscriptionClient
-                };
-
-                await session.StoreAsync(subscription, subscriptionDocId).ConfigureAwait(false);
-            }
-        }
-
-        public async Task Unsubscribe(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session)
-        {
-            var subscriptionDocId = SubscriptionDocument.FormatId(messageType, subscriptionClient);
-
-            var subscriptionToDelete = await session.LoadAsync<SubscriptionDocument>(subscriptionDocId).ConfigureAwait(false);
-
-            if (subscriptionToDelete != null)
-            {
-                session.Delete(subscriptionToDelete);
-            }
-        }
-    }
-
-    class AggregateSubscriptionDocumentAccess : ISubscriptionAccess
-    {
-        public async Task Unsubscribe(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session)
-        {
-            var subscriptionDocId = Subscription.FormatId(messageType);
-
-            var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
-
-            if (subscription.Subscribers.Contains(subscriptionClient))
-            {
-                subscription.Subscribers.Remove(subscriptionClient);
-            }
-        }
-
-        public async Task Subscribe(MessageType messageType, SubscriptionClient subscriptionClient, IAsyncDocumentSession session)
-        {
-            var subscriptionDocId = Subscription.FormatId(messageType);
-
-            var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
-
-            if (subscription == null)
-            {
-                subscription = new Subscription
-                {
-                    Id = subscriptionDocId,
-                    MessageType = messageType,
-                    Subscribers = new List<SubscriptionClient>()
-                };
-
-                await session.StoreAsync(subscription).ConfigureAwait(false);
-            }
-
-            if (!subscription.Subscribers.Contains(subscriptionClient))
-            {
-                subscription.Subscribers.Add(subscriptionClient);
-            }
-        }
-
-    }
 
     class SubscriptionPersister : ISubscriptionStorage
     {
@@ -102,6 +21,19 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
         public async Task Subscribe(Subscriber subscriber, IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
         {
             await TrySubscriptionMethod(subscriber, messageTypes, subscriptionAccess.Subscribe);
+        }
+
+        public async Task Unsubscribe(Subscriber subscriber, IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
+        {
+            await TrySubscriptionMethod(subscriber, messageTypes, subscriptionAccess.Unsubscribe);
+        }
+
+        public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
+        {
+            using (var session = OpenAsyncSession())
+            {
+                return await subscriptionAccess.GetSubscriberAddressesForMessage(messageTypes, context, session);
+            }
         }
 
         private async Task TrySubscriptionMethod(
@@ -139,33 +71,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                 {
                     attempts++;
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                    throw;
-                }
             } while (attempts < 5);
-        }
-
-
-        public async Task Unsubscribe(Subscriber subscriber, IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
-        {
-            await TrySubscriptionMethod(subscriber, messageTypes, subscriptionAccess.Unsubscribe);
-        }
-
-        public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
-        {
-            var ids = messageTypes.Select(Subscription.FormatId).ToList();
-
-            using (var session = OpenAsyncSession())
-            {
-                var subscriptions = await session.LoadAsync<Subscription>(ids).ConfigureAwait(false);
-
-                return subscriptions.Where(s => s != null)
-                                    .SelectMany(s => s.Subscribers)
-                                    .Distinct()
-                                    .Select(c => new Subscriber(c.TransportAddress, new Endpoint(c.Endpoint)));
-            }
         }
 
         IAsyncDocumentSession OpenAsyncSession()

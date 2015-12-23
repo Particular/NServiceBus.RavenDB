@@ -109,6 +109,9 @@
     <Compile Include="SagaPersister\SagaPersister.cs" />
     <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />
     <Compile Include="SessionManagement\SynchronizedStorage.cs" />
+    <Compile Include="Subscriptions\AggregateSubscriptionDocumentAccess.cs" />
+    <Compile Include="Subscriptions\IndividualSubscriptionDocumentAccess.cs" />
+    <Compile Include="Subscriptions\ISubscriptionAccess.cs" />
     <Compile Include="Subscriptions\MessageTypeConverter.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionSettingsExtensions.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionStorage.cs" />

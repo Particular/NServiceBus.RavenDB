@@ -12,9 +12,16 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
 
         public SubscriptionClient SubscriptionClient { get; set; }
 
+        public static string IdStart(MessageType messageType)
+        {
+            var startOfId = $"Subscription/{messageType.TypeName}/";
+
+            return startOfId;
+        }
+
         public static string FormatId(MessageType messageType, SubscriptionClient client)
         {
-            var documentId = $"Subscription/{messageType.TypeName}/{client.Endpoint}/{messageType.Version.Major}";
+            var documentId = IdStart(messageType) + $"{client.Endpoint}/{messageType.Version.Major}";
 
             return documentId;
         }
