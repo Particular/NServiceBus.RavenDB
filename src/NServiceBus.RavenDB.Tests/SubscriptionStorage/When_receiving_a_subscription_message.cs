@@ -23,14 +23,14 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
             new MessageType("MessageType2", "1.0.0.0")
         };
 
-        var storage = new SubscriptionPersister(store, new AggregateSubscriptionDocumentAccess());
+        var storage = new SubscriptionPersister(store, new IndividualSubscriptionDocumentAccess());
 
         await storage.Subscribe(clientEndpoint, messageTypes, new ContextBag());
 
         using (var session = store.OpenAsyncSession())
         {
             var subscriptions = await session
-                .Query<Subscription>()
+                .Query<SubscriptionDocument>()
                 .Customize(c => c.WaitForNonStaleResults())
                 .CountAsync();
 

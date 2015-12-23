@@ -16,7 +16,7 @@
     using Raven.Json.Linq;
 
     [TestFixture]
-    public class When_converting_old_subscription_to_new_subscription : RavenDBPersistenceTestBase
+    public class When_converting_old_subscription_to_subscription_per_message_type : RavenDBPersistenceTestBase
     {
         public override void SetUp()
         {
@@ -44,7 +44,7 @@
             }, Subscription.FormatId(messageType))
             .ConfigureAwait(false);
             await session.SaveChangesAsync().ConfigureAwait(false);
-
+        
             List<Subscriber> subscriptions = null;
 
             var exception = await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag())).ToList(); });
@@ -113,20 +113,36 @@
         {
             var session = store.OpenAsyncSession();
             var messageType = MessageTypes.MessageA.Single();
-
-            await session.StoreAsync(new Subscription
+            var subscribers = new List<SubscriptionClient>
             {
-                Subscribers = new List<SubscriptionClient>
+                new SubscriptionClient
                 {
-                    new SubscriptionClient { TransportAddress = "timeouts" + "@" + RuntimeEnvironment.MachineName,  Endpoint = "timeouts" },
-                    new SubscriptionClient { TransportAddress = "mytestendpoint" + "@" + RuntimeEnvironment.MachineName, Endpoint = "mytestendpoint" }
+                    TransportAddress = "timeouts" + "@" + RuntimeEnvironment.MachineName,
+                    Endpoint = "timeouts"
                 },
-                MessageType = messageType
-            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+                new SubscriptionClient
+                {
+                    TransportAddress = "mytestendpoint" + "@" + RuntimeEnvironment.MachineName,
+                    Endpoint = "mytestendpoint"
+                }
+            };
 
+            foreach (var subscriptionClient in subscribers)
+            {
+                await session.StoreAsync(new SubscriptionDocument
+                {
+                    SubscriptionClient = subscriptionClient,
+                    MessageType = messageType
+                }, SubscriptionDocument.FormatId(messageType, subscriptionClient)).ConfigureAwait(false);
+            }
+            
             await session.SaveChangesAsync().ConfigureAwait(false);
 
-            var exception = await Catch(async () => { (await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag())).ToList(); });
+            var exception = await Catch(async () =>
+            {
+                (await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag())).ToList(); 
+            });
+
             Assert.Null(exception);
         }
 
