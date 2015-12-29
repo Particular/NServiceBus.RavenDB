@@ -35,7 +35,7 @@ public class MessageTypes
 
 public class TestClients
 {
-    public static Subscriber ClientA = new Subscriber("ClientA", new Endpoint("ClientA"));
-    public static Subscriber ClientB = new Subscriber("ClientB", new Endpoint("ClientB"));
-    public static Subscriber ClientC = new Subscriber("ClientC", new Endpoint("ClientC"));
+    public static Subscriber ClientA = new Subscriber("ClientA", new EndpointName("ClientA"));
+    public static Subscriber ClientB = new Subscriber("ClientB", new EndpointName("ClientB"));
+    public static Subscriber ClientC = new Subscriber("ClientC", new EndpointName("ClientC"));
 }
