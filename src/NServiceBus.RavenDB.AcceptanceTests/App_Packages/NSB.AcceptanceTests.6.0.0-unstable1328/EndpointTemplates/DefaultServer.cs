@@ -63,6 +63,7 @@
             builder.GetSettings().SetDefault("ScaleOut.UseSingleBrokerQueue", true);
             configurationBuilderCustomization(builder);
 
+
             return builder;
         }
 
