@@ -272,6 +272,7 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.6.0.0-unstable1372\Volatile\When_sending_to_non_durable_endpoint.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="When_detecting_a_saga_with_multiple_corr_props.cs" />
+    <Compile Include="When_accessing_raven_session_from_handler.cs" />
     <Compile Include="When_using_a_sagafinder.cs" />
   </ItemGroup>
   <ItemGroup>
