@@ -9,7 +9,7 @@ namespace NServiceBus.RavenDB.Internal
 
     static class LegacyAddress
     {
-        public static List<SubscriptionClient> ParseMultipleToSubscriptionClient(RavenJArray array) => array.Select(token => ParseToSubscriptionClient(token)).ToList();
+        public static List<SubscriptionClient> ParseMultipleToSubscriptionClient(RavenJArray array) => array.Select(ParseToSubscriptionClient).ToList();
 
         public static SubscriptionClient ParseToSubscriptionClient(RavenJToken token)
         {

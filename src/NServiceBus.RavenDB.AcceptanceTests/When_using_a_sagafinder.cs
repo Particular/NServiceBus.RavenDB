@@ -10,8 +10,7 @@
     using NServiceBus.SagaPersisters.RavenDB;
     using NServiceBus.Sagas;
     using NUnit.Framework;
-    using Raven.Client;
-
+    
     public class When_using_a_sagafinder : NServiceBusAcceptanceTest
     {
         [Test]

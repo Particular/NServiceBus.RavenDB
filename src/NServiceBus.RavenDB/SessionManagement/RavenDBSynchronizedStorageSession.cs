@@ -10,12 +10,12 @@ namespace NServiceBus.SagaPersisters.RavenDB
     /// </summary>
     public class RavenDBSynchronizedStorageSession : CompletableSynchronizedStorageSession
     {
-        private bool ownsTransaction;
+        bool ownsTransaction;
 
         /// <summary>
         /// The RavenDB session
         /// </summary>
-        public IAsyncDocumentSession Transaction { get; private set; }
+        public IAsyncDocumentSession Transaction { get; }
 
         /// <summary>
         /// 
@@ -24,7 +24,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
         /// <param name="ownsSession">Whether this instance is responsible for committing and disposing</param>
         public RavenDBSynchronizedStorageSession(IAsyncDocumentSession session, bool ownsSession)
         {
-            this.ownsTransaction = ownsSession;
+            ownsTransaction = ownsSession;
             Transaction = session;
         }
 
