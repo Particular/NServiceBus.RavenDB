@@ -8,7 +8,7 @@
     using NUnit.Framework;
     using Raven.Client;
 
-    public class When_accessing_raven_session_from_handler : NServiceBusAcceptanceTest
+    public class When_accessing_raven_session_from_handler_with_saga : NServiceBusAcceptanceTest
     {
         [Test]
         public async Task It_should_return_configured_session()
@@ -45,6 +45,14 @@
 
             public class SagaData : IContainSagaData
             {
+                public SagaData()
+                {
+                    if (Id.ToString() == new Guid().ToString())
+                    {
+                        Id = Guid.NewGuid();
+                    }
+                }
+
                 public Guid Id { get; set; }
                 public string Originator { get; set; }
                 public string OriginalMessageId { get; set; }
