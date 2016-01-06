@@ -27,7 +27,6 @@
                 throw new Exception("RavenDB is configured as persistence for Outbox and no DocumentStore instance found");
             }
 
-            ConnectionVerifier.VerifyConnectionToRavenDBServer(store);
             StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(store, context.Settings);
 
             Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
