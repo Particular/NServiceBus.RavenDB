@@ -31,7 +31,8 @@
 
             Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
 
-            context.Container.ConfigureComponent(b => new OutboxPersister(store), DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(b => new OutboxPersister(store), DependencyLifecycle.InstancePerCall)
+                .ConfigureProperty(x => x.EndpointName, context.Settings.EndpointName());
 
             context.Container.ConfigureComponent<OutboxRecordsCleaner>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(x => x.DocumentStore, store);

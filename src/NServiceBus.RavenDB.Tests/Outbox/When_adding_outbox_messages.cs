@@ -25,7 +25,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_throw_if__trying_to_insert_same_messageid_concurrently()
         {
-            var persister = new OutboxPersister(store);
+            var persister = new OutboxPersister(store) { EndpointName = "TestEndpoint" };
+
             var exception = await Catch<NonUniqueObjectException>(async () =>
             {
                 using (var transaction = await persister.BeginTransaction(new ContextBag()))
@@ -42,7 +43,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_throw_if__trying_to_insert_same_messageid()
         {
-            var persister = new OutboxPersister(store);
+            var persister = new OutboxPersister(store) { EndpointName = "TestEndpoint" };
+
             using (var transaction = await persister.BeginTransaction(new ContextBag()))
             {
                 await persister.Store(new OutboxMessage("MySpecialId", new List<TransportOperation>()), transaction, new ContextBag());
@@ -65,7 +67,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_save_with_not_dispatched()
         {
-            var persister = new OutboxPersister(store);
+            var persister = new OutboxPersister(store) { EndpointName = "TestEndpoint" };
+
             var id = Guid.NewGuid().ToString("N");
             var message = new OutboxMessage(id, new List<TransportOperation>
             {
@@ -89,7 +92,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_update_dispatched_flag()
         {
-            var persister = new OutboxPersister(store);
+            var persister = new OutboxPersister(store) { EndpointName = "TestEndpoint" };
+
             var id = Guid.NewGuid().ToString("N");
             var message = new OutboxMessage(id, new List<TransportOperation>
             {
@@ -115,5 +119,84 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 Assert.True(result.Dispatched);
             }
         }
+
+        [TestCase("Outbox/")]
+        [TestCase("Outbox/TestEndpoint/")]
+        public async Task Should_get_messages_with_old_and_new_recordId_format(string outboxRecordIdPrefix)
+        {
+            var persister = new OutboxPersister(store) { EndpointName = "TestEndpoint" };
+
+            var messageId = Guid.NewGuid().ToString();
+
+            //manually store an OutboxRecord to control the OutboxRecordId format
+            using (var session = OpenAsyncSession())
+            {
+                await session.StoreAsync(new OutboxRecord
+                {
+                    MessageId = messageId,
+                    Dispatched = false,
+                    TransportOperations = new List<OutboxRecord.OutboxOperation>
+                    {
+                        new OutboxRecord.OutboxOperation
+                        {
+                            Message = new byte[1024*5],
+                            Headers = new Dictionary<string, string>(),
+                            MessageId = messageId,
+                            Options = new Dictionary<string, string>()
+                        }
+                    }
+                }, outboxRecordIdPrefix + messageId);
+
+                await session.SaveChangesAsync();
+            }
+            
+            var result = await persister.Get(messageId, new ContextBag());
+
+            Assert.NotNull(result);
+            Assert.AreEqual(messageId, result.MessageId);
+        }
+
+        [TestCase("Outbox/")]
+        [TestCase("Outbox/TestEndpoint/")]
+        public async Task Should_set_messages_as_dispatched_with_old_and_new_recordId_format(string outboxRecordIdPrefix)
+        {
+            var persister = new OutboxPersister(store) { EndpointName = "TestEndpoint" };
+
+            var messageId = Guid.NewGuid().ToString();
+
+            //manually store an OutboxRecord to control the OutboxRecordId format
+            using (var session = OpenAsyncSession())
+            {
+                await session.StoreAsync(new OutboxRecord
+                {
+                    MessageId = messageId,
+                    Dispatched = false,
+                    TransportOperations = new List<OutboxRecord.OutboxOperation>
+                    {
+                        new OutboxRecord.OutboxOperation
+                        {
+                            Message = new byte[1024*5],
+                            Headers = new Dictionary<string, string>(),
+                            MessageId = messageId,
+                            Options = new Dictionary<string, string>()
+                        }
+                    }
+                }, outboxRecordIdPrefix + messageId);
+
+                await session.SaveChangesAsync();
+            }
+
+            await persister.SetAsDispatched(messageId, new ContextBag());
+
+            using (var session = OpenAsyncSession())
+            {
+                var result = await session.LoadAsync<OutboxRecord>(outboxRecordIdPrefix + messageId);
+
+                Assert.NotNull(result);
+                Assert.True(result.Dispatched);
+            }
+            
+        }
+
     }
 }

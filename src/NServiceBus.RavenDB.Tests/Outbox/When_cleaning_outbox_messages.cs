@@ -27,8 +27,7 @@
             var id = Guid.NewGuid().ToString("N");
             var context = new ContextBag();
 
-
-            var persister = new OutboxPersister(store);
+            var persister = new OutboxPersister(store) {  EndpointName = "TestEndpoint" };
 
             using (var transaction = await persister.BeginTransaction(context))
             {
