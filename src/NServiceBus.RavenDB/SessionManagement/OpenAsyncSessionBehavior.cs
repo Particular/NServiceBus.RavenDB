@@ -55,13 +55,13 @@
 
     class RavenAsyncSessionProvider : IAsyncSessionProvider
     {
-        readonly BehaviorContext context;
+        readonly IBehaviorContext context;
 
-        public RavenAsyncSessionProvider(BehaviorContext context)
+        public RavenAsyncSessionProvider(IBehaviorContext context)
         {
             this.context = context;
         }
 
-        public IAsyncDocumentSession AsyncSession => context.Get<IAsyncDocumentSession>();
+        public IAsyncDocumentSession AsyncSession => context.Extensions.Get<IAsyncDocumentSession>();
     }
 }

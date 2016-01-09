@@ -5,14 +5,13 @@
     using NServiceBus.Pipeline;
     using Raven.Client;
 
-    class ProvidedAsyncSessionBehavior : Behavior<IncomingPhysicalMessageContext>
+    class ProvidedAsyncSessionBehavior : Behavior<IIncomingPhysicalMessageContext>
     {
-
         public Func<IAsyncDocumentSession> GetAsyncSession { get; set; }
 
-        public override Task Invoke(IncomingPhysicalMessageContext context, Func<Task> next)
+        public override Task Invoke(IIncomingPhysicalMessageContext context, Func<Task> next)
         {
-            context.Set(GetAsyncSession);
+            context.Extensions.Set(GetAsyncSession);
             return next();
         }
 
