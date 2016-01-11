@@ -22,13 +22,13 @@
                 {
                     testContext.RavenSessionFromTest = session;
                 })
-                    .WithEndpoint<RavenSessionExtensions>(b => b.When((bus, c) =>
+                    .WithEndpoint<SharedRavenSessionExtensions>(b => b.When((bus, c) =>
                     {
                         var options = new SendOptions();
 
                         options.RouteToLocalEndpointInstance();
 
-                        return bus.Send(new RavenSessionExtensions.GenericMessage(), options);
+                        return bus.Send(new SharedRavenSessionExtensions.GenericMessage(), options);
                     }))
                     .Done(c => c.HandlerWasHit)
                     .Run();
@@ -43,9 +43,9 @@
             public bool HandlerWasHit { get; set; }
         }
 
-        public class RavenSessionExtensions : EndpointConfigurationBuilder
+        public class SharedRavenSessionExtensions : EndpointConfigurationBuilder
         {
-            public RavenSessionExtensions()
+            public SharedRavenSessionExtensions()
             {
                 EndpointSetup<DefaultServer>((config, context) =>
                 {
@@ -54,14 +54,14 @@
                 });
             }
 
-            public class SagaData : IContainSagaData
+            public class SharedSessionSagaData : IContainSagaData
             {
                 public Guid Id { get; set; }
                 public string Originator { get; set; }
                 public string OriginalMessageId { get; set; }
             }
 
-            public class GenericSaga : Saga<SagaData>, IAmStartedByMessages<GenericMessage>
+            public class SharedSessionGenericSaga : Saga<SharedSessionSagaData>, IAmStartedByMessages<GenericMessage>
             {
                 public RavenSessionTestContext TestContext { get; set; }
 
@@ -72,7 +72,7 @@
                     return Task.FromResult(0);
                 }
 
-                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
+                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SharedSessionSagaData> mapper)
                 {
                     mapper.ConfigureMapping<GenericMessage>(m => m.Id).ToSaga(s => s.Id);
                 }

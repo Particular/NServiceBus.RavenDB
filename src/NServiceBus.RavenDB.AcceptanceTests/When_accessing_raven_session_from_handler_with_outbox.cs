@@ -16,13 +16,13 @@
         {
             var context =
                 await Scenario.Define<RavenSessionTestContext>()
-                    .WithEndpoint<RavenSessionExtensions>(b => b.When((bus, c) =>
+                    .WithEndpoint<RavenSessionExtensionsWithOutbox>(b => b.When((bus, c) =>
                     {
                         var options = new SendOptions();
 
                         options.RouteToLocalEndpointInstance();
 
-                        return bus.Send(new RavenSessionExtensions.GenericMessage(), options);
+                        return bus.Send(new RavenSessionExtensionsWithOutbox.GenericMessage(), options);
                     }))
                     .Done(c => c.HandlerWasHit)
                     .Run();
@@ -37,9 +37,9 @@
             public bool HandlerWasHit { get; set; }
         }
 
-        public class RavenSessionExtensions : EndpointConfigurationBuilder
+        public class RavenSessionExtensionsWithOutbox : EndpointConfigurationBuilder
         {
-            public RavenSessionExtensions()
+            public RavenSessionExtensionsWithOutbox()
             {
                 EndpointSetup<DefaultServer>((config, context) =>
                 {

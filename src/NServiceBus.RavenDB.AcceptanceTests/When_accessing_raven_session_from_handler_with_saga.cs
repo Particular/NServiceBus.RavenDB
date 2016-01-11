@@ -43,9 +43,9 @@
                 EndpointSetup<DefaultServer>();
             }
 
-            public class SagaData : IContainSagaData
+            public class SessionExtensionSagaData : IContainSagaData
             {
-                public SagaData()
+                public SessionExtensionSagaData()
                 {
                     if (Id.ToString() == new Guid().ToString())
                     {
@@ -58,7 +58,7 @@
                 public string OriginalMessageId { get; set; }
             }
 
-            public class GenericSaga : Saga<SagaData>, IAmStartedByMessages<GenericMessage>
+            public class SessionExtensionGenericSaga : Saga<SessionExtensionSagaData>, IAmStartedByMessages<GenericMessage>
             {
                 public RavenSessionTestContext TestContext { get; set; }
 
@@ -69,7 +69,7 @@
                     return Task.FromResult(0);
                 }
 
-                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
+                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SessionExtensionSagaData> mapper)
                 {
                     mapper.ConfigureMapping<GenericMessage>(m => m.Id).ToSaga(s => s.Id);
                 }
