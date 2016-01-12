@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using NServiceBus.Pipeline;
     using NServiceBus.RavenDB.Internal;
-    using NServiceBus.RavenDB.Persistence;
     using Raven.Client;
 
     class OpenAsyncSessionBehavior : Behavior<IIncomingPhysicalMessageContext>
@@ -51,17 +50,5 @@
                 InsertAfter(WellKnownStep.ExecuteUnitOfWork);
             }
         }
-    }
-
-    class RavenAsyncSessionProvider : IAsyncSessionProvider
-    {
-        readonly IBehaviorContext context;
-
-        public RavenAsyncSessionProvider(IBehaviorContext context)
-        {
-            this.context = context;
-        }
-
-        public IAsyncDocumentSession AsyncSession => context.Extensions.Get<IAsyncDocumentSession>();
     }
 }
