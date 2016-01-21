@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
-    using NServiceBus.RavenDB.Persistence;
     using NUnit.Framework;
     using Raven.Client;
 
@@ -27,8 +26,8 @@
                     .Run();
 
             Assert.IsNull(context.RavenSessionFromHandler);
-            Assert.IsTrue(context.Exception.Message.Contains("saga"));
-            Assert.IsTrue(context.Exception.Message.Contains("outbox"));
+            Assert.IsTrue(context.Exception.Message.ToLower().Contains("saga"), "The exception message should alert the user about necessary features.");
+            Assert.IsTrue(context.Exception.Message.ToLower().Contains("outbox"), "The exception message should alert the user about necessary features.");
         }
 
         public class RavenSessionTestContext : ScenarioContext

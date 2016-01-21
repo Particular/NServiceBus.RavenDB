@@ -1,6 +1,6 @@
 ﻿using Raven.Client;
 
-namespace NServiceBus.RavenDB.Persistence
+namespace NServiceBus
 {
     using System;
 
@@ -26,7 +26,10 @@ namespace NServiceBus.RavenDB.Persistence
             context.Extensions.TryGet(out session);
             if (session == null)
             {
-                throw new Exception("Could not retrieve a RavenDB session. Please ensure that you are using a saga or have enabled outbox.");
+                throw new Exception(
+                    @"GetRavenSession() allows retrieval of the shared Raven IAsyncDocumentSession 
+being used by NServiceBus so that additional Raven operations can be completed in the same transactional context as NServiceBus Sagas and Outbox features. 
+Because the Saga and Outbox features are not currently in use, it was not possible to retrieve a RavenDB session.");
             }
             return session;
         }
