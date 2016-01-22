@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Raven.Abstractions.Data;
     using Raven.Client.Document;
 
@@ -38,7 +39,13 @@
 
             public void Dispose()
             {
-                store.DatabaseCommands.GlobalAdmin.DeleteDatabase(dbName, hardDelete: true);
+                // Task.Delay is being used to allow raven time to unlock the database 
+                // Task.Run is being used to take the cleanup of the database out of the context of the test runner, as the test should not fail if cleanup fails.
+                Task.Run(() =>
+                {
+                    Task.Delay(500);
+                    store.DatabaseCommands.GlobalAdmin.DeleteDatabase(dbName, hardDelete: true);
+                });
             }
         }
     }

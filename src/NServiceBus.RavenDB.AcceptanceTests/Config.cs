@@ -29,7 +29,25 @@ public class ConfigureRavenDBPersistence : IConfigureTestExecution
 
     public async Task Cleanup()
     {
-        await documentStore.AsyncDatabaseCommands.GlobalAdmin.DeleteDatabaseAsync(documentStore.DefaultDatabase, true);
+        // Periodically the delete will throw an exception because Raven has the database locked
+        // To solve this we have a retry loop with a delay
+        var triesLeft = 3;
+
+        while (--triesLeft > 0)
+        {
+            try
+            {
+                await documentStore.AsyncDatabaseCommands.GlobalAdmin.DeleteDatabaseAsync(documentStore.DefaultDatabase, true);
+                break;
+            }
+            catch
+            {
+                if (triesLeft < 1)
+                    throw;
+
+                await Task.Delay(100);
+            }
+        }
 
         Console.WriteLine("Deleted '{0}' database", documentStore.DefaultDatabase);
     }
