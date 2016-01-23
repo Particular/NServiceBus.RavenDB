@@ -1,6 +1,7 @@
-﻿namespace NServiceBus.Persistence
+﻿namespace NServiceBus
 {
     using NServiceBus.Features;
+    using NServiceBus.Persistence;
     using NServiceBus.RavenDB;
     using NServiceBus.RavenDB.Outbox;
     using NServiceBus.RavenDB.SessionManagement;
