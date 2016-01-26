@@ -41,6 +41,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Moq, Version=4.2.1510.2205, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+      <HintPath>..\packages\Moq.4.2.1510.2205\lib\net40\Moq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="NServiceBus.AcceptanceTesting, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
       <HintPath>..\packages\NServiceBus.AcceptanceTesting.6.0.0-unstable1372\lib\net452\NServiceBus.AcceptanceTesting.dll</HintPath>
       <Private>True</Private>
@@ -271,7 +275,11 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.6.0.0-unstable1372\Versioning\When_multiple_versions_of_a_message_is_published.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.6.0.0-unstable1372\Volatile\When_sending_to_non_durable_endpoint.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="When_accessing_raven_session_from_handler_with_outbox.cs" />
+    <Compile Include="When_raven_session_is_provided.cs" />
+    <Compile Include="When_accessing_raven_session_with_no_saga_or_outbox.cs" />
     <Compile Include="When_detecting_a_saga_with_multiple_corr_props.cs" />
+    <Compile Include="When_accessing_raven_session_from_handler_with_saga.cs" />
     <Compile Include="When_using_a_sagafinder.cs" />
   </ItemGroup>
   <ItemGroup>
