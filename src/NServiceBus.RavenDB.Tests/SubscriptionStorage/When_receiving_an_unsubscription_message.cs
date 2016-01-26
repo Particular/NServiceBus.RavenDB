@@ -13,11 +13,13 @@ public class When_receiving_an_unsubscribe_message : RavenDBPersistenceTestBase
         var storage = new SubscriptionPersister(store);
         var context = new ContextBag();
 
-        await storage.Subscribe(TestClients.ClientA, MessageTypes.All, context);
+        await storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA, context);
+        await storage.Subscribe(TestClients.ClientA, MessageTypes.MessageB, context);
 
-        await storage.Unsubscribe(TestClients.ClientA, MessageTypes.All, context);
+        await storage.Unsubscribe(TestClients.ClientA, MessageTypes.MessageA, context);
+        await storage.Unsubscribe(TestClients.ClientA, MessageTypes.MessageB, context);
 
-        var clients = await storage.GetSubscriberAddressesForMessage(MessageTypes.All, context);
+        var clients = await storage.GetSubscriberAddressesForMessage(new []{ MessageTypes.MessageA, MessageTypes.MessageB }, context);
 
         Assert.IsEmpty(clients);
     }

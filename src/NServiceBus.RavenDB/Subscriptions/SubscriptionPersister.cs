@@ -17,7 +17,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             documentStore = store;
         }
 
-        public async Task Subscribe(Subscriber subscriber, IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
+        public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
             //When the subscriber is running V6 and UseLegacyMessageDrivenSubscriptionMode is enabled at the subscriber the 'subcriber.Endpoint' value is null
             var endpoint = subscriber.Endpoint?.ToString() ?? subscriber.TransportAddress.Split('@').First();
@@ -33,28 +33,25 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
                 {
                     using (var session = OpenAsyncSession())
                     {
-                        foreach (var messageType in messageTypes)
+                        var subscriptionDocId = Subscription.FormatId(messageType);
+
+                        var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
+
+                        if (subscription == null)
                         {
-                            var subscriptionDocId = Subscription.FormatId(messageType);
-
-                            var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
-
-                            if (subscription == null)
+                            subscription = new Subscription
                             {
-                                subscription = new Subscription
-                                {
-                                    Id = subscriptionDocId,
-                                    MessageType = messageType,
-                                    Subscribers = new List<SubscriptionClient>()
-                                };
+                                Id = subscriptionDocId,
+                                MessageType = messageType,
+                                Subscribers = new List<SubscriptionClient>()
+                            };
 
-                                await session.StoreAsync(subscription).ConfigureAwait(false);
-                            }
+                            await session.StoreAsync(subscription).ConfigureAwait(false);
+                        }
 
-                            if (!subscription.Subscribers.Contains(subscriptionClient))
-                            {
-                                subscription.Subscribers.Add(subscriptionClient);
-                            }
+                        if (!subscription.Subscribers.Contains(subscriptionClient))
+                        {
+                            subscription.Subscribers.Add(subscriptionClient);
                         }
 
                         await session.SaveChangesAsync().ConfigureAwait(false);
@@ -69,34 +66,31 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             } while (attempts < 5);
         }
 
-        public async Task Unsubscribe(Subscriber subscriber, IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
+        public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
             var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint.ToString() };
 
             using (var session = OpenAsyncSession())
             {
-                foreach (var messageType in messageTypes)
+                var subscriptionDocId = Subscription.FormatId(messageType);
+
+                var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
+
+                if (subscription == null)
                 {
-                    var subscriptionDocId = Subscription.FormatId(messageType);
+                    return;
+                }
 
-                    var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
-
-                    if (subscription == null)
-                    {
-                        continue;
-                    }
-
-                    if (subscription.Subscribers.Contains(subscriptionClient))
-                    {
-                        subscription.Subscribers.Remove(subscriptionClient);
-                    }
+                if (subscription.Subscribers.Contains(subscriptionClient))
+                {
+                    subscription.Subscribers.Remove(subscriptionClient);
                 }
 
                 await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
-        public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IReadOnlyCollection<MessageType> messageTypes, ContextBag context)
+        public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
             var ids = messageTypes.Select(Subscription.FormatId).ToList();
 

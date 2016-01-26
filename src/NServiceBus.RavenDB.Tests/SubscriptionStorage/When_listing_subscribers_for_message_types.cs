@@ -20,7 +20,7 @@ public class When_listing_subscribers_for_message_types : RavenDBPersistenceTest
         await storage.Subscribe(TestClients.ClientB, MessageTypes.MessageA, context);
         await storage.Subscribe(TestClients.ClientA, MessageTypes.MessageAv2, context);
 
-        var subscriptionsForMessageType = await storage.GetSubscriberAddressesForMessage(MessageTypes.MessageA, context);
+        var subscriptionsForMessageType = await storage.GetSubscriberAddressesForMessage(new []{ MessageTypes.MessageA }, context);
 
         Assert.AreEqual(2, subscriptionsForMessageType.Count());
 
@@ -37,18 +37,9 @@ public class When_listing_subscribers_for_message_types : RavenDBPersistenceTest
         var storage = new SubscriptionPersister(store);
         var context = new ContextBag();
 
-        await storage.Subscribe(TestClients.ClientA, new[]
-                {
-                    new MessageType(typeof(ISomeInterface))
-                }, context);
-        await storage.Subscribe(TestClients.ClientA, new[]
-                {
-                    new MessageType(typeof(ISomeInterface2))
-                }, context);
-        await storage.Subscribe(TestClients.ClientA, new[]
-                {
-                    new MessageType(typeof(ISomeInterface3))
-                }, context);
+        await storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface)), context);
+        await storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface2)), context);
+        await storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface3)), context);
 
         var subscriptionsForMessageType = await storage.GetSubscriberAddressesForMessage(new[]
                 {

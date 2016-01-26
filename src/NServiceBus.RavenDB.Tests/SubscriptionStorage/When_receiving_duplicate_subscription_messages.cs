@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using NServiceBus.Extensibility;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
@@ -18,15 +17,9 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
     {
         var storage = new SubscriptionPersister(store);
 
-        await storage.Subscribe(new Subscriber("testEndPoint@localhost", new EndpointName("testEndPoint")), new List<MessageType>
-        {
-            new MessageType("SomeMessageType", "1.0.0.0")
-        }, new ContextBag());
+        await storage.Subscribe(new Subscriber("testEndPoint@localhost", new EndpointName("testEndPoint")), new MessageType("SomeMessageType", "1.0.0.0"), new ContextBag());
 
-        await storage.Subscribe(new Subscriber("testEndPoint@localhost", new EndpointName("testEndPoint")), new List<MessageType>
-        {
-            new MessageType("SomeMessageType", "1.0.0.0")
-        }, new ContextBag());
+        await storage.Subscribe(new Subscriber("testEndPoint@localhost", new EndpointName("testEndPoint")), new MessageType("SomeMessageType", "1.0.0.0"), new ContextBag());
 
         using (var session = store.OpenAsyncSession())
         {
