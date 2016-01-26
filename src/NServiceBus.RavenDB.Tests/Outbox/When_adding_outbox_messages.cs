@@ -131,7 +131,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             //manually store an OutboxRecord to control the OutboxRecordId format
             using (var session = OpenAsyncSession())
             {
-                await session.StoreAsync(new OutboxRecord
+                var newRecord = new OutboxRecord
                 {
                     MessageId = messageId,
                     Dispatched = false,
@@ -145,7 +145,9 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                             Options = new Dictionary<string, string>()
                         }
                     }
-                }, outboxRecordIdPrefix + messageId);
+                };
+                var fullDocumentId = outboxRecordIdPrefix + messageId;
+                await session.StoreAsync(newRecord, fullDocumentId);
 
                 await session.SaveChangesAsync();
             }

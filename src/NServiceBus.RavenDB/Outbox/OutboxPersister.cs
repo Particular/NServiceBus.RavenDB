@@ -25,8 +25,9 @@
                 session.Advanced.AllowNonAuthoritativeInformation = false;
 
                 // We use Load operation and not queries to avoid stale results
-                var docs = await session.LoadAsync<OutboxRecord>(GetPossibleOutboxDocumentIds(messageId)).ConfigureAwait(false);
-                result = docs.FirstOrDefault();
+                var possibleIds = GetPossibleOutboxDocumentIds(messageId);
+                var docs = await session.LoadAsync<OutboxRecord>(possibleIds).ConfigureAwait(false);
+                result = docs.FirstOrDefault(o => o != null);
             }
 
             if (result == null)
@@ -81,7 +82,8 @@
                 session.Advanced.UseOptimisticConcurrency = true;
                 session.Advanced.AllowNonAuthoritativeInformation = false;
 
-                var outboxMessage = (await session.LoadAsync<OutboxRecord>(GetPossibleOutboxDocumentIds(messageId)).ConfigureAwait(false)).FirstOrDefault();
+                var docs = await session.LoadAsync<OutboxRecord>(GetPossibleOutboxDocumentIds(messageId)).ConfigureAwait(false);
+                var outboxMessage = docs.FirstOrDefault(o => o != null);
                 if (outboxMessage == null || outboxMessage.Dispatched)
                 {
                     return;
