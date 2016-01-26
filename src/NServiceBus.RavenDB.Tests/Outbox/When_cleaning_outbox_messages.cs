@@ -7,6 +7,7 @@
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Outbox;
+    using NServiceBus.Routing;
     using NUnit.Framework;
     using Raven.Client;
 
@@ -27,7 +28,7 @@
             var id = Guid.NewGuid().ToString("N");
             var context = new ContextBag();
 
-            var persister = new OutboxPersister(store) {  EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(store) {  EndpointName = new EndpointName("TestEndpoint") };
 
             using (var transaction = await persister.BeginTransaction(context))
             {

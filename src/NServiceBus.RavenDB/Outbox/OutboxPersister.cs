@@ -6,12 +6,13 @@
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
+    using NServiceBus.Routing;
     using Raven.Client;
     using TransportOperation = NServiceBus.Outbox.TransportOperation;
 
     class OutboxPersister : IOutboxStorage
     {
-        public string EndpointName { get; set; }
+        public EndpointName EndpointName { get; set; }
 
         public OutboxPersister(IDocumentStore documentStore)
         {

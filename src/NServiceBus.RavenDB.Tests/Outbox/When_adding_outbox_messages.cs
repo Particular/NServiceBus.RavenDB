@@ -7,6 +7,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Outbox;
+    using NServiceBus.Routing;
     using NUnit.Framework;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
@@ -25,7 +26,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_throw_if__trying_to_insert_same_messageid_concurrently()
         {
-            var persister = new OutboxPersister(store) { EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(store) { EndpointName = new EndpointName("TestEndpoint") };
 
             var exception = await Catch<NonUniqueObjectException>(async () =>
             {
@@ -43,7 +44,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_throw_if__trying_to_insert_same_messageid()
         {
-            var persister = new OutboxPersister(store) { EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(store) { EndpointName = new EndpointName("TestEndpoint") };
 
             using (var transaction = await persister.BeginTransaction(new ContextBag()))
             {
@@ -67,7 +68,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_save_with_not_dispatched()
         {
-            var persister = new OutboxPersister(store) { EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(store) { EndpointName = new EndpointName("TestEndpoint") };
 
             var id = Guid.NewGuid().ToString("N");
             var message = new OutboxMessage(id, new List<TransportOperation>
@@ -92,7 +93,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_update_dispatched_flag()
         {
-            var persister = new OutboxPersister(store) { EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(store) { EndpointName = new EndpointName("TestEndpoint") };
 
             var id = Guid.NewGuid().ToString("N");
             var message = new OutboxMessage(id, new List<TransportOperation>
@@ -124,7 +125,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [TestCase("Outbox/TestEndpoint/")]
         public async Task Should_get_messages_with_old_and_new_recordId_format(string outboxRecordIdPrefix)
         {
-            var persister = new OutboxPersister(store) { EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(store) { EndpointName = new EndpointName("TestEndpoint") };
 
             var messageId = Guid.NewGuid().ToString();
 
@@ -162,7 +163,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [TestCase("Outbox/TestEndpoint/")]
         public async Task Should_set_messages_as_dispatched_with_old_and_new_recordId_format(string outboxRecordIdPrefix)
         {
-            var persister = new OutboxPersister(store) { EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(store) { EndpointName = new EndpointName("TestEndpoint") };
 
             var messageId = Guid.NewGuid().ToString();
 
