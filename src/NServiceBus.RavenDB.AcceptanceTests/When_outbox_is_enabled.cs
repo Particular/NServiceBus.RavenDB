@@ -26,7 +26,8 @@
                         await busSession.Send(new DuplicateMessage(), opts);
 
                         await busSession.SendLocal(new MarkerMessage());
-                    });
+                    })
+                    .DoNotFailOnErrorMessages();
                 })
                 .WithEndpoint<DownstreamEndpoint>()
                 .Done(c => c.Done)
