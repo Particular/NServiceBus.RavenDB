@@ -72,12 +72,14 @@
     <Compile Include="Gateway\RavenDbGatewayDeduplication.cs" />
     <Compile Include="Internal\BackwardsCompatibilityHelper.cs" />
     <Compile Include="Internal\ConnectionVerifier.cs" />
+    <Compile Include="Internal\DocumentStoreInitContext.cs" />
+    <Compile Include="Internal\DocumentStoreManager.cs" />
     <Compile Include="Internal\DocumentStoreWrapper.cs" />
     <Compile Include="Internal\Helpers.cs" />
     <Compile Include="ConnectionParameters.cs" />
     <Compile Include="Internal\RavenBuildInfo.cs" />
+    <Compile Include="Internal\SingleSharedDocumentStore.cs" />
     <Compile Include="Internal\StorageEngineVerifier.cs" />
-    <Compile Include="Internal\TransactionRecoveryStorageVerifier.cs" />
     <Compile Include="Outbox\Installer.cs" />
     <Compile Include="Outbox\OutboxPersister.cs" />
     <Compile Include="Outbox\OutboxRecord.cs" />
