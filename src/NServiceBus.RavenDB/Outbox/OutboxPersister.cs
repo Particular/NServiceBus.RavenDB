@@ -12,11 +12,10 @@
 
     class OutboxPersister : IOutboxStorage
     {
-        public EndpointName EndpointName { get; set; }
-
-        public OutboxPersister(IDocumentStore documentStore)
+        public OutboxPersister(IDocumentStore documentStore, EndpointName endpointName)
         {
             this.documentStore = documentStore;
+            this.endpointName = endpointName;
         }
         public async Task<OutboxMessage> Get(string messageId, ContextBag options)
         {
@@ -106,9 +105,9 @@
             };
         }
 
-        string GetOutboxRecordId(string messageId) => $"Outbox/{EndpointName}/{messageId}";
+        string GetOutboxRecordId(string messageId) => $"Outbox/{endpointName}/{messageId}";
 
-
+        EndpointName endpointName;
         IDocumentStore documentStore;
     }
 }
