@@ -11,7 +11,6 @@
     using NUnit.Framework;
     using Raven.Client;
     using Raven.Client.Document;
-    using Timeout = NServiceBus.TimeoutPersisters.RavenDB.TimeoutData;
     using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
     [TestFixture]

@@ -17,15 +17,9 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
     {
         var clientEndpoint = new Subscriber("TestEndpoint", new EndpointName("TestEndpoint"));
 
-        var messageTypes = new[]
-        {
-            new MessageType("MessageType1", "1.0.0.0"),
-            new MessageType("MessageType2", "1.0.0.0")
-        };
-
         var storage = new SubscriptionPersister(store);
 
-        await storage.Subscribe(clientEndpoint, messageTypes, new ContextBag());
+        await storage.Subscribe(clientEndpoint, new MessageType("MessageType1", "1.0.0.0"), new ContextBag());
 
         using (var session = store.OpenAsyncSession())
         {
@@ -34,7 +28,7 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
                 .Customize(c => c.WaitForNonStaleResults())
                 .CountAsync();
 
-            Assert.AreEqual(2, subscriptions);
+            Assert.AreEqual(1, subscriptions);
         }
     }
 }

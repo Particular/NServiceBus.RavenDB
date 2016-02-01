@@ -5,7 +5,6 @@
     using AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Configuration.AdvanceExtensibility;
-    using NServiceBus.RavenDB.Persistence;
     using NUnit.Framework;
     using Raven.Client;
 

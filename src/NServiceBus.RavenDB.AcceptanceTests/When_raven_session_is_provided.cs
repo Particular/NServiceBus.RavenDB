@@ -6,7 +6,6 @@
     using Moq;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Persistence;
-    using NServiceBus.RavenDB.Persistence;
     using NUnit.Framework;
     using Raven.Client;
 

@@ -12,7 +12,7 @@ public class When_listing_subscribers_for_a_non_existing_message_type : RavenDBP
     public async Task No_subscribers_should_be_returned()
     {
         var persister = new SubscriptionPersister(store);
-        var subscriptionsForMessageType = await persister.GetSubscriberAddressesForMessage(MessageTypes.MessageA, new ContextBag());
+        var subscriptionsForMessageType = await persister.GetSubscriberAddressesForMessage(new []{ MessageTypes.MessageA }, new ContextBag());
 
         Assert.AreEqual(0, subscriptionsForMessageType.Count());
     }
