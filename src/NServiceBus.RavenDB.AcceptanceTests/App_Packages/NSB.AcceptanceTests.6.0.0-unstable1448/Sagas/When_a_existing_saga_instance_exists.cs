@@ -16,7 +16,7 @@
                 .Done(c => c.SecondMessageReceived)
                 .Run();
 
-            Assert.AreEqual(context.FirstSagaId, context.SecondSagaId, "The same saga instance should be invoked for both messages");
+            Assert.AreEqual(context.FirstSagaId, context.SecondSagaId, "The same saga instance should be invoked invoked for both messages");
         }
 
         public class Context : ScenarioContext

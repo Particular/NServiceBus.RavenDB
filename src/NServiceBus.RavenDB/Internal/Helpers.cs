@@ -7,7 +7,6 @@
     using System.Text;
     using NServiceBus.ConsistencyGuarantees;
     using NServiceBus.Logging;
-    using NServiceBus.Persistence;
     using NServiceBus.Settings;
     using Raven.Client;
     using Raven.Client.Document;

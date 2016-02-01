@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus
 {
     using NServiceBus.Configuration.AdvanceExtensibility;
-    using NServiceBus.Persistence;
     using Raven.Client;
 
     /// <summary>

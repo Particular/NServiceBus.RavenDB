@@ -55,22 +55,20 @@
                 .ToArray();
 
             var usedNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-            var offenders = new HashSet<string>();
+            var offenders = 0;
 
             Console.WriteLine("Sagas / Saga Entities with non-unique names:");
             foreach (var cls in sagas.Union(sagaEntities).Union(nestedSagaEntityParents))
             {
                 if (usedNames.Contains(cls.Name))
                 {
-                    offenders.Add(cls.Name);
+                    offenders++;
                     Console.WriteLine(cls.FullName);
                 }
                 usedNames.Add(cls.Name);
             }
 
-            var failureMessage = "Non-unique names: " + string.Join("; ", offenders);
-
-            Assert.AreEqual(0, offenders.Count, failureMessage);
+            Assert.AreEqual(0, offenders);
         }
     }
 }

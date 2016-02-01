@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
-using NServiceBus.Persistence;
 using Raven.Client.Document;
 
 public class ConfigureRavenDBPersistence : IConfigureTestExecution

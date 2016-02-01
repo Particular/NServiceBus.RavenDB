@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using NServiceBus.Configuration.AdvanceExtensibility;
-    using NServiceBus.Persistence;
     using NServiceBus.RavenDB;
     using NServiceBus.RavenDB.SessionManagement;
     using Raven.Client;
