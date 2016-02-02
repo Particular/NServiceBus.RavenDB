@@ -130,7 +130,6 @@
     <Compile Include="SagaPersister\When_trying_to_fetch_a_non_existing_saga_by_its_unique_property.cs" />
     <Compile Include="SagaPersister\When_updating_a_saga_property_that_does_not_have_a_unique_attribute.cs" />
     <Compile Include="SagaPersister\When_updating_a_saga_without_unique_properties.cs" />
-    <Compile Include="RavenSessionFactory.cs" />
     <Compile Include="StartSaga.cs" />
     <Compile Include="SubscriptionStorage\TestData.cs" />
     <Compile Include="SubscriptionStorage\When_converting_old_subscription_to_new_subscription.cs" />

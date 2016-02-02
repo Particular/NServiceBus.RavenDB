@@ -1,29 +1,38 @@
-﻿using Raven.Client;
-
+﻿
 namespace NServiceBus
 {
     using System;
+    using NServiceBus.Extensibility;
+    using Raven.Client;
 
     /// <summary>
-    /// Extensions, to the message handler context, to manage RavenDB session.
+    /// Extensions to get the registered RavenDB session
     /// </summary>
     public static class RavenSessionExtension
     {
         /// <summary>
         /// Gets the current RavenDB session.
         /// </summary>
-        /// <param name="context">The context.</param>
-        /// <returns></returns>
+        /// <param name="context">The message handler context.</param>
         public static IAsyncDocumentSession GetRavenSession(this IMessageHandlerContext context)
         {
+            return context.Extensions.GetRavenSession();
+        }
+
+        /// <summary>
+        /// Gets the current RavenDB session.
+        /// </summary>
+        /// <param name="contextBag">The context bag.</param>
+        public static IAsyncDocumentSession GetRavenSession(this ReadOnlyContextBag contextBag)
+        {
             Func<IAsyncDocumentSession> sessionFunction;
-            context.Extensions.TryGet(out sessionFunction);
+            contextBag.TryGet(out sessionFunction);
             if (sessionFunction != null)
             {
                 return sessionFunction();
             }
             IAsyncDocumentSession session;
-            context.Extensions.TryGet(out session);
+            contextBag.TryGet(out session);
             if (session == null)
             {
                 throw new Exception(
