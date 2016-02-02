@@ -53,7 +53,7 @@
                 {
                     try
                     {
-                        TestContext.RavenSessionFromHandler = context.GetRavenSession();
+                        TestContext.RavenSessionFromHandler = context.SynchronizedStorageSession.Session();
                     }
                     catch (Exception e)
                     {

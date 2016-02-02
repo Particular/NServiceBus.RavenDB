@@ -15,7 +15,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
         /// <summary>
         /// The RavenDB session
         /// </summary>
-        public IAsyncDocumentSession Transaction { get; }
+        public IAsyncDocumentSession Session { get; }
 
         /// <summary>
         /// 
@@ -25,7 +25,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
         public RavenDBSynchronizedStorageSession(IAsyncDocumentSession session, bool ownsSession)
         {
             ownsTransaction = ownsSession;
-            Transaction = session;
+            Session = session;
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
         /// </summary>
         public async Task Enlist(Func<IAsyncDocumentSession, Task> action)
         {
-            await action(Transaction);
+            await action(Session);
         }
 
         /// <inheritdoc />
@@ -41,7 +41,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
         {
             if(ownsTransaction)
             {
-                Transaction.Dispose();
+                Session.Dispose();
             }
         }
 
@@ -50,7 +50,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
         {
             if(ownsTransaction)
             {
-                await Transaction.SaveChangesAsync().ConfigureAwait(false);
+                await Session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
     }

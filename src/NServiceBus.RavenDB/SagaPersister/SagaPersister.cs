@@ -64,14 +64,14 @@ namespace NServiceBus.SagaPersisters.RavenDB
         public async Task<T> Get<T>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where T : IContainSagaData
         {
             var ravenSession = (RavenDBSynchronizedStorageSession)session;
-            var documentSession = ravenSession.Transaction;
+            var documentSession = ravenSession.Session;
             return await documentSession.LoadAsync<T>(sagaId).ConfigureAwait(false);
         }
 
         public async Task<T> Get<T>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where T : IContainSagaData
         {
             var ravenSession = (RavenDBSynchronizedStorageSession)session;
-            var documentSession = ravenSession.Transaction;
+            var documentSession = ravenSession.Session;
 
             var lookupId = SagaUniqueIdentity.FormatId(typeof(T), new KeyValuePair<string, object>(propertyName, propertyValue));
 
