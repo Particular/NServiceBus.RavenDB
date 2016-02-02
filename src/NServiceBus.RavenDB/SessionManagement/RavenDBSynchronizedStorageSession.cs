@@ -1,6 +1,5 @@
 namespace NServiceBus.SagaPersisters.RavenDB
 {
-    using System;
     using System.Threading.Tasks;
     using NServiceBus.Persistence;
     using Raven.Client;
@@ -18,7 +17,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
         public IAsyncDocumentSession Session { get; }
 
         /// <summary>
-        /// 
+        /// Contructor for synchronized storage session
         /// </summary>
         /// <param name="session">The transaction to wrap</param>
         /// <param name="ownsSession">Whether this instance is responsible for committing and disposing</param>
@@ -26,14 +25,6 @@ namespace NServiceBus.SagaPersisters.RavenDB
         {
             ownsTransaction = ownsSession;
             Session = session;
-        }
-
-        /// <summary>
-        /// Enlist and run an action against the RavenDB session
-        /// </summary>
-        public async Task Enlist(Func<IAsyncDocumentSession, Task> action)
-        {
-            await action(Session);
         }
 
         /// <inheritdoc />
