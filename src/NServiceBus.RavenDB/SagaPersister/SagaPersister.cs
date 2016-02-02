@@ -37,7 +37,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
             });
         }
 
-        private static async Task CreateSagaUniqueIdentity(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, IAsyncDocumentSession documentSession)
+        static async Task CreateSagaUniqueIdentity(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, IAsyncDocumentSession documentSession)
         {
             var sagaDocId = documentSession.Advanced.DocumentStore.Conventions.FindFullDocumentKeyFromNonStringIdentifier(sagaData.Id, sagaData.GetType(), false);
             var propertyKeyValuePair = new KeyValuePair<string, object>(correlationProperty.Name, correlationProperty.Value);

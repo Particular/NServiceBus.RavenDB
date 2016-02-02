@@ -110,7 +110,7 @@ namespace NServiceBus.RavenDB.Tests
         /// </summary>
         /// <param name="other">reference addressed to be checked with this</param>
         /// <returns>true if this is equal to other</returns>
-        private bool Equals(LegacyAddress other)
+        bool Equals(LegacyAddress other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
