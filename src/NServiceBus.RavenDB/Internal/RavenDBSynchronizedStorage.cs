@@ -20,28 +20,46 @@ namespace NServiceBus.RavenDB.Internal
 
         public Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag)
         {
-            var session = GetRavenSession(contextBag);
+            var tuple = GetRavenSession();
 
-            var syncronizedStorageSession = new RavenDBSynchronizedStorageSession(session, true);
+            var syncronizedStorageSession = new RavenDBSynchronizedStorageSession(tuple.Session, tuple.Owns);
 
             return Task.FromResult((CompletableSynchronizedStorageSession)syncronizedStorageSession);
         }
 
-        static IAsyncDocumentSession GetRavenSession(ReadOnlyContextBag contextBag)
+        SessionOwnership GetRavenSession()
         {
             Func<IAsyncDocumentSession> sessionFunction;
-            contextBag.TryGet(RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey, out sessionFunction);
+            settings.TryGet(RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey, out sessionFunction);
             if (sessionFunction != null)
             {
-                return sessionFunction();
+                return new SessionOwnership(false, sessionFunction());
             }
+
             IAsyncDocumentSession session;
-            contextBag.TryGet(out session);
-            if (session == null)
+            if (settings.TryGet(out session))
             {
-                throw new InvalidOperationException("Failed to retrieve an IAsyncDocumentSession, this is usually because the Saga and Outbox features are not in use.");
+                return new SessionOwnership(true, session);
             }
-            return session;
+
+            var store = settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtensions.DocumentStoreSettingsKey)
+                        ?? SharedDocumentStore.Get(settings);
+
+            session = store.OpenAsyncSession();
+
+            return new SessionOwnership(true, session);
+        }
+
+        class SessionOwnership
+        {
+            public SessionOwnership(bool ownsSession, IAsyncDocumentSession session)
+            {
+                Session = session;
+                Owns = ownsSession;
+
+            }
+            public IAsyncDocumentSession Session { get; set; }
+            public bool Owns { get; set; }
         }
     }
 
