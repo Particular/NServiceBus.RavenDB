@@ -20,11 +20,9 @@ namespace NServiceBus.RavenDB.Internal
 
         public Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag)
         {
-            var tuple = GetRavenSession();
+            var ownership = GetRavenSession();
 
-            var syncronizedStorageSession = new RavenDBSynchronizedStorageSession(tuple.Session, tuple.Owns);
-
-            return Task.FromResult((CompletableSynchronizedStorageSession)syncronizedStorageSession);
+            return Task.FromResult((CompletableSynchronizedStorageSession)new RavenDBSynchronizedStorageSession(ownership.Session, ownership.Owns));
         }
 
         SessionOwnership GetRavenSession()
@@ -58,8 +56,8 @@ namespace NServiceBus.RavenDB.Internal
                 Owns = ownsSession;
 
             }
-            public IAsyncDocumentSession Session { get; set; }
-            public bool Owns { get; set; }
+            public IAsyncDocumentSession Session { get; }
+            public bool Owns { get; }
         }
     }
 

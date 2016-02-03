@@ -17,7 +17,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
         public IAsyncDocumentSession Session { get; }
 
         /// <summary>
-        /// Contructor for synchronized storage session
+        /// Constructor for synchronized storage session
         /// </summary>
         /// <param name="session">The transaction to wrap</param>
         /// <param name="ownsSession">Whether this instance is responsible for committing and disposing</param>
