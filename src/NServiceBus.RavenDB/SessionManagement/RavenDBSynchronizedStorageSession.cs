@@ -7,7 +7,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
     /// <summary>
     /// Synchronized storage session for wrapping RavenDB transactions
     /// </summary>
-    public class RavenDBSynchronizedStorageSession : CompletableSynchronizedStorageSession
+    class RavenDBSynchronizedStorageSession : CompletableSynchronizedStorageSession
     {
         bool ownsTransaction;
 
