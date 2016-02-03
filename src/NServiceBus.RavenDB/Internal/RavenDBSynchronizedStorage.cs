@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace NServiceBus.RavenDB.Internal
 {
+    using System;
+
     class RavenDBSynchronizedStorage : ISynchronizedStorage
     {
         ReadOnlySettings settings;
@@ -18,12 +20,28 @@ namespace NServiceBus.RavenDB.Internal
 
         public Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag)
         {
-            var store = settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtensions.DocumentStoreSettingsKey)
-                ?? SharedDocumentStore.Get(settings);
+            var session = GetRavenSession(contextBag);
 
-            var session = store.OpenAsyncSession();
+            var syncronizedStorageSession = new RavenDBSynchronizedStorageSession(session, true);
 
-            return Task.FromResult((CompletableSynchronizedStorageSession)new RavenDBSynchronizedStorageSession(session, true));
+            return Task.FromResult((CompletableSynchronizedStorageSession)syncronizedStorageSession);
+        }
+
+        static IAsyncDocumentSession GetRavenSession(ReadOnlyContextBag contextBag)
+        {
+            Func<IAsyncDocumentSession> sessionFunction;
+            contextBag.TryGet(RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey, out sessionFunction);
+            if (sessionFunction != null)
+            {
+                return sessionFunction();
+            }
+            IAsyncDocumentSession session;
+            contextBag.TryGet(out session);
+            if (session == null)
+            {
+                throw new InvalidOperationException("Failed to retrieve an IAsyncDocumentSession, this is usually because the Saga and Outbox features are not in use.");
+            }
+            return session;
         }
     }
 
