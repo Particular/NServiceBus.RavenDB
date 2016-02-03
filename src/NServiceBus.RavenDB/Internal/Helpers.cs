@@ -105,6 +105,7 @@
         public static void ApplyRavenDBConventions(ReadOnlySettings settings, IDocumentStore documentStore)
         {
             documentStore.Conventions.FindTypeTagName = BackwardsCompatibilityHelper.LegacyFindTypeTagName;
+            documentStore.Conventions.AllowMultipuleAsyncOperations = true;
 
             var store = documentStore as DocumentStore;
             if (store == null)
