@@ -3,7 +3,6 @@
     using System;
     using NServiceBus.Features;
     using NServiceBus.RavenDB.Internal;
-    using NServiceBus.RavenDB.Outbox;
     using Raven.Client;
     using Raven.Client.Document;
     using Raven.Client.Document.DTC;
@@ -12,7 +11,7 @@
     {
         public RavenDbStorageSession()
         {
-            DependsOnAtLeastOne(typeof(RavenDbSagaStorage), typeof(RavenDbOutboxStorage));
+            EnableByDefault();
         }
 
         protected override void Setup(FeatureConfigurationContext context)

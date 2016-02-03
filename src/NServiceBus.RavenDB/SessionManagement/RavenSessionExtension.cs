@@ -1,10 +1,10 @@
-﻿using Raven.Client;
-
+﻿
 namespace NServiceBus
 {
     using System;
     using NServiceBus.Persistence;
     using NServiceBus.SagaPersisters.RavenDB;
+    using Raven.Client;
 
     /// <summary>
     /// Extensions to manage RavenDB session.
