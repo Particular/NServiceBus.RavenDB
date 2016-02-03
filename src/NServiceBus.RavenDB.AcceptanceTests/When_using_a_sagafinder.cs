@@ -54,7 +54,7 @@
                     }
 
                     var ravenSession = (RavenDBSynchronizedStorageSession) session;
-                    return await ravenSession.Transaction.LoadAsync<SagaFinderSagaData>(Context.SagaId).ConfigureAwait(false);
+                    return await ravenSession.Session.LoadAsync<SagaFinderSagaData>(Context.SagaId).ConfigureAwait(false);
                 }
             }
 

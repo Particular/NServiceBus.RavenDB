@@ -60,6 +60,6 @@
 
         public override string ExampleConnectionStringForErrorMessage => null;
 
-        private static TransportTransactionMode transportTransactionMode;
+        static TransportTransactionMode transportTransactionMode;
     }
 }
