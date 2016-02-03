@@ -85,6 +85,7 @@
     <Compile Include="ConnectionParameters.cs" />
     <Compile Include="Internal\RavenDBSynchronizedStorage.cs" />
     <Compile Include="Internal\StorageEngineVerifier.cs" />
+    <Compile Include="Internal\TransactionRecoveryStorageVerifier.cs" />
     <Compile Include="Outbox\OutboxPersister.cs" />
     <Compile Include="Outbox\OutboxRecord.cs" />
     <Compile Include="Outbox\OutboxRecordsCleaner.cs" />

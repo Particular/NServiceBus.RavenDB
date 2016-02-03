@@ -6,8 +6,6 @@
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions.RavenDB;
     using Raven.Client;
-    using Raven.Client.Document;
-    using Raven.Client.Document.DTC;
 
     class RavenDbSubscriptionStorage : Feature
     {
@@ -36,11 +34,7 @@
             BackwardsCompatibilityHelper.SupportOlderClrTypes(store);
 
             // This is required for DTC fix, and this requires RavenDB 2.5 build 2900 or above
-            var remoteStorage = store as DocumentStore;
-            if (remoteStorage != null)
-            {
-                remoteStorage.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
-            }
+            TransactionRecoveryStorageVerifier.ReplaceStorageIfNotSetByUser(store);
 
             store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
 
