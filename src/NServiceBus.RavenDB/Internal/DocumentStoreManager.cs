@@ -14,6 +14,7 @@
     {
         static readonly ILog Logger = LogManager.GetLogger(typeof(DocumentStoreManager));
         const string settingsKey = "RavenDbDocumentStore";
+        const string CustomizeDocumentStoreKey = "RavenDB.SetCustomizeDocumentStoreDelegate";
         static Dictionary<Type, string> featureSettingsKeys;
         static Dictionary<Type, string> connStrKeys;
 
@@ -88,6 +89,16 @@
             }
 
             return initContext.Init(settings);
+        }
+
+        public static void SetCustomizeDocumentStoreDelegate(SettingsHolder settings, Action<IDocumentStore> customize)
+        {
+            settings.Set(CustomizeDocumentStoreKey, customize);
+        }
+
+        public static Action<IDocumentStore> GetCustomizeDocumentStoreDelegate(ReadOnlySettings settings)
+        {
+            return settings.GetOrDefault<Action<IDocumentStore>>(CustomizeDocumentStoreKey);
         }
 
         private static DocumentStoreInitContext CreateDefaultDocumentStore(ReadOnlySettings settings)

@@ -23,10 +23,17 @@
         {
             if (!isInitialized)
             {
+                var customize = DocumentStoreManager.GetCustomizeDocumentStoreDelegate(settings);
+
                 ApplyConventions(settings);
                 ConnectionVerifier.VerifyConnectionToRavenDBServer(docStore);
                 StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(docStore, settings);
                 BackwardsCompatibilityHelper.SupportOlderClrTypes(docStore);
+
+                if (customize != null)
+                {
+                    customize(docStore);
+                }
 
                 docStore.Initialize();
             }
@@ -49,11 +56,11 @@
 
             if (store.ResourceManagerId != ravenDefaultResourceManagerId)
             {
-                Logger.Warn("Overriding user-specified documentStore.ResourceManagerId. It's no longer necessary to set this value while using NServiceBus.RavenDB persistence.");
+                Logger.Warn("Overriding user-specified documentStore.ResourceManagerId. It's no longer necessary to set this value while using NServiceBus.RavenDB persistence. Consider using busConfiguration.CustomizeDocumentStore(Action<IDocumentStore customize) if this is absolutely necessary, but it is not recommended.");
             }
             if (!(store.TransactionRecoveryStorage is VolatileOnlyTransactionRecoveryStorage))
             {
-                Logger.Warn("Overriding user-specified documentStore.TransactionRecoveryStorage. It's no longer necessary to set this value while using NServiceBus.RavenDB persistence.");
+                Logger.Warn("Overriding user-specified documentStore.TransactionRecoveryStorage. It's no longer necessary to set this value while using NServiceBus.RavenDB persistence. Consider using busConfiguration.CustomizeDocumentStore(Action<IDocumentStore customize) if this is absolutely necessary, but it is not recommended.");
             }
 
             var resourceManagerId = settings.Get<string>("NServiceBus.LocalAddress") + "-" + settings.Get<string>("EndpointVersion");
