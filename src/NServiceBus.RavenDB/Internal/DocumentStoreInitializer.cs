@@ -4,20 +4,23 @@
     using System.Security.Cryptography;
     using System.Text;
     using NServiceBus.Logging;
-    using NServiceBus.Persistence;
     using NServiceBus.Settings;
     using Raven.Client;
     using Raven.Client.Document;
     using Raven.Client.Document.DTC;
 
-    class DocumentStoreInitContext
+    class DocumentStoreInitializer
     {
-        static readonly ILog Logger = LogManager.GetLogger(typeof(RavenDBPersistence));
+        static readonly ILog Logger = LogManager.GetLogger(typeof(DocumentStoreInitializer));
 
-        internal DocumentStoreInitContext(IDocumentStore store)
+        internal DocumentStoreInitializer(IDocumentStore store)
         {
             this.docStore = store;
         }
+
+        public string Url => this.docStore.Url;
+
+        public string Identifier => this.docStore.Identifier;
 
         internal IDocumentStore Init(ReadOnlySettings settings)
         {

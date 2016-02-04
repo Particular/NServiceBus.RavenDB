@@ -58,7 +58,7 @@
 
                     b.CustomConfig(cfg =>
                     {
-                        var ds = ConfigureRavenDBPersistence.GetDefaultDocumentStore(cfg.GetSettings());
+                        var ds = ConfigureRavenDBPersistence.GetDefaultDocumentStore(cfg.GetSettings()) as DocumentStore;
                         ds.ResourceManagerId = context.ExpectedResourceManagerId;
                         ds.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
                     });

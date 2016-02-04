@@ -3,6 +3,7 @@ using NServiceBus;
 using NServiceBus.Configuration.AdvanceExtensibility;
 using NServiceBus.Persistence;
 using NServiceBus.Settings;
+using Raven.Client;
 using Raven.Client.Document;
 
 public class ConfigureRavenDBPersistence
@@ -40,9 +41,9 @@ public class ConfigureRavenDBPersistence
         Console.WriteLine("Deleted '{0}' database", documentStore.DefaultDatabase);
     }
 
-    public static DocumentStore GetDefaultDocumentStore(ReadOnlySettings settings)
+    public static IDocumentStore GetDefaultDocumentStore(ReadOnlySettings settings)
     {
-        return settings.Get<DocumentStore>(DefaultDocumentStoreKey);
+        return settings.Get<IDocumentStore>(DefaultDocumentStoreKey);
     }
 
     public static PersistenceExtentions<RavenDBPersistence> GetDefaultPersistenceExtensions(ReadOnlySettings settings)

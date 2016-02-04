@@ -2,6 +2,6 @@
 {
     class SingleSharedDocumentStore
     {
-        public DocumentStoreInitContext DocumentStoreProxy { get; set; }
+        public DocumentStoreInitializer Initializer { get; set; }
     }
 }

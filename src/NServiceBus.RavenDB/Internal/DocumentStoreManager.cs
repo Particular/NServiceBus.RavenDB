@@ -42,53 +42,59 @@
         public static void SetDocumentStore<TStorageType>(SettingsHolder settings, IDocumentStore store)
             where TStorageType : StorageType
         {
-            var initContext = new DocumentStoreInitContext(store);
+            var initContext = new DocumentStoreInitializer(store);
             settings.Set(featureSettingsKeys[typeof(TStorageType)], initContext);
         }
 
         public static void SetDefaultStore(SettingsHolder settings, IDocumentStore store)
         {
-            var initContext = new DocumentStoreInitContext(store);
+            var initContext = new DocumentStoreInitializer(store);
             settings.Set(settingsKey, initContext);
         }
 
         public static IDocumentStore GetDocumentStore<TStorageType>(ReadOnlySettings settings)
             where TStorageType : StorageType
         {
+            return GetUninitializedDocumentStore<TStorageType>(settings).Init(settings);
+        }
+
+        internal static DocumentStoreInitializer GetUninitializedDocumentStore<TStorageType>(ReadOnlySettings settings)
+            where TStorageType : StorageType
+        {
             // First try to get a document store specific to a storage type (Subscriptions, Gateway, etc.)
-            var initContext = settings.GetOrDefault<DocumentStoreInitContext>(featureSettingsKeys[typeof(TStorageType)]);
+            var docStoreInitializer = settings.GetOrDefault<DocumentStoreInitializer>(featureSettingsKeys[typeof(TStorageType)]);
 
             // Next, if a connection string name exists for the storage type, create based on that
-            if (initContext == null)
+            if (docStoreInitializer == null)
             {
-                initContext = CreateStoreByConnectionStringName(settings, connStrKeys[typeof(TStorageType)]);
+                docStoreInitializer = CreateStoreByConnectionStringName(settings, connStrKeys[typeof(TStorageType)]);
             }
 
             // Next try finding a shared DocumentStore
-            if (initContext == null)
+            if (docStoreInitializer == null)
             {
-                initContext = settings.GetOrDefault<DocumentStoreInitContext>(settingsKey);
+                docStoreInitializer = settings.GetOrDefault<DocumentStoreInitializer>(settingsKey);
             }
 
             // Otherwise, we need to create it ourselves, but do so only once.
-            if (initContext == null)
+            if (docStoreInitializer == null)
             {
                 // The holder is known to be non-null since we set it in SharedDocumentStore feature ctor
                 var holder = settings.Get<SingleSharedDocumentStore>();
-                if (holder.DocumentStoreProxy == null)
+                if (holder.Initializer == null)
                 {
-                    holder.DocumentStoreProxy = CreateDefaultDocumentStore(settings);
+                    holder.Initializer = CreateDefaultDocumentStore(settings);
                 }
 
-                initContext = holder.DocumentStoreProxy;
+                docStoreInitializer = holder.Initializer;
             }
 
-            if (initContext == null)
+            if (docStoreInitializer == null)
             {
                 throw new Exception($"RavenDB is configured as persistence for {typeof(TStorageType).Name} and no DocumentStore instance could be found.");
             }
 
-            return initContext.Init(settings);
+            return docStoreInitializer;
         }
 
         public static void SetCustomizeDocumentStoreDelegate(SettingsHolder settings, Action<IDocumentStore> customize)
@@ -101,7 +107,7 @@
             return settings.GetOrDefault<Action<IDocumentStore>>(CustomizeDocumentStoreKey);
         }
 
-        private static DocumentStoreInitContext CreateDefaultDocumentStore(ReadOnlySettings settings)
+        private static DocumentStoreInitializer CreateDefaultDocumentStore(ReadOnlySettings settings)
         {
             var p = settings.GetOrDefault<ConnectionParameters>(RavenDbSettingsExtensions.DefaultConnectionParameters);
             if (p != null)
@@ -114,7 +120,7 @@
                     Credentials = p.Credentials
                 };
 
-                return new DocumentStoreInitContext(storeByParams);
+                return new DocumentStoreInitializer(storeByParams);
             }
 
             var initContext = CreateStoreByConnectionStringName(settings, "NServiceBus/Persistence/RavenDB", "NServiceBus/Persistence");
@@ -127,7 +133,7 @@
             return CreateStoreByUrl(settings, "http://localhost:8080");
         }
 
-        static DocumentStoreInitContext CreateStoreByConnectionStringName(ReadOnlySettings settings, params string[] connectionStringNames)
+        static DocumentStoreInitializer CreateStoreByConnectionStringName(ReadOnlySettings settings, params string[] connectionStringNames)
         {
             var connectionStringName = GetFirstNonEmptyConnectionString(connectionStringNames);
             if (!string.IsNullOrWhiteSpace(connectionStringName))
@@ -141,12 +147,12 @@
                     docStore.DefaultDatabase = settings.EndpointName();
                 }
 
-                return new DocumentStoreInitContext(docStore);
+                return new DocumentStoreInitializer(docStore);
             }
             return null;
         }
 
-        static DocumentStoreInitContext CreateStoreByUrl(ReadOnlySettings settings, string url)
+        static DocumentStoreInitializer CreateStoreByUrl(ReadOnlySettings settings, string url)
         {
             var docStore = new DocumentStore
             {
@@ -158,7 +164,7 @@
                 docStore.DefaultDatabase = settings.EndpointName();
             }
 
-            return new DocumentStoreInitContext(docStore);
+            return new DocumentStoreInitializer(docStore);
         }
 
         static string GetFirstNonEmptyConnectionString(params string[] connectionStringNames)
