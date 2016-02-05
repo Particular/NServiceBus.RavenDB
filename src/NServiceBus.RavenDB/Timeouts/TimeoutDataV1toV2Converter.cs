@@ -31,8 +31,15 @@ namespace NServiceBus.RavenDB.Timeouts
 
         static bool IsTimeoutData(RavenJObject ravenJObject)
         {
-            var clrType = ravenJObject["Raven-Clr-Type"].Value<string>();
-            return !string.IsNullOrEmpty(clrType) && clrType == "NServiceBus.TimeoutPersisters.RavenDB.TimeoutData, NServiceBus.RavenDB";
+            var clrMetaData = ravenJObject["Raven-Clr-Type"];
+            //not all raven document types have 'Raven-Clr-Type' metadata
+            if (clrMetaData == null)
+            {
+                return false;
+            }
+            var clrType = clrMetaData.Value<string>();
+            return !string.IsNullOrEmpty(clrType) && 
+                clrType == "NServiceBus.TimeoutPersisters.RavenDB.TimeoutData, NServiceBus.RavenDB";
         }
     }
 }
