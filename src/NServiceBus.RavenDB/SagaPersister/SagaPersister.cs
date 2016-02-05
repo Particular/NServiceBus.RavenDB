@@ -8,6 +8,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.Sagas;
     using Raven.Abstractions.Commands;
+    using Raven.Abstractions.Data;
     using Raven.Client;
     using Raven.Json.Linq;
 
@@ -46,7 +47,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
                 SagaId = sagaData.Id,
                 UniqueValue = propertyKeyValuePair.Value,
                 SagaDocId = sagaDocId
-            }, id: sagaUniqueIdentityDocId).ConfigureAwait(false);
+            }, id: sagaUniqueIdentityDocId, etag: Etag.Empty).ConfigureAwait(false);
 
             var metadata = await documentSession.Advanced.GetMetadataForAsync(sagaData).ConfigureAwait(false);
             metadata[UniqueDocIdKey] = sagaUniqueIdentityDocId;
