@@ -4,6 +4,8 @@
     using System.Threading.Tasks;
     using EndpointTemplates;
     using AcceptanceTesting;
+    using NServiceBus.Config;
+    using NServiceBus.Features;
     using NUnit.Framework;
 
     public class When_a_existing_saga_instance_exists : NServiceBusAcceptanceTest
@@ -12,7 +14,14 @@
         public async Task Should_hydrate_and_invoke_the_existing_instance()
         {
             var context = await Scenario.Define<Context>()
-                .WithEndpoint<ExistingSagaInstanceEndpt>(b => b.When(bus => bus.SendLocal(new StartSagaMessage { SomeId = Guid.NewGuid() })))
+                .WithEndpoint<ExistingSagaInstanceEndpt>(b =>
+                {
+                    b.When(bus => bus.SendLocal(new StartSagaMessage
+                    {
+                        SomeId = Guid.NewGuid()
+                    }))
+                    .DoNotFailOnErrorMessages();
+                })
                 .Done(c => c.SecondMessageReceived)
                 .Run();
 
@@ -31,12 +40,22 @@
         {
             public ExistingSagaInstanceEndpt()
             {
-                EndpointSetup<DefaultServer>();
+                EndpointSetup<DefaultServer>(b =>
+                {
+                    b.EnableFeature<FirstLevelRetries>();
+                });
             }
 
-            public class TestSaga05 : Saga<TestSagaData05>, IAmStartedByMessages<StartSagaMessage>
+            public class TestSaga05 : Saga<TestSagaData05>, IAmStartedByMessages<StartSagaMessage>,
+                IHandleMessages<FinishSagaMessage>
             {
                 public Context TestContext { get; set; }
+
+                public Task Handle(FinishSagaMessage message, IMessageHandlerContext context)
+                {
+                    TestContext.SecondMessageReceived = true;
+                    return Task.FromResult(0);
+                }
 
                 public Task Handle(StartSagaMessage message, IMessageHandlerContext context)
                 {
@@ -45,20 +64,21 @@
                     if (message.SecondMessage)
                     {
                         TestContext.SecondSagaId = Data.Id;
-                        TestContext.SecondMessageReceived = true;
+                        return context.SendLocal(new FinishSagaMessage { SomeId = message.SomeId });
                     }
                     else
                     {
                         TestContext.FirstSagaId = Data.Id;
                         return context.SendLocal(new StartSagaMessage { SomeId = message.SomeId, SecondMessage = true });
                     }
-
-                    return Task.FromResult(0);
                 }
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<TestSagaData05> mapper)
                 {
                     mapper.ConfigureMapping<StartSagaMessage>(m => m.SomeId)
+                        .ToSaga(s => s.SomeId);
+
+                    mapper.ConfigureMapping<FinishSagaMessage>(m => m.SomeId)
                         .ToSaga(s => s.SomeId);
                 }
             }
@@ -78,6 +98,12 @@
             public Guid SomeId { get; set; }
 
             public bool SecondMessage { get; set; }
+        }
+
+        [Serializable]
+        public class FinishSagaMessage : ICommand
+        {
+            public Guid SomeId { get; set; }
         }
     }
 }
