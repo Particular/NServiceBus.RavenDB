@@ -28,8 +28,7 @@
             {
                 throw new Exception("RavenDB is configured as persistence for Timeouts and no DocumentStore instance found");
             }
-
-            ConnectionVerifier.VerifyConnectionToRavenDBServer(store);
+            
             StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(store, context.Settings);
 
             BackwardsCompatibilityHelper.SupportOlderClrTypes(store);
