@@ -38,14 +38,15 @@
             {
                 EndpointSetup<DefaultServer>(c =>
                 {
+                    c.EnableFeature<FirstLevelRetries>();
                     c.EnableFeature<TimeoutManager>();
                     c.ExecuteTheseHandlersFirst(typeof(CatchAllMessageHandler));
                 });
             }
 
-            public class MultiTimeoutsSaga1 : Saga<MultiTimeoutsSaga1.MultiTimeoutsSaga1Data>, 
-                IAmStartedByMessages<StartSaga1>, 
-                IHandleTimeouts<Saga1Timeout>, 
+            public class MultiTimeoutsSaga1 : Saga<MultiTimeoutsSaga1.MultiTimeoutsSaga1Data>,
+                IAmStartedByMessages<StartSaga1>,
+                IHandleTimeouts<Saga1Timeout>,
                 IHandleTimeouts<Saga2Timeout>
             {
                 public Context TestContext { get; set; }
