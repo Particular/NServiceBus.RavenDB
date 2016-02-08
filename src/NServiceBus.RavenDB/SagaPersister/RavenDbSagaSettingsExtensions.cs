@@ -2,6 +2,7 @@
 {
     using NServiceBus.Configuration.AdvanceExtensibility;
     using NServiceBus.Persistence;
+    using NServiceBus.RavenDB.Internal;
     using Raven.Client;
 
     /// <summary>
@@ -9,7 +10,6 @@
     /// </summary>
     public static class RavenDbSagaSettingsExtensions
     {
-        internal const string DocumentStoreSettingsKey = "RavenDbDocumentStore/Saga";
         internal const string AllowStaleSagaReadsKey = "RavenDB.AllowStaleSagaReads";
 
         /// <summary>
@@ -20,7 +20,7 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> UseDocumentStoreForSagas(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            cfg.GetSettings().Set(DocumentStoreSettingsKey, documentStore);
+            DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(cfg.GetSettings(), documentStore);
             return cfg;
         }
 
