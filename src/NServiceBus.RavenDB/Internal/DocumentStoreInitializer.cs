@@ -29,7 +29,6 @@
                 var customize = DocumentStoreManager.GetCustomizeDocumentStoreDelegate(settings);
 
                 ApplyConventions(settings);
-                ConnectionVerifier.VerifyConnectionToRavenDBServer(docStore);
                 BackwardsCompatibilityHelper.SupportOlderClrTypes(docStore);
 
                 if (customize != null)
