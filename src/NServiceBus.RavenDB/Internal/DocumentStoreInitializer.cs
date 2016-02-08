@@ -29,8 +29,6 @@
                 var customize = DocumentStoreManager.GetCustomizeDocumentStoreDelegate(settings);
 
                 ApplyConventions(settings);
-                ConnectionVerifier.VerifyConnectionToRavenDBServer(docStore);
-                StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(docStore, settings);
                 BackwardsCompatibilityHelper.SupportOlderClrTypes(docStore);
 
                 if (customize != null)
@@ -39,6 +37,7 @@
                 }
 
                 docStore.Initialize();
+                StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(docStore, settings);
             }
             isInitialized = true;
             return docStore;
