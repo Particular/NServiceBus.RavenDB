@@ -1,58 +1,16 @@
 ﻿namespace NServiceBus.RavenDB.Internal
 {
     using System;
-    using System.Configuration;
-    using System.Linq;
-    using System.Security.Cryptography;
     using System.Text;
     using NServiceBus.Logging;
     using NServiceBus.Persistence;
-    using NServiceBus.Settings;
     using Raven.Client;
-    using Raven.Client.Document;
     using Raven.Client.Indexes;
     using Raven.Json.Linq;
 
     class Helpers
     {
         static readonly ILog Logger = LogManager.GetLogger(typeof(RavenDBPersistence));
-
-        public static IDocumentStore CreateDocumentStoreByConnectionStringName(ReadOnlySettings settings, params string[] connectionStringNames)
-        {
-            var connectionStringName = GetFirstNonEmptyConnectionString(connectionStringNames);
-            if (!string.IsNullOrWhiteSpace(connectionStringName))
-            {
-                var docStore = new DocumentStore
-                {
-                    ConnectionStringName = connectionStringName
-                };
-                if (docStore.DefaultDatabase == null)
-                {
-                    docStore.DefaultDatabase = settings.EndpointName();
-                }
-                ApplyRavenDBConventions(settings, docStore);
-
-                return docStore.Initialize();
-            }
-            return null;
-        }
-
-        public static IDocumentStore CreateDocumentStoreByUrl(ReadOnlySettings settings, string url)
-        {
-            var docStore = new DocumentStore
-            {
-                Url = url
-            };
-
-            if (docStore.DefaultDatabase == null)
-            {
-                docStore.DefaultDatabase = settings.EndpointName();
-            }
-
-            ApplyRavenDBConventions(settings, docStore);
-
-            return docStore.Initialize();
-        }
 
         static void LogRavenConnectionFailure(Exception exception, IDocumentStore store)
         {
@@ -84,53 +42,6 @@
             {
                 LogRavenConnectionFailure(e, documentStore);
                 throw;
-            }
-        }
-
-        static string GetFirstNonEmptyConnectionString(params string[] connectionStringNames)
-        {
-            try
-            {
-                return connectionStringNames.FirstOrDefault(cstr => ConfigurationManager.ConnectionStrings[cstr] != null);
-            }
-            catch (ConfigurationErrorsException)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        ///     Apply the NServiceBus conventions to a <see cref="DocumentStore" /> .
-        /// </summary>
-        public static void ApplyRavenDBConventions(ReadOnlySettings settings, IDocumentStore documentStore)
-        {
-            documentStore.Conventions.FindTypeTagName = BackwardsCompatibilityHelper.LegacyFindTypeTagName;
-
-            var store = documentStore as DocumentStore;
-            if (store == null)
-            {
-                return;
-            }
-
-            var resourceManagerId = settings.Get<string>("NServiceBus.LocalAddress") + "-" + settings.Get<string>("EndpointVersion");
-            store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
-
-            bool suppressDistributedTransactions;
-            if (settings.TryGet("Transactions.SuppressDistributedTransactions", out suppressDistributedTransactions) && suppressDistributedTransactions)
-            {
-                store.EnlistInDistributedTransactions = false;
-            }
-        }
-
-        static Guid DeterministicGuidBuilder(string input)
-        {
-            // use MD5 hash to get a 16-byte hash of the string
-            using (var provider = new MD5CryptoServiceProvider())
-            {
-                var inputBytes = Encoding.Default.GetBytes(input);
-                var hashBytes = provider.ComputeHash(inputBytes);
-                // generate a guid from the hash:
-                return new Guid(hashBytes);
             }
         }
 

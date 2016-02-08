@@ -4,6 +4,7 @@
     using NServiceBus.Configuration.AdvanceExtensibility;
     using NServiceBus.Persistence;
     using NServiceBus.RavenDB;
+    using NServiceBus.RavenDB.Internal;
     using NServiceBus.RavenDB.SessionManagement;
     using Raven.Client;
 
@@ -12,7 +13,6 @@
     /// </summary>
     public static class RavenDbSettingsExtensions
     {
-        internal const string DocumentStoreSettingsKey = "RavenDbDocumentStore";
         internal const string DefaultConnectionParameters = "RavenDbConnectionParameters";
         internal const string SharedSessionSettingsKey = "RavenDbSharedSession";
 
@@ -24,7 +24,7 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            cfg.GetSettings().Set(DocumentStoreSettingsKey, documentStore);
+            DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), documentStore);
             return cfg;
         }
 
