@@ -34,9 +34,9 @@
                         .Where(o => o.Dispatched)
                         .OrderBy(o => o.DispatchedAt);
 
-                    using (var enumerator = await session.Advanced.StreamAsync(query))
+                    using (var enumerator = await session.Advanced.StreamAsync(query).ConfigureAwait(false))
                     {
-                        while (await enumerator.MoveNextAsync())
+                        while (await enumerator.MoveNextAsync().ConfigureAwait(false))
                         {
                             if (enumerator.Current.Document.DispatchedAt >= dateTime)
                             {
@@ -44,11 +44,11 @@
                             }
 
                             /*
-                             * For some unknown reasons when streaming classes with no 
-                             * Id property the Key is not filled. The document Id can be 
+                             * For some unknown reasons when streaming classes with no
+                             * Id property the Key is not filled. The document Id can be
                              * found in the streamed document metadata.
                              */
-                            var key = enumerator.Current.Key ?? enumerator.Current.Metadata[ "@id" ].ToString();
+                            var key = enumerator.Current.Key ?? enumerator.Current.Metadata["@id"].ToString();
 
                             deletionCommands.Add(new DeleteCommandData
                             {
@@ -58,7 +58,7 @@
                     }
                 }
 
-                await DocumentStore.AsyncDatabaseCommands.BatchAsync(deletionCommands);
+                await DocumentStore.AsyncDatabaseCommands.BatchAsync(deletionCommands).ConfigureAwait(false);
             }
             finally
             {
