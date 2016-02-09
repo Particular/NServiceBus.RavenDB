@@ -58,7 +58,7 @@
                 }
             }
 
-            protected override Task OnStart(IBusSession session)
+            protected override Task OnStart(IMessageSession session)
             {
                 timeToKeepDeduplicationData = Settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
 
@@ -69,7 +69,7 @@
                 return Task.FromResult(0);
             }
 
-            protected override Task OnStop(IBusSession session)
+            protected override Task OnStop(IMessageSession session)
             {
                 using(var waitHandle = new ManualResetEvent(false))
                 {
