@@ -79,7 +79,6 @@
     <Compile Include="Internal\IDocumentStoreWrapper.cs" />
     <Compile Include="Internal\LegacyAddress.cs" />
     <Compile Include="Internal\BackwardsCompatibilityHelper.cs" />
-    <Compile Include="Internal\RavenBuildInfo.cs" />
     <Compile Include="Internal\DocumentStoreWrapper.cs" />
     <Compile Include="Internal\Helpers.cs" />
     <Compile Include="ConnectionParameters.cs" />
