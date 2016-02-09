@@ -15,7 +15,7 @@
         /// <param name="timeToKeepDeduplicationData">The time to keep the deduplication data. 
         /// The cleanup process removes entries older than the specified time to keep deduplication data, therefore the time span cannot be negative</param>
         /// <returns>The configuration</returns>
-        public static BusConfiguration SetTimeToKeepDeduplicationData(this BusConfiguration configuration, TimeSpan timeToKeepDeduplicationData)
+        public static EndpointConfiguration SetTimeToKeepDeduplicationData(this EndpointConfiguration configuration, TimeSpan timeToKeepDeduplicationData)
         {
             var now = DateTime.UtcNow;
             if (now - timeToKeepDeduplicationData >= now)
@@ -33,7 +33,7 @@
         /// <param name="configuration">The configuration being extended</param>
         /// <param name="frequencyToRunDeduplicationDataCleanup">The frequency to run the deduplication data cleanup task. By specifying a negative time span (-1) the cleanup task will never run.</param>
         /// <returns>The configuration</returns>
-        public static BusConfiguration SetFrequencyToRunDeduplicationDataCleanup(this BusConfiguration configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
+        public static EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this EndpointConfiguration configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
         {
             configuration.GetSettings().Set("Outbox.FrequencyToRunDeduplicationDataCleanup", frequencyToRunDeduplicationDataCleanup);
             return configuration;

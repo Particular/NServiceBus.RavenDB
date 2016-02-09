@@ -7,7 +7,7 @@ using Raven.Client.Document;
 
 public class ConfigureRavenDBPersistence : IConfigureTestExecution
 {
-    public Task Configure(BusConfiguration configuration, IDictionary<string, string> settings)
+    public Task Configure(EndpointConfiguration configuration, IDictionary<string, string> settings)
     {
         documentStore = GetDocumentStore();
 
