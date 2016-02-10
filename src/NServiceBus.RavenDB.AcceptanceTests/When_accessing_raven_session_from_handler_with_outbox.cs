@@ -53,7 +53,7 @@
 
                 public Task Handle(GenericMessage message, IMessageHandlerContext context)
                 {
-                    TestContext.RavenSessionFromHandler = context.SynchronizedStorageSession.Session();
+                    TestContext.RavenSessionFromHandler = context.SynchronizedStorageSession.RavenSession();
                     TestContext.HandlerWasHit = true;
                     return Task.FromResult(0);
                 }

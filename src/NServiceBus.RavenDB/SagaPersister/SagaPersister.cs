@@ -18,7 +18,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
 
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
-            var documentSession = session.Session();
+            var documentSession = session.RavenSession();
 
             if (sagaData == null)
             {
@@ -61,13 +61,13 @@ namespace NServiceBus.SagaPersisters.RavenDB
 
         public async Task<T> Get<T>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where T : IContainSagaData
         {
-            var documentSession = session.Session();
+            var documentSession = session.RavenSession();
             return await documentSession.LoadAsync<T>(sagaId).ConfigureAwait(false);
         }
 
         public async Task<T> Get<T>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where T : IContainSagaData
         {
-            var documentSession = session.Session();
+            var documentSession = session.RavenSession();
 
             var lookupId = SagaUniqueIdentity.FormatId(typeof(T), new KeyValuePair<string, object>(propertyName, propertyValue));
 
@@ -91,7 +91,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
 
         public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
-            var documentSession = session.Session();
+            var documentSession = session.RavenSession();
 
             documentSession.Delete(sagaData);
 

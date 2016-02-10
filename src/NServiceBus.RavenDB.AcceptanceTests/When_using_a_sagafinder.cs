@@ -52,7 +52,7 @@
                         return await Task.FromResult(default(SagaFinderSagaData));
                     }
 
-                    return await session.Session().LoadAsync<SagaFinderSagaData>(Context.SagaId).ConfigureAwait(false);
+                    return await session.RavenSession().LoadAsync<SagaFinderSagaData>(Context.SagaId).ConfigureAwait(false);
                 }
             }
 
