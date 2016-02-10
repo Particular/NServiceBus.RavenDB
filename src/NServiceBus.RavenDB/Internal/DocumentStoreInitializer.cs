@@ -1,6 +1,9 @@
 ﻿namespace NServiceBus.RavenDB.Internal
 {
     using System;
+    using System.Collections.Generic;
+    using System.Configuration;
+    using System.IO;
     using System.Security.Cryptography;
     using System.Text;
     using NServiceBus.Logging;
@@ -68,14 +71,58 @@
             var resourceManagerId = settings.Get<string>("NServiceBus.LocalAddress") + "-" + settings.Get<string>("EndpointVersion");
             store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
 
-            string path = $@"%LOCALAPPDATA%\NServiceBus.RavenDB\{store.ResourceManagerId}";
-            store.TransactionRecoveryStorage = new LocalDirectoryTransactionRecoveryStorage(path);
+            store.TransactionRecoveryStorage = CreateValidTransactionRecoveryStorage(settings, store.ResourceManagerId);
 
             bool suppressDistributedTransactions;
             if (settings.TryGet("Transactions.SuppressDistributedTransactions", out suppressDistributedTransactions) && suppressDistributedTransactions)
             {
                 store.EnlistInDistributedTransactions = false;
             }
+        }
+
+        static ITransactionRecoveryStorage CreateValidTransactionRecoveryStorage(ReadOnlySettings settings, Guid resourceManagerId)
+        {
+            var suffixPath = Path.Combine("NServiceBus.RavenDB", resourceManagerId.ToString());
+
+            foreach (var basePath in GetPotentialTransactionRecoveryStoragePaths(settings))
+            {
+                var fullPath = Path.Combine(basePath, suffixPath);
+                try
+                {
+                    return new LocalDirectoryTransactionRecoveryStorage(fullPath);
+                }
+                // TODO: Cover other exception types? https://msdn.microsoft.com/en-us/library/54a0at6s(v=vs.110).aspx
+                catch (UnauthorizedAccessException)
+                {
+                    // Have to catch and move on to the next location
+                }
+            }
+
+            Logger.Warn($"Unable to find a location to store RavenDB transaction recovery storage information. Consider specifying a writeable directory using the `{RavenDbPersistenceSettingsExtensions.TransactionRecoveryStorageBasePathKey}` appSetting or .SetTransactionRecoveryStorageBasePath(basePath) option.");
+            Logger.Warn("Falling back to IsolatedStorage-based transaction recovery storage, which has shown to be unstable in high-contention situations.");
+
+            return new IsolatedStorageTransactionRecoveryStorage();
+        }
+
+        static IEnumerable<string> GetPotentialTransactionRecoveryStoragePaths(ReadOnlySettings settings)
+        {
+            string settingsBasePath;
+            if (settings.TryGet(RavenDbPersistenceSettingsExtensions.TransactionRecoveryStorageBasePathKey, out settingsBasePath))
+            {
+                yield return settingsBasePath;
+                throw new Exception($"Unable to access RavenDB transaction recovery storage specified by `.SetTransactionRecoveryStorageBasePath(string basePath)` because access to `{settingsBasePath}` is denied.");
+            }
+
+            var configBasePath = ConfigurationManager.AppSettings[RavenDbPersistenceSettingsExtensions.TransactionRecoveryStorageBasePathKey];
+            if (configBasePath != null)
+            {
+                yield return configBasePath;
+                throw new ConfigurationErrorsException($"Unable to access RavenDB transaction recovery storage specified in `RavenDB/TransactionRecoveryStorage/BasePath` appSetting because access to `{configBasePath}`is denied.");
+            }
+
+            yield return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            yield return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            yield return Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
         }
 
         static Guid DeterministicGuidBuilder(string input)
