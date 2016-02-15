@@ -14,6 +14,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     {
         DateTime lastCleanupTime = DateTime.MinValue;
         readonly IDocumentStore documentStore;
+        bool abort = false;
 
         public QueryTimeouts(IDocumentStore store)
         {
@@ -28,6 +29,11 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
         public async Task<TimeoutsChunk> GetNextChunk(DateTime startSlice)
         {
+            if(abort)
+            {
+                return new TimeoutsChunk(new TimeoutsChunk.Timeout[ 0 ], DateTime.UtcNow.AddHours(1));
+            }
+
             var now = DateTime.UtcNow;
             List<TimeoutsChunk.Timeout> results;
 
@@ -49,7 +55,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             using (var session = documentStore.OpenAsyncSession())
             {
                 var query = GetChunkQuery(session)
-                    .Where(t => t.Time > startSlice)
+                    .Where(t => t.Time > startSlice && t.Time <= DateTime.UtcNow)
                     .Select(t => new
                     {
                         t.Id,
@@ -61,13 +67,13 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 {
                     while (await enumerator.MoveNextAsync().ConfigureAwait(false))
                     {
+                        if(abort)
+                        {
+                            break;
+                        }
+
                         var dateTime = enumerator.Current.Document.Time;
                         nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time < now
-
-                        if (dateTime > DateTime.UtcNow)
-                        {
-                            break; // break on first future timeout
-                        }
 
                         results.Add(new TimeoutsChunk.Timeout(enumerator.Current.Document.Id, dateTime));
                     }
@@ -85,6 +91,11 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
         public async Task<IEnumerable<TimeoutsChunk.Timeout>> GetCleanupChunk(DateTime startSlice)
         {
+            if(abort)
+            {
+                return new TimeoutsChunk.Timeout[0];
+            }
+
             using (var session = documentStore.OpenAsyncSession())
             {
                 var query = await GetChunkQuery(session)
@@ -115,6 +126,11 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                     t =>
                         t.OwningTimeoutManager == string.Empty ||
                         t.OwningTimeoutManager == EndpointName);
+        }
+
+        internal void Shutdown()
+        {
+            abort = true;
         }
     }
 }
