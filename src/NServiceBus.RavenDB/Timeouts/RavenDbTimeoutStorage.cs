@@ -6,7 +6,7 @@
     using NServiceBus.RavenDB.Timeouts;
     using NServiceBus.TimeoutPersisters.RavenDB;
     using Raven.Client;
-
+    using System.Threading.Tasks;
     class RavenDbTimeoutStorage : Feature
     {
         RavenDbTimeoutStorage()
@@ -44,6 +44,26 @@
             context.Container.ConfigureComponent(() => new TimeoutPersister(store),DependencyLifecycle.InstancePerCall);
             context.Container.ConfigureComponent(() => new QueryTimeouts(store), DependencyLifecycle.SingleInstance) // Needs to be SingleInstance because it contains cleanup state
                 .ConfigureProperty(x => x.EndpointName, context.Settings.EndpointName().ToString());
+            context.RegisterStartupTask(builder =>
+            {
+                return builder.Build<QueryTimeoutsLifecycleHandler>();
+            });
+        }
+
+        class QueryTimeoutsLifecycleHandler : FeatureStartupTask
+        {
+            public QueryTimeouts QueryTimeouts { get; set; }
+
+            protected override Task OnStart(IMessageSession session)
+            {
+                //NOP
+                return Task.FromResult(false);
+            }
+
+            protected override Task OnStop(IMessageSession session)
+            {
+                return Task.Run(() => this.QueryTimeouts.Shutdown());
+            }
         }
     }
 }
