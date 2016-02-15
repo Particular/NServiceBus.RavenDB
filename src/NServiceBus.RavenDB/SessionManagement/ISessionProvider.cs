@@ -3,7 +3,7 @@ namespace NServiceBus.RavenDB.Persistence
     /// <summary>
     ///     Provides access the the session managed by NServiceBus
     /// </summary>
-    [ObsoleteEx( Message = "Use the 'IAsyncSessionProvider' interface.", RemoveInVersion = "5", TreatAsErrorFromVersion = "4" )]
+    [ObsoleteEx( Message = "The session is now exposed through SynchronizedStorageSession.RavenSession(). For handlers use context.SynchronizedStorageSession.RavenSession(). For ", RemoveInVersion = "5", TreatAsErrorFromVersion = "4" )]
     public interface ISessionProvider
     {
         

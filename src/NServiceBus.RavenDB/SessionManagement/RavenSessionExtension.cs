@@ -1,37 +1,31 @@
-﻿using Raven.Client;
-
+﻿
 namespace NServiceBus
 {
     using System;
+    using NServiceBus.Persistence;
+    using NServiceBus.SagaPersisters.RavenDB;
+    using Raven.Client;
 
     /// <summary>
-    /// Extensions, to the message handler context, to manage RavenDB session.
+    /// Extensions to manage RavenDB session.
     /// </summary>
     public static class RavenSessionExtension
     {
         /// <summary>
         /// Gets the current RavenDB session.
         /// </summary>
-        /// <param name="context">The context.</param>
+        /// <param name="session">The storage session.</param>
         /// <returns></returns>
-        public static IAsyncDocumentSession GetRavenSession(this IMessageHandlerContext context)
+        public static IAsyncDocumentSession RavenSession(this SynchronizedStorageSession session)
         {
-            Func<IAsyncDocumentSession> sessionFunction;
-            context.Extensions.TryGet(out sessionFunction);
-            if (sessionFunction != null)
+            var synchronizedStorageSession = session as RavenDBSynchronizedStorageSession;
+            
+            if (synchronizedStorageSession == null)
             {
-                return sessionFunction();
+                throw new InvalidOperationException("It was not possible to retrieve a RavenDB session.");
             }
-            IAsyncDocumentSession session;
-            context.Extensions.TryGet(out session);
-            if (session == null)
-            {
-                throw new Exception(
-                    @"GetRavenSession() allows retrieval of the shared Raven IAsyncDocumentSession 
-being used by NServiceBus so that additional Raven operations can be completed in the same transactional context as NServiceBus Sagas and Outbox features. 
-Because the Saga and Outbox features are not currently in use, it was not possible to retrieve a RavenDB session.");
-            }
-            return session;
+
+            return synchronizedStorageSession.Session;
         }
     }
 }

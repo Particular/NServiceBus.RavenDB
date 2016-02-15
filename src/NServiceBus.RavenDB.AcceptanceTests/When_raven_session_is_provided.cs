@@ -3,19 +3,24 @@
     using System;
     using System.Threading.Tasks;
     using AcceptanceTesting;
-    using Moq;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
     using Raven.Client;
+    using Raven.Client.Document;
 
     public class When_raven_session_is_provided : NServiceBusAcceptanceTest
     {
         [Test]
         public async Task It_should_return_configured_session()
         {
-            var session = Mock.Of<IAsyncDocumentSession>();
+            DocumentStore documentStore = null;
+            IAsyncDocumentSession session = null;
+            try
+            {
+                documentStore = ConfigureRavenDBPersistence.GetDocumentStore();
+                session = documentStore.OpenAsyncSession();
 
-            var context =
+                var context =
                 await Scenario.Define<RavenSessionTestContext>(testContext =>
                 {
                     testContext.RavenSessionFromTest = session;
@@ -31,7 +36,23 @@
                     .Done(c => c.HandlerWasHit)
                     .Run();
 
-            Assert.AreSame(session, context.RavenSessionFromHandler);
+                Assert.AreSame(session, context.RavenSessionFromHandler);
+            }
+            finally
+            {
+                if (session != null)
+                {
+                    session.Dispose();
+                    session = null;
+                }
+
+                if (documentStore != null)
+                {
+                    await ConfigureRavenDBPersistence.DeleteDatabase(documentStore);
+                }
+            }
+
+
         }
 
         public class RavenSessionTestContext : ScenarioContext
@@ -65,7 +86,7 @@
 
                 public Task Handle(GenericMessage message, IMessageHandlerContext context)
                 {
-                    TestContext.RavenSessionFromHandler = context.GetRavenSession();
+                    TestContext.RavenSessionFromHandler = context.SynchronizedStorageSession.RavenSession();
                     TestContext.HandlerWasHit = true;
                     return Task.FromResult(0);
                 }

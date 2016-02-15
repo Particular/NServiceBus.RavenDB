@@ -40,9 +40,9 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
             // added after startSlice have been set to a later timout and we might have missed them
             // because of stale indexes.
-            if(lastCleanupTime == DateTime.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) < now)
+            if (lastCleanupTime == DateTime.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) < now)
             {
-                results = (await GetCleanupChunk(startSlice)).ToList();
+                results = (await GetCleanupChunk(startSlice).ConfigureAwait(false)).ToList();
             }
             else
             {
@@ -52,7 +52,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             // default return value for when no results are found
             var nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10);
 
-            using(var session = documentStore.OpenAsyncSession())
+            using (var session = documentStore.OpenAsyncSession())
             {
                 var query = GetChunkQuery(session)
                     .Where(t => t.Time > startSlice && t.Time <= DateTime.UtcNow)
@@ -63,9 +63,9 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                     });
 
                 var qhi = new Reference<QueryHeaderInformation>();
-                using(var enumerator = await session.Advanced.StreamAsync(query, qhi))
+                using (var enumerator = await session.Advanced.StreamAsync(query, qhi).ConfigureAwait(false))
                 {
-                    while(await enumerator.MoveNextAsync())
+                    while (await enumerator.MoveNextAsync().ConfigureAwait(false))
                     {
                         if(abort)
                         {
@@ -80,7 +80,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 }
 
                 // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
-                if(qhi.Value != null && qhi.Value.IsStale && results.Count == 0)
+                if (qhi.Value != null && qhi.Value.IsStale && results.Count == 0)
                 {
                     nextTimeToRunQuery = now;
                 }
@@ -96,7 +96,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 return new TimeoutsChunk.Timeout[0];
             }
 
-            using(var session = documentStore.OpenAsyncSession())
+            using (var session = documentStore.OpenAsyncSession())
             {
                 var query = await GetChunkQuery(session)
                     .Where(t => t.Time <= startSlice.Subtract(CleanupGapFromTimeslice))
@@ -106,7 +106,8 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                         t.Time
                     })
                     .Take(1024)
-                    .ToListAsync();
+                    .ToListAsync()
+                    .ConfigureAwait(false);
 
                 var chunk = query.Select(arg => new TimeoutsChunk.Timeout(arg.Id, arg.Time));
 

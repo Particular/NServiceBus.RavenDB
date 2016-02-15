@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace NServiceBus.RavenDB.Internal
 {
+    using System;
+
     class RavenDBSynchronizedStorage : ISynchronizedStorage
     {
         ReadOnlySettings settings;
@@ -18,12 +20,44 @@ namespace NServiceBus.RavenDB.Internal
 
         public Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag)
         {
+            var ownership = GetRavenSession();
+
+            return Task.FromResult((CompletableSynchronizedStorageSession)new RavenDBSynchronizedStorageSession(ownership.Session, ownership.Owns));
+        }
+
+        SessionOwnership GetRavenSession()
+        {
+            Func<IAsyncDocumentSession> sessionFunction;
+            settings.TryGet(RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey, out sessionFunction);
+            if (sessionFunction != null)
+            {
+                return new SessionOwnership(false, sessionFunction());
+            }
+
+            IAsyncDocumentSession session;
+            if (settings.TryGet(out session))
+            {
+                return new SessionOwnership(true, session);
+            }
+
             var store = settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtensions.DocumentStoreSettingsKey)
-                ?? SharedDocumentStore.Get(settings);
+                        ?? SharedDocumentStore.Get(settings);
 
-            var session = store.OpenAsyncSession();
+            session = store.OpenAsyncSession();
 
-            return Task.FromResult((CompletableSynchronizedStorageSession)new RavenDBSynchronizedStorageSession(session, true));
+            return new SessionOwnership(true, session);
+        }
+
+        class SessionOwnership
+        {
+            public SessionOwnership(bool ownsSession, IAsyncDocumentSession session)
+            {
+                Session = session;
+                Owns = ownsSession;
+
+            }
+            public IAsyncDocumentSession Session { get; }
+            public bool Owns { get; }
         }
     }
 

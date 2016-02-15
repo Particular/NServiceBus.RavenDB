@@ -1,25 +1,33 @@
 ﻿namespace NServiceBus.RavenDB.Outbox
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
+    using NServiceBus.Routing;
     using Raven.Client;
+    using TransportOperation = NServiceBus.Outbox.TransportOperation;
 
     class OutboxPersister : IOutboxStorage
     {
-        public OutboxPersister(IDocumentStore documentStore)
+        public OutboxPersister(IDocumentStore documentStore, EndpointName endpointName)
         {
             this.documentStore = documentStore;
+            this.endpointName = endpointName;
         }
         public async Task<OutboxMessage> Get(string messageId, ContextBag options)
         {
             OutboxRecord result;
             using (var session = documentStore.OpenAsyncSession())
             {
+                session.Advanced.AllowNonAuthoritativeInformation = false;
+
                 // We use Load operation and not queries to avoid stale results
-                result = await session.LoadAsync<OutboxRecord>(GetOutboxRecordId(messageId)).ConfigureAwait(false);
+                var possibleIds = GetPossibleOutboxDocumentIds(messageId);
+                var docs = await session.LoadAsync<OutboxRecord>(possibleIds).ConfigureAwait(false);
+                result = docs.FirstOrDefault(o => o != null);
             }
 
             if (result == null)
@@ -27,9 +35,13 @@
                 return default(OutboxMessage);
             }
 
-            var operations = result.TransportOperations.Select(t => new TransportOperation(t.MessageId, t.Options, t.Message, t.Headers)).ToList();
-            var message = new OutboxMessage(result.MessageId, operations);
+            var operations = new List<TransportOperation>();
+            if (!result.Dispatched)
+            {
+                operations.AddRange(result.TransportOperations.Select(t => new TransportOperation(t.MessageId, t.Options, t.Message, t.Headers)));
+            }
 
+            var message = new OutboxMessage(result.MessageId, operations);
             return message;
         }
 
@@ -68,7 +80,10 @@
             using (var session = documentStore.OpenAsyncSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
-                var outboxMessage = await session.LoadAsync<OutboxRecord>(GetOutboxRecordId(messageId)).ConfigureAwait(false);
+                session.Advanced.AllowNonAuthoritativeInformation = false;
+
+                var docs = await session.LoadAsync<OutboxRecord>(GetPossibleOutboxDocumentIds(messageId)).ConfigureAwait(false);
+                var outboxMessage = docs.FirstOrDefault(o => o != null);
                 if (outboxMessage == null || outboxMessage.Dispatched)
                 {
                     return;
@@ -81,11 +96,18 @@
             }
         }
 
-        static string GetOutboxRecordId(string messageId)
+        string[] GetPossibleOutboxDocumentIds(string messageId)
         {
-            return "Outbox/" + messageId;
+            return new[]
+            {
+                GetOutboxRecordId(messageId),
+                $"Outbox/{messageId}"
+            };
         }
 
+        string GetOutboxRecordId(string messageId) => $"Outbox/{endpointName}/{messageId}";
+
+        EndpointName endpointName;
         IDocumentStore documentStore;
     }
 }
