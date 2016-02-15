@@ -55,7 +55,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             using (var session = documentStore.OpenAsyncSession())
             {
                 var query = GetChunkQuery(session)
-                    .Where(t => t.Time > startSlice)
+                    .Where(t => t.Time > startSlice && t.Time <= DateTime.UtcNow)
                     .Select(t => new
                     {
                         t.Id,
@@ -74,11 +74,6 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
                         var dateTime = enumerator.Current.Document.Time;
                         nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time < now
-
-                        if (dateTime > DateTime.UtcNow)
-                        {
-                            break; // break on first future timeout
-                        }
 
                         results.Add(new TimeoutsChunk.Timeout(enumerator.Current.Document.Id, dateTime));
                     }
