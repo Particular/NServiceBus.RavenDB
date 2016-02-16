@@ -29,11 +29,6 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
         public async Task<TimeoutsChunk> GetNextChunk(DateTime startSlice)
         {
-            if(abort)
-            {
-                return new TimeoutsChunk(new TimeoutsChunk.Timeout[ 0 ], DateTime.UtcNow.AddHours(1));
-            }
-
             var now = DateTime.UtcNow;
             List<TimeoutsChunk.Timeout> results;
 
