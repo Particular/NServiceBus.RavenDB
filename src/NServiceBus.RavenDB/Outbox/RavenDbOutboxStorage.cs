@@ -33,21 +33,21 @@
 
             context.Container.ConfigureComponent(b => new OutboxPersister(store, context.Settings.EndpointName()), DependencyLifecycle.InstancePerCall);
 
-            context.Container.ConfigureComponent<OutboxRecordsCleaner>(DependencyLifecycle.InstancePerCall)
-                .ConfigureProperty(x => x.DocumentStore, store);
-
+            context.Container.ConfigureComponent(b => new OutboxRecordsCleaner(store), DependencyLifecycle.InstancePerCall);
+              
             context.Container.ConfigureComponent<OutboxCleaner>(DependencyLifecycle.InstancePerCall);
 
-            context.RegisterStartupTask(builder =>
-            {
-                return builder.Build<OutboxCleaner>();
-            });
+            context.RegisterStartupTask(builder => builder.Build<OutboxCleaner>());
         }
 
         class OutboxCleaner : FeatureStartupTask, IDisposable
         {
-            public OutboxRecordsCleaner Cleaner { get; set; }
-            public ReadOnlySettings Settings { get; set; }
+            public OutboxCleaner(OutboxRecordsCleaner cleaner, ReadOnlySettings settings)
+            {
+                this.cleaner = cleaner;
+                this.settings = settings;
+            }
+
 
             public void Dispose()
             {
@@ -60,9 +60,9 @@
 
             protected override Task OnStart(IMessageSession session)
             {
-                timeToKeepDeduplicationData = Settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
+                timeToKeepDeduplicationData = settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
 
-                var frequencyToRunDeduplicationDataCleanup = Settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
+                var frequencyToRunDeduplicationDataCleanup = settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
 
                 cleanupTimer = new Timer(PerformCleanup, null, TimeSpan.FromMinutes(1), frequencyToRunDeduplicationDataCleanup);
 
@@ -83,11 +83,14 @@
 
             void PerformCleanup(object state)
             {
-                Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData)
+                cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData)
                     .GetAwaiter()
                     .GetResult();
             }
 
+
+            OutboxRecordsCleaner cleaner;
+            ReadOnlySettings settings;
             Timer cleanupTimer;
             TimeSpan timeToKeepDeduplicationData;
         }

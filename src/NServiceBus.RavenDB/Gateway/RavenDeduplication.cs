@@ -2,11 +2,10 @@
 {
     using System;
     using System.Threading.Tasks;
-    using NServiceBus.Extensibility;
+    using Extensibility;
     using NServiceBus.Gateway.Deduplication;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
-    using Raven.Client.Document;
 
     class RavenDeduplication : IDeduplicateMessages
     {
