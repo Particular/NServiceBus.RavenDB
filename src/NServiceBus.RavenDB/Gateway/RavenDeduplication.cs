@@ -6,14 +6,18 @@
     using NServiceBus.Gateway.Deduplication;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
+    using Raven.Client.Document;
 
     class RavenDeduplication : IDeduplicateMessages
     {
-        public IDocumentStore DocumentStore { get; set; }
+        public RavenDeduplication(IDocumentStore documentStore)
+        {
+            this.documentStore = documentStore;
+        }
 
         public async Task<bool> DeduplicateMessage(string messageId, DateTime timeReceived, ContextBag context)
         {
-            using (var session = DocumentStore.OpenAsyncSession())
+            using (var session = documentStore.OpenAsyncSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
                 session.Advanced.AllowNonAuthoritativeInformation = false;
@@ -26,7 +30,7 @@
 
                 try
                 {
-                  await  session.SaveChangesAsync().ConfigureAwait(false);
+                    await session.SaveChangesAsync().ConfigureAwait(false);
                 }
                 catch (ConcurrencyException)
                 {
@@ -41,5 +45,7 @@
         {
             return messageId.Replace("\\", "_");
         }
+
+        IDocumentStore documentStore;
     }
 }
