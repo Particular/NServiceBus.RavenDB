@@ -21,10 +21,7 @@
 
             new TimeoutsIndex().Execute(store);
 
-            query = new QueryTimeouts(store)
-            {
-                EndpointName = "MyTestEndpoint"
-            };
+            query = new QueryTimeouts(store, "MyTestEndpoint");
         }
 
         [Test]
