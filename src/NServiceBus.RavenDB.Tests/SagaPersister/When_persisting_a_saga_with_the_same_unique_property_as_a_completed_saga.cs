@@ -12,7 +12,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
     [Test]
     public async Task It_should_persist_successfully()
     {
-        IAsyncDocumentSession session;
+        IDocumentSession session;
         var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var uniqueString = Guid.NewGuid().ToString();

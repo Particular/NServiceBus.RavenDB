@@ -105,9 +105,9 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
             }
         }
 
-        IAsyncDocumentSession OpenAsyncSession()
+        IDocumentSession OpenAsyncSession()
         {
-            var session = documentStore.OpenAsyncSession();
+            var session = documentStore.OpenSession();
             session.Advanced.AllowNonAuthoritativeInformation = false;
             session.Advanced.UseOptimisticConcurrency = true;
             return session;

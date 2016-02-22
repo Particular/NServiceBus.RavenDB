@@ -63,7 +63,7 @@
 
             await cleaner.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));
 
-            using (var s = store.OpenAsyncSession())
+            using (var s = store.OpenSession())
             {
                 var result = await s.Query<OutboxRecord>().ToListAsync();
 

@@ -14,7 +14,7 @@
     {
         internal const string DocumentStoreSettingsKey = "RavenDbDocumentStore";
         internal const string DefaultConnectionParameters = "RavenDbConnectionParameters";
-        internal const string SharedAsyncSessionSettingsKey = "RavenDbSharedAsyncSession";
+        internal const string SharedSessionSettingsKey = "RavenDbSharedAsyncSession";
 
         /// <summary>
         ///     Configures the storages to use the given document store supplied
@@ -51,21 +51,22 @@
         [ObsoleteEx( Message = "Use the 'UseSharedAsyncSession' configuration extension method to provide an async session.", RemoveInVersion = "5", TreatAsErrorFromVersion = "4" )]
         public static PersistenceExtentions<RavenDBPersistence> UseSharedSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDocumentSession> getSessionFunc)
         {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        ///     Specifies the async session that the shared persisters (saga + outbox) that should be used. The lifecycle is controled by
-        ///     me
-        /// </summary>
-        /// <param name="cfg"></param>
-        /// <param name="getAsyncSessionFunc">A func returning the async session to be used</param>
-        /// <returns></returns>
-        public static PersistenceExtentions<RavenDBPersistence> UseSharedAsyncSession( this PersistenceExtentions<RavenDBPersistence> cfg, Func<IAsyncDocumentSession> getAsyncSessionFunc )
-        {
-            cfg.GetSettings().Set( SharedAsyncSessionSettingsKey, getAsyncSessionFunc );
+            cfg.GetSettings().Set(SharedSessionSettingsKey, getSessionFunc);
             return cfg;
         }
+
+        ///// <summary>
+        /////     Specifies the async session that the shared persisters (saga + outbox) that should be used. The lifecycle is controled by
+        /////     me
+        ///// </summary>
+        ///// <param name="cfg"></param>
+        ///// <param name="getSessionFunc">A func returning the async session to be used</param>
+        ///// <returns></returns>
+        //public static PersistenceExtentions<RavenDBPersistence> UseSharedAsyncSession( this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDocumentSession> getSessionFunc)
+        //{
+        //    cfg.GetSettings().Set( SharedSessionSettingsKey, getSessionFunc);
+        //    return cfg;
+        //}
 
         /// <summary>
         ///     Specifies the mapping to use for when resolving the database name to use for each message.

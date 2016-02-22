@@ -13,7 +13,7 @@
 
         public async Task<bool> DeduplicateMessage(string messageId, DateTime timeReceived, ContextBag context)
         {
-            using (var session = DocumentStore.OpenAsyncSession())
+            using (var session = DocumentStore.OpenSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
                 session.Advanced.AllowNonAuthoritativeInformation = false;

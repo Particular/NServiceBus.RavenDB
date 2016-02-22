@@ -31,7 +31,7 @@
         [Test]
         public async Task Should_allow_old_subscriptions()
         {
-            var session = store.OpenAsyncSession();
+            var session = store.OpenSession();
             var messageType = MessageTypes.MessageA;
             await session.StoreAsync(new OldSubscription
             {
@@ -63,7 +63,7 @@
         [Test]
         public async Task Should_allow_old_subscriptions_without_machine_name()
         {
-            var session = store.OpenAsyncSession();
+            var session = store.OpenSession();
             var messageType = MessageTypes.MessageA;
             await session.StoreAsync(new OldSubscription
             {
@@ -93,7 +93,7 @@
         [Test]
         public async Task Should_allow_old_subscriptions_with_empty_clients()
         {
-            var session = store.OpenAsyncSession();
+            var session = store.OpenSession();
             var messageType = MessageTypes.MessageA;
             await session.StoreAsync(new OldSubscription
             {
@@ -111,7 +111,7 @@
         [Test]
         public async Task Should_allow_new_subscriptions()
         {
-            var session = store.OpenAsyncSession();
+            var session = store.OpenSession();
             var messageType = MessageTypes.MessageA;
 
             await session.StoreAsync(new Subscription

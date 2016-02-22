@@ -31,8 +31,8 @@
 
         public class RavenSessionTestContext : ScenarioContext
         {
-            public IAsyncDocumentSession RavenSessionFromTest { get; set; }
-            public IAsyncDocumentSession RavenSessionFromHandler { get; set; }
+            public IDocumentSession RavenSessionFromTest { get; set; }
+            public IDocumentSession RavenSessionFromHandler { get; set; }
             public bool HandlerWasHit { get; set; }
         }
 

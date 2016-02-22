@@ -50,7 +50,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             };
             var context = new ContextBag();
 
-            var session = store.OpenAsyncSession();
+            var session = store.OpenSession();
             await session.StoreAsync(timeout);
             await session.SaveChangesAsync();
 
@@ -84,7 +84,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             };
             var context = new ContextBag();
 
-            var session = store.OpenAsyncSession();
+            var session = store.OpenSession();
             await session.StoreAsync(timeout);
             await session.SaveChangesAsync();
 
@@ -118,7 +118,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                 OwningTimeoutManager = "MyTestEndpoint"
             };
 
-            var session = store.OpenAsyncSession();
+            var session = store.OpenSession();
             await session.StoreAsync(timeout);
             await session.SaveChangesAsync();
             var context = new ContextBag();

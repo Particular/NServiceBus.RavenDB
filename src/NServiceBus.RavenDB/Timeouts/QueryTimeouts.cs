@@ -46,7 +46,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             // default return value for when no results are found
             var nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10);
 
-            using (var session = documentStore.OpenAsyncSession())
+            using (var session = documentStore.OpenSession())
             {
                 var query = GetChunkQuery(session)
                     .Where(t => t.Time > startSlice)
@@ -56,10 +56,10 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                         t.Time
                     });
 
-                var qhi = new Reference<QueryHeaderInformation>();
-                using (var enumerator = await session.Advanced.StreamAsync(query, qhi).ConfigureAwait(false))
+                QueryHeaderInformation qhi;
+                using (var enumerator = session.Advanced.Stream(query, out qhi))
                 {
-                    while (await enumerator.MoveNextAsync().ConfigureAwait(false))
+                    while (enumerator.MoveNext())
                     {
                         var dateTime = enumerator.Current.Document.Time;
                         nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time < now
@@ -74,7 +74,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 }
 
                 // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
-                if (qhi.Value != null && qhi.Value.IsStale && results.Count == 0)
+                if (qhi != null && qhi.IsStale && results.Count == 0)
                 {
                     nextTimeToRunQuery = now;
                 }
@@ -85,7 +85,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
         public async Task<IEnumerable<TimeoutsChunk.Timeout>> GetCleanupChunk(DateTime startSlice)
         {
-            using (var session = documentStore.OpenAsyncSession())
+            using (var session = documentStore.OpenSession())
             {
                 var query = await GetChunkQuery(session)
                     .Where(t => t.Time <= startSlice.Subtract(CleanupGapFromTimeslice))
@@ -106,7 +106,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             }
         }
 
-        IRavenQueryable<TimeoutData> GetChunkQuery(IAsyncDocumentSession session)
+        IRavenQueryable<TimeoutData> GetChunkQuery(IDocumentSession session)
         {
             session.Advanced.AllowNonAuthoritativeInformation = true;
             return session.Query<TimeoutData, TimeoutsIndex>()

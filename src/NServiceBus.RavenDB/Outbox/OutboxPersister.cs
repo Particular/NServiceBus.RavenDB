@@ -20,7 +20,7 @@
         public async Task<OutboxMessage> Get(string messageId, ContextBag options)
         {
             OutboxRecord result;
-            using (var session = documentStore.OpenAsyncSession())
+            using (var session = documentStore.OpenSession())
             {
                 session.Advanced.AllowNonAuthoritativeInformation = false;
 
@@ -48,7 +48,7 @@
 
         public Task<OutboxTransaction> BeginTransaction(ContextBag context)
         {
-            var session = documentStore.OpenAsyncSession();
+            var session = documentStore.OpenSession();
 
             session.Advanced.UseOptimisticConcurrency = true;
 
@@ -77,7 +77,7 @@
 
         public async Task SetAsDispatched(string messageId, ContextBag options)
         {
-            using (var session = documentStore.OpenAsyncSession())
+            using (var session = documentStore.OpenSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
                 session.Advanced.AllowNonAuthoritativeInformation = false;

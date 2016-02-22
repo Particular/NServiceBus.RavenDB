@@ -113,7 +113,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             WaitForIndexing(store);
 
-            using (var s = store.OpenAsyncSession())
+            using (var s = store.OpenSession())
             {
                 var result = await s.Query<OutboxRecord>()
                     .SingleOrDefaultAsync(o => o.MessageId == id);
@@ -132,7 +132,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var messageId = Guid.NewGuid().ToString();
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = OpenAsyncSession())
+            using (var session = OpenSession())
             {
                 var newRecord = new OutboxRecord
                 {
@@ -170,7 +170,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var messageId = Guid.NewGuid().ToString();
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = OpenAsyncSession())
+            using (var session = OpenSession())
             {
                 await session.StoreAsync(new OutboxRecord
                 {
@@ -193,7 +193,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             await persister.SetAsDispatched(messageId, new ContextBag());
 
-            using (var session = OpenAsyncSession())
+            using (var session = OpenSession())
             {
                 var result = await session.LoadAsync<OutboxRecord>(outboxRecordIdPrefix + messageId);
 

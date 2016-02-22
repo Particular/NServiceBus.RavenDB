@@ -18,7 +18,7 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
             UniqueString = null
         };
 
-        IAsyncDocumentSession session;
+        IDocumentSession session;
         var context = this.CreateContextWithAsyncSessionPresent(out session);
         var ravenSession = new RavenDBSynchronizedStorageSession(session, true);
         var persister = new SagaPersister();

@@ -10,6 +10,6 @@ namespace NServiceBus.RavenDB.Persistence
         /// <summary>
         ///     The async session
         /// </summary>
-        IAsyncDocumentSession AsyncSession { get; }
+        IDocumentSession AsyncSession { get; }
     }
 }

@@ -2,6 +2,7 @@
 namespace NServiceBus
 {
     using System;
+    using System.Collections;
     using NServiceBus.Persistence;
     using NServiceBus.SagaPersisters.RavenDB;
     using Raven.Client;
@@ -16,10 +17,10 @@ namespace NServiceBus
         /// </summary>
         /// <param name="session">The storage session.</param>
         /// <returns></returns>
-        public static IAsyncDocumentSession RavenSession(this SynchronizedStorageSession session)
+        public static IDocumentSession RavenSession(this SynchronizedStorageSession session)
         {
             var synchronizedStorageSession = session as RavenDBSynchronizedStorageSession;
-            
+
             if (synchronizedStorageSession == null)
             {
                 throw new InvalidOperationException("It was not possible to retrieve a RavenDB session.");

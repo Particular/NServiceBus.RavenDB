@@ -12,7 +12,7 @@ public class When_updating_a_saga_property_that_does_not_have_a_unique_attribute
     [Test]
     public async Task It_should_persist_successfully()
     {
-        IAsyncDocumentSession session;
+        IDocumentSession session;
         var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var uniqueString = Guid.NewGuid().ToString();

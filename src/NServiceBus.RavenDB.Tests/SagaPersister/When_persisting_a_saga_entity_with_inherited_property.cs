@@ -12,7 +12,7 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
     [Test]
     public async Task Inherited_property_classes_should_be_persisted()
     {
-        IAsyncDocumentSession session;
+        IDocumentSession session;
         var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var entity = new SagaData

@@ -13,7 +13,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
     [Test]
     public async Task It_should_enforce_uniqueness()
     {
-        IAsyncDocumentSession session;
+        IDocumentSession session;
         var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
         var uniqueString = Guid.NewGuid().ToString();

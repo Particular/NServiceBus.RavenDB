@@ -14,11 +14,11 @@
         public async Task It_should_return_configured_session()
         {
             DocumentStore documentStore = null;
-            IAsyncDocumentSession session = null;
+            IDocumentSession session = null;
             try
             {
                 documentStore = ConfigureRavenDBPersistence.GetDocumentStore();
-                session = documentStore.OpenAsyncSession();
+                session = documentStore.OpenSession();
 
                 var context =
                 await Scenario.Define<RavenSessionTestContext>(testContext =>
@@ -57,8 +57,8 @@
 
         public class RavenSessionTestContext : ScenarioContext
         {
-            public IAsyncDocumentSession RavenSessionFromTest { get; set; }
-            public IAsyncDocumentSession RavenSessionFromHandler { get; set; }
+            public IDocumentSession RavenSessionFromTest { get; set; }
+            public IDocumentSession RavenSessionFromHandler { get; set; }
             public bool HandlerWasHit { get; set; }
         }
 
@@ -69,7 +69,7 @@
                 EndpointSetup<DefaultServer>((config, context) =>
                 {
                     var scenarioContext = context.ScenarioContext as RavenSessionTestContext;
-                    config.UsePersistence<RavenDBPersistence>().UseSharedAsyncSession(() => scenarioContext.RavenSessionFromTest);
+                    config.UsePersistence<RavenDBPersistence>().UseSharedSession(() => scenarioContext.RavenSessionFromTest);
                 });
             }
 

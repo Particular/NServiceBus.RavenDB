@@ -35,7 +35,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
             await CreateSagaUniqueIdentity(sagaData, correlationProperty, documentSession).ConfigureAwait(false);
         }
 
-        static async Task CreateSagaUniqueIdentity(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, IAsyncDocumentSession documentSession)
+        static async Task CreateSagaUniqueIdentity(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, IDocumentSession documentSession)
         {
             var sagaDocId = documentSession.Advanced.DocumentStore.Conventions.FindFullDocumentKeyFromNonStringIdentifier(sagaData.Id, sagaData.GetType(), false);
             var propertyKeyValuePair = new KeyValuePair<string, object>(correlationProperty.Name, correlationProperty.Value);
@@ -49,7 +49,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
                 SagaDocId = sagaDocId
             }, id: sagaUniqueIdentityDocId, etag: Etag.Empty).ConfigureAwait(false);
 
-            var metadata = await documentSession.Advanced.GetMetadataForAsync(sagaData).ConfigureAwait(false);
+            var metadata = documentSession.Advanced.GetMetadataFor(sagaData);
             metadata[UniqueDocIdKey] = sagaUniqueIdentityDocId;
         }
 
@@ -74,10 +74,9 @@ namespace NServiceBus.SagaPersisters.RavenDB
             //store it in the context to be able to optimize deletes for legacy sagas that don't have the id in metadata
             context.Set(UniqueDocIdKey, lookupId);
 
-            var lookup = await documentSession
+            var lookup = documentSession
                 .Include("SagaDocId") //tell raven to pull the saga doc as well to save us a round-trip
-                .LoadAsync<SagaUniqueIdentity>(lookupId)
-                .ConfigureAwait(false);
+                .Load<SagaUniqueIdentity>(lookupId);
 
             if (lookup != null)
             {
@@ -97,7 +96,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
 
             string uniqueDocumentId;
             RavenJToken uniqueDocumentIdMetadata;
-            var metadata = await documentSession.Advanced.GetMetadataForAsync(sagaData).ConfigureAwait(false);
+            var metadata = documentSession.Advanced.GetMetadataFor(sagaData);
             if (metadata.TryGetValue(UniqueDocIdKey, out uniqueDocumentIdMetadata))
             {
                 uniqueDocumentId = uniqueDocumentIdMetadata.Value<string>();

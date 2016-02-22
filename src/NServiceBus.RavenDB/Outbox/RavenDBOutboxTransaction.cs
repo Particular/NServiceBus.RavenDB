@@ -6,7 +6,7 @@
 
     class RavenDBOutboxTransaction : OutboxTransaction
     {
-        public RavenDBOutboxTransaction(IAsyncDocumentSession session)
+        public RavenDBOutboxTransaction(IDocumentSession session)
         {
             AsyncSession = session;
         }
@@ -22,6 +22,6 @@
             await AsyncSession.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public IAsyncDocumentSession AsyncSession { get; private set; }
+        public IDocumentSession AsyncSession { get; private set; }
     }
 }

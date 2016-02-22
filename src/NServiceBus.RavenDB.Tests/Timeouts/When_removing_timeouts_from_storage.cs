@@ -87,7 +87,7 @@
             // See issue http://issues.hibernatingrhinos.com/issue/RavenDB-4000
 
             var document = new DemoDocument();
-            using (var session = store.OpenAsyncSession())
+            using (var session = store.OpenSession())
             {
                 await session.StoreAsync(document);
                 await session.SaveChangesAsync();
@@ -125,7 +125,7 @@
         {
             try
             {
-                using (var session = store.OpenAsyncSession())
+                using (var session = store.OpenSession())
                 {
                     var document = await session.LoadAsync<DemoDocument>(documentId);
 

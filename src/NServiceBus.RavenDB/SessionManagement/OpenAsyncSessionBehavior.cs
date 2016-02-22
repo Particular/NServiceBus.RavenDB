@@ -29,12 +29,12 @@
             }
         }
 
-        IAsyncDocumentSession OpenAsyncSession(IIncomingPhysicalMessageContext context)
+        IDocumentSession OpenAsyncSession(IIncomingPhysicalMessageContext context)
         {
             var databaseName = GetDatabaseName(context.Message.Headers);
             var documentSession = string.IsNullOrEmpty(databaseName) 
-                ? documentStoreWrapper.DocumentStore.OpenAsyncSession() 
-                : documentStoreWrapper.DocumentStore.OpenAsyncSession(databaseName);
+                ? documentStoreWrapper.DocumentStore.OpenSession() 
+                : documentStoreWrapper.DocumentStore.OpenSession(databaseName);
 
             documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
@@ -45,7 +45,7 @@
         public class Registration : RegisterStep
         {
             public Registration()
-                : base("OpenRavenDbAsyncSession", typeof(OpenAsyncSessionBehavior), "Makes sure that there is a RavenDB IAsyncDocumentSession available on the pipeline")
+                : base("OpenRavenDbAsyncSession", typeof(OpenAsyncSessionBehavior), "Makes sure that there is a RavenDB IDocumentSession available on the pipeline")
             {
                 InsertAfter(WellKnownStep.ExecuteUnitOfWork);
             }

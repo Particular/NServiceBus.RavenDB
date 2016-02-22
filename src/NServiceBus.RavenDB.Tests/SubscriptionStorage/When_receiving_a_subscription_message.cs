@@ -21,7 +21,7 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
 
         await storage.Subscribe(clientEndpoint, new MessageType("MessageType1", "1.0.0.0"), new ContextBag());
 
-        using (var session = store.OpenAsyncSession())
+        using (var session = store.OpenSession())
         {
             var subscriptions = await session
                 .Query<Subscription>()

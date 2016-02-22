@@ -32,7 +32,7 @@
         {
             const int numberOfTimeoutsToAdd = 10;
 
-            var session = store.OpenAsyncSession();
+            var session = store.OpenSession();
             for (var i = 0; i < numberOfTimeoutsToAdd; i++)
             {
                 await session.StoreAsync(new LegacyTimeoutData
@@ -57,7 +57,7 @@
         {
             const int numberOfTimeoutsToAdd = 10;
 
-            var session = store.OpenAsyncSession();
+            var session = store.OpenSession();
             for (var i = 0; i < numberOfTimeoutsToAdd; i++)
             {
                 if (i % 2 == 0)
@@ -110,7 +110,7 @@
 
             var nextTime = DateTime.UtcNow.AddHours(1);
 
-            var session = store.OpenAsyncSession();
+            var session = store.OpenSession();
             await session.StoreAsync(new LegacyTimeoutData
             {
                 Time = nextTime,

@@ -5,7 +5,7 @@
 
     class RavenAsyncSessionFactory : IAsyncSessionProvider
     {
-        IAsyncDocumentSession session;
+        IDocumentSession session;
         readonly IDocumentStore store;
 
         public RavenAsyncSessionFactory(IDocumentStore store)
@@ -14,11 +14,11 @@
             this.store = store;
         }
 
-        public IAsyncDocumentSession AsyncSession => session ?? (session = OpenAsyncSession());
+        public IDocumentSession AsyncSession => session ?? (session = OpenAsyncSession());
 
-        IAsyncDocumentSession OpenAsyncSession()
+        IDocumentSession OpenAsyncSession()
         {
-            var documentSession = store.OpenAsyncSession();
+            var documentSession = store.OpenSession();
             documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
             return documentSession;

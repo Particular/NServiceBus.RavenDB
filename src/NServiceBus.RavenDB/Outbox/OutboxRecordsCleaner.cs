@@ -28,15 +28,15 @@
             {
                 var deletionCommands = new List<ICommandData>();
 
-                using (var session = DocumentStore.OpenAsyncSession())
+                using (var session = DocumentStore.OpenSession())
                 {
                     var query = session.Query<OutboxRecord, OutboxRecordsIndex>()
                         .Where(o => o.Dispatched)
                         .OrderBy(o => o.DispatchedAt);
 
-                    using (var enumerator = await session.Advanced.StreamAsync(query).ConfigureAwait(false))
+                    using (var enumerator = session.Advanced.Stream(query))
                     {
-                        while (await enumerator.MoveNextAsync().ConfigureAwait(false))
+                        while (enumerator.MoveNext())
                         {
                             if (enumerator.Current.Document.DispatchedAt >= dateTime)
                             {

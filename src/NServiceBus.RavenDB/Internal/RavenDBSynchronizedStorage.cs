@@ -27,14 +27,14 @@ namespace NServiceBus.RavenDB.Internal
 
         SessionOwnership GetRavenSession()
         {
-            Func<IAsyncDocumentSession> sessionFunction;
-            settings.TryGet(RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey, out sessionFunction);
+            Func<IDocumentSession> sessionFunction;
+            settings.TryGet(RavenDbSettingsExtensions.SharedSessionSettingsKey, out sessionFunction);
             if (sessionFunction != null)
             {
                 return new SessionOwnership(false, sessionFunction());
             }
 
-            IAsyncDocumentSession session;
+            IDocumentSession session;
             if (settings.TryGet(out session))
             {
                 return new SessionOwnership(true, session);
@@ -43,20 +43,20 @@ namespace NServiceBus.RavenDB.Internal
             var store = settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtensions.DocumentStoreSettingsKey)
                         ?? SharedDocumentStore.Get(settings);
 
-            session = store.OpenAsyncSession();
+            session = store.OpenSession();
 
             return new SessionOwnership(true, session);
         }
 
         class SessionOwnership
         {
-            public SessionOwnership(bool ownsSession, IAsyncDocumentSession session)
+            public SessionOwnership(bool ownsSession, IDocumentSession session)
             {
                 Session = session;
                 Owns = ownsSession;
 
             }
-            public IAsyncDocumentSession Session { get; }
+            public IDocumentSession Session { get; }
             public bool Owns { get; }
         }
     }

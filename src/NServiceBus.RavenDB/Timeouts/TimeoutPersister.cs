@@ -19,7 +19,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
         public async Task Add(CoreTimeoutData timeout, ContextBag context)
         {
-            using (var session = documentStore.OpenAsyncSession())
+            using (var session = documentStore.OpenSession())
             {
                 var timeoutData = new Timeout(timeout);
                 await session.StoreAsync(timeoutData).ConfigureAwait(false);
@@ -30,7 +30,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
         public async Task<bool> TryRemove(string timeoutId, ContextBag context)
         {
-            using (var session = documentStore.OpenAsyncSession())
+            using (var session = documentStore.OpenSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
 
@@ -58,7 +58,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
         public async Task<CoreTimeoutData> Peek(string timeoutId, ContextBag context)
         {
-            using (var session = documentStore.OpenAsyncSession())
+            using (var session = documentStore.OpenSession())
             {
                 var timeoutData = await session.LoadAsync<Timeout>(timeoutId).ConfigureAwait(false);
 

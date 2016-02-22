@@ -19,7 +19,7 @@ public class When_persisting_a_saga_entity_with_an_Enum_property : RavenDBPersis
             Status = StatusEnum.AnotherStatus
         };
 
-        IAsyncDocumentSession session;
+        IDocumentSession session;
 
         var context = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
