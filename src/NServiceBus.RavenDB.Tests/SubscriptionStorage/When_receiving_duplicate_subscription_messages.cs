@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using NServiceBus.Extensibility;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
@@ -23,10 +24,10 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
 
         using (var session = store.OpenSession())
         {
-            var subscriptions = await session
+            var subscriptions = session
                 .Query<Subscription>()
                 .Customize(c => c.WaitForNonStaleResults())
-                .CountAsync();
+                .Count();
 
             Assert.AreEqual(1, subscriptions);
         }

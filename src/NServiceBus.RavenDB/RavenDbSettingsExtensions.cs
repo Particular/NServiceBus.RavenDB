@@ -48,7 +48,7 @@
         /// <param name="cfg"></param>
         /// <param name="getSessionFunc">A func returning the session to be used</param>
         /// <returns></returns>
-        [ObsoleteEx( Message = "Use the 'UseSharedAsyncSession' configuration extension method to provide an async session.", RemoveInVersion = "5", TreatAsErrorFromVersion = "4" )]
+        //[ObsoleteEx( Message = "Use the 'UseSharedAsyncSession' configuration extension method to provide an async session.", RemoveInVersion = "5", TreatAsErrorFromVersion = "4" )]
         public static PersistenceExtentions<RavenDBPersistence> UseSharedSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDocumentSession> getSessionFunc)
         {
             cfg.GetSettings().Set(SharedSessionSettingsKey, getSessionFunc);

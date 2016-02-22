@@ -83,11 +83,11 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             return new TimeoutsChunk(results, nextTimeToRunQuery);
         }
 
-        public async Task<IEnumerable<TimeoutsChunk.Timeout>> GetCleanupChunk(DateTime startSlice)
+        public Task<IEnumerable<TimeoutsChunk.Timeout>> GetCleanupChunk(DateTime startSlice)
         {
             using (var session = documentStore.OpenSession())
             {
-                var query = await GetChunkQuery(session)
+                var query = GetChunkQuery(session)
                     .Where(t => t.Time <= startSlice.Subtract(CleanupGapFromTimeslice))
                     .Select(t => new
                     {
@@ -95,14 +95,13 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                         t.Time
                     })
                     .Take(1024)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
+                    .ToList();
 
                 var chunk = query.Select(arg => new TimeoutsChunk.Timeout(arg.Id, arg.Time));
 
                 lastCleanupTime = DateTime.UtcNow;
 
-                return chunk;
+                return Task.FromResult(chunk);
             }
         }
 

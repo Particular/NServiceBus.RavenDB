@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using NServiceBus.Extensibility;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.RavenDB.Tests;
@@ -23,10 +24,10 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
 
         using (var session = store.OpenSession())
         {
-            var subscriptions = await session
+            var subscriptions = session
                 .Query<Subscription>()
                 .Customize(c => c.WaitForNonStaleResults())
-                .CountAsync();
+                .Count();
 
             Assert.AreEqual(1, subscriptions);
         }

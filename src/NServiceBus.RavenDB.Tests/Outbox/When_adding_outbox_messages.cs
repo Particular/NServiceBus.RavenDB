@@ -115,8 +115,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             using (var s = store.OpenSession())
             {
-                var result = await s.Query<OutboxRecord>()
-                    .SingleOrDefaultAsync(o => o.MessageId == id);
+                var result = s.Query<OutboxRecord>()
+                    .SingleOrDefault(o => o.MessageId == id);
 
                 Assert.NotNull(result);
                 Assert.True(result.Dispatched);

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
@@ -65,7 +66,7 @@
 
             using (var s = store.OpenSession())
             {
-                var result = await s.Query<OutboxRecord>().ToListAsync();
+                var result = s.Query<OutboxRecord>().ToList();
 
                 Assert.AreEqual(1, result.Count);
                 Assert.AreEqual("NotDispatched", result[0].MessageId);

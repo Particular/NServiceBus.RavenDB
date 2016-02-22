@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.RavenDB.Persistence.SagaPersister;
@@ -32,7 +33,11 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
         await session.SaveChangesAsync().ConfigureAwait(false);
 
         Assert.Null(await persister.Get<SagaData>(sagaId, synchronizedSession, options));
-        Assert.Null(await session.Query<SagaUniqueIdentity>().Customize(c => c.WaitForNonStaleResults()).SingleOrDefaultAsync(u => u.SagaId == sagaId).ConfigureAwait(false));
+
+        var uniqueIdentityDocument = 
+            session.Query<SagaUniqueIdentity>().Customize(c => c.WaitForNonStaleResults()).SingleOrDefault(u => u.SagaId == sagaId);
+
+        Assert.Null(uniqueIdentityDocument);
     }
 
     class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartMessage>
