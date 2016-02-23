@@ -15,6 +15,11 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
         DateTime lastCleanupTime = DateTime.MinValue;
         readonly IDocumentStore documentStore;
 
+        /// <summary>
+        /// RavenDB server default maximum page size 
+        /// </summary>
+        private int maximumPageSize = 1024;
+
         public QueryTimeouts(IDocumentStore store)
         {
             documentStore = store;
@@ -94,7 +99,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                         t.Id,
                         t.Time
                     })
-                    .Take(1024)
+                    .Take(maximumPageSize)
                     .ToListAsync()
                     .ConfigureAwait(false);
 
