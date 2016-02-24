@@ -13,7 +13,6 @@
 
         public static Func<IDictionary<string, string>, string> GetDatabaseName = context => string.Empty;
 
-
         public OpenAsyncSessionBehavior(IDocumentStoreWrapper documentStoreWrapper)
         {
             this.documentStoreWrapper = documentStoreWrapper;
