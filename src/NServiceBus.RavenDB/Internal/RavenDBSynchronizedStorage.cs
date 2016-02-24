@@ -20,12 +20,12 @@ namespace NServiceBus.RavenDB.Internal
 
         public Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag)
         {
-            var ownership = GetRavenSession();
+            var ownership = GetRavenSession(contextBag);
 
             return Task.FromResult((CompletableSynchronizedStorageSession)new RavenDBSynchronizedStorageSession(ownership.Session, ownership.Owns));
         }
 
-        SessionOwnership GetRavenSession()
+        SessionOwnership GetRavenSession(ContextBag contextBag)
         {
             Func<IAsyncDocumentSession> sessionFunction;
             settings.TryGet(RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey, out sessionFunction);
@@ -40,10 +40,12 @@ namespace NServiceBus.RavenDB.Internal
                 return new SessionOwnership(true, session);
             }
 
-            var store = settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtensions.DocumentStoreSettingsKey)
-                        ?? SharedDocumentStore.Get(settings);
+            session = contextBag.Get<IAsyncDocumentSession>();
 
-            session = store.OpenAsyncSession();
+            if (session == null)
+            {
+                throw new Exception("IAsyncDocumentSession is not configured in the container for the incoming message pipeline.");
+            }
 
             return new SessionOwnership(true, session);
         }
