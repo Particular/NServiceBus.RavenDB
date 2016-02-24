@@ -4,11 +4,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using NServiceBus.Routing;
-    using NServiceBus.Settings;
     using NServiceBus.Transports;
 
     /// <summary>
-    /// This is a copy from NServiceBus.AcceptanceTests
+    /// This is a copy from NServiceBus.AcceptanceTests to allow mocking TransportTransactionMode
     /// </summary>
     public class FakeRavenDBTransportInfrastructure : TransportInfrastructure
     {
@@ -49,27 +48,5 @@
         public override TransportTransactionMode TransactionMode => transactionMode;
 
         public override OutboundRoutingPolicy OutboundRoutingPolicy { get; } = new OutboundRoutingPolicy(OutboundRoutingType.Unicast, OutboundRoutingType.Unicast, OutboundRoutingType.Unicast);
-    }
-
-    /// <summary>
-    /// This is a copy from NServiceBus.AcceptanceTests
-    /// </summary>
-    public class FakeRavenDBTestTransport : TransportDefinition
-    {
-        private TransportTransactionMode transactionMode;
-
-        public FakeRavenDBTestTransport(TransportTransactionMode transactionMode)
-        {
-            this.transactionMode = transactionMode;
-        }
-
-        protected override TransportInfrastructure Initialize(SettingsHolder settings, string connectionString)
-        {
-            return new FakeRavenDBTransportInfrastructure(transactionMode);
-        }
-
-        public override bool RequiresConnectionString => false;
-
-        public override string ExampleConnectionStringForErrorMessage => null;
     }
 }
