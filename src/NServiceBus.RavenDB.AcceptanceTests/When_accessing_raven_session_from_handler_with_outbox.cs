@@ -19,7 +19,7 @@
                     {
                         var options = new SendOptions();
 
-                        options.RouteToLocalEndpointInstance();
+                        options.RouteToThisEndpoint();
 
                         return bus.Send(new RavenSessionExtensionsWithOutbox.GenericMessage(), options);
                     }))

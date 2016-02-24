@@ -27,11 +27,11 @@
                 })
                     .WithEndpoint<SharedRavenSessionExtensions>(b => b.When((bus, c) =>
                     {
-                        var options = new SendOptions();
+                        var sendOptions = new SendOptions();
 
-                        options.RouteToLocalEndpointInstance();
+                        sendOptions.RouteToThisEndpoint();
 
-                        return bus.Send(new SharedRavenSessionExtensions.GenericMessage(), options);
+                        return bus.Send(new SharedRavenSessionExtensions.GenericMessage(), sendOptions);
                     }))
                     .Done(c => c.HandlerWasHit)
                     .Run();

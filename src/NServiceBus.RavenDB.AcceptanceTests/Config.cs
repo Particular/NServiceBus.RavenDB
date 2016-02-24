@@ -39,6 +39,8 @@ public class ConfigureRavenDBPersistence : IConfigureTestExecution
         await DeleteDatabase(documentStore);
     }
 
+    public IEnumerable<Type> UnsupportedScenarioDescriptorTypes => new List<Type>();
+
     public static async Task DeleteDatabase(DocumentStore documentStore)
     {
         // Periodically the delete will throw an exception because Raven has the database locked
