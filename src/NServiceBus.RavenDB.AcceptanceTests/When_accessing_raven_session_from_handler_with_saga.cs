@@ -16,11 +16,11 @@
                 await Scenario.Define<RavenSessionTestContext>()
                     .WithEndpoint<RavenSessionExtensions>(b => b.When((bus, c) =>
                     {
-                        var options = new SendOptions();
+                        var sendOptions = new SendOptions();
 
-                        options.RouteToLocalEndpointInstance();
+                        sendOptions.RouteToThisEndpoint();
 
-                        return bus.Send(new RavenSessionExtensions.GenericMessage(), options);
+                        return bus.Send(new RavenSessionExtensions.GenericMessage(), sendOptions);
                     }))
                     .Done(c => c.HandlerWasHit)
                     .Run();

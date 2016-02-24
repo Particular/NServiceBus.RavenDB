@@ -18,12 +18,12 @@
                 {
                     b.When(async busSession =>
                     {
-                        var opts = new SendOptions();
-                        opts.SetHeader("NServiceBus.MessageId", Guid.NewGuid().ToString());
-                        opts.RouteToLocalEndpointInstance();
+                        var sendOptions = new SendOptions();
+                        sendOptions.SetHeader("NServiceBus.MessageId", Guid.NewGuid().ToString());
+                        sendOptions.RouteToThisEndpoint();
 
-                        await busSession.Send(new DuplicateMessage(), opts);
-                        await busSession.Send(new DuplicateMessage(), opts);
+                        await busSession.Send(new DuplicateMessage(), sendOptions);
+                        await busSession.Send(new DuplicateMessage(), sendOptions);
 
                         await busSession.SendLocal(new MarkerMessage());
                     })
