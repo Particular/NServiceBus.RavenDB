@@ -3,15 +3,23 @@
     using System;
     using System.Threading.Tasks;
     using NServiceBus.Pipeline;
+    using NServiceBus.Settings;
     using Raven.Client;
 
     class ProvidedAsyncSessionBehavior : Behavior<IIncomingPhysicalMessageContext>
     {
-        public Func<IAsyncDocumentSession> GetAsyncSession { get; set; }
+        private ReadOnlySettings settings;
+
+        public ProvidedAsyncSessionBehavior(ReadOnlySettings settings)
+        {
+            this.settings = settings;
+        }
 
         public override Task Invoke(IIncomingPhysicalMessageContext context, Func<Task> next)
         {
-            context.Extensions.Set(GetAsyncSession);
+            Func<IAsyncDocumentSession> asyncSessionFactory;
+            settings.TryGet(RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey, out asyncSessionFactory);
+            context.Extensions.Set(asyncSessionFactory);
             return next();
         }
 

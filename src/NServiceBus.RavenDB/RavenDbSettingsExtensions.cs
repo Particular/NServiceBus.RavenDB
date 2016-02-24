@@ -63,7 +63,7 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> UseSharedAsyncSession( this PersistenceExtentions<RavenDBPersistence> cfg, Func<IAsyncDocumentSession> getAsyncSessionFunc )
         {
-            cfg.GetSettings().Set( SharedAsyncSessionSettingsKey, getAsyncSessionFunc );
+            cfg.GetSettings().Set(SharedAsyncSessionSettingsKey, getAsyncSessionFunc);
             return cfg;
         }
 
