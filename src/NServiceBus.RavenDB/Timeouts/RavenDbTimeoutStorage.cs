@@ -20,9 +20,9 @@
             var store =
                 // Try getting a document store object specific to this Feature that user may have wired in
                 context.Settings.GetOrDefault<IDocumentStore>(RavenDbTimeoutSettingsExtensions.SettingsKey)
-                    // Init up a new DocumentStore based on a connection string specific to this feature
+                // Init up a new DocumentStore based on a connection string specific to this feature
                 ?? Helpers.CreateDocumentStoreByConnectionStringName(context.Settings, "NServiceBus/Persistence/RavenDB/Timeout")
-                    // Trying pulling a shared DocumentStore set by the user or other Feature
+                // Trying pulling a shared DocumentStore set by the user or other Feature
                 ?? context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtensions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context.Settings);
 
             if (store == null)
@@ -41,9 +41,8 @@
 
             Helpers.SafelyCreateIndex(store, new TimeoutsIndex());
 
-            context.Container.ConfigureComponent(() => new TimeoutPersister(store),DependencyLifecycle.InstancePerCall);
-            context.Container.ConfigureComponent(() => new QueryTimeouts(store), DependencyLifecycle.SingleInstance) // Needs to be SingleInstance because it contains cleanup state
-                .ConfigureProperty(x => x.EndpointName, context.Settings.EndpointName().ToString());
+            context.Container.ConfigureComponent(() => new TimeoutPersister(store), DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(() => new QueryTimeouts(store, context.Settings.EndpointName().ToString()), DependencyLifecycle.SingleInstance); // Needs to be SingleInstance because it contains cleanup state
         }
     }
 }

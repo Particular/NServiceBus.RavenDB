@@ -9,8 +9,10 @@
 
     class OutboxRecordsCleaner
     {
-        volatile bool doingCleanup;
-        public IDocumentStore DocumentStore { get; set; }
+        public OutboxRecordsCleaner(IDocumentStore documentStore)
+        {
+            this.documentStore = documentStore;
+        }
 
         public async Task RemoveEntriesOlderThan(DateTime dateTime)
         {
@@ -28,7 +30,7 @@
             {
                 var deletionCommands = new List<ICommandData>();
 
-                using (var session = DocumentStore.OpenAsyncSession())
+                using (var session = documentStore.OpenAsyncSession())
                 {
                     var query = session.Query<OutboxRecord, OutboxRecordsIndex>()
                         .Where(o => o.Dispatched)
@@ -58,12 +60,15 @@
                     }
                 }
 
-                await DocumentStore.AsyncDatabaseCommands.BatchAsync(deletionCommands).ConfigureAwait(false);
+                await documentStore.AsyncDatabaseCommands.BatchAsync(deletionCommands).ConfigureAwait(false);
             }
             finally
             {
                 doingCleanup = false;
             }
         }
+
+        IDocumentStore documentStore;
+        volatile bool doingCleanup;
     }
 }
