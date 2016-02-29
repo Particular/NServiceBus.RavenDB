@@ -10,7 +10,6 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
     using Raven.Client;
     using Raven.Client.Document;
     using TimeoutData = Timeout.Core.TimeoutData;
-    using Timeout = TimeoutPersisters.RavenDB.TimeoutData;
     using TimeoutPersisters.RavenDB;
 
     [TestFixture]
@@ -125,7 +124,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                 new TimeoutsIndex().Execute(documentStore);
 
                 var persister = new TimeoutPersister
-                                {
+                {
                                     DocumentStore = documentStore,
                                     EndpointName = "foo",
                                     TriggerCleanupEvery = TimeSpan.FromDays(1), // Make sure cleanup doesn't run automatically
@@ -170,7 +169,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
                                }.Initialize())
                                {
                                    var persister2 = new TimeoutPersister
-                                                    {
+                                   {
                                                         DocumentStore = store,
                                                         EndpointName = "bar",
                                                     };
