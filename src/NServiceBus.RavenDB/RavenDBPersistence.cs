@@ -20,7 +20,7 @@
             Defaults(s =>
             {
                 RavenLogManager.CurrentLogManager = new NoOpLogManager();
-
+                
                 s.EnableFeatureByDefault<RavenDbStorageSession>();
                 s.EnableFeatureByDefault<SharedDocumentStore>();
             });

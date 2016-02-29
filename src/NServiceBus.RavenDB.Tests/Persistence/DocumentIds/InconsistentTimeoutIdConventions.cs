@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using NServiceBus.RavenDB.Shutdown;
     using NServiceBus.TimeoutPersisters.RavenDB;
     using NUnit.Framework;
     using Raven.Client;
@@ -45,7 +44,7 @@
 
                     Assert.AreEqual(index, prefillIndex, "Index definitions must match or previous timeouts will not be found.");
 
-                    var persister = new TimeoutPersister(new ShutdownDelegateRegistry())
+                    var persister = new TimeoutPersister
                     {
                         DocumentStore = store,
                         EndpointName = EndpointName
@@ -117,7 +116,7 @@
 
                     CreateTimeoutIndex(store);
 
-                    var persister = new TimeoutPersister(new ShutdownDelegateRegistry())
+                    var persister = new TimeoutPersister
                     {
                         DocumentStore = store,
                         EndpointName = EndpointName
