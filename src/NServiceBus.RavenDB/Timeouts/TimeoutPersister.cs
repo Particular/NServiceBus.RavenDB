@@ -3,6 +3,8 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
+    using NServiceBus.RavenDB.Shutdown;
     using NServiceBus.Timeout.Core;
     using Raven.Abstractions.Data;
     using Raven.Abstractions.Exceptions;
@@ -15,12 +17,15 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     {
         DateTime lastCleanupTime = DateTime.MinValue;
 
-        public TimeoutPersister()
+        public TimeoutPersister(IRegisterShutdownDelegates shutdownRegistry)
         {
             TriggerCleanupEvery = TimeSpan.FromMinutes(2);
             CleanupGapFromTimeslice = TimeSpan.FromMinutes(1);
+            shutdownTokenSource = new CancellationTokenSource();
+            shutdownRegistry.Register(() => shutdownTokenSource.Cancel());
         }
 
+        private CancellationTokenSource shutdownTokenSource;
         public IDocumentStore DocumentStore { get; set; }
         public string EndpointName { get; set; }
         public TimeSpan CleanupGapFromTimeslice { get; set; }
@@ -32,7 +37,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             List<Tuple<string, DateTime>> results;
 
             // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
-            // added after startSlice have been set to a later timout and we might have missed them
+            // added after startSlice have been set to a later timeout and we might have missed them
             // because of stale indexes.
             if (lastCleanupTime == DateTime.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) < now)
             {
@@ -80,6 +85,11 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 }
             }
 
+            if (shutdownTokenSource != null && shutdownTokenSource.IsCancellationRequested)
+            {
+                return Enumerable.Empty<Tuple<string, DateTime>>();
+            }
+
             return results;
         }
 
@@ -121,6 +131,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
         IRavenQueryable<Timeout> GetChunkQuery(IDocumentSession session)
         {
             session.Advanced.AllowNonAuthoritativeInformation = true;
+            session.Advanced.NonAuthoritativeInformationTimeout = TimeSpan.FromSeconds(10);
             return session.Query<Timeout, TimeoutsIndex>()
                 .OrderBy(t => t.Time)
                 .Where(
