@@ -17,7 +17,7 @@
             IAsyncDocumentSession session = null;
             try
             {
-                documentStore = ConfigureRavenDBPersistence.GetDocumentStore();
+                documentStore = ConfigureEndpointRavenDBPersistence.GetDocumentStore();
                 session = documentStore.OpenAsyncSession();
 
                 var context =
@@ -48,7 +48,7 @@
 
                 if (documentStore != null)
                 {
-                    await ConfigureRavenDBPersistence.DeleteDatabase(documentStore);
+                    await ConfigureEndpointRavenDBPersistence.DeleteDatabase(documentStore);
                 }
             }
 
