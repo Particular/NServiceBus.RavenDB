@@ -25,6 +25,11 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             shutdownRegistry.Register(() => shutdownTokenSource.Cancel());
         }
 
+        /// <summary>
+        /// RavenDB server default maximum page size 
+        /// </summary>
+        private int maximumPageSize = 1024;
+
         private CancellationTokenSource shutdownTokenSource;
         public IDocumentStore DocumentStore { get; set; }
         public string EndpointName { get; set; }
@@ -34,6 +39,10 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
         public IEnumerable<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
         {
             var now = DateTime.UtcNow;
+            var defaultNextPollTime = DateTime.UtcNow.AddMinutes(10);
+
+            nextTimeToRunQuery = defaultNextPollTime;
+
             List<Tuple<string, DateTime>> results;
 
             // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
@@ -48,46 +57,58 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 results = new List<Tuple<string, DateTime>>();
             }
 
-            // default return value for when no results are found
-            nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10);
+            RavenQueryStatistics statistics;
 
             using (var session = DocumentStore.OpenSession())
             {
-                var query = GetChunkQuery(session)
-                    .Where(t => t.Time > startSlice)
-                    .Select(t => new
-                    {
-                        t.Id,
-                        t.Time
-                    });
+                int totalCount, skipCount = 0;
 
-                QueryHeaderInformation qhi;
-                using (var enumerator = session.Advanced.Stream(query, out qhi))
+                do
                 {
-                    while (enumerator.MoveNext())
+                    var query = GetChunkQuery(session);
+
+                    var dueTimeouts =
+                        query.Statistics(out statistics)
+                            .Where(t => t.Time >= startSlice)
+                            .Where(t => t.Time < now)
+                            .Skip(skipCount)
+                            .Select(t => new
+                            {
+                                t.Id,
+                                t.Time
+                            })
+                            .Take(maximumPageSize);
+
+                    foreach (var dueTimeout in dueTimeouts)
                     {
-                        var dateTime = enumerator.Current.Document.Time;
-                        nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time < now
-
-                        if (dateTime > DateTime.UtcNow)
-                        {
-                            break; // break on first future timeout
-                        }
-
-                        results.Add(new Tuple<string, DateTime>(enumerator.Current.Document.Id, dateTime));
+                        results.Add(new Tuple<string, DateTime>(dueTimeout.Id, dueTimeout.Time));
                     }
-                }
 
-                // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
-                if (qhi != null && qhi.IsStale && results.Count == 0)
+                    // Check for cancellation
+                    if (shutdownTokenSource != null && shutdownTokenSource.IsCancellationRequested)
+                    {
+                        return Enumerable.Empty<Tuple<string, DateTime>>();
+                    }
+
+                    skipCount = results.Count + statistics.SkippedResults;
+                    totalCount = statistics.TotalResults;
+                }
+                while (results.Count < totalCount);
+
+                var nextDueTimeout =
+                    GetChunkQuery(session)
+                        .FirstOrDefault(t => t.Time > now);
+
+                if (nextDueTimeout != null)
                 {
-                    nextTimeToRunQuery = now;
+                    nextTimeToRunQuery = nextDueTimeout.Time;
                 }
             }
 
-            if (shutdownTokenSource != null && shutdownTokenSource.IsCancellationRequested)
+            // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
+            if (statistics.IsStale && results.Count == 0)
             {
-                return Enumerable.Empty<Tuple<string, DateTime>>();
+                nextTimeToRunQuery = now;
             }
 
             return results;
@@ -127,7 +148,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             var operation = DocumentStore.DatabaseCommands.DeleteByIndex("TimeoutsIndex", new IndexQuery { Query = string.Format("SagaId:{0}", sagaId) }, new BulkOperationOptions { AllowStale = true });
             operation.WaitForCompletion();
         }
-        
+
         IRavenQueryable<Timeout> GetChunkQuery(IDocumentSession session)
         {
             session.Advanced.AllowNonAuthoritativeInformation = true;
@@ -151,7 +172,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                         t.Id,
                         t.Time
                     })
-                    .Take(1024)
+                    .Take(maximumPageSize)
                     .ToList()
                     .Select(arg => new Tuple<string, DateTime>(arg.Id, arg.Time));
 
