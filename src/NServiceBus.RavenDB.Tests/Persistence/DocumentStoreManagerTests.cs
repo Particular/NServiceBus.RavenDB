@@ -1,0 +1,121 @@
+﻿namespace NServiceBus.RavenDB.Tests.Persistence
+{
+    using System;
+    using NServiceBus.Persistence;
+    using NServiceBus.RavenDB.Internal;
+    using NServiceBus.Routing;
+    using NServiceBus.Settings;
+    using NServiceBus.Transports;
+    using NUnit.Framework;
+    using Raven.Client;
+    using Raven.Tests.Helpers;
+
+    [TestFixture]
+    public class DocumentStoreManagerTests : RavenTestBase
+    {
+        [Test]
+        public void Specific_stores_should_mask_default()
+        {
+            var settings = new SettingsHolder();
+            settings.Set("Transactions.SuppressDistributedTransactions", true);
+            settings.Set<TransportInfrastructure>(new FakeRavenDBTransportInfrastructure(TransportTransactionMode.None));
+
+            DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(settings, EmbeddedStore("GatewayDeduplication"));
+            DocumentStoreManager.SetDocumentStore<StorageType.Outbox>(settings, EmbeddedStore("Outbox"));
+            DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(settings, EmbeddedStore("Sagas"));
+            DocumentStoreManager.SetDocumentStore<StorageType.Subscriptions>(settings, EmbeddedStore("Subscriptions"));
+            DocumentStoreManager.SetDocumentStore<StorageType.Timeouts>(settings, EmbeddedStore("Timeouts"));
+            DocumentStoreManager.SetDefaultStore(settings, EmbeddedStore("Default"));
+
+            var readOnly = settings as ReadOnlySettings;
+
+            Assert.AreEqual("GatewayDeduplication", DocumentStoreManager.GetDocumentStore<StorageType.GatewayDeduplication>(readOnly).Identifier);
+            Assert.AreEqual("Outbox", DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(readOnly).Identifier);
+            Assert.AreEqual("Sagas", DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(readOnly).Identifier);
+            Assert.AreEqual("Subscriptions", DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(readOnly).Identifier);
+            Assert.AreEqual("Timeouts", DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(readOnly).Identifier);
+        }
+
+        [Test]
+        public void Customize_delegate_round_trip()
+        {
+            var settings = new SettingsHolder();
+
+            Action<IDocumentStore> customize = ds => ds.Identifier = "test";
+
+            DocumentStoreManager.SetCustomizeDocumentStoreDelegate(settings, customize);
+
+            var action = DocumentStoreManager.GetCustomizeDocumentStoreDelegate(settings);
+
+            Assert.AreEqual(customize, action);
+        }
+
+        [Test]
+        public void Last_customize_delegate_wins()
+        {
+            var settings = new SettingsHolder();
+            settings.Set("Transactions.SuppressDistributedTransactions", true);
+            settings.Set<TransportInfrastructure>(new FakeRavenDBTransportInfrastructure(TransportTransactionMode.None));
+
+            DocumentStoreManager.SetCustomizeDocumentStoreDelegate(settings, ds => ds.Identifier += "FirstDelegate");
+            DocumentStoreManager.SetCustomizeDocumentStoreDelegate(settings, ds => ds.Identifier += "SecondDelegate");
+
+            DocumentStoreManager.SetDefaultStore(settings, EmbeddedStore("Default"));
+            DocumentStoreManager.SetDocumentStore<StorageType.Outbox>(settings, EmbeddedStore("Outbox"));
+
+            var readOnly = settings as ReadOnlySettings;
+
+            Assert.AreEqual("DefaultSecondDelegate", DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(readOnly).Identifier);
+            Assert.AreEqual("OutboxSecondDelegate", DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(readOnly).Identifier);
+        }
+
+        [Test]
+        public void Should_construct_store_based_on_connection_params()
+        {
+            var connectionParams = new ConnectionParameters
+            {
+                Url = "http://localhost:8083",
+                DatabaseName = "TestConnectionParams"
+            };
+
+            var settings = DefaultSettings();
+            settings.Set(RavenDbSettingsExtensions.DefaultConnectionParameters, connectionParams);
+
+            var storeInitializer = DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Sagas>(settings);
+
+            Assert.AreEqual("http://localhost:8083", storeInitializer.Url);
+            Assert.AreEqual("http://localhost:8083 (DB: TestConnectionParams)", storeInitializer.Identifier);
+        }
+
+        [Test]
+        public void Should_create_default_connection()
+        {
+            var settings = DefaultSettings();
+
+            var storeInitializer = DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Timeouts>(settings);
+
+            Assert.AreEqual("http://localhost:8080", storeInitializer.Url);
+            Assert.AreEqual("http://localhost:8080 (DB: FakeEndpoint)", storeInitializer.Identifier);
+        }
+
+        private IDocumentStore EmbeddedStore(string identifier)
+        {
+            var store = NewDocumentStore();
+            store.Identifier = identifier;
+            return store;
+        }
+
+        private SettingsHolder DefaultSettings()
+        {
+            var settings = new SettingsHolder();
+            settings.Set("NServiceBus.LocalAddress", "FakeAddress");
+            settings.Set("EndpointVersion", "FakeVersion");
+            settings.SetDefault("Transactions.SuppressDistributedTransactions", false);
+            settings.Set<EndpointName>(new EndpointName("FakeEndpoint"));
+            settings.Set<SingleSharedDocumentStore>(new SingleSharedDocumentStore());
+            settings.Set<TransportInfrastructure>(new FakeRavenDBTransportInfrastructure(TransportTransactionMode.TransactionScope));
+
+            return settings;
+        }
+    }
+}

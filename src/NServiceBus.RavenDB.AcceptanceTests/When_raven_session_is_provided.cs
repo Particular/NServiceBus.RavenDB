@@ -1,58 +1,37 @@
 ﻿namespace NServiceBus.AcceptanceTests.ApiExtension
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
+    using NServiceBus.Configuration.AdvanceExtensibility;
     using NUnit.Framework;
     using Raven.Client;
-    using Raven.Client.Document;
 
     public class When_raven_session_is_provided : NServiceBusAcceptanceTest
     {
         [Test]
         public async Task It_should_return_configured_session()
         {
-            DocumentStore documentStore = null;
-            IAsyncDocumentSession session = null;
-            try
-            {
-                documentStore = ConfigureEndpointRavenDBPersistence.GetDocumentStore();
-                session = documentStore.OpenAsyncSession();
-
-                var context =
-                await Scenario.Define<RavenSessionTestContext>(testContext =>
+            var context =
+            await Scenario.Define<RavenSessionTestContext>()
+                .WithEndpoint<SharedRavenSessionExtensions>(builder =>
                 {
-                    testContext.RavenSessionFromTest = session;
-                })
-                    .WithEndpoint<SharedRavenSessionExtensions>(b => b.When((bus, c) =>
+                    builder.When((msgSession, ctx) =>
                     {
                         var sendOptions = new SendOptions();
 
                         sendOptions.RouteToThisEndpoint();
 
-                        return bus.Send(new SharedRavenSessionExtensions.GenericMessage(), sendOptions);
-                    }))
-                    .Done(c => c.HandlerWasHit)
-                    .Run();
+                        return msgSession.Send(new SharedRavenSessionExtensions.GenericMessage(), sendOptions);
+                    });
+                })
+                .Done(c => c.HandlerWasHit)
+                .Run();
 
-                Assert.AreSame(session, context.RavenSessionFromHandler);
-            }
-            finally
-            {
-                if (session != null)
-                {
-                    session.Dispose();
-                    session = null;
-                }
-
-                if (documentStore != null)
-                {
-                    await ConfigureEndpointRavenDBPersistence.DeleteDatabase(documentStore);
-                }
-            }
-
-
+            Assert.AreSame(context.RavenSessionFromTest, context.RavenSessionFromHandler);
+            Assert.AreEqual(1, context.SessionCreateCount);
         }
 
         public class RavenSessionTestContext : ScenarioContext
@@ -60,6 +39,14 @@
             public IAsyncDocumentSession RavenSessionFromTest { get; set; }
             public IAsyncDocumentSession RavenSessionFromHandler { get; set; }
             public bool HandlerWasHit { get; set; }
+
+            int _sessionCreateCount;
+            public int SessionCreateCount { get { return _sessionCreateCount; } }
+
+            public void IncrementSessionCreateCount()
+            {
+                Interlocked.Increment(ref _sessionCreateCount);
+            }
         }
 
         public class SharedRavenSessionExtensions : EndpointConfigurationBuilder
@@ -69,7 +56,15 @@
                 EndpointSetup<DefaultServer>((config, context) =>
                 {
                     var scenarioContext = context.ScenarioContext as RavenSessionTestContext;
-                    config.UsePersistence<RavenDBPersistence>().UseSharedAsyncSession(() => scenarioContext.RavenSessionFromTest);
+                    var docStore = ConfigureEndpointRavenDBPersistence.GetDefaultDocumentStore(config.GetSettings());
+
+                    ConfigureEndpointRavenDBPersistence.GetDefaultPersistenceExtensions(config.GetSettings())
+                        .UseSharedAsyncSession(() =>
+                        {
+                            scenarioContext.RavenSessionFromTest = docStore.OpenAsyncSession();
+                            scenarioContext.IncrementSessionCreateCount();
+                            return scenarioContext.RavenSessionFromTest;
+                        });
                 });
             }
 

@@ -1,6 +1,8 @@
 ﻿namespace NServiceBus
 {
     using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Persistence;
+    using NServiceBus.RavenDB.Internal;
     using Raven.Client;
 
     /// <summary>
@@ -8,7 +10,6 @@
     /// </summary>
     public static class RavenDbSagaSettingsExtensions
     {
-        internal const string DocumentStoreSettingsKey = "RavenDbDocumentStore/Saga";
         internal const string AllowStaleSagaReadsKey = "RavenDB.AllowStaleSagaReads";
 
         /// <summary>
@@ -19,7 +20,7 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> UseDocumentStoreForSagas(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            cfg.GetSettings().Set(DocumentStoreSettingsKey, documentStore);
+            DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(cfg.GetSettings(), documentStore);
             return cfg;
         }
 
@@ -28,7 +29,7 @@
         /// </summary>
         /// <param name="cfg">Object to attach to</param>
         /// <returns></returns>
-       [ObsoleteEx(RemoveInVersion = "5", TreatAsErrorFromVersion = "4",Message = "As of Version 6 of NServiceBus core all correlated properties are unique by default so you can safely remove this setting.")]
+        [ObsoleteEx(RemoveInVersion = "7", TreatAsErrorFromVersion = "6", Message = "As of Version 6 of NServiceBus core all correlated properties are unique by default so you can safely remove this setting.")]
         public static PersistenceExtentions<RavenDBPersistence> AllowStaleSagaReads(this PersistenceExtentions<RavenDBPersistence> cfg)
         {
             cfg.GetSettings().Set(AllowStaleSagaReadsKey, true);
