@@ -7,6 +7,8 @@
     using NServiceBus.TimeoutPersisters.RavenDB;
     using Raven.Client;
     using System.Threading.Tasks;
+    using Timeout.Core;
+    using Logging;
     class RavenDbTimeoutStorage : Feature
     {
         RavenDbTimeoutStorage()
@@ -51,7 +53,9 @@
 
         class QueryTimeoutsLifecycleHandler : FeatureStartupTask
         {
-            public QueryTimeouts QueryTimeouts { get; set; }
+            static readonly ILog Logger = LogManager.GetLogger(typeof(RavenDBPersistence));
+
+            public IQueryTimeouts QueryTimeouts { get; set; }
 
             protected override Task OnStart(IMessageSession session)
             {
@@ -61,7 +65,17 @@
 
             protected override Task OnStop(IMessageSession session)
             {
-                return Task.Run(() => this.QueryTimeouts.Shutdown());
+                return Task.Run(() =>
+                {
+                    var impl = QueryTimeouts as QueryTimeouts;
+                    if(impl == null)
+                    {
+                        Logger.Warn("The IQueryTimeouts implementations cannot be properly shut down.");
+                        return;
+                    }
+
+                    impl.Shutdown();
+                });
             }
         }
     }
