@@ -7,13 +7,18 @@
 
     class ProvidedAsyncSessionBehavior : Behavior<IIncomingPhysicalMessageContext>
     {
-        public Func<IAsyncDocumentSession> GetAsyncSession { get; set; }
+        public ProvidedAsyncSessionBehavior(Func<IAsyncDocumentSession> getAsyncSession)
+        {
+            this.getAsyncSession = getAsyncSession;
+        }
 
         public override Task Invoke(IIncomingPhysicalMessageContext context, Func<Task> next)
         {
-            context.Extensions.Set(GetAsyncSession);
+            context.Extensions.Set(getAsyncSession);
             return next();
         }
+        
+        Func<IAsyncDocumentSession> getAsyncSession;
 
         public class Registration : RegisterStep
         {

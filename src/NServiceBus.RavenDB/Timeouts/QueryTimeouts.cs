@@ -12,18 +12,14 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
     class QueryTimeouts : IQueryTimeouts
     {
-        DateTime lastCleanupTime = DateTime.MinValue;
-        readonly IDocumentStore documentStore;
-        bool abort = false;
-
-        public QueryTimeouts(IDocumentStore store)
+        public QueryTimeouts(IDocumentStore documentStore, string endpointName)
         {
-            documentStore = store;
+            this.documentStore = documentStore;
+            this.endpointName = endpointName;
             TriggerCleanupEvery = TimeSpan.FromMinutes(2);
             CleanupGapFromTimeslice = TimeSpan.FromMinutes(1);
         }
 
-        public string EndpointName { get; set; }
         public TimeSpan CleanupGapFromTimeslice { get; set; }
         public TimeSpan TriggerCleanupEvery { get; set; }
 
@@ -105,7 +101,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                         t.Id,
                         t.Time
                     })
-                    .Take(1024)
+                    .Take(maximumPageSize)
                     .ToListAsync()
                     .ConfigureAwait(false);
 
@@ -125,7 +121,18 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 .Where(
                     t =>
                         t.OwningTimeoutManager == string.Empty ||
-                        t.OwningTimeoutManager == EndpointName);
+                        t.OwningTimeoutManager == endpointName);
         }
+
+        string endpointName;
+        DateTime lastCleanupTime = DateTime.MinValue;
+        IDocumentStore documentStore;
+        bool abort = false;
+
+        /// <summary>
+        /// RavenDB server default maximum page size 
+        /// </summary>
+        private int maximumPageSize = 1024;
+
     }
 }

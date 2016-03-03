@@ -17,7 +17,7 @@
             IAsyncDocumentSession session = null;
             try
             {
-                documentStore = ConfigureRavenDBPersistence.GetDocumentStore();
+                documentStore = ConfigureEndpointRavenDBPersistence.GetDocumentStore();
                 session = documentStore.OpenAsyncSession();
 
                 var context =
@@ -27,11 +27,11 @@
                 })
                     .WithEndpoint<SharedRavenSessionExtensions>(b => b.When((bus, c) =>
                     {
-                        var options = new SendOptions();
+                        var sendOptions = new SendOptions();
 
-                        options.RouteToLocalEndpointInstance();
+                        sendOptions.RouteToThisEndpoint();
 
-                        return bus.Send(new SharedRavenSessionExtensions.GenericMessage(), options);
+                        return bus.Send(new SharedRavenSessionExtensions.GenericMessage(), sendOptions);
                     }))
                     .Done(c => c.HandlerWasHit)
                     .Run();
@@ -48,7 +48,7 @@
 
                 if (documentStore != null)
                 {
-                    await ConfigureRavenDBPersistence.DeleteDatabase(documentStore);
+                    await ConfigureEndpointRavenDBPersistence.DeleteDatabase(documentStore);
                 }
             }
 

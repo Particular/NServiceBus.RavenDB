@@ -29,9 +29,8 @@
             {
                 new TimeoutsIndex().Execute(documentStore);
 
-                var query = new QueryTimeouts(documentStore)
+                var query = new QueryTimeouts(documentStore, "foo")
                 {
-                    EndpointName = "foo",
                     TriggerCleanupEvery = TimeSpan.FromHours(1) // Make sure cleanup doesn't run automatically
                 };
                 var persister = new TimeoutPersister(documentStore);
@@ -126,9 +125,8 @@
             {
                 new TimeoutsIndex().Execute(documentStore);
 
-                var query = new QueryTimeouts(documentStore)
+                var query = new QueryTimeouts(documentStore, "foo")
                 {
-                    EndpointName = "foo",
                     TriggerCleanupEvery = TimeSpan.FromDays(1) // Make sure cleanup doesn't run automatically
                 };
                 var persister = new TimeoutPersister(documentStore);

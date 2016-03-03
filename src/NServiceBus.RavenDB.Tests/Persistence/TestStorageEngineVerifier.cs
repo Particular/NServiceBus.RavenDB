@@ -16,7 +16,7 @@
             using (documentStore.SetupVoronTest())
             {
                 var settings = new SettingsHolder();
-                settings.Set<TransportDefinition>(new FakeRavenDBTestTransport(TransportTransactionMode.TransactionScope));
+                settings.Set<TransportInfrastructure>(new FakeRavenDBTransportInfrastructure(TransportTransactionMode.TransactionScope));
                 Assert.Throws<InvalidOperationException>(() => StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(documentStore, settings));
             }
         }
@@ -29,7 +29,7 @@
             {
 
                 var settings = new SettingsHolder();
-                settings.Set<TransportDefinition>(new FakeRavenDBTestTransport(TransportTransactionMode.TransactionScope));
+                settings.Set<TransportInfrastructure>(new FakeRavenDBTransportInfrastructure(TransportTransactionMode.TransactionScope));
                 settings.Set("RavenDB.IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled", true);
 
                 Assert.DoesNotThrow(() => StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(documentStore, settings));
@@ -43,7 +43,7 @@
             using (documentStore.SetupVoronTest())
             {
                 var settings = new SettingsHolder();
-                settings.Set<TransportDefinition>(new FakeRavenDBTestTransport(TransportTransactionMode.ReceiveOnly));
+                settings.Set<TransportInfrastructure>(new FakeRavenDBTransportInfrastructure(TransportTransactionMode.ReceiveOnly));
 
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                 Assert.DoesNotThrow(() => StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(documentStore, settings));

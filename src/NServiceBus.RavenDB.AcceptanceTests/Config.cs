@@ -5,9 +5,14 @@ using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
 using Raven.Client.Document;
 
-public class ConfigureRavenDBPersistence : IConfigureTestExecution
+public class ConfigureScenariosForRavenDBPersistence : IConfigureSupportedScenariosForTestExecution
 {
-    public Task Configure(EndpointConfiguration configuration, IDictionary<string, string> settings)
+    public IEnumerable<Type> UnsupportedScenarioDescriptorTypes => new List<Type>();
+}
+
+public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecution
+{
+    public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings)
     {
         documentStore = GetDocumentStore();
 
@@ -16,6 +21,11 @@ public class ConfigureRavenDBPersistence : IConfigureTestExecution
         Console.WriteLine("Created '{0}' database", documentStore.DefaultDatabase);
 
         return Task.FromResult(0);
+    }
+
+    public Task Cleanup()
+    {
+        return DeleteDatabase(documentStore);
     }
 
     public static DocumentStore GetDocumentStore()
@@ -32,11 +42,6 @@ public class ConfigureRavenDBPersistence : IConfigureTestExecution
         documentStore.Initialize();
 
         return documentStore;
-    }
-
-    public async Task Cleanup()
-    {
-        await DeleteDatabase(documentStore);
     }
 
     public static async Task DeleteDatabase(DocumentStore documentStore)

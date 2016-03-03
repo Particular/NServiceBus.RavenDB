@@ -35,8 +35,7 @@
             // This is required for DTC fix, and this requires RavenDB 2.5 build 2900 or above
             TransactionRecoveryStorageVerifier.ReplaceStorageIfNotSetByUser(store);
 
-            context.Container.ConfigureComponent<RavenDeduplication>(DependencyLifecycle.SingleInstance)
-                .ConfigureProperty(x => x.DocumentStore, store);
+            context.Container.ConfigureComponent(b=>new RavenDeduplication(store), DependencyLifecycle.SingleInstance);
         }
     }
 }

@@ -19,10 +19,7 @@
             new TimeoutsIndex().Execute(store);
 
             persister = new TimeoutPersister(store);
-            query = new QueryTimeouts(store)
-            {
-                EndpointName = "MyTestEndpoint"
-            };
+            query = new QueryTimeouts(store, "MyTestEndpoint");
         }
 
         [Test]
