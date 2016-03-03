@@ -46,7 +46,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             using (var session = documentStore.OpenAsyncSession())
             {
                 var query = GetChunkQuery(session)
-                    .Where(t => t.Time > startSlice)
+                    .Where(t => t.Time > startSlice && t.Time <= DateTime.UtcNow)
                     .Select(t => new
                     {
                         t.Id,
@@ -58,13 +58,13 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 {
                     while (await enumerator.MoveNextAsync().ConfigureAwait(false))
                     {
+                        if(abort)
+                        {
+                            break;
+                        }
+
                         var dateTime = enumerator.Current.Document.Time;
                         nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time < now
-
-                        if (dateTime > DateTime.UtcNow)
-                        {
-                            break; // break on first future timeout
-                        }
 
                         results.Add(new TimeoutsChunk.Timeout(enumerator.Current.Document.Id, dateTime));
                     }
@@ -80,8 +80,18 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             return new TimeoutsChunk(results, nextTimeToRunQuery);
         }
 
+        internal void Shutdown()
+        {
+            abort = true;
+        }
+
         public async Task<IEnumerable<TimeoutsChunk.Timeout>> GetCleanupChunk(DateTime startSlice)
         {
+            if(abort)
+            {
+                return new TimeoutsChunk.Timeout[ 0 ];
+            }
+
             using (var session = documentStore.OpenAsyncSession())
             {
                 var query = await GetChunkQuery(session)
@@ -117,7 +127,8 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
         string endpointName;
         DateTime lastCleanupTime = DateTime.MinValue;
         IDocumentStore documentStore;
-		
+        bool abort = false;
+
         /// <summary>
         /// RavenDB server default maximum page size 
         /// </summary>
