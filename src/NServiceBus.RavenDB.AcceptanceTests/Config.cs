@@ -28,7 +28,7 @@ public class ConfigureRavenDBPersistence
         var persistenceExtensions = config.UsePersistence<RavenDBPersistence>()
             .DoNotSetupDatabasePermissions()
             .SetDefaultDocumentStore(documentStore)
-            .SetTransactionRecoveryStorageBasePath("%LOCALAPPDATA%");
+            .SetTransactionRecoveryStorageBasePath(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
 
         settings.Set(DefaultPersistenceExtensionsKey, persistenceExtensions);
 
