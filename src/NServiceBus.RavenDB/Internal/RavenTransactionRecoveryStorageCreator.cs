@@ -27,6 +27,10 @@
                 var programDataPathForException = Environment.ExpandEnvironmentVariables("%PROGRAMDATA%");
                 throw new InvalidOperationException($"Unable to store RavenDB transaction recovery storage information. Specify a writeable directory using the .SetTransactionRecoveryStorageBasePath(basePath) option. `{programDataPathForException}` may be a good candidate. The same path can be shared by multiple endpoints.");
             }
+            if (!string.Equals(Environment.ExpandEnvironmentVariables(settingsBasePath), settingsBasePath, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new InvalidOperationException($"RavenDB transaction recovery storage path `{settingsBasePath}` cannot contain environment variables because any change to an environment variable might change the path, which could result in data loss.");
+            }
 
             var suffixPath = Path.Combine("NServiceBus.RavenDB", docStore.ResourceManagerId.ToString());
             const string commonErrorMsg = "Unable to access RavenDB transaction recovery storage specified by `.SetTransactionRecoveryStorageBasePath(string basePath)`.";
