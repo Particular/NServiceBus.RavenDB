@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using NServiceBus.RavenDB.Shutdown;
     using NUnit.Framework;
     using Support;
     using TimeoutPersisters.RavenDB;
@@ -15,8 +16,8 @@
         {
             new TimeoutsIndex().Execute(store);
 
-            var persister = new TimeoutPersister
-                            {
+            var persister = new TimeoutPersister(new ShutdownDelegateRegistry())
+            {
                                 DocumentStore = store,
                                 EndpointName = "MyTestEndpoint",
                             };
@@ -47,7 +48,7 @@
         {
             new TimeoutsIndex().Execute(store);
 
-            var persister = new TimeoutPersister
+            var persister = new TimeoutPersister(new ShutdownDelegateRegistry())
             {
                 DocumentStore = store,
                 EndpointName = "MyTestEndpoint",

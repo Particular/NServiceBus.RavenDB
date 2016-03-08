@@ -80,6 +80,7 @@
     <Compile Include="Internal\RavenDbPersistenceSettingsExtensions.cs" />
     <Compile Include="Internal\SingleSharedDocumentStore.cs" />
     <Compile Include="Internal\StorageEngineVerifier.cs" />
+    <Compile Include="Internal\RavenTransactionRecoveryStorageCreator.cs" />
     <Compile Include="Outbox\Installer.cs" />
     <Compile Include="Outbox\OutboxPersister.cs" />
     <Compile Include="Outbox\OutboxRecord.cs" />
@@ -102,6 +103,11 @@
     <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />
     <Compile Include="SagaPersister\SagaPersister.cs" />
     <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />
+    <Compile Include="Shutdown\IContainShutdownDelegates.cs" />
+    <Compile Include="Shutdown\IRegisterShutdownDelegates.cs" />
+    <Compile Include="Shutdown\RavenDBShutdownHook.cs" />
+    <Compile Include="Shutdown\ShutdownDelegateRegistry.cs" />
+    <Compile Include="Shutdown\ShutdownHook.cs" />
     <Compile Include="Subscriptions\Installer.cs" />
     <Compile Include="Subscriptions\MessageTypeConverter.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionSettingsExtensions.cs" />

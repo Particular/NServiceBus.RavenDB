@@ -21,6 +21,7 @@
             {
                 RavenLogManager.CurrentLogManager = new NoOpLogManager();
 
+                s.EnableFeatureByDefault<RavenDbShutdownHook>();
                 s.EnableFeatureByDefault<RavenDbStorageSession>();
                 s.EnableFeatureByDefault<SharedDocumentStore>();
             });
