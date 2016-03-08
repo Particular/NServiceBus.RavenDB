@@ -1,6 +1,8 @@
 ﻿namespace NServiceBus
 {
     using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Persistence;
+    using NServiceBus.RavenDB.Internal;
     using Raven.Client;
 
     /// <summary>
@@ -8,8 +10,6 @@
     /// </summary>
     public static class RavenDbTimeoutSettingsExtensions
     {
-        internal const string SettingsKey = "RavenDbDocumentStore/Timeouts";
-
         /// <summary>
         ///     Configures the given document store to be used when storing timeouts
         /// </summary>
@@ -18,7 +18,7 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> UseDocumentStoreForTimeouts(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            cfg.GetSettings().Set(SettingsKey, documentStore);
+            DocumentStoreManager.SetDocumentStore<StorageType.Timeouts>(cfg.GetSettings(), documentStore);
             return cfg;
         }
     }

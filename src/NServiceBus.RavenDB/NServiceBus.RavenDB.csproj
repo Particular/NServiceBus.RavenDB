@@ -75,17 +75,21 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Gateway\GatewayMessage.cs" />
-    <Compile Include="Gateway\RavenDbTimeoutSettingsExtensions.cs" />
+    <Compile Include="Gateway\RavenDbGatewayDeduplicationSettingsExtensions.cs" />
     <Compile Include="Gateway\RavenDbGatewayDeduplication.cs" />
+    <Compile Include="Internal\DocumentStoreInitializer.cs" />
+    <Compile Include="Internal\DocumentStoreManager.cs" />
     <Compile Include="Internal\IDocumentStoreWrapper.cs" />
     <Compile Include="Internal\LegacyAddress.cs" />
     <Compile Include="Internal\BackwardsCompatibilityHelper.cs" />
     <Compile Include="Internal\DocumentStoreWrapper.cs" />
     <Compile Include="Internal\Helpers.cs" />
     <Compile Include="ConnectionParameters.cs" />
+    <Compile Include="Internal\RavenDbPersistenceSettingsExtensions.cs" />
     <Compile Include="Internal\RavenDBSynchronizedStorage.cs" />
+    <Compile Include="Internal\RavenTransactionRecoveryStorageCreator.cs" />
+    <Compile Include="Internal\SingleSharedDocumentStore.cs" />
     <Compile Include="Internal\StorageEngineVerifier.cs" />
-    <Compile Include="Internal\TransactionRecoveryStorageVerifier.cs" />
     <Compile Include="Outbox\OutboxPersister.cs" />
     <Compile Include="Outbox\OutboxRecord.cs" />
     <Compile Include="Outbox\OutboxRecordsCleaner.cs" />

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
+using NServiceBus.Configuration.AdvanceExtensibility;
+using NServiceBus.Settings;
+using Raven.Client;
 using Raven.Client.Document;
 
 public class ConfigureScenariosForRavenDBPersistence : IConfigureSupportedScenariosForTestExecution
@@ -14,9 +17,22 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 {
     public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings)
     {
-        documentStore = GetDocumentStore();
+        documentStore = new DocumentStore
+        {
+            Url = "http://localhost:8083",
+            DefaultDatabase = Guid.NewGuid().ToString()
+        };
 
-        configuration.UsePersistence<RavenDBPersistence>().DoNotSetupDatabasePermissions().SetDefaultDocumentStore(documentStore);
+        var endpointSettings = configuration.GetSettings();
+
+        endpointSettings.Set(DefaultDocumentStoreKey, documentStore);
+
+        var persistenceExtensions = configuration.UsePersistence<RavenDBPersistence>()
+            .DoNotSetupDatabasePermissions()
+            .SetDefaultDocumentStore(documentStore)
+            .SetTransactionRecoveryStorageBasePath(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
+
+        endpointSettings.Set(DefaultPersistenceExtensionsKey, persistenceExtensions);
 
         Console.WriteLine("Created '{0}' database", documentStore.DefaultDatabase);
 
@@ -28,23 +44,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
         return DeleteDatabase(documentStore);
     }
 
-    public static DocumentStore GetDocumentStore()
-    {
-        var databaseName = Guid.NewGuid().ToString();
-
-        var documentStore = new DocumentStore
-        {
-            Url = "http://localhost:8083",
-            DefaultDatabase = databaseName,
-            ResourceManagerId = Guid.NewGuid() /* This is OK for ATT purposes */
-        };
-
-        documentStore.Initialize();
-
-        return documentStore;
-    }
-
-    public static async Task DeleteDatabase(DocumentStore documentStore)
+    private static async Task DeleteDatabase(DocumentStore documentStore)
     {
         // Periodically the delete will throw an exception because Raven has the database locked
         // To solve this we have a retry loop with a delay
@@ -71,5 +71,17 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
         Console.WriteLine("Deleted '{0}' database", documentStore.DefaultDatabase);
     }
 
+    public static IDocumentStore GetDefaultDocumentStore(ReadOnlySettings settings)
+    {
+        return settings.Get<IDocumentStore>(DefaultDocumentStoreKey);
+    }
+
+    public static PersistenceExtentions<RavenDBPersistence> GetDefaultPersistenceExtensions(ReadOnlySettings settings)
+    {
+        return settings.Get<PersistenceExtentions<RavenDBPersistence>>(DefaultPersistenceExtensionsKey);
+    }
+
     DocumentStore documentStore;
+    const string DefaultDocumentStoreKey = "$.ConfigureRavenDBPersistence.DefaultDocumentStore";
+    const string DefaultPersistenceExtensionsKey = "$.ConfigureRavenDBPersistence.DefaultPersistenceExtensions";
 }

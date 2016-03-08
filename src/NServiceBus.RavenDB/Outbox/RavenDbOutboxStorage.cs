@@ -4,9 +4,9 @@
     using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Features;
+    using NServiceBus.Persistence;
     using NServiceBus.RavenDB.Internal;
     using NServiceBus.Settings;
-    using Raven.Client;
 
     class RavenDbOutboxStorage : Feature
     {
@@ -18,16 +18,7 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            var store =
-                // Trying pulling a shared DocumentStore set by the user or other Feature
-                context.Settings.GetOrDefault<IDocumentStore>(RavenDbSettingsExtensions.DocumentStoreSettingsKey) ?? SharedDocumentStore.Get(context.Settings);
-
-            if(store == null)
-            {
-                throw new Exception("RavenDB is configured as persistence for Outbox and no DocumentStore instance found");
-            }
-
-            StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(store, context.Settings);
+            var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings);
 
             Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
 
