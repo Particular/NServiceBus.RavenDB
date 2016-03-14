@@ -16,6 +16,7 @@
         {
             var settings = new SettingsHolder();
             settings.Set("Transactions.SuppressDistributedTransactions", true);
+            settings.Set("TypesToScan", new Type[0]);
 
             DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(settings, EmbeddedStore("GatewayDeduplication"));
             DocumentStoreManager.SetDocumentStore<StorageType.Outbox>(settings, EmbeddedStore("Outbox"));
@@ -52,6 +53,7 @@
         {
             var settings = new SettingsHolder();
             settings.Set("Transactions.SuppressDistributedTransactions", true);
+            settings.Set("TypesToScan", new Type[0]);
 
             DocumentStoreManager.SetCustomizeDocumentStoreDelegate(settings, ds => ds.Identifier += "FirstDelegate");
             DocumentStoreManager.SetCustomizeDocumentStoreDelegate(settings, ds => ds.Identifier += "SecondDelegate");
