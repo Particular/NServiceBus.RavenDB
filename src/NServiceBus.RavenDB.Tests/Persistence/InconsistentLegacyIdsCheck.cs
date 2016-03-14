@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
     using NServiceBus.RavenDB.Internal;
     using NServiceBus.Saga;
     using NServiceBus.TimeoutPersisters.RavenDB;
@@ -25,7 +27,7 @@
 
             using (var session = docStore.OpenSession())
             {
-                var timeout = session.Load<TimeoutData>(1);
+                var timeout = session.Load<TimeoutData>(1001);
                 Assert.IsNotNull(timeout);
                 Assert.AreEqual("TheOwningTimeoutManager", timeout.OwningTimeoutManager);
             }
@@ -49,7 +51,67 @@
             }
         }
 
-        private IDocumentStore CreateFilledDocStore(Guid sagaId, bool useLegacyDocIdConventions, bool readWithModifiedConventions)
+        [TestCase(false, false)]
+        [TestCase(false, true)]
+        [TestCase(true, false)]
+        [TestCase(true, true)]
+        public void TestStoringSaga(bool storeWithModifiedConventions, bool readWithModifiedConventions)
+        {
+            var docStore = CreateFilledDocStore(Guid.NewGuid(), storeWithModifiedConventions, readWithModifiedConventions);
+            var snooper = StoreSnooper.Install(docStore);
+
+            var newSagaId = Guid.NewGuid();
+
+            using (var session = docStore.OpenSession())
+            {
+                session.Store(new TestSagaData
+                {
+                    Id = newSagaId,
+                    OrderId = 12345,
+                    OriginalMessageId = Guid.NewGuid().ToString(),
+                    Originator = "TheOriginator"
+                });
+                session.SaveChanges();
+            }
+
+            var desiredCollection = storeWithModifiedConventions ? "TestSaga" : "TestSagaDatas";
+            var desiredId = $"{desiredCollection}/{newSagaId}";
+
+            Assert.AreEqual(1, snooper.KeysStored.Count());
+            Assert.AreEqual(desiredId, snooper.KeysStored.First());
+        }
+
+        [TestCase(false, false)]
+        [TestCase(false, true)]
+        [TestCase(true, false)]
+        [TestCase(true, true)]
+        public void TestStoringTimeout(bool storeWithModifiedConventions, bool readWithModifiedConventions)
+        {
+            var docStore = CreateFilledDocStore(Guid.NewGuid(), storeWithModifiedConventions, readWithModifiedConventions);
+            var snooper = StoreSnooper.Install(docStore);
+
+            using (var session = docStore.OpenSession())
+            {
+                session.Store(new TimeoutData
+                { 
+                    Destination = new Address("Somewhere", "OutThere"),
+                    Headers = new Dictionary<string, string>(),
+                    OwningTimeoutManager = "TheOwner",
+                    SagaId = Guid.Empty,
+                    State = new byte[0],
+                    Time = DateTime.UtcNow.AddDays(5)
+                });
+                session.SaveChanges();
+            }
+
+            var desiredCollection = storeWithModifiedConventions ? "TimeoutData" : "TimeoutDatas";
+            var desiredId = $"{desiredCollection}/1";
+
+            Assert.AreEqual(1, snooper.KeysStored.Count());
+            Assert.AreEqual(desiredId, snooper.KeysStored.First());
+        }
+
+        private IDocumentStore CreateFilledDocStore(Guid sagaId, bool storeWithModifiedConventions, bool readWithModifiedConventions)
         {
             var store = NewDocumentStore(configureStore: s =>
             {
@@ -57,6 +119,9 @@
                 {
                     s.Conventions.FindTypeTagName = BackwardsCompatibilityHelper.LegacyFindTypeTagName;
                 }
+
+                var documentIdConventions = new DocumentIdConventions(s, new [] { typeof(TestSagaData) });
+                s.Conventions.FindTypeTagName = documentIdConventions.FindTypeTagName;
             }).Initialize();
 
             var timeout = new TimeoutData
@@ -74,15 +139,20 @@
                 Originator = "SomeSaga"
             };
 
-            if (useLegacyDocIdConventions)
+            if (storeWithModifiedConventions)
             {
                 DirectStore(store, $"TestSaga/{sagaId}", saga, "TestSaga");
-                DirectStore(store, "TimeoutData/1", timeout, "TimeoutData");
+                DirectStore(store, "TimeoutData/1001", timeout, "TimeoutData");
             }
             else
             {
                 DirectStore(store, $"TestSagaDatas/{sagaId}", saga, "TestSagaDatas");
-                DirectStore(store, "TimeoutDatas/1", timeout, "TimeoutDatas");
+                DirectStore(store, "TimeoutDatas/1001", timeout, "TimeoutDatas");
+            }
+
+            while (store.DatabaseCommands.GetStatistics().StaleIndexes.Length != 0)
+            {
+                Thread.Sleep(10);
             }
 
             return store;

@@ -88,10 +88,12 @@
   <ItemGroup>
     <Compile Include="Outbox\When_adding_outbox_messages.cs" />
     <Compile Include="Outbox\When_cleaning_outbox_messages.cs" />
+    <Compile Include="Persistence\DocumentIdConventionsTests.cs" />
     <Compile Include="Persistence\InconsistentLegacyIdsCheck.cs" />
     <Compile Include="Persistence\DocumentStoreExtensionsForVoron.cs" />
     <Compile Include="Persistence\DocumentStoreManagerTests.cs" />
     <Compile Include="Persistence\RavenUserInstallerTests.cs" />
+    <Compile Include="Persistence\StoreSnooper.cs" />
     <Compile Include="Persistence\TestStorageEngineVerifier.cs" />
     <Compile Include="RavenDBPersistenceTestBase.cs" />
     <Compile Include="SagaPersister\Saga_with_unique_property_set_to_null.cs" />

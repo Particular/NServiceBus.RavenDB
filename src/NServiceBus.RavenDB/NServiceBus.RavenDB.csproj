@@ -71,6 +71,7 @@
     <Compile Include="Gateway\RavenDbTimeoutSettingsExtensions.cs" />
     <Compile Include="Gateway\RavenDbGatewayDeduplication.cs" />
     <Compile Include="Internal\BackwardsCompatibilityHelper.cs" />
+    <Compile Include="Internal\DocumentIdConventions.cs" />
     <Compile Include="Internal\DocumentStoreInitializer.cs" />
     <Compile Include="Internal\DocumentStoreManager.cs" />
     <Compile Include="Internal\DocumentStoreWrapper.cs" />

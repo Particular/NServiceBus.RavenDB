@@ -45,7 +45,8 @@
 
         void ApplyConventions(ReadOnlySettings settings)
         {
-            docStore.Conventions.FindTypeTagName = BackwardsCompatibilityHelper.LegacyFindTypeTagName;
+            var idConventions = new DocumentIdConventions(docStore, settings.GetAvailableTypes());
+            docStore.Conventions.FindTypeTagName = idConventions.FindTypeTagName;
 
             var store = docStore as DocumentStore;
             if (store == null)
