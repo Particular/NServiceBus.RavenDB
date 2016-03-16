@@ -65,6 +65,11 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
                 do
                 {
+                    if (CancellationRequested())
+                    {
+                        return Enumerable.Empty<Tuple<string, DateTime>>();
+                    }
+
                     var query = GetChunkQuery(session);
 
                     var dueTimeouts =
@@ -84,8 +89,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                         results.Add(new Tuple<string, DateTime>(dueTimeout.Id, dueTimeout.Time));
                     }
 
-                    // Check for cancellation
-                    if (shutdownTokenSource != null && shutdownTokenSource.IsCancellationRequested)
+                    if (CancellationRequested())
                     {
                         return Enumerable.Empty<Tuple<string, DateTime>>();
                     }
@@ -208,5 +212,11 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 return false;
             }
         }
+        
+        private bool CancellationRequested()
+        {
+            return shutdownTokenSource != null && shutdownTokenSource.IsCancellationRequested;
+        }
+
     }
 }
