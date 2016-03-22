@@ -6,7 +6,6 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
     using System.Linq;
     using System.Threading.Tasks;
     using System.Transactions;
-    using NServiceBus.RavenDB.Shutdown;
     using NUnit.Framework;
     using Support;
     using TimeoutPersisters.RavenDB;
@@ -23,7 +22,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
         {
             store = NewDocumentStore(false, "esent");
             new TimeoutsIndex().Execute(store);
-            timeoutPersister = new TimeoutPersister(new ShutdownDelegateRegistry())
+            timeoutPersister = new TimeoutPersister
             {
                 DocumentStore = store,
                 EndpointName = "MyTestEndpoint",
