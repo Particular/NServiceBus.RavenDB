@@ -27,5 +27,15 @@ namespace NServiceBus
 
             return synchronizedStorageSession.Session;
         }
+
+        /// <summary>
+        /// Sets the current RavenDB session received by <see cref="RavenSession"/>.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="session"></param>
+        public static void SetRavenSession(this IMessageHandlerContext context, IAsyncDocumentSession session)
+        {
+            context.Extensions.Set<SynchronizedStorageSession>(new RavenDBSynchronizedStorageSession(session, true));
+        }
     }
 }
