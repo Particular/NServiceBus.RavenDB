@@ -4,6 +4,7 @@
     using NServiceBus.Configuration.AdvanceExtensibility;
     using NServiceBus.Persistence;
     using NServiceBus.RavenDB;
+    using NServiceBus.RavenDB.Internal;
     using NServiceBus.RavenDB.SessionManagement;
     using Raven.Client;
 
@@ -24,6 +25,7 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
+            Helpers.ApplyDocumentIdConventions(cfg.GetSettings(), documentStore);
             cfg.GetSettings().Set(DocumentStoreSettingsKey, documentStore);
             return cfg;
         }

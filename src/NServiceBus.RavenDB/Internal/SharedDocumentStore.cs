@@ -34,6 +34,7 @@
                         ApiKey = p.ApiKey,
                         Credentials = p.Credentials
                     };
+                    Helpers.ApplyDocumentIdConventions(settings, holder.DocumentStore);
                     Helpers.ApplyRavenDBConventions(settings, holder.DocumentStore);
                     holder.DocumentStore.Initialize();
                 }
