@@ -30,6 +30,8 @@
 
             Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
 
+            DocumentIdConventions.Apply(context.Settings, store);
+
             context.Container.ConfigureComponent<Installer>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(c => c.StoreToInstall, store);
 
