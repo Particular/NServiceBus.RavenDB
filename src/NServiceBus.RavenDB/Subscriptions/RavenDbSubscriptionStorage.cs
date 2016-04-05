@@ -31,8 +31,6 @@
                 throw new Exception("RavenDB is configured as persistence for Subscriptions and no DocumentStore instance found");
             }
 
-            ConnectionVerifier.VerifyConnectionToRavenDBServer(store);
-
             BackwardsCompatibilityHelper.SupportOlderClrTypes(store);
 
             // This is required for DTC fix, and this requires RavenDB 2.5 build 2900 or above

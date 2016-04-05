@@ -28,8 +28,6 @@
                 throw new Exception("RavenDB is configured as persistence for Outbox and no DocumentStore instance found");
             }
 
-            ConnectionVerifier.VerifyConnectionToRavenDBServer(store);
-
             Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
 
             context.Container.ConfigureComponent<Installer>(DependencyLifecycle.InstancePerCall)
