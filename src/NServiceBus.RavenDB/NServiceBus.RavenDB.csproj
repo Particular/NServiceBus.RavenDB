@@ -117,6 +117,7 @@
     <Compile Include="Subscriptions\SubscriptionPersister.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionV1toV2Converter.cs" />
+    <Compile Include="Testing\TestableRavenStorageSession.cs" />
     <Compile Include="Timeouts\QueryTimeouts.cs" />
     <Compile Include="Timeouts\RavenDbTimeoutSettingsExtensions.cs" />
     <Compile Include="Timeouts\RavenDbTimeoutStorage.cs" />
