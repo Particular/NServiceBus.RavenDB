@@ -100,7 +100,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
             var timeouts = GetTimeouts();
             Assert.AreEqual(2, timeouts.Count());
 
-            bool result = false;
+            var result = false;
             foreach (var timeout in timeouts)
             {
                 result = timeoutPersister.TryRemove(timeout.Item1);

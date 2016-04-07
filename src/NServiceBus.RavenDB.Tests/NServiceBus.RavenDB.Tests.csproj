@@ -108,6 +108,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Infrastructure\ReusableDB.cs" />
+    <Compile Include="Infrastructure\StoreSnooper.cs" />
+    <Compile Include="Persistence\DocumentIds\DocumentIdConventionTestBase.cs" />
+    <Compile Include="Persistence\DocumentIds\InconsistentSagaIdConventions.cs" />
+    <Compile Include="Persistence\DocumentIds\InconsistentTimeoutIdConventions.cs" />
     <Compile Include="Persistence\RavenUserInstallerTests.cs" />
     <Compile Include="RavenTestBase.cs" />
     <Compile Include="SagaPersister\Saga_with_unique_property_set_to_null.cs" />
