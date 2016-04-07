@@ -2,7 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using AcceptanceTesting;
+    using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
     using Raven.Client;
@@ -21,20 +21,17 @@
                 session = documentStore.OpenAsyncSession();
 
                 var context =
-                await Scenario.Define<RavenSessionTestContext>(testContext =>
-                {
-                    testContext.RavenSessionFromTest = session;
-                })
-                    .WithEndpoint<SharedRavenSessionExtensions>(b => b.When((bus, c) =>
-                    {
-                        var sendOptions = new SendOptions();
+                    await Scenario.Define<RavenSessionTestContext>(testContext => { testContext.RavenSessionFromTest = session; })
+                        .WithEndpoint<SharedRavenSessionExtensions>(b => b.When((bus, c) =>
+                        {
+                            var sendOptions = new SendOptions();
 
-                        sendOptions.RouteToThisEndpoint();
+                            sendOptions.RouteToThisEndpoint();
 
-                        return bus.Send(new SharedRavenSessionExtensions.GenericMessage(), sendOptions);
-                    }))
-                    .Done(c => c.HandlerWasHit)
-                    .Run();
+                            return bus.Send(new SharedRavenSessionExtensions.GenericMessage(), sendOptions);
+                        }))
+                        .Done(c => c.HandlerWasHit)
+                        .Run();
 
                 Assert.AreSame(session, context.RavenSessionFromHandler);
             }
@@ -51,8 +48,6 @@
                     await ConfigureEndpointRavenDBPersistence.DeleteDatabase(documentStore);
                 }
             }
-
-
         }
 
         public class RavenSessionTestContext : ScenarioContext

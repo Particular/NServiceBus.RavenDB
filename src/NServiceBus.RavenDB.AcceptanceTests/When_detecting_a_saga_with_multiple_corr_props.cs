@@ -18,7 +18,7 @@
                 .Done(c => c.Exceptions.Any() || c.EndpointsStarted)
                 .Run());
 
-            const string expectedMessage = "Sagas can only have mappings that correlate on a single saga property. Please use custom finders to correlate";
+            const string expectedMessage = "Sagas can only have mappings that correlate on a single saga property. Use custom finders to correlate";
 
             var exceptionToVerify = ex.InnerException.InnerException;
 

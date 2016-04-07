@@ -8,7 +8,7 @@
     using NServiceBus.Features;
     using NUnit.Framework;
 
-    public class When_outbox_is_enabled
+    public class When_outbox_is_enabled : NServiceBusAcceptanceTest
     {
         [Test]
         public async Task Downstream_duplicates_are_eliminated()
