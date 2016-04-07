@@ -8,6 +8,7 @@ namespace NServiceBus.RavenDB
     using Logging;
     using NServiceBus.Persistence.Raven;
     using NServiceBus.RavenDB.Gateway.Persistence;
+    using NServiceBus.RavenDB.Internal;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Serializers.Json;
     using Raven.Abstractions.Data;
@@ -173,6 +174,7 @@ namespace NServiceBus.RavenDB
                 documentStore.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
 
                 documentStore.Conventions.FindTypeTagName = RavenConventions.FindTypeTagName;
+                DocumentIdConventions.Apply(documentStore);
 
                 documentStore.Conventions.MaxNumberOfRequestsPerSession = 100;
 
