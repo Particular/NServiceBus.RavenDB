@@ -6,7 +6,7 @@
     using AcceptanceTesting;
     using NUnit.Framework;
 
-    public class When_using_audit_message_is_received : NServiceBusAcceptanceTest
+    public class When_audit_message_received : NServiceBusAcceptanceTest
     {
 
         [Test]
@@ -15,7 +15,7 @@
             var context = new Context();
             Scenario.Define(context)
             .WithEndpoint<EndpointWithAuditOn>(b => b.Given(bus => bus.SendLocal(new MessageToBeAudited())))
-            .WithEndpoint<EndpointThatHandlesAuditMessages>()
+            .WithEndpoint<EndptHandlesAuditMsgs>()
             .Done(c => c.IsMessageHandlingComplete && context.IsMessageHandledByTheAuditEndpoint)
             .Run();
             Assert.IsTrue(context.Headers.ContainsKey(Headers.ProcessingStarted));
@@ -36,7 +36,7 @@
             public EndpointWithAuditOn()
             {
                 EndpointSetup<DefaultServer>()
-                    .AuditTo<EndpointThatHandlesAuditMessages>();
+                    .AuditTo<EndptHandlesAuditMsgs>();
             }
 
             class MessageToBeAuditedHandler : IHandleMessages<MessageToBeAudited>
@@ -55,10 +55,10 @@
             }
         }
 
-        public class EndpointThatHandlesAuditMessages : EndpointConfigurationBuilder
+        public class EndptHandlesAuditMsgs : EndpointConfigurationBuilder
         {
 
-            public EndpointThatHandlesAuditMessages()
+            public EndptHandlesAuditMsgs()
             {
                 EndpointSetup<DefaultServer>();
             }
