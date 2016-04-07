@@ -95,6 +95,8 @@
     <Compile Include="Outbox\RavenDBOutboxTransaction.cs" />
     <Compile Include="RavenDbSettingsExtensions.cs" />
     <Compile Include="SagaPersister\RavenDbSagaSettingsExtensions.cs" />
+    <Compile Include="SessionManagement\ContextBagExtensions.cs" />
+    <Compile Include="SessionManagement\RavenDBSynchronizedStorageAdapter.cs" />
     <Compile Include="SessionManagement\RavenDBSynchronizedStorageSession.cs" />
     <Compile Include="SessionManagement\ISessionProvider.cs" />
     <Compile Include="SessionManagement\IAsyncSessionProvider.cs" />
@@ -109,7 +111,7 @@
     <Compile Include="SagaPersister\SagaPersister.cs" />
     <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />
     <Compile Include="SessionManagement\RavenSessionExtension.cs" />
-    <Compile Include="SessionManagement\SynchronizedStorage.cs" />
+    <Compile Include="SessionManagement\SessionOwnership.cs" />
     <Compile Include="Subscriptions\MessageTypeConverter.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionSettingsExtensions.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionStorage.cs" />

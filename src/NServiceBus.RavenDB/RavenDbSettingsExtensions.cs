@@ -48,20 +48,20 @@
         /// <param name="cfg"></param>
         /// <param name="getSessionFunc">A func returning the session to be used</param>
         /// <returns></returns>
-        [ObsoleteEx( Message = "Use the 'UseSharedAsyncSession' configuration extension method to provide an async session.", RemoveInVersion = "5", TreatAsErrorFromVersion = "4" )]
+        [ObsoleteEx(Message = "Use the 'UseSharedAsyncSession' configuration extension method to provide an async session.", RemoveInVersion = "5", TreatAsErrorFromVersion = "4")]
         public static PersistenceExtentions<RavenDBPersistence> UseSharedSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDocumentSession> getSessionFunc)
         {
             throw new NotSupportedException();
         }
 
         /// <summary>
-        ///     Specifies the async session that the shared persisters (saga + outbox) that should be used. The lifecycle is controled by
+        ///     Specifies the async session that the shared persisters (saga + outbox) that should be used. The lifecycle is controlled by
         ///     me
         /// </summary>
         /// <param name="cfg"></param>
         /// <param name="getAsyncSessionFunc">A func returning the async session to be used</param>
         /// <returns></returns>
-        public static PersistenceExtentions<RavenDBPersistence> UseSharedAsyncSession( this PersistenceExtentions<RavenDBPersistence> cfg, Func<IAsyncDocumentSession> getAsyncSessionFunc )
+        public static PersistenceExtentions<RavenDBPersistence> UseSharedAsyncSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IAsyncDocumentSession> getAsyncSessionFunc)
         {
             cfg.GetSettings().Set(SharedAsyncSessionSettingsKey, getAsyncSessionFunc);
             return cfg;
