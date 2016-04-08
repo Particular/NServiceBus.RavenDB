@@ -50,7 +50,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="NServiceBus.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NServiceBus.6.0.0-unstable1598\lib\net452\NServiceBus.Core.dll</HintPath>
+      <HintPath>..\packages\NServiceBus.6.0.0-beta0001\lib\net452\NServiceBus.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Obsolete, Version=4.0.3.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
@@ -95,6 +95,8 @@
     <Compile Include="Outbox\RavenDBOutboxTransaction.cs" />
     <Compile Include="RavenDbSettingsExtensions.cs" />
     <Compile Include="SagaPersister\RavenDbSagaSettingsExtensions.cs" />
+    <Compile Include="SessionManagement\ContextBagExtensions.cs" />
+    <Compile Include="SessionManagement\RavenDBSynchronizedStorageAdapter.cs" />
     <Compile Include="SessionManagement\RavenDBSynchronizedStorageSession.cs" />
     <Compile Include="SessionManagement\ISessionProvider.cs" />
     <Compile Include="SessionManagement\IAsyncSessionProvider.cs" />
@@ -109,7 +111,7 @@
     <Compile Include="SagaPersister\SagaPersister.cs" />
     <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />
     <Compile Include="SessionManagement\RavenSessionExtension.cs" />
-    <Compile Include="SessionManagement\SynchronizedStorage.cs" />
+    <Compile Include="SessionManagement\SessionOwnership.cs" />
     <Compile Include="Subscriptions\MessageTypeConverter.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionSettingsExtensions.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionStorage.cs" />
