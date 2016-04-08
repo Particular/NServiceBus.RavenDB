@@ -45,7 +45,7 @@
 
                 if (documentStore != null)
                 {
-                    await ConfigureEndpointRavenDBPersistence.DeleteDatabase(documentStore);
+                    await ConfigureEndpointRavenDBPersistence.DeleteDatabase(documentStore.DefaultDatabase);
                 }
             }
         }

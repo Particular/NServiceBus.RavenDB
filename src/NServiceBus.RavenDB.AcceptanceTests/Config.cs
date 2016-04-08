@@ -14,7 +14,9 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 {
     public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings)
     {
-        documentStore = GetDocumentStore();
+        var documentStore = GetDocumentStore();
+
+        databaseName = documentStore.DefaultDatabase;
 
         configuration.UsePersistence<RavenDBPersistence>().DoNotSetupDatabasePermissions().SetDefaultDocumentStore(documentStore);
 
@@ -25,17 +27,24 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     public Task Cleanup()
     {
-        return DeleteDatabase(documentStore);
+        return DeleteDatabase(databaseName);
     }
 
     public static DocumentStore GetDocumentStore()
     {
-        var databaseName = Guid.NewGuid().ToString();
+        var dbName = Guid.NewGuid().ToString();
 
+        var documentStore = GetInitializedDocumentStore(dbName);
+
+        return documentStore;
+    }
+
+    private static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
+    {
         var documentStore = new DocumentStore
         {
             Url = "http://localhost:8083",
-            DefaultDatabase = databaseName,
+            DefaultDatabase = defaultDatabase,
             ResourceManagerId = Guid.NewGuid() /* This is OK for ATT purposes */
         };
 
@@ -44,22 +53,26 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
         return documentStore;
     }
 
-    public static async Task DeleteDatabase(DocumentStore documentStore)
+    public static async Task DeleteDatabase(string dbName)
     {
         // Periodically the delete will throw an exception because Raven has the database locked
         // To solve this we have a retry loop with a delay
         var triesLeft = 3;
 
-        while (--triesLeft > 0)
+        while (triesLeft-- > 0)
         {
             try
             {
-                await documentStore.AsyncDatabaseCommands.GlobalAdmin.DeleteDatabaseAsync(documentStore.DefaultDatabase, true);
-                break;
+                // We are using a new store because the global one is disposed of before cleanup
+                using (var storeForDeletion = GetInitializedDocumentStore(dbName))
+                {
+                    await storeForDeletion.AsyncDatabaseCommands.GlobalAdmin.DeleteDatabaseAsync(dbName, true);
+                    break;
+                }
             }
             catch
             {
-                if (triesLeft < 1)
+                if (triesLeft == 0)
                 {
                     throw;
                 }
@@ -68,8 +81,8 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
             }
         }
 
-        Console.WriteLine("Deleted '{0}' database", documentStore.DefaultDatabase);
+        Console.WriteLine("Deleted '{0}' database", dbName);
     }
 
-    DocumentStore documentStore;
+    string databaseName;
 }
