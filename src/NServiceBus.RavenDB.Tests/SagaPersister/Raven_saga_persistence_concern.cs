@@ -4,13 +4,13 @@ namespace NServiceBus.Core.Tests.Persistence.RavenDB.SagaPersister
     using NServiceBus.RavenDB.Persistence;
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NUnit.Framework;
-    using Raven.Client;
+    using Raven.Client.Document;
     using Raven.Client.Embedded;
     using Saga;
 
     abstract class Raven_saga_persistence_concern
     {
-        protected IDocumentStore store;
+        protected DocumentStore store;
 
         [TestFixtureSetUp]
         public virtual void Setup()
