@@ -5,7 +5,7 @@
     /// <summary>
     ///     RavenDB Saga Storage.
     /// </summary>
-    public class RavenDbSagaStorage : Feature
+    class RavenDbSagaStorage : Feature
     {
         /// <summary>
         ///     Creates an instance of <see cref="RavenDbSagaStorage" />.

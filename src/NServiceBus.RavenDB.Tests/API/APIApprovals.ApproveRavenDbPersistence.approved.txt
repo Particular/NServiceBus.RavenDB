@@ -1,12 +1,4 @@
-﻿namespace NServiceBus.Features
-{
-    
-    public class RavenDbSagaStorage : NServiceBus.Features.Feature
-    {
-        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
-    }
-}
-namespace NServiceBus.Gateway.Deduplication
+﻿namespace NServiceBus.Gateway.Deduplication
 {
     
     public class GatewayMessage
