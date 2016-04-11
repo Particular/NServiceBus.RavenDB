@@ -138,6 +138,7 @@ namespace NServiceBus.RavenDB
         /// <returns>The configuration object.</returns>
         public static Configure RavenDBStorageWithStore(this Configure config, IDocumentStore documentStore)
         {
+            DocumentIdConventions.Apply(documentStore);
             return config.InternalRavenPersistence(() => new StoreAccessor(documentStore));
         }
 
