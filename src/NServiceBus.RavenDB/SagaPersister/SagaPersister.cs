@@ -124,6 +124,8 @@ namespace NServiceBus.SagaPersisters.RavenDB
 
             if (lookup != null)
             {
+                sessionProvider.Session.Advanced.Evict(lookup); //don't track. We store/delete SagaUniqueIdentity explicitly
+
                 return lookup.SagaDocId != null
                     ? sessionProvider.Session.Load<T>(lookup.SagaDocId) //if we have a saga id we can just load it
                     : Get<T>(lookup.SagaId); //if not this is a saga that was created pre 3.0.4 so we fallback to a get instead
