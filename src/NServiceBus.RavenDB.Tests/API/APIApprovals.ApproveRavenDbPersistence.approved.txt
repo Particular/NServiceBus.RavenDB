@@ -1,14 +1,4 @@
-﻿namespace NServiceBus.Gateway.Deduplication
-{
-    
-    public class GatewayMessage
-    {
-        public GatewayMessage() { }
-        public string Id { get; set; }
-        public System.DateTime TimeReceived { get; set; }
-    }
-}
-namespace NServiceBus.RavenDB
+﻿namespace NServiceBus.RavenDB
 {
     
     public class ConnectionParameters
