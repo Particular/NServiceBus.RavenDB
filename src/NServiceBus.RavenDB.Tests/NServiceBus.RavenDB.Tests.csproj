@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -114,6 +114,7 @@
     <Compile Include="SagaPersister\Saga_with_unique_property_set_to_null.cs" />
     <Compile Include="SagaPersister\TestSaga.cs" />
     <Compile Include="SagaPersister\When_completing_a_saga_with_the_raven_persister.cs" />
+    <Compile Include="SagaPersister\When_loading_a_legacy_unique_identity.cs" />
     <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_an_Enum_property.cs" />
     <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_a_concrete_class_property.cs" />
     <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_a_date_time_property.cs" />

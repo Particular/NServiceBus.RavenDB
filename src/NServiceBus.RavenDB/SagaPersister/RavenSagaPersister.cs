@@ -104,6 +104,8 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
 
             if (lookup != null)
             {
+                sessionProvider.Session.Advanced.Evict(lookup); //don't track. We store/delete SagaUniqueIdentity explicitly
+
                 return lookup.SagaDocId != null
                     ? sessionProvider.Session.Load<T>(lookup.SagaDocId) //if we have a saga id we can just load it
                     : Get<T>(lookup.SagaId); //if not this is a saga that was created pre 3.0.4 so we fallback to a get instead
@@ -138,7 +140,7 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
             var id = SagaUniqueIdentity.FormatId(saga.GetType(), uniqueProperty.Value);
             var sagaDocId = sessionProvider.Session.Advanced.DocumentStore.Conventions.FindFullDocumentKeyFromNonStringIdentifier(saga.Id, saga.GetType(), false);
 
-            
+
 
             sessionProvider.Session.Store(new SagaUniqueIdentity
                 {
@@ -161,9 +163,9 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
             var id = SagaUniqueIdentity.FormatId(saga.GetType(), uniqueProperty);
 
             sessionProvider.Session.Advanced.Defer(new DeleteCommandData
-                {
-                    Key = id
-                });
+            {
+                Key = id
+            });
         }
 
         readonly ISessionProvider sessionProvider;

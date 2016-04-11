@@ -8,6 +8,7 @@ namespace NServiceBus.RavenDB
     using Logging;
     using NServiceBus.Persistence.Raven;
     using NServiceBus.RavenDB.Gateway.Persistence;
+    using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Serializers.Json;
     using Raven.Abstractions.Data;
@@ -15,6 +16,7 @@ namespace NServiceBus.RavenDB
     using Raven.Client;
     using Raven.Client.Document;
     using Raven.Client.Document.DTC;
+    using Raven.Json.Linq;
     using Settings;
     using ILogManager = Raven.Abstractions.Logging.ILogManager;
     using RavenPersistenceConstants = NServiceBus.RavenDB.Persistence.RavenPersistenceConstants;
@@ -176,22 +178,7 @@ namespace NServiceBus.RavenDB
 
                 documentStore.Conventions.MaxNumberOfRequestsPerSession = 100;
 
-                documentStore.Conventions.FindClrType = (id, doc, metadata) =>
-                {
-                    var clrtype = metadata.Value<string>(Constants.RavenClrType);
-
-                    if (clrtype == "NServiceBus.Persistence.Raven.SubscriptionStorage.Subscription, NServiceBus.Core")
-                    {
-                        clrtype = ReflectionUtil.GetFullNameWithoutVersionInformation(typeof(Subscription));
-                    }
-
-                    if (clrtype == "NServiceBus.Gateway.Persistence.Raven.GatewayMessage, NServiceBus.Core")
-                    {
-                        clrtype = ReflectionUtil.GetFullNameWithoutVersionInformation(typeof(GatewayMessage));
-                    }
-
-                    return clrtype;
-                };
+                documentStore.Conventions.FindClrType = FindClrType;
 
                 if (SettingsHolder.Get<bool>("Transactions.SuppressDistributedTransactions"))
                 {
@@ -207,6 +194,28 @@ namespace NServiceBus.RavenDB
 
                 return new StoreAccessor(documentStore);
             });
+        }
+
+        internal static string FindClrType(string id, RavenJObject doc, RavenJObject metadata)
+        {
+            var clrtype = metadata.Value<string>(Constants.RavenClrType);
+
+            if (clrtype == "NServiceBus.Persistence.Raven.SubscriptionStorage.Subscription, NServiceBus.Core")
+            {
+                clrtype = ReflectionUtil.GetFullNameWithoutVersionInformation(typeof(Subscription));
+            }
+
+            if (clrtype == "NServiceBus.Gateway.Persistence.Raven.GatewayMessage, NServiceBus.Core")
+            {
+                clrtype = ReflectionUtil.GetFullNameWithoutVersionInformation(typeof(GatewayMessage));
+            }
+
+            if (clrtype == "NServiceBus.Persistence.Raven.SagaPersister.SagaUniqueIdentity, NServiceBus.Core")
+            {
+                clrtype = ReflectionUtil.GetFullNameWithoutVersionInformation(typeof(SagaUniqueIdentity));
+            }
+
+            return clrtype;
         }
 
         static Configure InternalRavenPersistence(this Configure config, Func<StoreAccessor> factory)
