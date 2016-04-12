@@ -13,38 +13,6 @@
     public class When_customzing_DocStore : NServiceBusAcceptanceTest
     {
         [Test]
-        public void Should_honor_customized_values()
-        {
-            var context = new Context();
-            context.ExpectedResourceManagerId = Guid.NewGuid();
-
-            Scenario.Define(context)
-                .WithEndpoint<CustomizeDocStoreEndpoint>(b =>
-                {
-                    b.Given(bus => bus.SendLocal(new TestCmd { Name = "Doesn't matter, let's say Fred"}));
-
-                    b.CustomConfig(cfg =>
-                    {
-                        ConfigureRavenDBPersistence.GetDefaultPersistenceExtensions(cfg.GetSettings())
-                        .CustomizeDocumentStore(store =>
-                        {
-                            var ds = store as DocumentStore;
-                            ds.Identifier = "TestIdentifier";
-                            ds.ResourceManagerId = context.ExpectedResourceManagerId;
-                            ds.TransactionRecoveryStorage = new VolatileOnlyTransactionRecoveryStorage();
-                        });
-                    });
-                })
-                .Done(c => c.MessageReceived)
-                .Run();
-            
-            Assert.IsNotNull(context.DocStore);
-            Assert.AreEqual("TestIdentifier", context.DocStore.Identifier);
-            Assert.AreEqual(context.ExpectedResourceManagerId, context.DocStore.ResourceManagerId);
-            Assert.IsInstanceOf<VolatileOnlyTransactionRecoveryStorage>(context.DocStore.TransactionRecoveryStorage);
-        }
-
-        [Test]
         public void Should_not_change_tx_recovery_values_for_provided_DocStore_with_IsolatedStorage()
         {
             var context = new Context();

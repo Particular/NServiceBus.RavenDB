@@ -79,7 +79,6 @@
     <Compile Include="Internal\Helpers.cs" />
     <Compile Include="ConnectionParameters.cs" />
     <Compile Include="Internal\RavenBuildInfo.cs" />
-    <Compile Include="Internal\RavenDbPersistenceSettingsExtensions.cs" />
     <Compile Include="Internal\SingleSharedDocumentStore.cs" />
     <Compile Include="Internal\StorageEngineVerifier.cs" />
     <Compile Include="Outbox\Installer.cs" />
