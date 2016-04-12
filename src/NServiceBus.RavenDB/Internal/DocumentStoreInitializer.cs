@@ -45,7 +45,7 @@
 
         void ApplyConventions(ReadOnlySettings settings)
         {
-            var idConventions = new DocumentIdConventions(docStore, settings.GetAvailableTypes());
+            var idConventions = new DocumentIdConventions(docStore, settings.GetAvailableTypes(), settings.EndpointName());
             docStore.Conventions.FindTypeTagName = idConventions.FindTypeTagName;
 
             var store = docStore as DocumentStore;
