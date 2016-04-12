@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Persistence\DocumentIds\DocumentIdConventionTestBase.cs" />
+    <Compile Include="Persistence\DocumentIds\DocumentIdStrategyTests.cs" />
     <Compile Include="Persistence\DocumentIds\InconsistentSagaIdConventions.cs" />
     <Compile Include="Persistence\DocumentIds\InconsistentTimeoutIdConventions.cs" />
     <Compile Include="Infrastructure\ReusableDB.cs" />

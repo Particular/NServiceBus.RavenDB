@@ -11,7 +11,6 @@
     [TestFixture]
     public class InconsistentTimeoutIdConventions : DocumentIdConventionTestBase
     {
-        const string EndpointName = "FakeEndpoint";
         readonly DateTime dueTimeout = new DateTime(DateTime.UtcNow.Year, 1, 1);
 
         [TestCase(ConventionType.RavenDefault)]
@@ -89,7 +88,8 @@
                     ApplyTestConventions(store, ConventionType.RavenDefault);
                     store.Initialize();
 
-                    Assert.Throws<InvalidOperationException>(() => store.Conventions.FindTypeTagName(typeof(TimeoutPersisters.RavenDB.TimeoutData)));
+                    var exception = Assert.Throws<InvalidOperationException>(() => store.Conventions.FindTypeTagName(typeof(TimeoutPersisters.RavenDB.TimeoutData)));
+                    Console.WriteLine($"Got expected exception: {exception.Message}");
                 }
             }
         }
