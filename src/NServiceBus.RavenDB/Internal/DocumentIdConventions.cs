@@ -3,23 +3,30 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Security.Cryptography;
+    using System.Text;
     using NServiceBus.Saga;
     using NServiceBus.Settings;
     using Raven.Client;
+    using Raven.Json.Linq;
 
     class DocumentIdConventions
     {
         private readonly IDocumentStore store;
         private readonly Func<Type, string> userSuppliedConventions;
+        private readonly string endpointName;
+        private readonly string collectionNamesDocId;
         private readonly object padlock;
         private Dictionary<Type, string> mappedTypes;
         private IEnumerable<Type> types;
 
-        public DocumentIdConventions(IDocumentStore store, IEnumerable<Type> types)
+        public DocumentIdConventions(IDocumentStore store, IEnumerable<Type> types, string endpointName)
         {
             this.store = store;
             this.types = types;
+            this.endpointName = endpointName;
 
+            collectionNamesDocId = $"NServiceBus/DocumentCollectionNames/{SHA1Hash(endpointName)}";
             userSuppliedConventions = store.Conventions.FindTypeTagName;
             padlock = new object();
         }
@@ -38,7 +45,7 @@
             }
 
             var types = settings.GetAvailableTypes();
-            var conventions = new DocumentIdConventions(store, types);
+            var conventions = new DocumentIdConventions(store, types, settings.EndpointName());
             store.Conventions.FindTypeTagName = conventions.FindTypeTagName;
         }
 
@@ -65,60 +72,115 @@
                 if (mappedTypes != null)
                     return;
 
-                var terms = GetTerms();
-                var termsSet = new HashSet<string>(terms);
+                var collectionData = new CollectionData();
 
-                var mappings = new Dictionary<Type, string>();
-                MapTypeToCollectionName(typeof(TimeoutPersisters.RavenDB.TimeoutData), termsSet, mappings);
+                var jsonDoc = store.DatabaseCommands.Get(collectionNamesDocId);
+                if (jsonDoc != null)
+                {
+                    var collectionNames = jsonDoc.DataAsJson["Collections"] as RavenJArray;
+                    foreach (RavenJValue value in collectionNames)
+                    {
+                        collectionData.Collections.Add(value.Value as string);
+                    }
+                }
 
+                MapTypeToCollectionName(typeof(TimeoutPersisters.RavenDB.TimeoutData), collectionData);
                 foreach (var sagaType in types.Where(IsSagaEntity))
                 {
-                    MapTypeToCollectionName(sagaType, termsSet, mappings);
+                    MapTypeToCollectionName(sagaType, collectionData);
+                }
+
+                if (collectionData.Changed)
+                {
+                    var newDoc = new RavenJObject();
+                    var list = new RavenJArray();
+                    foreach (var name in collectionData.Collections)
+                    {
+                        list.Add(new RavenJValue(name));
+                    }
+                    newDoc["EndpointName"] = this.endpointName;
+                    newDoc["EndpointName"] = this.endpointName;
+                    newDoc["Collections"] = list;
+                    var metadata = new RavenJObject();
+                    store.DatabaseCommands.Put(collectionNamesDocId, null, newDoc, metadata);
                 }
 
                 // Completes initialization
-                this.mappedTypes = mappings;
+                this.mappedTypes = collectionData.Mappings;
             }
         }
 
-        private IEnumerable<string> GetTerms()
+
+
+        private HashSet<string> GetTerms()
         {
             const string DocsByEntityNameIndex = "Raven/DocumentsByEntityName";
             var index = store.DatabaseCommands.GetIndex(DocsByEntityNameIndex);
             if (index == null)
             {
-                // If the index doesn't exist, then the database is new and 
-                // it's not going to have any existing terms in it.
-                return Enumerable.Empty<string>();
+                throw new InvalidOperationException("The Raven/DocumentsByEntityName index must exist in order to determine the document ID strategy. This index is created by RavenDB automatically. Please check in Raven Studio to make sure it exists.");
             }
 
-            return store.DatabaseCommands.GetTerms(DocsByEntityNameIndex, "Tag", null, 1024);
+            var terms = store.DatabaseCommands.GetTerms(DocsByEntityNameIndex, "Tag", null, 1024);
+            return new HashSet<string>(terms);
         } 
 
-        private void MapTypeToCollectionName(Type type, HashSet<string> collectionNames, Dictionary<Type, string> mappings)
+        private void MapTypeToCollectionName(Type type, CollectionData collectionData)
         {
             var byUserConvention = userSuppliedConventions(type);
             var ravenDefault = Raven.Client.Document.DocumentConvention.DefaultTypeTagName(type);
             var byLegacy = LegacyFindTypeTagName(type);
 
-            var mappingsInPriorityOrder = new []
+            var mappingsInPriorityOrder = new[]
             {
                 byUserConvention,
                 ravenDefault,
                 byLegacy
             };
 
-            var collectionsThatExist = mappingsInPriorityOrder
-                .Where(name => collectionNames.Contains(name))
-                .ToArray();
+            var configuredName = mappingsInPriorityOrder
+                .SingleOrDefault(name => collectionData.Collections.Contains(name));
 
-            if (collectionsThatExist.Distinct().Count() > 1)
+            if (configuredName == null)
             {
-                throw new InvalidOperationException("Multiple collections exist. Needs to be fixed.");
+                if (collectionData.IndexResults == null)
+                {
+                    collectionData.IndexResults = GetTerms();
+                }
+
+                var collectionsThatExist = mappingsInPriorityOrder
+                    .Distinct()
+                    .Where(name => collectionData.IndexResults.Contains(name))
+                    .ToArray();
+
+                
+                if (collectionsThatExist.Length > 1)
+                {
+                    var options = string.Join(", ", collectionsThatExist);
+                    throw new InvalidOperationException($"Multiple RavenDB collection names ({options}) found for type `{type.FullName}`. Unable to determine DocumentId naming strategy for this type. Please remove or modify the documents that were mapped incorrectly.");
+                }
+
+                configuredName = collectionsThatExist.FirstOrDefault() ?? byLegacy;
+                collectionData.Collections.Add(configuredName);
+                collectionData.Changed = true;
             }
 
-            var blessedCollectionName = collectionsThatExist.FirstOrDefault() ?? byLegacy;
-            mappings.Add(type, blessedCollectionName);
+            collectionData.Mappings.Add(type, configuredName);
+        }
+
+        private string SHA1Hash(string input)
+        {
+            using (var sha = new SHA1CryptoServiceProvider()) // Is FIPS compliant
+            {
+                var inBytes = Encoding.UTF8.GetBytes(input);
+                var hashBytes = sha.ComputeHash(inBytes);
+                var builder = new StringBuilder();
+                foreach (var b in hashBytes)
+                {
+                    builder.Append(b.ToString("x2"));
+                }
+                return builder.ToString();
+            }
         }
 
         private static string LegacyFindTypeTagName(Type t)
@@ -136,6 +198,14 @@
         private static bool IsSagaEntity(Type t)
         {
             return !t.IsAbstract && !t.IsInterface && !t.IsGenericType && typeof(IContainSagaData).IsAssignableFrom(t);
+        }
+
+        class CollectionData
+        {
+            public HashSet<string> Collections { get; private set; } = new HashSet<string>();
+            public Dictionary<Type, string> Mappings { get; private set; } = new Dictionary<Type, string>();
+            public HashSet<string> IndexResults { get; set; }
+            public bool Changed { get; set; }
         }
     }
 }
