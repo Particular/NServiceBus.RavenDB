@@ -108,6 +108,19 @@
     <Compile Include="Gateway\When_storing_a_duplicate_message.cs" />
     <Compile Include="Gateway\When_storing_a_new_message.cs" />
     <Compile Include="Gateway\When_updating_a_header_of_message.cs" />
+    <None Include="app.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj">
+      <Project>{281646e3-32e0-4f4d-bcf6-1dc5efc6c268}</Project>
+      <Name>NServiceBus.RavenDB</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DocumentIds\DocumentIdStrategyTests.cs" />
     <Compile Include="Infrastructure\ReusableDB.cs" />
     <Compile Include="Infrastructure\StoreSnooper.cs" />
     <Compile Include="Installers\RavenUserInstallerTests.cs" />

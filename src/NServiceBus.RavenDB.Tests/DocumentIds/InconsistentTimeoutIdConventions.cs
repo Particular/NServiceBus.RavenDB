@@ -86,7 +86,8 @@
                     ApplyTestConventions(store, ConventionType.RavenDefault);
                     store.Initialize();
 
-                    Assert.Throws<InvalidOperationException>(() => store.Conventions.FindTypeTagName(typeof(TimeoutData)));
+                    var exception = Assert.Throws<InvalidOperationException>(() => store.Conventions.FindTypeTagName(typeof(TimeoutData)));
+                    Console.WriteLine($"Got expected exception: {exception.Message}");
                 }
             }
         }

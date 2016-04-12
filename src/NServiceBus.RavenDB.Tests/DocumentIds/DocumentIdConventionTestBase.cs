@@ -9,6 +9,8 @@
 
     public abstract class DocumentIdConventionTestBase
     {
+        protected const string EndpointName = "FakeEndpoint";
+
         protected void DirectStore(IDocumentStore store, string id, object document, string entityName)
         {
             var jsonDoc = RavenJObject.FromObject(document);
@@ -49,7 +51,7 @@
             ApplyConventionsInternal(store, type, false);
 
             var sagaTypes = new[] { typeof(TestSagaData) };
-            var conventions = new DocumentIdConventions(store, sagaTypes);
+            var conventions = new DocumentIdConventions(store, sagaTypes, EndpointName);
             store.Conventions.FindTypeTagName = conventions.FindTypeTagName;
         }
 
