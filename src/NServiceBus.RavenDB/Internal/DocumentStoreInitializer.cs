@@ -26,15 +26,8 @@
         {
             if (!isInitialized)
             {
-                var customize = DocumentStoreManager.GetCustomizeDocumentStoreDelegate(settings);
-
                 ApplyConventions(settings);
                 BackwardsCompatibilityHelper.SupportOlderClrTypes(docStore);
-
-                if (customize != null)
-                {
-                    customize(docStore);
-                }
 
                 docStore.Initialize();
                 StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(docStore, settings);

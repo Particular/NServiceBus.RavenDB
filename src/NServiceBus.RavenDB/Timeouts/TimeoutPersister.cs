@@ -28,7 +28,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
         /// </summary>
         private int maximumPageSize = 1024;
 
-        private CancellationTokenSource shutdownTokenSource;
+        private readonly CancellationTokenSource shutdownTokenSource;
         public IDocumentStore DocumentStore { get; set; }
         public string EndpointName { get; set; }
         public TimeSpan CleanupGapFromTimeslice { get; set; }
@@ -211,7 +211,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             }
         }
         
-        private bool CancellationRequested()
+        bool CancellationRequested()
         {
             return shutdownTokenSource != null && shutdownTokenSource.IsCancellationRequested;
         }

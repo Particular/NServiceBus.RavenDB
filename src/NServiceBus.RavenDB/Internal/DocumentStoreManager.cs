@@ -13,8 +13,7 @@
     static class DocumentStoreManager
     {
         static readonly ILog Logger = LogManager.GetLogger(typeof(DocumentStoreManager));
-        const string settingsKey = "RavenDbDocumentStore";
-        const string CustomizeDocumentStoreKey = "RavenDB.SetCustomizeDocumentStoreDelegate";
+        const string defaultDocStoreSettingsKey = "RavenDbDocumentStore";
         static Dictionary<Type, string> featureSettingsKeys;
         static Dictionary<Type, string> connStrKeys;
 
@@ -49,7 +48,7 @@
         public static void SetDefaultStore(SettingsHolder settings, IDocumentStore store)
         {
             var initContext = new DocumentStoreInitializer(store);
-            settings.Set(settingsKey, initContext);
+            settings.Set(defaultDocStoreSettingsKey, initContext);
         }
 
         public static IDocumentStore GetDocumentStore<TStorageType>(ReadOnlySettings settings)
@@ -73,7 +72,7 @@
             // Next try finding a shared DocumentStore
             if (docStoreInitializer == null)
             {
-                docStoreInitializer = settings.GetOrDefault<DocumentStoreInitializer>(settingsKey);
+                docStoreInitializer = settings.GetOrDefault<DocumentStoreInitializer>(defaultDocStoreSettingsKey);
             }
 
             // Otherwise, we need to create it ourselves, but do so only once.
@@ -95,16 +94,6 @@
             }
 
             return docStoreInitializer;
-        }
-
-        public static void SetCustomizeDocumentStoreDelegate(SettingsHolder settings, Action<IDocumentStore> customize)
-        {
-            settings.Set(CustomizeDocumentStoreKey, customize);
-        }
-
-        public static Action<IDocumentStore> GetCustomizeDocumentStoreDelegate(ReadOnlySettings settings)
-        {
-            return settings.GetOrDefault<Action<IDocumentStore>>(CustomizeDocumentStoreKey);
         }
 
         private static DocumentStoreInitializer CreateDefaultDocumentStore(ReadOnlySettings settings)
