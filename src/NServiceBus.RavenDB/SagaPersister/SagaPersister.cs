@@ -81,6 +81,8 @@ namespace NServiceBus.SagaPersisters.RavenDB
 
             if (lookup != null)
             {
+                documentSession.Advanced.Evict(lookup);
+
                 return lookup.SagaDocId != null
                     ? await documentSession.LoadAsync<T>(lookup.SagaDocId).ConfigureAwait(false) //if we have a saga id we can just load it
                     : await Get<T>(lookup.SagaId, session, context).ConfigureAwait(false); //if not this is a saga that was created pre 3.0.4 so we fallback to a get instead

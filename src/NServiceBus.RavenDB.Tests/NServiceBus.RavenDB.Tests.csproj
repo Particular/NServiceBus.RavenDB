@@ -144,6 +144,7 @@
     <Compile Include="SagaPersister\Saga_with_unique_property_set_to_null.cs" />
     <Compile Include="SagaPersister\When_completing_a_version3_saga.cs" />
     <Compile Include="SagaPersister\When_completing_a_saga_with_unique_property.cs" />
+    <Compile Include="SagaPersister\When_loading_a_legacy_unique_identity.cs" />
     <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_an_Enum_property.cs" />
     <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_a_concrete_class_property.cs" />
     <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_a_date_time_property.cs" />
