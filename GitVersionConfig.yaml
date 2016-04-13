@@ -1,1 +1,4 @@
-assemblyVersioningScheme: Major
+assembly-versioning-scheme: Major
+branches:
+  develop:
+    tag: alpha
