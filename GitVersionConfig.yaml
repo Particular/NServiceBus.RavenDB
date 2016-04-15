@@ -5,3 +5,5 @@ branches:
   develop:
     tag: alpha
     prevent-increment-of-merged-branch-version: true
+disabled-base-version-strategies:
+  - MergeMessageBaseVersionStrategy
