@@ -83,6 +83,7 @@
     <Compile Include="Gateway\ConfigureGateway.cs" />
     <Compile Include="ConfigureRavenPersistence.cs" />
     <Compile Include="InternalsVisibleTo.cs" />
+    <Compile Include="Internal\DocumentIdConventions.cs" />
     <Compile Include="ISessionProvider.cs" />
     <Compile Include="TimeoutPersister\ConfigureTimeoutManager.cs" />
     <Compile Include="Gateway\GatewayMessage.cs" />
