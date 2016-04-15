@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
+using NServiceBus.Configuration.AdvanceExtensibility;
+using NServiceBus.Settings;
 using Raven.Client.Document;
+using Raven.Client.Document.DTC;
 
 public class ConfigureScenariosForRavenDBPersistence : IConfigureSupportedScenariosForTestExecution
 {
@@ -12,13 +15,19 @@ public class ConfigureScenariosForRavenDBPersistence : IConfigureSupportedScenar
 
 public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecution
 {
+    const string DefaultDocumentStoreKey = "$.ConfigureEndpointRavenDBPersistence.DefaultDocumentStore";
+
     public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings)
     {
         var documentStore = GetDocumentStore();
 
         databaseName = documentStore.DefaultDatabase;
 
-        configuration.UsePersistence<RavenDBPersistence>().DoNotSetupDatabasePermissions().SetDefaultDocumentStore(documentStore);
+        configuration.GetSettings().Set(DefaultDocumentStoreKey, documentStore);
+
+        configuration.UsePersistence<RavenDBPersistence>()
+            .DoNotSetupDatabasePermissions()
+            .SetDefaultDocumentStore(documentStore);
 
         Console.WriteLine("Created '{0}' database", documentStore.DefaultDatabase);
 
@@ -41,11 +50,15 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     private static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
     {
+        var resourceManagerId = Guid.NewGuid();
+        var recoveryPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)}\NServiceBus.RavenDB\{resourceManagerId}";
+
         var documentStore = new DocumentStore
         {
             Url = "http://localhost:8083",
             DefaultDatabase = defaultDatabase,
-            ResourceManagerId = Guid.NewGuid() /* This is OK for ATT purposes */
+            ResourceManagerId = resourceManagerId,
+            TransactionRecoveryStorage = new LocalDirectoryTransactionRecoveryStorage(recoveryPath)
         };
 
         documentStore.Initialize();
@@ -85,4 +98,9 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
     }
 
     string databaseName;
+
+    public static DocumentStore GetDefaultDocumentStore(ReadOnlySettings settings)
+    {
+        return settings.Get<DocumentStore>(DefaultDocumentStoreKey);
+    }
 }
