@@ -16,7 +16,7 @@
             new TimeoutsIndex().Execute(store);
 
             var persister = new TimeoutPersister
-                            {
+            {
                                 DocumentStore = store,
                                 EndpointName = "MyTestEndpoint",
                             };

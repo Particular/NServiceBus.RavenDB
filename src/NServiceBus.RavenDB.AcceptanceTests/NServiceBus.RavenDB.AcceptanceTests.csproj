@@ -214,6 +214,7 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Versioning\When_multiple_versions_of_a_message_is_published.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.5.2.1\Volatile\When_sending_to_non_durable_endpoint.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="When_customizing_DocumentStore.cs" />
     <Compile Include="When_loading_sagas_with_no_unique.cs" />
     <Compile Include="When_outbox_is_enabled.cs" />
     <Compile Include="When_using_a_sagafinder.cs" />

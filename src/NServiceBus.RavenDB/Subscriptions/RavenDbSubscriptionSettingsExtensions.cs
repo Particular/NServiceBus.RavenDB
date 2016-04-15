@@ -2,6 +2,7 @@
 {
     using NServiceBus.Configuration.AdvanceExtensibility;
     using NServiceBus.Persistence;
+    using NServiceBus.RavenDB.Internal;
     using Raven.Client;
 
     /// <summary>
@@ -9,8 +10,6 @@
     /// </summary>
     public static class RavenDbSubscriptionSettingsExtensions
     {
-        internal const string SettingsKey = "RavenDbDocumentStore/Subscription";
-
         /// <summary>
         ///     Configures the given document store to be used when storing subscriptions
         /// </summary>
@@ -19,7 +18,7 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> UseDocumentStoreForSubscriptions(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            cfg.GetSettings().Set(SettingsKey, documentStore);
+            DocumentStoreManager.SetDocumentStore<StorageType.Subscriptions>(cfg.GetSettings(), documentStore);
             return cfg;
         }
     }
