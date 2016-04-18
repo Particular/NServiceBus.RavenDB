@@ -5,11 +5,9 @@
     /// <summary>
     ///     RavenDB Saga Storage.
     /// </summary>
+    [ObsoleteEx(Message = "This type was not meant to be used in external code is being made internal.", RemoveInVersion = "5", TreatAsErrorFromVersion = "4")]
     public class RavenDbSagaStorage : Feature
     {
-        /// <summary>
-        ///     Creates an instance of <see cref="RavenDbSagaStorage" />.
-        /// </summary>
         internal RavenDbSagaStorage()
         {
             DependsOn<Sagas>();

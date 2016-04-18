@@ -5,6 +5,7 @@
     /// <summary>
     ///     The Gateway message
     /// </summary>
+    [ObsoleteEx(Message = "This type was not meant to be used in external code is being made internal.", RemoveInVersion = "5", TreatAsErrorFromVersion = "4")]
     public class GatewayMessage
     {
         /// <summary>

@@ -1,6 +1,8 @@
 ﻿namespace NServiceBus.Features
 {
     
+    [System.ObsoleteAttribute("This type was not meant to be used in external code is being made internal. Will " +
+        "be removed in version 5.0.0.", true)]
     public class RavenDbSagaStorage : NServiceBus.Features.Feature
     {
         protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
@@ -9,6 +11,8 @@
 namespace NServiceBus.Gateway.Deduplication
 {
     
+    [System.ObsoleteAttribute("This type was not meant to be used in external code is being made internal. Will " +
+        "be removed in version 5.0.0.", true)]
     public class GatewayMessage
     {
         public GatewayMessage() { }
