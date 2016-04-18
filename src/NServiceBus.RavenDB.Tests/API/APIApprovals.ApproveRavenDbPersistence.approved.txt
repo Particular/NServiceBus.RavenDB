@@ -2,7 +2,7 @@
 {
     
     [System.ObsoleteAttribute("This type was not meant to be used in external code is being made internal. Will " +
-        "be treated as an error from version 4.0.0. Will be removed in version 5.0.0.", false)]
+        "be removed in version 5.0.0.", true)]
     public class RavenDbSagaStorage : NServiceBus.Features.Feature
     {
         protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
@@ -12,7 +12,7 @@ namespace NServiceBus.Gateway.Deduplication
 {
     
     [System.ObsoleteAttribute("This type was not meant to be used in external code is being made internal. Will " +
-        "be treated as an error from version 4.0.0. Will be removed in version 5.0.0.", false)]
+        "be removed in version 5.0.0.", true)]
     public class GatewayMessage
     {
         public GatewayMessage() { }
@@ -49,8 +49,8 @@ namespace NServiceBus.RavenDB.Persistence
         Raven.Client.IAsyncDocumentSession AsyncSession { get; }
     }
     [System.ObsoleteAttribute("The session is now exposed through SynchronizedStorageSession.RavenSession(). For" +
-        " handlers use context.SynchronizedStorageSession.RavenSession(). For. Will be tr" +
-        "eated as an error from version 4.0.0. Will be removed in version 5.0.0.", false)]
+        " handlers use context.SynchronizedStorageSession.RavenSession(). For. Will be re" +
+        "moved in version 5.0.0.", true)]
     public interface ISessionProvider { }
 }
 namespace NServiceBus
@@ -67,8 +67,7 @@ namespace NServiceBus
     public class static RavenDbSagaSettingsExtensions
     {
         [System.ObsoleteAttribute("As of Version 6 of NServiceBus core all correlated properties are unique by defau" +
-            "lt so you can safely remove this setting. Will be treated as an error from versi" +
-            "on 4.0.0. Will be removed in version 5.0.0.", false)]
+            "lt so you can safely remove this setting. Will be removed in version 5.0.0.", true)]
         public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> AllowStaleSagaReads(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSagas(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.IDocumentStore documentStore) { }
     }
@@ -81,8 +80,7 @@ namespace NServiceBus
         public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> SetMessageToDatabaseMappingConvention(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg, System.Func<System.Collections.Generic.IDictionary<string, string>, string> convention) { }
         public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> UseSharedAsyncSession(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg, System.Func<Raven.Client.IAsyncDocumentSession> getAsyncSessionFunc) { }
         [System.ObsoleteAttribute("Use the \'UseSharedAsyncSession\' configuration extension method to provide an asyn" +
-            "c session. Will be treated as an error from version 4.0.0. Will be removed in ve" +
-            "rsion 5.0.0.", false)]
+            "c session. Will be removed in version 5.0.0.", true)]
         public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> UseSharedSession(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg, System.Func<Raven.Client.IDocumentSession> getSessionFunc) { }
     }
     public class static RavenDbSubscriptionSettingsExtensions
