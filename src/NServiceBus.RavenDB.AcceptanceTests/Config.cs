@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
 using NServiceBus.Configuration.AdvanceExtensibility;
+using NServiceBus.RavenDB;
 using NServiceBus.Settings;
 using Raven.Client.Document;
 using Raven.Client.Document.DTC;
@@ -16,6 +17,7 @@ public class ConfigureScenariosForRavenDBPersistence : IConfigureSupportedScenar
 public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecution
 {
     const string DefaultDocumentStoreKey = "$.ConfigureEndpointRavenDBPersistence.DefaultDocumentStore";
+    const string DefaultPersistenceExtensionsKey = "$.ConfigureRavenDBPersistence.DefaultPersistenceExtensions";
 
     public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings)
     {
@@ -25,9 +27,11 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
         configuration.GetSettings().Set(DefaultDocumentStoreKey, documentStore);
 
-        configuration.UsePersistence<RavenDBPersistence>()
+        var persistenceExtensions = configuration.UsePersistence<RavenDBPersistence>()
             .DoNotSetupDatabasePermissions()
             .SetDefaultDocumentStore(documentStore);
+
+        configuration.GetSettings().Set(DefaultPersistenceExtensionsKey, persistenceExtensions);
 
         Console.WriteLine("Created '{0}' database", documentStore.DefaultDatabase);
 
@@ -102,5 +106,24 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
     public static DocumentStore GetDefaultDocumentStore(ReadOnlySettings settings)
     {
         return settings.Get<DocumentStore>(DefaultDocumentStoreKey);
+    }
+
+    public static PersistenceExtentions<RavenDBPersistence> GetDefaultPersistenceExtensions(ReadOnlySettings settings)
+    {
+        return settings.Get<PersistenceExtentions<RavenDBPersistence>>(DefaultPersistenceExtensionsKey);
+    }
+
+    public static void UseConnectionParameters(SettingsHolder settings)
+    {
+        var docStore = GetDefaultDocumentStore(settings);
+
+        settings.Set("RavenDbDocumentStore", null);
+
+        GetDefaultPersistenceExtensions(settings)
+            .SetDefaultDocumentStore(new ConnectionParameters
+            {
+                Url = docStore.Url,
+                DatabaseName = docStore.DefaultDatabase
+            });
     }
 }

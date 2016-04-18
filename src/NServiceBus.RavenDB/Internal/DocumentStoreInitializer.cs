@@ -59,7 +59,7 @@
 
                 if (store.ResourceManagerId == Guid.Empty || store.ResourceManagerId == ravenDefaultResourceManagerId)
                 {
-                    var resourceManagerId = settings.Get<string>("NServiceBus.LocalAddress") + "-" + settings.Get<string>("EndpointVersion");
+                    var resourceManagerId = settings.LocalAddress() + "-" + settings.Get<string>("EndpointVersion");
                     store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
                 }
 

@@ -299,6 +299,7 @@
     <Compile Include="When_detecting_a_saga_with_multiple_corr_props.cs" />
     <Compile Include="When_accessing_raven_session_from_handler_with_saga.cs" />
     <Compile Include="When_outbox_is_enabled.cs" />
+    <Compile Include="When_specify_ConnectionParameters.cs" />
     <Compile Include="When_using_a_sagafinder.cs" />
   </ItemGroup>
   <ItemGroup>
