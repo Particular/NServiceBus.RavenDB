@@ -46,7 +46,7 @@ public class When_updating_a_saga_without_unique_properties : RavenDBPersistence
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return Task.FromResult(0);
+            return TaskEx.CompletedTask;
         }
     }
 

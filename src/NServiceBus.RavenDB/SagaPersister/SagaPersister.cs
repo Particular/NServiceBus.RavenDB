@@ -56,7 +56,7 @@ namespace NServiceBus.SagaPersisters.RavenDB
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             //no-op since the dirty tracking will handle the update for us
-            return Task.FromResult(0);
+            return TaskEx.CompletedTask;
         }
 
         public async Task<T> Get<T>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where T : IContainSagaData

@@ -44,7 +44,7 @@ public class When_updating_a_saga_property_that_does_not_have_a_unique_attribute
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return Task.FromResult(0);
+            return TaskEx.CompletedTask;
         }
     }
 

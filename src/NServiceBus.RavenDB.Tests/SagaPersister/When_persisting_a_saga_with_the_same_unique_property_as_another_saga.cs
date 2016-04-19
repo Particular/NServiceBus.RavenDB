@@ -55,7 +55,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return Task.FromResult(0);
+            return TaskEx.CompletedTask;
         }
 
         class Message
