@@ -7,7 +7,6 @@
     using NServiceBus.Configuration.AdvanceExtensibility;
     using NUnit.Framework;
     using Raven.Client.Document;
-    using Raven.Client.Document.DTC;
 
     public class When_specify_ConnectionParameters : NServiceBusAcceptanceTest
     {
@@ -27,14 +26,13 @@
                 .Done(c => c.MessageReceived)
                 .Run();
 
-            Assert.IsNotNull(context.DocStore);
-            Assert.IsInstanceOf<IsolatedStorageTransactionRecoveryStorage>(context.DocStore.TransactionRecoveryStorage);
+            Assert.AreEqual("FakeApiKey-DocStoreCreatedByConnectionParameters", context.DocStoreApiKey);
         }
 
         public class Context : ScenarioContext
         {
             public bool MessageReceived { get; set; }
-            public DocumentStore DocStore { get; set; }
+            public string DocStoreApiKey { get; set; }
         }
 
         public class ConnectionParamsEndpoint : EndpointConfigurationBuilder
@@ -44,12 +42,12 @@
                 EndpointSetup<DefaultServer>();
             }
 
-            public class TestCustomizeDocStoreSaga : Saga<CustomizeDocStoreSagaData>,
+            public class ConnectionParamsSaga : Saga<ConnectionParamsSagaData>,
                 IAmStartedByMessages<TestCmd>
             {
                 public Context Context { get; set; }
 
-                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<CustomizeDocStoreSagaData> mapper)
+                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<ConnectionParamsSagaData> mapper)
                 {
                     mapper.ConfigureMapping<TestCmd>(msg => msg.Name).ToSaga(saga => saga.Name);
                 }
@@ -58,14 +56,16 @@
                 {
                     Data.Name = message.Name;
 
-                    Context.DocStore = context.SynchronizedStorageSession.RavenSession().Advanced.DocumentStore as DocumentStore;
+                    var docStore = context.SynchronizedStorageSession.RavenSession().Advanced.DocumentStore as DocumentStore;
+
+                    Context.DocStoreApiKey = docStore.ApiKey;
                     Context.MessageReceived = true;
 
                     return Task.FromResult(0);
                 }
             }
 
-            public class CustomizeDocStoreSagaData : ContainSagaData
+            public class ConnectionParamsSagaData : ContainSagaData
             {
                 public virtual string Name { get; set; }
             }

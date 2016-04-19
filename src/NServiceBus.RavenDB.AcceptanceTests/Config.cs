@@ -123,7 +123,8 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
             .SetDefaultDocumentStore(new ConnectionParameters
             {
                 Url = docStore.Url,
-                DatabaseName = docStore.DefaultDatabase
+                DatabaseName = docStore.DefaultDatabase,
+                ApiKey = "FakeApiKey-DocStoreCreatedByConnectionParameters"
             });
     }
 }

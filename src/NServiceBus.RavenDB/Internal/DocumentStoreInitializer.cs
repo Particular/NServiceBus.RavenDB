@@ -59,7 +59,9 @@
 
                 if (store.ResourceManagerId == Guid.Empty || store.ResourceManagerId == ravenDefaultResourceManagerId)
                 {
-                    var resourceManagerId = settings.LocalAddress() + "-" + settings.Get<string>("EndpointVersion");
+                    // TODO: Temporary Fix - In 3.x calculation used EndpointVersion as well
+                    // See https://github.com/Particular/NServiceBus.RavenDB/issues/178
+                    var resourceManagerId = settings.LocalAddress(); // + "-" + settings.Get<string>("EndpointVersion");
                     store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
                 }
 
