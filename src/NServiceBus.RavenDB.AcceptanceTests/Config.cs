@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
+using NServiceBus.Configuration.AdvanceExtensibility;
+using NServiceBus.RavenDB;
+using NServiceBus.Settings;
 using Raven.Client.Document;
+using Raven.Client.Document.DTC;
 
 public class ConfigureScenariosForRavenDBPersistence : IConfigureSupportedScenariosForTestExecution
 {
@@ -12,13 +16,22 @@ public class ConfigureScenariosForRavenDBPersistence : IConfigureSupportedScenar
 
 public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecution
 {
+    const string DefaultDocumentStoreKey = "$.ConfigureEndpointRavenDBPersistence.DefaultDocumentStore";
+    const string DefaultPersistenceExtensionsKey = "$.ConfigureRavenDBPersistence.DefaultPersistenceExtensions";
+
     public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings)
     {
         var documentStore = GetDocumentStore();
 
         databaseName = documentStore.DefaultDatabase;
 
-        configuration.UsePersistence<RavenDBPersistence>().DoNotSetupDatabasePermissions().SetDefaultDocumentStore(documentStore);
+        configuration.GetSettings().Set(DefaultDocumentStoreKey, documentStore);
+
+        var persistenceExtensions = configuration.UsePersistence<RavenDBPersistence>()
+            .DoNotSetupDatabasePermissions()
+            .SetDefaultDocumentStore(documentStore);
+
+        configuration.GetSettings().Set(DefaultPersistenceExtensionsKey, persistenceExtensions);
 
         Console.WriteLine("Created '{0}' database", documentStore.DefaultDatabase);
 
@@ -41,11 +54,15 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     private static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
     {
+        var resourceManagerId = Guid.NewGuid();
+        var recoveryPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)}\NServiceBus.RavenDB\{resourceManagerId}";
+
         var documentStore = new DocumentStore
         {
             Url = "http://localhost:8083",
             DefaultDatabase = defaultDatabase,
-            ResourceManagerId = Guid.NewGuid() /* This is OK for ATT purposes */
+            ResourceManagerId = resourceManagerId,
+            TransactionRecoveryStorage = new LocalDirectoryTransactionRecoveryStorage(recoveryPath)
         };
 
         documentStore.Initialize();
@@ -85,4 +102,29 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
     }
 
     string databaseName;
+
+    public static DocumentStore GetDefaultDocumentStore(ReadOnlySettings settings)
+    {
+        return settings.Get<DocumentStore>(DefaultDocumentStoreKey);
+    }
+
+    public static PersistenceExtentions<RavenDBPersistence> GetDefaultPersistenceExtensions(ReadOnlySettings settings)
+    {
+        return settings.Get<PersistenceExtentions<RavenDBPersistence>>(DefaultPersistenceExtensionsKey);
+    }
+
+    public static void UseConnectionParameters(SettingsHolder settings)
+    {
+        var docStore = GetDefaultDocumentStore(settings);
+
+        settings.Set("RavenDbDocumentStore", null);
+
+        GetDefaultPersistenceExtensions(settings)
+            .SetDefaultDocumentStore(new ConnectionParameters
+            {
+                Url = docStore.Url,
+                DatabaseName = docStore.DefaultDatabase,
+                ApiKey = "FakeApiKey-DocStoreCreatedByConnectionParameters"
+            });
+    }
 }

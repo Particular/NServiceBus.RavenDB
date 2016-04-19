@@ -133,10 +133,17 @@
     <Compile Include="App_Packages\ApiApprover.3.0.1\PublicApiApprover.cs" />
     <Compile Include="App_Packages\ApiApprover.3.0.1\PublicApiGenerator.cs" />
     <Compile Include="FakeRavenDBTestTransport.cs" />
+    <Compile Include="Infrastructure\ReusableDB.cs" />
+    <Compile Include="Infrastructure\StoreSnooper.cs" />
     <Compile Include="LegacyAddress.cs" />
     <Compile Include="Outbox\When_adding_outbox_messages.cs" />
     <Compile Include="Outbox\When_cleaning_outbox_messages.cs" />
+    <Compile Include="Persistence\DocumentIds\DocumentIdConventionTestBase.cs" />
+    <Compile Include="Persistence\DocumentIds\DocumentIdStrategyTests.cs" />
+    <Compile Include="Persistence\DocumentIds\InconsistentSagaIdConventions.cs" />
+    <Compile Include="Persistence\DocumentIds\InconsistentTimeoutIdConventions.cs" />
     <Compile Include="Persistence\DocumentStoreExtensionsForVoron.cs" />
+    <Compile Include="Persistence\DocumentStoreManagerTests.cs" />
     <Compile Include="Persistence\TestStorageEngineVerifier.cs" />
     <Compile Include="RavenDBPersistenceTestBase.cs" />
     <Compile Include="RavenDBPersistenceTestBaseExtensions.cs" />
