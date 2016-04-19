@@ -44,7 +44,7 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return Task.FromResult(0);
+            return TaskEx.CompletedTask;
         }
     }
 

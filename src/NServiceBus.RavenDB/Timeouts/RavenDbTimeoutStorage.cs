@@ -39,13 +39,13 @@
 
             protected override Task OnStart(IMessageSession session)
             {
-                return Task.FromResult(0);
+                return TaskEx.CompletedTask;
             }
 
             protected override Task OnStop(IMessageSession session)
             {
                 queryTimeouts.Shutdown();
-                return Task.FromResult(0);
+                return TaskEx.CompletedTask;
             }
 
             QueryTimeouts queryTimeouts;

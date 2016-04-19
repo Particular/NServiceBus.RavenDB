@@ -36,7 +36,7 @@ public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestB
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return Task.FromResult(0);
+            return TaskEx.CompletedTask;
         }
     }
 

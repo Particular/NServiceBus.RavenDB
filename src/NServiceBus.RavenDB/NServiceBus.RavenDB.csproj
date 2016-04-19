@@ -89,6 +89,7 @@
     <Compile Include="Internal\RavenDBSynchronizedStorage.cs" />
     <Compile Include="Internal\SingleSharedDocumentStore.cs" />
     <Compile Include="Internal\StorageEngineVerifier.cs" />
+    <Compile Include="Internal\TaskEx.cs" />
     <Compile Include="Outbox\OutboxPersister.cs" />
     <Compile Include="Outbox\OutboxRecord.cs" />
     <Compile Include="Outbox\OutboxRecordsCleaner.cs" />

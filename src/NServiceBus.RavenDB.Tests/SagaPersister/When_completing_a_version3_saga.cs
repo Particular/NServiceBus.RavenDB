@@ -43,7 +43,7 @@ public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
     {
         public Task Handle(StartMessage message, IMessageHandlerContext context)
         {
-            return Task.FromResult(0);
+            return TaskEx.CompletedTask;
         }
 
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)

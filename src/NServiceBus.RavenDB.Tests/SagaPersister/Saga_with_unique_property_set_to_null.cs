@@ -50,7 +50,7 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return Task.FromResult(0);
+            return TaskEx.CompletedTask;
         }
     }
 

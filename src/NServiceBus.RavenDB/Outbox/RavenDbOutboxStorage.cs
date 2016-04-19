@@ -57,7 +57,7 @@
 
                 cleanupTimer = new Timer(PerformCleanup, null, TimeSpan.FromMinutes(1), frequencyToRunDeduplicationDataCleanup);
 
-                return Task.FromResult(0);
+                return TaskEx.CompletedTask;
             }
 
             protected override Task OnStop(IMessageSession session)
@@ -69,7 +69,7 @@
                     cleanupTimer = null;
                 }
 
-                return Task.FromResult(0);
+                return TaskEx.CompletedTask;
             }
 
             void PerformCleanup(object state)
