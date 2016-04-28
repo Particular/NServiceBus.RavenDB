@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using EndpointTemplates;
     using AcceptanceTesting;
-    using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.RavenDB;
     using NUnit.Framework;
     using Raven.Client.Document;
 
@@ -20,7 +20,16 @@
 
                     b.CustomConfig((cfg, c) =>
                     {
-                        ConfigureEndpointRavenDBPersistence.UseConnectionParameters(cfg.GetSettings());
+                        TestDatabaseInfo dbInfo;
+
+                        cfg.UsePersistence<RavenDBPersistence>()
+                            .ResetDocumentStoreSettings(out dbInfo)
+                            .SetDefaultDocumentStore(new ConnectionParameters
+                            {
+                                Url = dbInfo.Url,
+                                DatabaseName = dbInfo.DatabaseName,
+                                ApiKey = "FakeApiKey-DocStoreCreatedByConnectionParameters"
+                            });
                     });
                 })
                 .Done(c => c.MessageReceived)

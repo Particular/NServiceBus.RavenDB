@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
 using NServiceBus.Configuration.AdvanceExtensibility;
-using NServiceBus.RavenDB;
 using NServiceBus.Settings;
 using Raven.Client.Document;
 using Raven.Client.Document.DTC;
@@ -112,19 +111,28 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
     {
         return settings.Get<PersistenceExtentions<RavenDBPersistence>>(DefaultPersistenceExtensionsKey);
     }
+}
 
-    public static void UseConnectionParameters(SettingsHolder settings)
+public static class TestConfigurationExtensions
+{
+    public static PersistenceExtentions<RavenDBPersistence> ResetDocumentStoreSettings(this PersistenceExtentions<RavenDBPersistence> cfg, out TestDatabaseInfo dbInfo)
     {
-        var docStore = GetDefaultDocumentStore(settings);
+        var settings = cfg.GetSettings();
+        var docStore = ConfigureEndpointRavenDBPersistence.GetDefaultDocumentStore(settings);
 
         settings.Set("RavenDbDocumentStore", null);
-
-        GetDefaultPersistenceExtensions(settings)
-            .SetDefaultDocumentStore(new ConnectionParameters
-            {
-                Url = docStore.Url,
-                DatabaseName = docStore.DefaultDatabase,
-                ApiKey = "FakeApiKey-DocStoreCreatedByConnectionParameters"
-            });
+        dbInfo = new TestDatabaseInfo
+        {
+            Url = docStore.Url,
+            DatabaseName = docStore.DefaultDatabase
+        };
+        return cfg;
     }
 }
+
+public class TestDatabaseInfo
+{
+    public string Url { get; set; }
+    public string DatabaseName { get; set; }
+}
+
