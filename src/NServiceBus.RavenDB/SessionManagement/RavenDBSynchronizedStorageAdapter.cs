@@ -27,9 +27,9 @@
             Transaction ambientTransaction;
             if (transportTransaction.TryGet(out ambientTransaction))
             {
-                var ownership = context.GetSessionOwnership();
-                CompletableSynchronizedStorageSession session = new RavenDBSynchronizedStorageSession(ownership.Session, ownership.Owns);
-                return Task.FromResult(session);
+                var session = context.GetAsyncSession();
+                CompletableSynchronizedStorageSession completableSynchronizedStorageSession = new RavenDBSynchronizedStorageSession(session, true);
+                return Task.FromResult(completableSynchronizedStorageSession);
             }
             return EmptyResult;
         }
