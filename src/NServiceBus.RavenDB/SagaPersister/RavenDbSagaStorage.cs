@@ -18,7 +18,7 @@
         /// </summary>
         protected override void Setup(FeatureConfigurationContext context)
         {
-            context.Container.ConfigureComponent<SagaPersister>(DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent<SagaPersister>(DependencyLifecycle.SingleInstance);
         }
     }
 }
