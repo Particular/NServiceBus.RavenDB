@@ -17,7 +17,7 @@
             contextBag.TryGet(out sessionFunction);
             if (sessionFunction != null)
             {
-                return new SessionOwnership(false, sessionFunction());
+                return new SessionOwnership(true, sessionFunction());
             }
 
             IAsyncDocumentSession session;
