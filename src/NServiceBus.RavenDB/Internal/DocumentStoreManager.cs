@@ -38,16 +38,16 @@
             };
         }
 
-        public static void SetDocumentStore<TStorageType>(SettingsHolder settings, IDocumentStore store)
+        public static void SetDocumentStore<TStorageType>(SettingsHolder settings, Func<ReadOnlySettings, IDocumentStore> storeCreator)
             where TStorageType : StorageType
         {
-            var initContext = new DocumentStoreInitializer(store);
+            var initContext = new DocumentStoreInitializer(storeCreator);
             settings.Set(featureSettingsKeys[typeof(TStorageType)], initContext);
         }
 
-        public static void SetDefaultStore(SettingsHolder settings, IDocumentStore store)
+        public static void SetDefaultStore(SettingsHolder settings, Func<ReadOnlySettings, IDocumentStore> storeCreator)
         {
-            var initContext = new DocumentStoreInitializer(store);
+            var initContext = new DocumentStoreInitializer(storeCreator);
             settings.Set(defaultDocStoreSettingsKey, initContext);
         }
 

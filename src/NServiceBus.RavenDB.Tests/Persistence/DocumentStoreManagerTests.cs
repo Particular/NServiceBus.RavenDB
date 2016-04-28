@@ -51,6 +51,7 @@
 
             var storeInitializer = DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Sagas>(settings);
 
+            storeInitializer.EnsureDocStoreCreated(settings);
             Assert.AreEqual("http://localhost:8083", storeInitializer.Url);
             Assert.AreEqual("http://localhost:8083 (DB: TestConnectionParams)", storeInitializer.Identifier);
         }
@@ -62,15 +63,16 @@
 
             var storeInitializer = DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Timeouts>(settings);
 
+            storeInitializer.EnsureDocStoreCreated(settings);
             Assert.AreEqual("http://localhost:8080", storeInitializer.Url);
             Assert.AreEqual("http://localhost:8080 (DB: FakeEndpoint)", storeInitializer.Identifier);
         }
 
-        private IDocumentStore EmbeddedStore(string identifier)
+        private Func<ReadOnlySettings, IDocumentStore> EmbeddedStore(string identifier)
         {
             var store = NewDocumentStore();
             store.Identifier = identifier;
-            return store;
+            return readOnlySettings => store;
         }
 
         private SettingsHolder DefaultSettings()

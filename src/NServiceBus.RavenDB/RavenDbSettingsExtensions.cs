@@ -6,6 +6,7 @@
     using NServiceBus.RavenDB;
     using NServiceBus.RavenDB.Internal;
     using NServiceBus.RavenDB.SessionManagement;
+    using NServiceBus.Settings;
     using Raven.Client;
 
     /// <summary>
@@ -24,7 +25,19 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), documentStore);
+            DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), readOnlySettings => documentStore);
+            return cfg;
+        }
+
+        /// <summary>
+        ///     Configures the storages to use the given document store supplied
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
+        /// <returns></returns>
+        public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IDocumentStore> storeCreator)
+        {
+            DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), storeCreator);
             return cfg;
         }
 

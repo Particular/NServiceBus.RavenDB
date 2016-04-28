@@ -13,19 +13,25 @@
     {
         static readonly ILog Logger = LogManager.GetLogger(typeof(DocumentStoreInitializer));
 
-        internal DocumentStoreInitializer(IDocumentStore store)
+        internal DocumentStoreInitializer(Func<ReadOnlySettings, IDocumentStore> storeCreator)
         {
-            this.docStore = store;
+            this.storeCreator = storeCreator;
         }
 
-        public string Url => this.docStore.Url;
+        internal DocumentStoreInitializer(IDocumentStore store)
+        {
+            this.storeCreator = readOnlySettings => store;
+        }
 
-        public string Identifier => this.docStore.Identifier;
+        public string Url => this.docStore?.Url;
+
+        public string Identifier => this.docStore?.Identifier;
 
         internal IDocumentStore Init(ReadOnlySettings settings)
         {
             if (!isInitialized)
             {
+                EnsureDocStoreCreated(settings);
                 ApplyConventions(settings);
                 BackwardsCompatibilityHelper.SupportOlderClrTypes(docStore);
 
@@ -34,6 +40,14 @@
             }
             isInitialized = true;
             return docStore;
+        }
+
+        internal void EnsureDocStoreCreated(ReadOnlySettings settings)
+        {
+            if (docStore == null)
+            {
+                docStore = storeCreator(settings);
+            }
         }
 
         void ApplyConventions(ReadOnlySettings settings)
@@ -86,6 +100,7 @@
             }
         }
 
+        Func<ReadOnlySettings, IDocumentStore> storeCreator;
         IDocumentStore docStore;
         bool isInitialized;
     }
