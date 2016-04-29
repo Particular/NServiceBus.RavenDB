@@ -1,6 +1,6 @@
-﻿namespace NServiceBus.Features
+﻿namespace NServiceBus.Persistence.RavenDB
 {
-    using NServiceBus.SagaPersisters.RavenDB;
+    using NServiceBus.Features;
 
     /// <summary>
     ///     RavenDB Saga Storage.

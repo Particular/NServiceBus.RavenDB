@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
-    using NServiceBus.SagaPersisters.RavenDB;
+    using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Sagas;
     using NUnit.Framework;
     using Raven.Abstractions.Data;

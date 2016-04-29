@@ -1,6 +1,7 @@
-﻿namespace NServiceBus.RavenDB.Outbox
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System.Linq;
+    using NServiceBus.RavenDB.Outbox;
     using Raven.Client.Indexes;
 
     class OutboxRecordsIndex : AbstractIndexCreationTask<OutboxRecord>

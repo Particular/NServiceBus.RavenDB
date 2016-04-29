@@ -1,10 +1,8 @@
-﻿namespace NServiceBus.RavenDB.Internal
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence;
-    using NServiceBus.RavenDB.SessionManagement;
-    using NServiceBus.SagaPersisters.RavenDB;
 
     class RavenDBSynchronizedStorage : ISynchronizedStorage
     {

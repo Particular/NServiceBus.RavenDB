@@ -1,9 +1,10 @@
-﻿namespace NServiceBus.RavenDB.Outbox
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using NServiceBus.RavenDB.Outbox;
     using Raven.Abstractions.Commands;
     using Raven.Client;
 

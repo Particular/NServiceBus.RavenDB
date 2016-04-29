@@ -7,7 +7,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
-    using NServiceBus.TimeoutPersisters.RavenDB;
+    using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
     using Raven.Client;
     using Raven.Client.Document;

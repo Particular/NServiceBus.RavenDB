@@ -1,4 +1,4 @@
-namespace NServiceBus.RavenDB
+namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using Raven.Abstractions.Extensions;

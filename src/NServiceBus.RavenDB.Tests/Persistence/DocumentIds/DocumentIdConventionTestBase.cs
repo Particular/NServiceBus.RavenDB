@@ -2,7 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using NServiceBus.RavenDB.Internal;
+    using NServiceBus.Persistence.RavenDB;
     using Raven.Abstractions.Data;
     using Raven.Client;
     using Raven.Json.Linq;

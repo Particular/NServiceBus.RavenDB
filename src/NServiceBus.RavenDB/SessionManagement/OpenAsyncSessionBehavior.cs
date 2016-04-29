@@ -1,10 +1,9 @@
-﻿namespace NServiceBus.RavenDB.SessionManagement
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using NServiceBus.Pipeline;
-    using NServiceBus.RavenDB.Internal;
     using Raven.Client;
 
     class OpenAsyncSessionBehavior : Behavior<IIncomingPhysicalMessageContext>

@@ -1,4 +1,4 @@
-namespace NServiceBus.TimeoutPersisters.RavenDB
+namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using System.Collections.Generic;
@@ -8,6 +8,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     using NServiceBus.Timeout.Core;
     using Raven.Client;
     using Raven.Client.Linq;
+    using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
     class QueryTimeouts : IQueryTimeouts
     {

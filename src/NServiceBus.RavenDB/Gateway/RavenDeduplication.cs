@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.RavenDB.Gateway.Deduplication
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using System.Threading.Tasks;

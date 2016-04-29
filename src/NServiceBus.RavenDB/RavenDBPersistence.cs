@@ -2,9 +2,7 @@
 {
     using NServiceBus.Features;
     using NServiceBus.Persistence;
-    using NServiceBus.RavenDB;
-    using NServiceBus.RavenDB.Outbox;
-    using NServiceBus.RavenDB.SessionManagement;
+    using NServiceBus.Persistence.RavenDB;
     using RavenLogManager = Raven.Abstractions.Logging.LogManager;
 
     /// <summary>

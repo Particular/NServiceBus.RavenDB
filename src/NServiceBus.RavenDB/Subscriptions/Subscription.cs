@@ -4,6 +4,7 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
     using System.Collections.Generic;
     using System.Security.Cryptography;
     using System.Text;
+    using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Unicast.Subscriptions;
     using Raven.Imports.Newtonsoft.Json;
 

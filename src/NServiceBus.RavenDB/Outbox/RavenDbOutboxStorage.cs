@@ -1,11 +1,10 @@
-﻿namespace NServiceBus.RavenDB.Outbox
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Features;
     using NServiceBus.Persistence;
-    using NServiceBus.RavenDB.Internal;
     using NServiceBus.Settings;
 
     class RavenDbOutboxStorage : Feature

@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using NServiceBus.Extensibility;
+using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
-using NServiceBus.Unicast.Subscriptions.RavenDB;
 using NUnit.Framework;
 
 [TestFixture]

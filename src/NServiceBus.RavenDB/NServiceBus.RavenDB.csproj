@@ -8,7 +8,7 @@
     <ProjectGuid>{281646E3-32E0-4F4D-BCF6-1DC5EFC6C268}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NServiceBus.RavenDB</RootNamespace>
+    <RootNamespace>NServiceBus.Persistence.RavenDB</RootNamespace>
     <AssemblyName>NServiceBus.RavenDB</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
 using NServiceBus.Extensibility;
+using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.RavenDB.Tests;
 using NServiceBus.Routing;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-using NServiceBus.Unicast.Subscriptions.RavenDB;
 using NUnit.Framework;
 using Raven.Client;
 

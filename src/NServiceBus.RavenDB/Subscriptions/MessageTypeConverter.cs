@@ -1,4 +1,4 @@
-namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
+namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using NServiceBus.Unicast.Subscriptions;

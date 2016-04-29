@@ -1,4 +1,4 @@
-namespace NServiceBus.RavenDB.Persistence
+namespace NServiceBus.Persistence.RavenDB
 {
     using Raven.Client;
 

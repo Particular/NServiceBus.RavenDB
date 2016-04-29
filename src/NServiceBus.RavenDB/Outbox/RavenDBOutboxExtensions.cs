@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.RavenDB.Outbox
+﻿namespace NServiceBus
 {
     using System;
     using NServiceBus.Configuration.AdvanceExtensibility;

@@ -5,8 +5,8 @@
     using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
+    using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Support;
-    using NServiceBus.TimeoutPersisters.RavenDB;
     using NUnit.Framework;
     using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 

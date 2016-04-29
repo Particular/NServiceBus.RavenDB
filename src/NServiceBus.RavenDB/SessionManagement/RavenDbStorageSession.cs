@@ -1,9 +1,8 @@
-﻿namespace NServiceBus.RavenDB.SessionManagement
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using NServiceBus.Features;
     using NServiceBus.Persistence;
-    using NServiceBus.RavenDB.Internal;
     using Raven.Client;
 
     class RavenDbStorageSession : Feature

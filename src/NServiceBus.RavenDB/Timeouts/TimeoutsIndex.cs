@@ -1,6 +1,7 @@
-﻿namespace NServiceBus.TimeoutPersisters.RavenDB
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System.Linq;
+    using NServiceBus.TimeoutPersisters.RavenDB;
     using Raven.Client.Indexes;
 
     class TimeoutsIndex : AbstractIndexCreationTask<TimeoutData>

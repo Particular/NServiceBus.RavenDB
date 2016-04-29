@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using EndpointTemplates;
     using AcceptanceTesting;
-    using NServiceBus.RavenDB;
+    using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
     using Raven.Client.Document;
 

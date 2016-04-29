@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.RavenDB.Outbox
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using System.Collections.Generic;
@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
+    using NServiceBus.RavenDB.Outbox;
     using NServiceBus.Routing;
     using Raven.Client;
     using TransportOperation = NServiceBus.Outbox.TransportOperation;

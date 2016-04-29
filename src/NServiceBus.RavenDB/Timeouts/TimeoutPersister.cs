@@ -1,4 +1,4 @@
-namespace NServiceBus.TimeoutPersisters.RavenDB
+namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using System.Threading.Tasks;
@@ -8,7 +8,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
     using CoreTimeoutData = NServiceBus.Timeout.Core.TimeoutData;
-    using Timeout = TimeoutData;
+    using Timeout = NServiceBus.TimeoutPersisters.RavenDB.TimeoutData;
 
     class TimeoutPersister : IPersistTimeouts
     {

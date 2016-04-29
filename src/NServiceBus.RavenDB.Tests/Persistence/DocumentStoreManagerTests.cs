@@ -2,7 +2,7 @@
 {
     using System;
     using NServiceBus.Persistence;
-    using NServiceBus.RavenDB.Internal;
+    using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Routing;
     using NServiceBus.Settings;
     using NUnit.Framework;

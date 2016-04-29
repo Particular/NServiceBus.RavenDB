@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
     using NServiceBus.Extensibility;
-    using NServiceBus.TimeoutPersisters.RavenDB;
+    using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
     using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
