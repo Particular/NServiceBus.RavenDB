@@ -6,6 +6,7 @@
     using NServiceBus.RavenDB;
     using NServiceBus.RavenDB.Internal;
     using NServiceBus.RavenDB.SessionManagement;
+    using NServiceBus.Settings;
     using Raven.Client;
 
     /// <summary>
@@ -29,6 +30,18 @@
         }
 
         /// <summary>
+        ///     Configures the storages to use the given document store supplied
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
+        /// <returns></returns>
+        public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IDocumentStore> storeCreator)
+        {
+            DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), storeCreator);
+            return cfg;
+        }
+
+        /// <summary>
         ///     Configures the persisters to connection to the server specified
         /// </summary>
         /// <param name="cfg"></param>
@@ -36,6 +49,10 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, ConnectionParameters connectionParameters)
         {
+            if (connectionParameters == null)
+            {
+                throw new ArgumentNullException(nameof(connectionParameters));
+            }
             cfg.GetSettings().Set(DefaultConnectionParameters, connectionParameters);
             // This will be registered with RavenUserInstaller once we initialize the document store object internally
             return cfg;
@@ -63,6 +80,10 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> UseSharedAsyncSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IAsyncDocumentSession> getAsyncSessionFunc)
         {
+            if (getAsyncSessionFunc == null)
+            {
+                throw new ArgumentNullException(nameof(getAsyncSessionFunc));
+            }
             cfg.GetSettings().Set(SharedAsyncSessionSettingsKey, getAsyncSessionFunc);
             return cfg;
         }

@@ -38,16 +38,47 @@
             };
         }
 
-        public static void SetDocumentStore<TStorageType>(SettingsHolder settings, IDocumentStore store)
-            where TStorageType : StorageType
+        public static void SetDocumentStore<TStorageType>(SettingsHolder settings, IDocumentStore documentStore)
         {
-            var initContext = new DocumentStoreInitializer(store);
-            settings.Set(featureSettingsKeys[typeof(TStorageType)], initContext);
+            if (documentStore == null)
+            {
+                throw new ArgumentNullException(nameof(documentStore));
+            }
+            SetDocumentStoreInternal(settings, typeof(TStorageType), s => documentStore);
         }
 
-        public static void SetDefaultStore(SettingsHolder settings, IDocumentStore store)
+        public static void SetDocumentStore<TStorageType>(SettingsHolder settings, Func<ReadOnlySettings, IDocumentStore> storeCreator)
+            where TStorageType : StorageType
         {
-            var initContext = new DocumentStoreInitializer(store);
+            if (storeCreator == null)
+            {
+                throw new ArgumentNullException(nameof(storeCreator));
+            }
+            SetDocumentStoreInternal(settings, typeof(TStorageType), storeCreator);
+        }
+
+        private static void SetDocumentStoreInternal(SettingsHolder settings, Type storageType, Func<ReadOnlySettings, IDocumentStore> storeCreator)
+        {
+            var initContext = new DocumentStoreInitializer(storeCreator);
+            settings.Set(featureSettingsKeys[storageType], initContext);
+        }
+
+        public static void SetDefaultStore(SettingsHolder settings, IDocumentStore documentStore)
+        {
+            if (documentStore == null)
+            {
+                throw new ArgumentNullException(nameof(documentStore));
+            }
+            SetDefaultStore(settings, s => documentStore);
+        }
+
+        public static void SetDefaultStore(SettingsHolder settings, Func<ReadOnlySettings, IDocumentStore> storeCreator)
+        {
+            if (storeCreator == null)
+            {
+                throw new ArgumentNullException(nameof(storeCreator));
+            }
+            var initContext = new DocumentStoreInitializer(storeCreator);
             settings.Set(defaultDocStoreSettingsKey, initContext);
         }
 
