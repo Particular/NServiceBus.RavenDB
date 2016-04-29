@@ -19,7 +19,7 @@
         /// <param name="documentStore">The document store to use</param>
         public static PersistenceExtentions<RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(cfg.GetSettings(), readOnlySettings => documentStore);
+            DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(cfg.GetSettings(), documentStore);
             return cfg;
         }
 

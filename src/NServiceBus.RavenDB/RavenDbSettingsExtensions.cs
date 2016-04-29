@@ -25,7 +25,7 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), readOnlySettings => documentStore);
+            DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), documentStore);
             return cfg;
         }
 
@@ -49,6 +49,10 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, ConnectionParameters connectionParameters)
         {
+            if (connectionParameters == null)
+            {
+                throw new ArgumentNullException(nameof(connectionParameters));
+            }
             cfg.GetSettings().Set(DefaultConnectionParameters, connectionParameters);
             // This will be registered with RavenUserInstaller once we initialize the document store object internally
             return cfg;
@@ -76,6 +80,10 @@
         /// <returns></returns>
         public static PersistenceExtentions<RavenDBPersistence> UseSharedAsyncSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IAsyncDocumentSession> getAsyncSessionFunc)
         {
+            if (getAsyncSessionFunc == null)
+            {
+                throw new ArgumentNullException(nameof(getAsyncSessionFunc));
+            }
             cfg.GetSettings().Set(SharedAsyncSessionSettingsKey, getAsyncSessionFunc);
             return cfg;
         }

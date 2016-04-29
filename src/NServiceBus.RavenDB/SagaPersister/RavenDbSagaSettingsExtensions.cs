@@ -21,7 +21,7 @@
         /// <param name="documentStore">The document store to be used</param>
         public static PersistenceExtentions<RavenDBPersistence> UseDocumentStoreForSagas(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(cfg.GetSettings(), readOnlySettings => documentStore);
+            DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(cfg.GetSettings(), documentStore);
             return cfg;
         }
 

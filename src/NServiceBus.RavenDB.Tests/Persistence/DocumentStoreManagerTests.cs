@@ -68,11 +68,11 @@
             Assert.AreEqual("http://localhost:8080 (DB: FakeEndpoint)", storeInitializer.Identifier);
         }
 
-        private Func<ReadOnlySettings, IDocumentStore> EmbeddedStore(string identifier)
+        private IDocumentStore EmbeddedStore(string identifier)
         {
             var store = NewDocumentStore();
             store.Identifier = identifier;
-            return readOnlySettings => store;
+            return store;
         }
 
         private SettingsHolder DefaultSettings()

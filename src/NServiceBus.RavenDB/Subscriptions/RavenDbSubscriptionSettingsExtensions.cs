@@ -19,7 +19,7 @@
         /// <param name="documentStore">The document store to use</param>
         public static PersistenceExtentions<RavenDBPersistence> UseDocumentStoreForSubscriptions(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            DocumentStoreManager.SetDocumentStore<StorageType.Subscriptions>(cfg.GetSettings(), readOnlySettings => documentStore);
+            DocumentStoreManager.SetDocumentStore<StorageType.Subscriptions>(cfg.GetSettings(), documentStore);
             return cfg;
         }
 

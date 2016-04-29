@@ -19,7 +19,7 @@
         /// <param name="documentStore">The document store to use</param>
         public static PersistenceExtentions<RavenDBPersistence> UseDocumentStoreForTimeouts(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            DocumentStoreManager.SetDocumentStore<StorageType.Timeouts>(cfg.GetSettings(), readOnlySettings => documentStore);
+            DocumentStoreManager.SetDocumentStore<StorageType.Timeouts>(cfg.GetSettings(), documentStore);
             return cfg;
         }
 
