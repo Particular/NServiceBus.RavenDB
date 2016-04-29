@@ -1,10 +1,7 @@
-﻿namespace NServiceBus.Features
+﻿namespace NServiceBus.Persistence.RavenDB
 {
+    using NServiceBus.Features;
     using NServiceBus.Persistence;
-    using NServiceBus.RavenDB;
-    using NServiceBus.RavenDB.Internal;
-    using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
-    using NServiceBus.Unicast.Subscriptions.RavenDB;
 
     class RavenDbSubscriptionStorage : Feature
     {

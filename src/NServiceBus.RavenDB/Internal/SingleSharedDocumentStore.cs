@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.RavenDB.Internal
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     class SingleSharedDocumentStore
     {

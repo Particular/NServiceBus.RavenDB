@@ -1,12 +1,10 @@
-﻿namespace NServiceBus.RavenDB.SessionManagement
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System.Threading.Tasks;
     using System.Transactions;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.Persistence;
-    using NServiceBus.RavenDB.Outbox;
-    using NServiceBus.SagaPersisters.RavenDB;
     using NServiceBus.Transports;
 
     class RavenDBSynchronizedStorageAdapter : ISynchronizedStorageAdapter

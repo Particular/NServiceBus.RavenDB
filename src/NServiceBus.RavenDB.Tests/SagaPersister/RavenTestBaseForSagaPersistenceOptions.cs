@@ -1,6 +1,6 @@
 ﻿using NServiceBus.Extensibility;
+using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
-using NServiceBus.SagaPersisters.RavenDB;
 using Raven.Client;
 
 static class RavenTestBaseForSagaPersistenceOptions

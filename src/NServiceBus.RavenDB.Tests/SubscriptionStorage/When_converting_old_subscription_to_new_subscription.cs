@@ -4,16 +4,17 @@
     using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
+    using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Routing;
     using NServiceBus.Support;
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-    using NServiceBus.Unicast.Subscriptions.RavenDB;
     using NUnit.Framework;
     using Raven.Client.Listeners;
     using Raven.Imports.Newtonsoft.Json;
     using Raven.Json.Linq;
+    using LegacyAddress = NServiceBus.RavenDB.Tests.LegacyAddress;
 
     [TestFixture]
     public class When_converting_old_subscription_to_new_subscription : RavenDBPersistenceTestBase

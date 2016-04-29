@@ -1,7 +1,6 @@
-﻿namespace NServiceBus.RavenDB
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using NServiceBus.Features;
-    using NServiceBus.RavenDB.Internal;
 
     class SharedDocumentStore : Feature
     {

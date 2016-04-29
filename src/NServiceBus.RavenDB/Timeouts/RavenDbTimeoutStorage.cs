@@ -1,11 +1,8 @@
-﻿namespace NServiceBus.Features
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System.Threading.Tasks;
+    using NServiceBus.Features;
     using NServiceBus.Persistence;
-    using NServiceBus.RavenDB;
-    using NServiceBus.RavenDB.Internal;
-    using NServiceBus.RavenDB.Timeouts;
-    using NServiceBus.TimeoutPersisters.RavenDB;
 
     class RavenDbTimeoutStorage : Feature
     {

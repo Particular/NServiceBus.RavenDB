@@ -1,4 +1,4 @@
-namespace NServiceBus.Unicast.Subscriptions.RavenDB
+namespace NServiceBus.Persistence.RavenDB
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -6,6 +6,7 @@ namespace NServiceBus.Unicast.Subscriptions.RavenDB
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Routing;
+    using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;

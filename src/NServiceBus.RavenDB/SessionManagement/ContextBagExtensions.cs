@@ -1,7 +1,8 @@
-﻿namespace NServiceBus.RavenDB.SessionManagement
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using NServiceBus.Extensibility;
+    using NServiceBus.RavenDB.SessionManagement;
     using Raven.Client;
 
     static class ContextBagExtensions

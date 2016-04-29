@@ -1,9 +1,8 @@
-﻿
-namespace NServiceBus
+﻿namespace NServiceBus
 {
     using System;
     using NServiceBus.Persistence;
-    using NServiceBus.SagaPersisters.RavenDB;
+    using NServiceBus.Persistence.RavenDB;
     using Raven.Client;
 
     /// <summary>

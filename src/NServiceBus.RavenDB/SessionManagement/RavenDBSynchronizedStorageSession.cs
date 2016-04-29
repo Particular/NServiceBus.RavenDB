@@ -1,4 +1,4 @@
-namespace NServiceBus.SagaPersisters.RavenDB
+namespace NServiceBus.Persistence.RavenDB
 {
     using System.Threading.Tasks;
     using NServiceBus.Persistence;

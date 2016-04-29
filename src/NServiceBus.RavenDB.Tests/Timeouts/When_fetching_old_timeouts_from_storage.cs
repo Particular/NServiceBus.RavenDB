@@ -4,9 +4,11 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Support;
     using NServiceBus.TimeoutPersisters.RavenDB;
     using NUnit.Framework;
+    using LegacyAddress = NServiceBus.RavenDB.Tests.LegacyAddress;
 
     public class When_fetching_old_timeouts_from_storage : RavenDBPersistenceTestBase
     {

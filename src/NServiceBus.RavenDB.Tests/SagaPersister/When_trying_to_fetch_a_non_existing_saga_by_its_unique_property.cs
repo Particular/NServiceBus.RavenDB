@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using NServiceBus;
+using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
-using NServiceBus.SagaPersisters.RavenDB;
 using NUnit.Framework;
 using Raven.Client;
 

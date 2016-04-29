@@ -1,6 +1,5 @@
-namespace NServiceBus.RavenDB.Timeouts
+namespace NServiceBus.Persistence.RavenDB
 {
-    using NServiceBus.RavenDB.Internal;
     using Raven.Client.Listeners;
     using Raven.Json.Linq;
 

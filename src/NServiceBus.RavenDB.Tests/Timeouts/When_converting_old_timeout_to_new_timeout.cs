@@ -4,10 +4,10 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
-    using NServiceBus.RavenDB.Timeouts;
+    using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Support;
-    using NServiceBus.TimeoutPersisters.RavenDB;
     using NUnit.Framework;
+    using LegacyAddress = NServiceBus.RavenDB.Tests.LegacyAddress;
     using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
     [TestFixture]

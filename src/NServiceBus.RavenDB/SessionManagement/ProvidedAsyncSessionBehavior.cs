@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.RavenDB.SessionManagement
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using System.Threading.Tasks;

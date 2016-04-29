@@ -1,6 +1,6 @@
 ﻿namespace NServiceBus.RavenDB.Tests
 {
-    using NServiceBus.RavenDB.Persistence;
+    using NServiceBus.Persistence.RavenDB;
     using Raven.Client;
 
     class RavenAsyncSessionFactory : IAsyncSessionProvider

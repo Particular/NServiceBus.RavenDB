@@ -1,6 +1,6 @@
-namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
+namespace NServiceBus.Persistence.RavenDB
 {
-    using NServiceBus.RavenDB.Internal;
+    using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using Raven.Client.Listeners;
     using Raven.Json.Linq;
 

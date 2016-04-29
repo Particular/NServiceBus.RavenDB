@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.RavenDB.Outbox
+﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System.Threading.Tasks;
     using NServiceBus.Outbox;

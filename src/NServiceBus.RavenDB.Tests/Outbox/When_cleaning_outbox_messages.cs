@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
+    using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Outbox;
     using NServiceBus.Routing;
     using NUnit.Framework;

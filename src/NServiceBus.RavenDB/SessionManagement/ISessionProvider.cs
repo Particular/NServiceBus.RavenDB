@@ -1,4 +1,4 @@
-namespace NServiceBus.RavenDB.Persistence
+namespace NServiceBus.Persistence.RavenDB
 {
     /// <summary>
     ///     Provides access the the session managed by NServiceBus
