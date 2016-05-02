@@ -15,7 +15,7 @@
         {
             var ex = Assert.Throws<AggregateException>(async () => await Scenario.Define<Context>()
                 .WithEndpoint<MultiPropEndpoint>(e => e.DoNotFailOnErrorMessages())
-                .Done(c => c.Exceptions.Any() || c.EndpointsStarted)
+                .Done(c => c.LoggedExceptions.Any() || c.EndpointsStarted)
                 .Run());
 
             const string expectedMessage = "Sagas can only have mappings that correlate on a single saga property. Use custom finders to correlate";
