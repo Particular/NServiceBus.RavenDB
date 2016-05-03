@@ -27,7 +27,7 @@
                 DefaultDatabase = db
             }.Initialize())
             {
-                await new TimeoutsIndex().ExecuteAsync(documentStore);
+                new TimeoutsIndex().Execute(documentStore);
 
                 var query = new QueryTimeouts(documentStore, "foo")
                 {
@@ -44,7 +44,7 @@
                 var lastTimeout = DateTime.UtcNow;
                 var finishedAdding = false;
 
-                new Thread(async () =>
+                new Thread(() =>
                 {
                     var sagaId = Guid.NewGuid();
                     for (var i = 0; i < 10000; i++)
@@ -56,7 +56,7 @@
                             Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                             OwningTimeoutManager = string.Empty
                         };
-                        await persister.Add(td, context);
+                        persister.Add(td, context).Wait();
                         expected.Add(new Tuple<string, DateTime>(td.Id, td.Time));
                         lastTimeout = (td.Time > lastTimeout) ? td.Time : lastTimeout;
                     }
@@ -123,7 +123,7 @@
                 DefaultDatabase = db
             }.Initialize())
             {
-                await new TimeoutsIndex().ExecuteAsync(documentStore);
+                new TimeoutsIndex().Execute(documentStore);
 
                 var query = new QueryTimeouts(documentStore, "foo")
                 {
@@ -142,7 +142,7 @@
                 var finishedAdding1 = false;
                 var finishedAdding2 = false;
 
-                new Thread(async () =>
+                new Thread(() =>
                 {
                     var sagaId = Guid.NewGuid();
                     for (var i = 0; i < insertsPerThread; i++)
@@ -154,7 +154,7 @@
                             Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                             OwningTimeoutManager = string.Empty
                         };
-                        await persister.Add(td, context);
+                        persister.Add(td, context).Wait();
                         Interlocked.Increment(ref expected);
                         lastExpectedTimeout = (td.Time > lastExpectedTimeout) ? td.Time : lastExpectedTimeout;
                     }
@@ -162,7 +162,7 @@
                     Console.WriteLine("*** Finished adding ***");
                 }).Start();
 
-                new Thread(async () =>
+                new Thread(() =>
                 {
                     using (var store = new DocumentStore
                     {
@@ -182,7 +182,7 @@
                                 Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                                 OwningTimeoutManager = string.Empty
                             };
-                            await persister2.Add(td, context);
+                            persister2.Add(td, context).Wait();
                             Interlocked.Increment(ref expected);
                             lastExpectedTimeout = (td.Time > lastExpectedTimeout) ? td.Time : lastExpectedTimeout;
                         }
