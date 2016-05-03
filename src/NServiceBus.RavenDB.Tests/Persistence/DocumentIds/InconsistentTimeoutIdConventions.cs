@@ -32,31 +32,35 @@
                     prefillIndex = CreateTimeoutIndex(store);
                 }
 
-                using (var store = db.NewStore())
+                // Need to ensure multiple runs will work, after conventions document is stored
+                for (var i = 0; i < 3; i++)
                 {
-                    Console.WriteLine($"Testing receives with DocumentStore initially configured for {seedType} conventions.");
-                    ApplyTestConventions(store, seedType);
-                    store.Initialize();
-
-                    var index = CreateTimeoutIndex(store);
-                    db.WaitForIndexing(store);
-
-                    Assert.AreEqual(index, prefillIndex, "Index definitions must match or previous timeouts will not be found.");
-
-                    var persister = new TimeoutPersister
+                    using (var store = db.NewStore())
                     {
-                        DocumentStore = store,
-                        EndpointName = EndpointName
-                    };
+                        Console.WriteLine($"Testing receives with DocumentStore initially configured for {seedType} conventions.");
+                        ApplyTestConventions(store, seedType);
+                        store.Initialize();
 
-                    DateTime nextTimeToRunQuery;
-                    var chunkTuples = persister.GetNextChunk(DateTime.UtcNow.AddYears(-10), out nextTimeToRunQuery).ToArray();
+                        var index = CreateTimeoutIndex(store);
+                        db.WaitForIndexing(store);
 
-                    Assert.AreEqual(10, chunkTuples.Length);
-                    foreach (var tuple in chunkTuples)
-                    {
-                        Console.WriteLine($"Received timeout {tuple.Item1}");
-                        Assert.AreEqual(dueTimeout, tuple.Item2);
+                        Assert.AreEqual(index, prefillIndex, "Index definitions must match or previous timeouts will not be found.");
+
+                        var persister = new TimeoutPersister
+                        {
+                            DocumentStore = store,
+                            EndpointName = EndpointName
+                        };
+
+                        DateTime nextTimeToRunQuery;
+                        var chunkTuples = persister.GetNextChunk(DateTime.UtcNow.AddYears(-10), out nextTimeToRunQuery).ToArray();
+
+                        Assert.AreEqual(10, chunkTuples.Length);
+                        foreach (var tuple in chunkTuples)
+                        {
+                            Console.WriteLine($"Received timeout {tuple.Item1}");
+                            Assert.AreEqual(dueTimeout, tuple.Item2);
+                        }
                     }
                 }
             }
