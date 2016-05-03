@@ -33,28 +33,32 @@
                     prefillIndex = CreateTimeoutIndex(store);
                 }
 
-                using (var store = db.NewStore())
+                // Need to ensure multiple runs will work, after conventions document is stored
+                for (var i = 0; i < 3; i++)
                 {
-                    Console.WriteLine($"Testing receives with DocumentStore initially configured for {seedType} conventions.");
-                    ApplyTestConventions(store, seedType);
-                    store.Initialize();
-
-                    var index = CreateTimeoutIndex(store);
-                    db.WaitForIndexing(store);
-
-                    Assert.AreEqual(index, prefillIndex, "Index definitions must match or previous timeouts will not be found.");
-
-                    var storeAccessor = new StoreAccessor(store);
-                    var persister = new RavenTimeoutPersistence(storeAccessor);
-
-                    DateTime nextTimeToRunQuery;
-                    var chunkTuples = persister.GetNextChunk(DateTime.UtcNow.AddYears(-10), out nextTimeToRunQuery).ToArray();
-
-                    Assert.AreEqual(10, chunkTuples.Length);
-                    foreach (var tuple in chunkTuples)
+                    using (var store = db.NewStore())
                     {
-                        Console.WriteLine($"Received timeout {tuple.Item1}");
-                        Assert.AreEqual(dueTimeout, tuple.Item2);
+                        Console.WriteLine($"Testing receives with DocumentStore initially configured for {seedType} conventions.");
+                        ApplyTestConventions(store, seedType);
+                        store.Initialize();
+
+                        var index = CreateTimeoutIndex(store);
+                        db.WaitForIndexing(store);
+
+                        Assert.AreEqual(index, prefillIndex, "Index definitions must match or previous timeouts will not be found.");
+
+                        var storeAccessor = new StoreAccessor(store);
+                        var persister = new RavenTimeoutPersistence(storeAccessor);
+
+                        DateTime nextTimeToRunQuery;
+                        var chunkTuples = persister.GetNextChunk(DateTime.UtcNow.AddYears(-10), out nextTimeToRunQuery).ToArray();
+
+                        Assert.AreEqual(10, chunkTuples.Length);
+                        foreach (var tuple in chunkTuples)
+                        {
+                            Console.WriteLine($"Received timeout {tuple.Item1}");
+                            Assert.AreEqual(dueTimeout, tuple.Item2);
+                        }
                     }
                 }
             }
