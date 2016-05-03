@@ -16,23 +16,25 @@ namespace NServiceBus.Persistence.RavenDB
     {
         const string UniqueDocIdKey = "NServiceBus-UniqueDocId";
 
-        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
+        public Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
 
             if (sagaData == null)
             {
-                return;
+                return TaskEx.CompletedTask;
             }
 
-            await documentSession.StoreAsync(sagaData).ConfigureAwait(false);
+            var storeDocTask = documentSession.StoreAsync(sagaData);
 
             if (correlationProperty == null)
             {
-                return;
+                return storeDocTask;
             }
 
-            await CreateSagaUniqueIdentity(sagaData, correlationProperty, documentSession).ConfigureAwait(false);
+            var storeUniqueIdentityTask = CreateSagaUniqueIdentity(sagaData, correlationProperty, documentSession);
+
+            return Task.WhenAll(storeDocTask, storeUniqueIdentityTask);
         }
 
         static async Task CreateSagaUniqueIdentity(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, IAsyncDocumentSession documentSession)
