@@ -75,7 +75,7 @@
                 }
             });
 
-            Assert.IsTrue(t1.Result | t2.Result, "the document should be deleted");
+            Assert.IsTrue(await t1 | await t2, "the document should be deleted");
             Assert.IsFalse(t1.Result && t2.Result, "only one operation should complete successfully");
         }
 
@@ -116,7 +116,7 @@
                 }
             });
 
-            Assert.IsTrue(t1.Result | t2.Result, "the document should be deleted");
+            Assert.IsTrue(await t1 | await t2, "the document should be deleted");
             Assert.IsFalse(t1.Result && t2.Result, "only one operation should complete successfully");
         }
 

@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
@@ -52,7 +51,7 @@
 
 
             await persister.SetAsDispatched(id, context);
-            Thread.Sleep(TimeSpan.FromSeconds(1)); //Need to wait for dispatch logic to finish
+            await Task.Delay(TimeSpan.FromSeconds(1)); //Need to wait for dispatch logic to finish
 
             //WaitForUserToContinueTheTest(store);
             WaitForIndexing(store);
