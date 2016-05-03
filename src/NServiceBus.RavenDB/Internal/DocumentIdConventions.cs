@@ -120,6 +120,7 @@
             };
 
             var configuredName = mappingsInPriorityOrder
+                .Distinct()
                 .SingleOrDefault(name => collectionData.Collections.Contains(name));
 
             if (configuredName == null)
