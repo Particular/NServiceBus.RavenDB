@@ -45,7 +45,10 @@
                         var index = CreateTimeoutIndex(store);
                         db.WaitForIndexing(store);
 
-                        Assert.AreEqual(index, prefillIndex, "Index definitions must match or previous timeouts will not be found.");
+                        if (i == 0)
+                        {
+                            Assert.AreEqual(index, prefillIndex, "Index definitions must match or previous timeouts will not be found.");
+                        }
 
                         var storeAccessor = new StoreAccessor(store);
                         var persister = new RavenTimeoutPersistence(storeAccessor);
