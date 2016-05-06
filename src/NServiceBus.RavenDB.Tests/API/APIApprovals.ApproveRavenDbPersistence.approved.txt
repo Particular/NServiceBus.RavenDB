@@ -1,16 +1,4 @@
-﻿namespace NServiceBus.Gateway.Deduplication
-{
-    
-    [System.ObsoleteAttribute("This type was not meant to be used in external code is being made internal. Will " +
-        "be removed in version 5.0.0.", true)]
-    public class GatewayMessage
-    {
-        public GatewayMessage() { }
-        public string Id { get; set; }
-        public System.DateTime TimeReceived { get; set; }
-    }
-}
-namespace NServiceBus.Persistence.RavenDB
+﻿namespace NServiceBus
 {
     
     public class ConnectionParameters
@@ -21,24 +9,6 @@ namespace NServiceBus.Persistence.RavenDB
         public string DatabaseName { get; set; }
         public string Url { get; set; }
     }
-    public interface IAsyncSessionProvider
-    {
-        Raven.Client.IAsyncDocumentSession AsyncSession { get; }
-    }
-    [System.ObsoleteAttribute("The session is now exposed through SynchronizedStorageSession.RavenSession(). For" +
-        " handlers use context.SynchronizedStorageSession.RavenSession(). For. Will be re" +
-        "moved in version 5.0.0.", true)]
-    public interface ISessionProvider { }
-    [System.ObsoleteAttribute("This type was not meant to be used in external code is being made internal. Will " +
-        "be removed in version 5.0.0.", true)]
-    public class RavenDbSagaStorage : NServiceBus.Features.Feature
-    {
-        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
-    }
-}
-namespace NServiceBus
-{
-    
     public class static RavenDbGatewayDeduplicationSettingsExtensions
     {
         public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.IDocumentStore documentStore) { }
@@ -67,7 +37,7 @@ namespace NServiceBus
         public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.IDocumentStore documentStore) { }
         public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.IDocumentStore> storeCreator) { }
-        public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg, NServiceBus.Persistence.RavenDB.ConnectionParameters connectionParameters) { }
+        public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg, NServiceBus.ConnectionParameters connectionParameters) { }
         public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> SetMessageToDatabaseMappingConvention(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg, System.Func<System.Collections.Generic.IDictionary<string, string>, string> convention) { }
         public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> UseSharedAsyncSession(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> cfg, System.Func<Raven.Client.IAsyncDocumentSession> getAsyncSessionFunc) { }
         [System.ObsoleteAttribute("Use the \'UseSharedAsyncSession\' configuration extension method to provide an asyn" +
@@ -87,6 +57,36 @@ namespace NServiceBus
     public class static RavenSessionExtension
     {
         public static Raven.Client.IAsyncDocumentSession RavenSession(this NServiceBus.Persistence.SynchronizedStorageSession session) { }
+    }
+}
+namespace NServiceBus.Gateway.Deduplication
+{
+    
+    [System.ObsoleteAttribute("This type was not meant to be used in external code is being made internal. Will " +
+        "be removed in version 5.0.0.", true)]
+    public class GatewayMessage
+    {
+        public GatewayMessage() { }
+        public string Id { get; set; }
+        public System.DateTime TimeReceived { get; set; }
+    }
+}
+namespace NServiceBus.Persistence.RavenDB
+{
+    
+    public interface IAsyncSessionProvider
+    {
+        Raven.Client.IAsyncDocumentSession AsyncSession { get; }
+    }
+    [System.ObsoleteAttribute("The session is now exposed through SynchronizedStorageSession.RavenSession(). For" +
+        " handlers use context.SynchronizedStorageSession.RavenSession(). For. Will be re" +
+        "moved in version 5.0.0.", true)]
+    public interface ISessionProvider { }
+    [System.ObsoleteAttribute("This type was not meant to be used in external code is being made internal. Will " +
+        "be removed in version 5.0.0.", true)]
+    public class RavenDbSagaStorage : NServiceBus.Features.Feature
+    {
+        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
     }
 }
 namespace NServiceBus.Testing

@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Persistence.RavenDB
+﻿namespace NServiceBus
 {
     using System.Net;
 
