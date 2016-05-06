@@ -1,5 +1,5 @@
 ﻿namespace NServiceBus
-{ 
+{
     using System.Net;
 
     /// <summary>
