@@ -46,42 +46,5 @@
                 }
             }
         }
-
-        [Test]
-        public void EnsureMappingFailsWithoutIndex()
-        {
-            using (var db = new ReusableDB())
-            {
-
-                using (var store = db.NewStore())
-                {
-                    ApplyTestConventions(store, ConventionType.RavenDefault);
-                    store.Initialize();
-
-                    // Remove the index to make sure the conventions will throw
-                    store.DatabaseCommands.DeleteIndex("Raven/DocumentsByEntityName");
-
-                    var persister = new TimeoutPersister
-                    {
-                        DocumentStore = store,
-                        EndpointName = EndpointName
-                    };
-
-                    var exception = Assert.Throws<InvalidOperationException>(() =>
-                    {
-                        persister.Add(new TimeoutData
-                        {
-                            Destination = new Address(EndpointName, "localhost"),
-                            Headers = new Dictionary<string, string>(),
-                            OwningTimeoutManager = EndpointName,
-                            SagaId = Guid.NewGuid(),
-                            Time = DateTime.UtcNow
-                        });
-                    });
-
-                    Console.WriteLine($"Got expected Exception: {exception.Message}");
-                }
-            }
-        }
     }
 }
