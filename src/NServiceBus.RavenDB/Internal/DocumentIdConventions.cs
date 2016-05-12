@@ -14,16 +14,20 @@
         private readonly IDocumentStore store;
         private readonly Func<Type, string> userSuppliedConventions;
         private readonly string endpointName;
+        private readonly bool sagasEnabled;
+        private readonly bool timeoutsEnabled;
         private readonly string collectionNamesDocId;
         private readonly object padlock;
         private Dictionary<Type, string> mappedTypes;
         private IEnumerable<Type> types;
 
-        public DocumentIdConventions(IDocumentStore store, IEnumerable<Type> types, string endpointName)
+        public DocumentIdConventions(IDocumentStore store, IEnumerable<Type> types, string endpointName, bool sagasEnabled = true, bool timeoutsEnabled = true)
         {
             this.store = store;
             this.types = types;
             this.endpointName = endpointName;
+            this.sagasEnabled = sagasEnabled;
+            this.timeoutsEnabled = timeoutsEnabled;
 
             collectionNamesDocId = $"NServiceBus/DocumentCollectionNames/{SHA1Hash(endpointName)}";
             userSuppliedConventions = store.Conventions.FindTypeTagName;
@@ -65,10 +69,16 @@
                     }
                 }
 
-                MapTypeToCollectionName(typeof(TimeoutPersisters.RavenDB.TimeoutData), collectionData);
-                foreach (var sagaType in types.Where(IsSagaEntity))
+                if (timeoutsEnabled)
                 {
-                    MapTypeToCollectionName(sagaType, collectionData);
+                    MapTypeToCollectionName(typeof(TimeoutPersisters.RavenDB.TimeoutData), collectionData);
+                }
+                if (sagasEnabled)
+                {
+                    foreach (var sagaType in types.Where(IsSagaEntity))
+                    {
+                        MapTypeToCollectionName(sagaType, collectionData);
+                    }
                 }
 
                 if (collectionData.Changed)
