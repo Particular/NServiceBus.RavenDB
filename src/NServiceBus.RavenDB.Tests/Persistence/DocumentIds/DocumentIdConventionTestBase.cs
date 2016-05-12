@@ -51,7 +51,7 @@
             ApplyConventionsInternal(store, type, false);
 
             var sagaTypes = new[] { typeof(TestSagaData) };
-            var conventions = new DocumentIdConventions(store, sagaTypes, EndpointName);
+            var conventions = new DocumentIdConventions(store, sagaTypes, EndpointName, true, true);
             store.Conventions.FindTypeTagName = conventions.FindTypeTagName;
         }
 
