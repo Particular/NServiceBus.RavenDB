@@ -6,6 +6,7 @@
     using System.Security.Cryptography;
     using System.Text;
     using NServiceBus.Saga;
+    using NServiceBus.Settings;
     using NServiceBus.Timeout.Core;
     using Raven.Client;
     using Raven.Json.Linq;
@@ -15,16 +16,20 @@
         private readonly IDocumentStore store;
         private readonly Func<Type, string> userSuppliedConventions;
         private readonly string endpointName;
+        private readonly bool sagasEnabled;
+        private readonly bool timeoutsEnabled;
         private readonly string collectionNamesDocId;
         private readonly object padlock;
         private Dictionary<Type, string> mappedTypes;
         private IEnumerable<Type> types;
 
-        public DocumentIdConventions(IDocumentStore store, IEnumerable<Type> types, string endpointName)
+        public DocumentIdConventions(IDocumentStore store, IEnumerable<Type> types, string endpointName, bool sagasEnabled = true, bool timeoutsEnabled = true)
         {
             this.store = store;
             this.types = types;
             this.endpointName = endpointName;
+            this.sagasEnabled = sagasEnabled;
+            this.timeoutsEnabled = timeoutsEnabled;
 
             collectionNamesDocId = $"NServiceBus/DocumentCollectionNames/{SHA1Hash(endpointName)}";
             userSuppliedConventions = store.Conventions.FindTypeTagName;
@@ -44,7 +49,9 @@
                 return;
             }
 
-            var conventions = new DocumentIdConventions(store, Configure.TypesToScan, Configure.EndpointName);
+            var sagasEnabled = SettingsHolder.GetOrDefault<bool>(typeof(Features.Sagas).FullName);
+            var timeoutsEnabled = SettingsHolder.GetOrDefault<bool>(typeof(Features.TimeoutManager).FullName);
+            var conventions = new DocumentIdConventions(store, Configure.TypesToScan, Configure.EndpointName, sagasEnabled, timeoutsEnabled);
             store.Conventions.FindTypeTagName = conventions.FindTypeTagName;
         }
 
@@ -83,10 +90,16 @@
                     }
                 }
 
-                MapTypeToCollectionName(typeof(TimeoutData), collectionData);
-                foreach (var sagaType in types.Where(IsSagaEntity))
+                if (timeoutsEnabled)
                 {
-                    MapTypeToCollectionName(sagaType, collectionData);
+                    MapTypeToCollectionName(typeof(TimeoutData), collectionData);
+                }
+                if (sagasEnabled)
+                {
+                    foreach (var sagaType in types.Where(IsSagaEntity))
+                    {
+                        MapTypeToCollectionName(sagaType, collectionData);
+                    }
                 }
 
                 if (collectionData.Changed)
@@ -122,7 +135,7 @@
 
             var terms = store.DatabaseCommands.GetTerms(DocsByEntityNameIndex, "Tag", null, 1024);
             return new HashSet<string>(terms);
-        } 
+        }
 
         private void MapTypeToCollectionName(Type type, CollectionData collectionData)
         {
@@ -153,7 +166,7 @@
                     .Where(name => collectionData.IndexResults.Contains(name))
                     .ToArray();
 
-                
+
                 if (collectionsThatExist.Length > 1)
                 {
                     var options = string.Join(", ", collectionsThatExist);
