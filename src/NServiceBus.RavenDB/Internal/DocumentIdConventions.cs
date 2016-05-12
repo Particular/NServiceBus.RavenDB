@@ -152,7 +152,7 @@
                     throw new InvalidOperationException($"Multiple RavenDB collection names ({options}) found for type `{type.FullName}`. Unable to determine DocumentId naming strategy for this type. Please remove or modify the documents that were mapped incorrectly.");
                 }
 
-                configuredName = collectionsThatExist.FirstOrDefault() ?? byLegacy;
+                configuredName = collectionsThatExist.FirstOrDefault() ?? ravenDefault;
                 collectionData.Collections.Add(configuredName);
                 collectionData.Changed = true;
             }
