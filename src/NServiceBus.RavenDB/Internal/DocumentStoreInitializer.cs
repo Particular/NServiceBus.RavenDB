@@ -38,7 +38,9 @@
 
         void ApplyConventions(ReadOnlySettings settings)
         {
-            var idConventions = new DocumentIdConventions(docStore, settings.GetAvailableTypes(), settings.EndpointName());
+            var sagasEnabled = settings.GetOrDefault<bool>(typeof(Features.Sagas).FullName);
+            var timeoutsEnabled = settings.GetOrDefault<bool>(typeof(Features.TimeoutManager).FullName);
+            var idConventions = new DocumentIdConventions(docStore, settings.GetAvailableTypes(), settings.EndpointName(), sagasEnabled, timeoutsEnabled);
             docStore.Conventions.FindTypeTagName = idConventions.FindTypeTagName;
 
             var store = docStore as DocumentStore;
