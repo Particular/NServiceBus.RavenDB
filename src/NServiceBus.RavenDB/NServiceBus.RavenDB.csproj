@@ -80,6 +80,7 @@
     <Compile Include="Internal\DocumentIdConventions.cs" />
     <Compile Include="Internal\DocumentStoreInitializer.cs" />
     <Compile Include="Internal\DocumentStoreManager.cs" />
+    <Compile Include="Internal\DocumentIdConventionsExtensions.cs" />
     <Compile Include="Internal\IDocumentStoreWrapper.cs" />
     <Compile Include="Internal\LegacyAddress.cs" />
     <Compile Include="Internal\BackwardsCompatibilityHelper.cs" />

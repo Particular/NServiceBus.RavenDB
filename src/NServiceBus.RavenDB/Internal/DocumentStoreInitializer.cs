@@ -3,6 +3,7 @@
     using System;
     using System.Security.Cryptography;
     using System.Text;
+    using NServiceBus.Features;
     using NServiceBus.Logging;
     using NServiceBus.Settings;
     using Raven.Client;
@@ -52,8 +53,13 @@
 
         void ApplyConventions(ReadOnlySettings settings)
         {
-            var idConventions = new DocumentIdConventions(docStore, settings.GetAvailableTypes(), settings.EndpointName().ToString());
-            docStore.Conventions.FindTypeTagName = idConventions.FindTypeTagName;
+            if (DocumentIdConventionsExtensions.NeedToApplyDocumentIdConventionsToDocumentStore(settings))
+            {
+                var sagasEnabled = settings.IsFeatureActive(typeof(Sagas));
+                var timeoutsEnabled = settings.IsFeatureActive(typeof(TimeoutManager));
+                var idConventions = new DocumentIdConventions(docStore, settings.GetAvailableTypes(), settings.EndpointName().ToString(), sagasEnabled, timeoutsEnabled);
+                docStore.Conventions.FindTypeTagName = idConventions.FindTypeTagName;
+            }
 
             var store = docStore as DocumentStore;
             if (store == null)
