@@ -31,39 +31,43 @@
                     sagas = await Prefill(store, seedType);
                 }
 
-                using (var store = db.NewStore())
+                // Need to ensure multiple runs will work, after conventions document is stored
+                for (var i = 0; i < 3; i++)
                 {
-                    Console.WriteLine($"Testing saga lookups with DocumentStore initially configured for {seedType} conventions.");
-                    ApplyTestConventions(store, seedType);
-                    store.Initialize();
-
-                    foreach (var saga in sagas)
+                    using (var store = db.NewStore())
                     {
-                        var persister = new SagaPersister();
-                        Console.WriteLine($"Retrieving SagaId {saga.Id} by SagaId");
-                        TestSagaData byId;
-                        using (var session = store.OpenAsyncSession())
-                        {
-                            byId = await persister.Get<TestSagaData>(saga.Id, new RavenDBSynchronizedStorageSession(session, false), null);
-                        }
-                        Assert.IsNotNull(byId);
-                        Assert.AreEqual(byId.Id, saga.Id);
-                        Assert.AreEqual(byId.OrderId, saga.OrderId);
-                        Assert.AreEqual(byId.OriginalMessageId, saga.OriginalMessageId);
-                        Assert.AreEqual(byId.Originator, saga.Originator);
-                        Assert.AreEqual(1, saga.Counter);
+                        Console.WriteLine($"Testing saga lookups with DocumentStore initially configured for {seedType} conventions.");
+                        ApplyTestConventions(store, seedType);
+                        store.Initialize();
 
-                        Console.WriteLine($"Retrieving SagaId {saga.Id} by Correlation Property OrderId={saga.OrderId}");
-                        using (var session = store.OpenAsyncSession())
+                        foreach (var saga in sagas)
                         {
-                            byId = await persister.Get<TestSagaData>("OrderId", saga.OrderId, new RavenDBSynchronizedStorageSession(session, false), new ContextBag());
+                            var persister = new SagaPersister();
+                            Console.WriteLine($"Retrieving SagaId {saga.Id} by SagaId");
+                            TestSagaData byId;
+                            using (var session = store.OpenAsyncSession())
+                            {
+                                byId = await persister.Get<TestSagaData>(saga.Id, new RavenDBSynchronizedStorageSession(session, false), null);
+                            }
+                            Assert.IsNotNull(byId);
+                            Assert.AreEqual(byId.Id, saga.Id);
+                            Assert.AreEqual(byId.OrderId, saga.OrderId);
+                            Assert.AreEqual(byId.OriginalMessageId, saga.OriginalMessageId);
+                            Assert.AreEqual(byId.Originator, saga.Originator);
+                            Assert.AreEqual(1, saga.Counter);
+
+                            Console.WriteLine($"Retrieving SagaId {saga.Id} by Correlation Property OrderId={saga.OrderId}");
+                            using (var session = store.OpenAsyncSession())
+                            {
+                                byId = await persister.Get<TestSagaData>("OrderId", saga.OrderId, new RavenDBSynchronizedStorageSession(session, false), new ContextBag());
+                            }
+                            Assert.IsNotNull(byId);
+                            Assert.AreEqual(byId.Id, saga.Id);
+                            Assert.AreEqual(byId.OrderId, saga.OrderId);
+                            Assert.AreEqual(byId.OriginalMessageId, saga.OriginalMessageId);
+                            Assert.AreEqual(byId.Originator, saga.Originator);
+                            Assert.AreEqual(1, saga.Counter);
                         }
-                        Assert.IsNotNull(byId);
-                        Assert.AreEqual(byId.Id, saga.Id);
-                        Assert.AreEqual(byId.OrderId, saga.OrderId);
-                        Assert.AreEqual(byId.OriginalMessageId, saga.OriginalMessageId);
-                        Assert.AreEqual(byId.Originator, saga.Originator);
-                        Assert.AreEqual(1, saga.Counter);
                     }
                 }
             }

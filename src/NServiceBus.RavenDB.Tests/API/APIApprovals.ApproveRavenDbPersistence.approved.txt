@@ -21,20 +21,28 @@ namespace NServiceBus.Persistence.RavenDB
         public string DatabaseName { get; set; }
         public string Url { get; set; }
     }
+    public class static DocumentIdConventionsExtensions
+    {
+        public static NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> DoNotUseLegacyConventionsWhichIsOnlySafeForNewEndpoints(this NServiceBus.PersistenceExtentions<NServiceBus.RavenDBPersistence> config) { }
+    }
     public interface IAsyncSessionProvider
     {
         Raven.Client.IAsyncDocumentSession AsyncSession { get; }
     }
-    [System.ObsoleteAttribute("The session is now exposed through SynchronizedStorageSession.RavenSession(). For" +
-        " handlers use context.SynchronizedStorageSession.RavenSession(). For. Will be re" +
-        "moved in version 5.0.0.", true)]
-    public interface ISessionProvider { }
     [System.ObsoleteAttribute("This type was not meant to be used in external code is being made internal. Will " +
         "be removed in version 5.0.0.", true)]
     public class RavenDbSagaStorage : NServiceBus.Features.Feature
     {
         protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
     }
+}
+namespace NServiceBus.RavenDB.Persistence
+{
+    
+    [System.ObsoleteAttribute("The session is now exposed through SynchronizedStorageSession.RavenSession(). For" +
+        " handlers use context.SynchronizedStorageSession.RavenSession(). For. Will be re" +
+        "moved in version 5.0.0.", true)]
+    public interface ISessionProvider { }
 }
 namespace NServiceBus
 {
