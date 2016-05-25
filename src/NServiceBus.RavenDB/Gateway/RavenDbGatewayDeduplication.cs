@@ -7,7 +7,7 @@
     {
         RavenDbGatewayDeduplication()
         {
-            DependsOn("Gateway");
+            DependsOn("NServiceBus.Features.Gateway");
         }
 
         protected override void Setup(FeatureConfigurationContext context)
