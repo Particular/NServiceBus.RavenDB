@@ -1,9 +1,8 @@
 ﻿namespace NServiceBus.RavenDB.AcceptanceTests
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
-    using NServiceBus.AcceptanceTesting;
+    using AcceptanceTesting;
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
@@ -19,7 +18,7 @@
             {
                 await Scenario.Define<Context>()
                     .WithEndpoint<MultiPropEndpoint>(e => e.DoNotFailOnErrorMessages())
-                    .Done(c => c.LoggedExceptions.Any() || c.EndpointsStarted)
+                    .Done(c => c.EndpointsStarted)
                     .Run();
             }
             catch (Exception ex)
