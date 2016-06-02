@@ -32,20 +32,11 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
         Assert.IsNotNull(exception);
     }
 
-    class StartSaga
-    {
-    }
-
     class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartSaga>
     {
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
         {
-            mapper.ConfigureMapping<Message>(m => m.UniqueString).ToSaga(s => s.UniqueString);
-        }
-
-        class Message
-        {
-            public string UniqueString { get; set; }
+            mapper.ConfigureMapping<StartSaga>(m => m.UniqueString).ToSaga(s => s.UniqueString);
         }
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
