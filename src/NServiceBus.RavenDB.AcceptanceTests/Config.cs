@@ -107,15 +107,15 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
         return settings.Get<DocumentStore>(DefaultDocumentStoreKey);
     }
 
-    public static PersistenceExtentions<RavenDBPersistence> GetDefaultPersistenceExtensions(ReadOnlySettings settings)
+    public static PersistenceExtensions<RavenDBPersistence> GetDefaultPersistenceExtensions(ReadOnlySettings settings)
     {
-        return settings.Get<PersistenceExtentions<RavenDBPersistence>>(DefaultPersistenceExtensionsKey);
+        return settings.Get<PersistenceExtensions<RavenDBPersistence>>(DefaultPersistenceExtensionsKey);
     }
 }
 
 public static class TestConfigurationExtensions
 {
-    public static PersistenceExtentions<RavenDBPersistence> ResetDocumentStoreSettings(this PersistenceExtentions<RavenDBPersistence> cfg, out TestDatabaseInfo dbInfo)
+    public static PersistenceExtensions<RavenDBPersistence> ResetDocumentStoreSettings(this PersistenceExtensions<RavenDBPersistence> cfg, out TestDatabaseInfo dbInfo)
     {
         var settings = cfg.GetSettings();
         var docStore = ConfigureEndpointRavenDBPersistence.GetDefaultDocumentStore(settings);

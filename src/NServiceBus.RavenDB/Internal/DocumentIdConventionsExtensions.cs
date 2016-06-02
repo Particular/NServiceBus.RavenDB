@@ -15,7 +15,7 @@
         /// This is a breaking change which, if applied to an existing database, will result in lost Saga and Timeout data.
         /// Do not use this on an existing database under any circumstances.
         /// </summary>
-        public static PersistenceExtentions<RavenDBPersistence> DoNotUseLegacyConventionsWhichIsOnlySafeForNewEndpoints(this PersistenceExtentions<RavenDBPersistence> config)
+        public static PersistenceExtensions<RavenDBPersistence> DoNotUseLegacyConventionsWhichIsOnlySafeForNewEndpoints(this PersistenceExtensions<RavenDBPersistence> config)
         {
             config.GetSettings().Set(DoNotUseLegacyConventionsSettingsKey, true);
             return config;
