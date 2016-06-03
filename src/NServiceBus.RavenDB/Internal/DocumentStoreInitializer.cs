@@ -96,7 +96,7 @@
 
                 if (dtcSettingsNotIdeal)
                 {
-                    Logger.Warn("NServiceBus has detected that a RavenDB DocumentStore is being used with Distributed Transaction Coordinator transactions, but without the recommended production-safe settings for ResourceManagerId or TransactionStorageRecovery. Please refer to \"Setting RavenDB DTC settings manually\" in the NServiceBus documentation for more information.");
+                    Logger.Warn("NServiceBus has detected that a RavenDB DocumentStore is being used with Distributed Transaction Coordinator transactions, but without the recommended production-safe settings for ResourceManagerId or TransactionStorageRecovery. Refer to \"Setting RavenDB DTC settings manually\" in the NServiceBus documentation for more information.");
                 }
             }
         }
