@@ -108,7 +108,7 @@
             var index = store.DatabaseCommands.GetIndex(DocsByEntityNameIndex);
             if (index == null)
             {
-                throw new InvalidOperationException("The Raven/DocumentsByEntityName index must exist in order to determine the document ID strategy. This index is created by RavenDB automatically. Please check in Raven Studio to make sure it exists.");
+                throw new InvalidOperationException("The Raven/DocumentsByEntityName index must exist in order to determine the document ID strategy. This index is created by RavenDB automatically. Check in Raven Studio to make sure it exists.");
             }
 
             var terms = store.DatabaseCommands.GetTerms(DocsByEntityNameIndex, "Tag", null, 1024);
@@ -144,11 +144,11 @@
                     .Where(name => collectionData.IndexResults.Contains(name))
                     .ToArray();
 
-                
+
                 if (collectionsThatExist.Length > 1)
                 {
                     var options = string.Join(", ", collectionsThatExist);
-                    throw new InvalidOperationException($"Multiple RavenDB collection names ({options}) found for type `{type.FullName}`. Unable to determine DocumentId naming strategy for this type. Please remove or modify the documents that were mapped incorrectly.");
+                    throw new InvalidOperationException($"Multiple RavenDB collection names ({options}) found for type `{type.FullName}`. Unable to determine DocumentId naming strategy for this type. Remove or modify the documents that were mapped incorrectly.");
                 }
 
                 configuredName = collectionsThatExist.FirstOrDefault() ?? ravenDefault;
