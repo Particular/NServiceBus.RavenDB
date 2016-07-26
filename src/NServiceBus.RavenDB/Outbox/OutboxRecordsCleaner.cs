@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Raven.Abstractions.Data;
     using Raven.Client;
@@ -12,7 +13,7 @@
             this.documentStore = documentStore;
         }
 
-        public Task RemoveEntriesOlderThan(DateTime dateTime)
+        public async Task RemoveEntriesOlderThan(DateTime dateTime, CancellationToken cancellationToken = default(CancellationToken))
         {
             var query = new IndexQuery
             {
@@ -24,8 +25,12 @@
                 AllowStale = true
             };
 
-            var operation = documentStore.DatabaseCommands.DeleteByIndex(nameof(OutboxRecordsIndex), query, bulkOpts);
-            return operation.WaitForCompletionAsync();
+            var operation = await documentStore.AsyncDatabaseCommands.DeleteByIndexAsync(nameof(OutboxRecordsIndex), query, bulkOpts, cancellationToken)
+                .ConfigureAwait(false);
+
+            // This is going to execute multiple "status check" requests to Raven, but this does
+            // not currently support CancellationToken.
+            await operation.WaitForCompletionAsync().ConfigureAwait(false);
         }
 
         IDocumentStore documentStore;

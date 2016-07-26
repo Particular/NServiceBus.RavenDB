@@ -25,7 +25,7 @@
             context.Container.ConfigureComponent(b => new OutboxPersister(store, context.Settings.EndpointName()), DependencyLifecycle.InstancePerCall);
 
             context.Container.ConfigureComponent(b => new OutboxRecordsCleaner(store), DependencyLifecycle.InstancePerCall);
-              
+
             context.Container.ConfigureComponent<OutboxCleaner>(DependencyLifecycle.InstancePerCall);
 
             context.RegisterStartupTask(builder => builder.Build<OutboxCleaner>());
@@ -72,12 +72,18 @@
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var nextClean = DateTime.UtcNow.Add(frequencyToRunDeduplicationDataCleanup);
-
                     try
                     {
+                        var nextClean = DateTime.UtcNow.Add(frequencyToRunDeduplicationDataCleanup);
+
                         var olderThan = DateTime.UtcNow - timeToKeepDeduplicationData;
-                        await cleaner.RemoveEntriesOlderThan(olderThan).ConfigureAwait(false);
+                        await cleaner.RemoveEntriesOlderThan(olderThan, cancellationToken).ConfigureAwait(false);
+
+                        var delay = nextClean - DateTime.UtcNow;
+                        if (delay > TimeSpan.Zero)
+                        {
+                            await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
+                        }
                     }
                     catch (OperationCanceledException)
                     {
@@ -86,12 +92,6 @@
                     catch (Exception ex)
                     {
                         logger.Warn("Unable to remove expired Outbox records from Raven database.", ex);
-                    }
-
-                    var delay = nextClean - DateTime.UtcNow;
-                    if (delay > TimeSpan.Zero)
-                    {
-                        await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
