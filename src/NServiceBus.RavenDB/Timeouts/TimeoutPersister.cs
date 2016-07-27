@@ -38,7 +38,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             List<Tuple<string, DateTime>> results;
 
             // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
-            // added after startSlice have been set to a later timout and we might have missed them
+            // added after startSlice have been set to a later timeout and we might have missed them
             // because of stale indexes.
             if (lastCleanupTime == DateTime.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) < now)
             {
