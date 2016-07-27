@@ -91,7 +91,7 @@
                     }
                     catch (Exception ex)
                     {
-                        logger.Warn("Unable to remove expired Outbox records from Raven database.", ex);
+                        logger.Error("Unable to remove expired Outbox records from Raven database.", ex);
                     }
                 }
             }

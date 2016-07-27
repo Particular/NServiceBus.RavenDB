@@ -17,7 +17,7 @@
         {
             var query = new IndexQuery
             {
-                Query = $"DispatchedAt:[* TO {dateTime:o}]"
+                Query = $"Dispatched:true AND DispatchedAt:[* TO {dateTime:o}]"
             };
 
             var bulkOpts = new BulkOperationOptions
@@ -25,7 +25,7 @@
                 AllowStale = true
             };
 
-            var operation = await documentStore.AsyncDatabaseCommands.DeleteByIndexAsync(nameof(OutboxRecordsIndex), query, bulkOpts, cancellationToken)
+            var operation = await documentStore.AsyncDatabaseCommands.DeleteByIndexAsync("OutboxRecordsIndex", query, bulkOpts, cancellationToken)
                 .ConfigureAwait(false);
 
             // This is going to execute multiple "status check" requests to Raven, but this does
