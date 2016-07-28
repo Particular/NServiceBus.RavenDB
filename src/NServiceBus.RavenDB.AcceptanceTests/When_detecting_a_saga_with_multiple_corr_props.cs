@@ -1,9 +1,8 @@
 ﻿namespace NServiceBus.RavenDB.AcceptanceTests
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
-    using NServiceBus.AcceptanceTesting;
+    using AcceptanceTesting;
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
@@ -11,16 +10,24 @@
     public class When_detecting_a_saga_with_multiple_corr_props : NServiceBusAcceptanceTest
     {
         [Test]
-        public void Should_blow_up()
+        public async Task Should_blow_up()
         {
-            var ex = Assert.Throws<AggregateException>(async () => await Scenario.Define<Context>()
-                .WithEndpoint<MultiPropEndpoint>(e => e.DoNotFailOnErrorMessages())
-                .Done(c => c.LoggedExceptions.Any() || c.EndpointsStarted)
-                .Run());
+            Exception exceptionToVerify = null;
+
+            try
+            {
+                await Scenario.Define<Context>()
+                    .WithEndpoint<MultiPropEndpoint>(e => e.DoNotFailOnErrorMessages())
+                    .Done(c => c.EndpointsStarted)
+                    .Run();
+            }
+            catch (Exception ex)
+            {
+                exceptionToVerify = ex?.InnerException?.InnerException;
+            }
+            Assert.IsNotNull(exceptionToVerify);
 
             const string expectedMessage = "Sagas can only have mappings that correlate on a single saga property. Use custom finders to correlate";
-
-            var exceptionToVerify = ex.InnerException.InnerException;
 
             Assert.True(exceptionToVerify.Message.Contains(expectedMessage), "Should tell user to use a single correlation property or custom finders");
         }

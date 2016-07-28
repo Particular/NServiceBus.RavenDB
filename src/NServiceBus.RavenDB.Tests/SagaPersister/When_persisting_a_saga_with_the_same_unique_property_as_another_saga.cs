@@ -50,17 +50,12 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
     {
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
         {
-            mapper.ConfigureMapping<Message>(m => m.UniqueString).ToSaga(s => s.UniqueString);
+            mapper.ConfigureMapping<StartSaga>(m => m.UniqueString).ToSaga(s => s.UniqueString);
         }
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
             return TaskEx.CompletedTask;
-        }
-
-        class Message
-        {
-            public string UniqueString { get; set; }
         }
     }
 

@@ -1,11 +1,9 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
-    using NServiceBus.RavenDB.Outbox;
-    using Raven.Abstractions.Commands;
+    using Raven.Abstractions.Data;
     using Raven.Client;
 
     class OutboxRecordsCleaner
@@ -13,63 +11,30 @@
         public OutboxRecordsCleaner(IDocumentStore documentStore)
         {
             this.documentStore = documentStore;
+            indexName = new OutboxRecordsIndex().IndexName;
         }
 
-        public async Task RemoveEntriesOlderThan(DateTime dateTime)
+        public async Task RemoveEntriesOlderThan(DateTime dateTime, CancellationToken cancellationToken = default(CancellationToken))
         {
-            lock (this)
+            var query = new IndexQuery
             {
-                if (doingCleanup)
-                {
-                    return;
-                }
+                Query = $"Dispatched:true AND DispatchedAt:[* TO {dateTime:o}]"
+            };
 
-                doingCleanup = true;
-            }
-
-            try
+            var bulkOpts = new BulkOperationOptions
             {
-                var deletionCommands = new List<ICommandData>();
+                AllowStale = true
+            };
 
-                using (var session = documentStore.OpenAsyncSession())
-                {
-                    var query = session.Query<OutboxRecord, OutboxRecordsIndex>()
-                        .Where(o => o.Dispatched)
-                        .OrderBy(o => o.DispatchedAt);
+            var operation = await documentStore.AsyncDatabaseCommands.DeleteByIndexAsync(indexName, query, bulkOpts, cancellationToken)
+                .ConfigureAwait(false);
 
-                    using (var enumerator = await session.Advanced.StreamAsync(query).ConfigureAwait(false))
-                    {
-                        while (await enumerator.MoveNextAsync().ConfigureAwait(false))
-                        {
-                            if (enumerator.Current.Document.DispatchedAt >= dateTime)
-                            {
-                                break; // break streaming if we went past the threshold
-                            }
-
-                            /*
-                             * For some unknown reasons when streaming classes with no
-                             * Id property the Key is not filled. The document Id can be
-                             * found in the streamed document metadata.
-                             */
-                            var key = enumerator.Current.Key ?? enumerator.Current.Metadata["@id"].ToString();
-
-                            deletionCommands.Add(new DeleteCommandData
-                            {
-                                Key = key
-                            });
-                        }
-                    }
-                }
-
-                await documentStore.AsyncDatabaseCommands.BatchAsync(deletionCommands).ConfigureAwait(false);
-            }
-            finally
-            {
-                doingCleanup = false;
-            }
+            // This is going to execute multiple "status check" requests to Raven, but this does
+            // not currently support CancellationToken.
+            await operation.WaitForCompletionAsync().ConfigureAwait(false);
         }
 
         IDocumentStore documentStore;
-        volatile bool doingCleanup;
+        string indexName;
     }
 }

@@ -78,11 +78,12 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="NServiceBus.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NServiceBus.6.0.0-beta0002\lib\net452\NServiceBus.Core.dll</HintPath>
+      <HintPath>..\packages\NServiceBus.6.0.0-beta0004\lib\net452\NServiceBus.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework, Version=3.2.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.2.1\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Raven.Abstractions, Version=3.0.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
       <HintPath>..\packages\RavenDB.Tests.Helpers.3.0.30000\lib\net45\Raven.Abstractions.dll</HintPath>
@@ -144,6 +145,7 @@
     <Compile Include="Persistence\DocumentIds\InconsistentTimeoutIdConventions.cs" />
     <Compile Include="Persistence\DocumentStoreExtensionsForVoron.cs" />
     <Compile Include="Persistence\DocumentStoreManagerTests.cs" />
+    <Compile Include="Persistence\RavenSessionExtensionTests.cs" />
     <Compile Include="Persistence\TestStorageEngineVerifier.cs" />
     <Compile Include="RavenDBPersistenceTestBase.cs" />
     <Compile Include="RavenDBPersistenceTestBaseExtensions.cs" />

@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
-    using System.Text;
     using NServiceBus.Logging;
     using Raven.Client;
     using Raven.Client.Indexes;
@@ -13,21 +12,14 @@
 
         static void LogRavenConnectionFailure(Exception exception, IDocumentStore store)
         {
-            var sb = new StringBuilder();
-            sb.AppendFormat("RavenDB could not be contacted. We tried to access Raven using the following url: {0}.",
-                store.Url);
-            sb.AppendLine();
-            sb.AppendFormat("Please ensure that you can open the Raven Studio by navigating to {0}.", store.Url);
-            sb.AppendLine();
-            sb.AppendLine(
-                @"To configure NServiceBus to use a different Raven connection string add a connection string named ""NServiceBus.Persistence"" in your config file, example:");
-            sb.AppendFormat(
-                @"<connectionStrings>
+            var error = $@"RavenDB could not be contacted. We tried to access Raven using the following url: {store.Url}.
+Ensure that you can open the Raven Studio by navigating to {store.Url}.
+To configure NServiceBus to use a different Raven connection string add a connection string named ""NServiceBus.Persistence"" in the config file, example:
+<connectionStrings>
     <add name=""NServiceBus.Persistence"" connectionString=""http://localhost:9090"" />
-</connectionStrings>");
-            sb.AppendLine("Original exception: " + exception);
-
-            Logger.Warn(sb.ToString());
+</connectionStrings>
+Original exception: {exception}";
+            Logger.Warn(error);
         }
 
         public static void VerifyConnectionToRavenDb(IDocumentStore documentStore)

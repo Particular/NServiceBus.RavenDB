@@ -17,9 +17,9 @@
             AsyncSession = null;
         }
 
-        public async Task Commit()
+        public Task Commit()
         {
-            await AsyncSession.SaveChangesAsync().ConfigureAwait(false);
+            return AsyncSession.SaveChangesAsync();
         }
 
         public IAsyncDocumentSession AsyncSession { get; private set; }

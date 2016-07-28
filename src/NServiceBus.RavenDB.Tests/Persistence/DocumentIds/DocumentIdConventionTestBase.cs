@@ -11,7 +11,7 @@
     {
         protected const string EndpointName = "FakeEndpoint";
 
-        protected async Task DirectStore(IDocumentStore store, string id, object document, string entityName)
+        protected Task DirectStore(IDocumentStore store, string id, object document, string entityName)
         {
             var jsonDoc = RavenJObject.FromObject(document);
             var metadata = new RavenJObject();
@@ -20,10 +20,10 @@
             metadata["Raven-Clr-Type"] = $"{type.FullName}, {type.Assembly.GetName().Name}";
 
             Console.WriteLine($"Creating {entityName}: {id}");
-            await store.AsyncDatabaseCommands.PutAsync(id, Etag.Empty, jsonDoc, metadata);
+            return store.AsyncDatabaseCommands.PutAsync(id, Etag.Empty, jsonDoc, metadata);
         }
 
-        protected async Task StoreHiLo(IDocumentStore store, string entityName)
+        protected Task StoreHiLo(IDocumentStore store, string entityName)
         {
             string hiloId = $"Raven/Hilo/{entityName}";
             var document = new RavenJObject();
@@ -31,7 +31,7 @@
             var metadata = new RavenJObject();
 
             Console.WriteLine($"Creating {hiloId}");
-            await store.AsyncDatabaseCommands.PutAsync(hiloId, null, document, metadata);
+            return store.AsyncDatabaseCommands.PutAsync(hiloId, null, document, metadata);
         }
 
         public enum ConventionType

@@ -16,7 +16,7 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
         {
             if (uniqueProperty.Value == null)
             {
-                throw new ArgumentNullException("uniqueProperty", $"Property {uniqueProperty.Key} is marked with the [Unique] attribute on {sagaType.Name} but contains a null value. Please make sure that all unique properties are set on your SagaData and/or that you have marked the correct properties as unique.");
+                throw new ArgumentNullException("uniqueProperty", $"Property {uniqueProperty.Key} is marked with the [Unique] attribute on {sagaType.Name} but contains a null value. Make sure that all unique properties are set on the SagaData and/or that you have marked the correct properties as unique.");
             }
 
             // use MD5 hash to get a 16-byte hash of the string

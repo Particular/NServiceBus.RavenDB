@@ -11,7 +11,6 @@
             Map = docs => from doc in docs
                 select new
                 {
-                    doc.MessageId,
                     doc.Dispatched,
                     doc.DispatchedAt
                 };

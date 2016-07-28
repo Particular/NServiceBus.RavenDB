@@ -58,11 +58,11 @@
             return Task.FromResult<OutboxTransaction>(transaction);
         }
 
-        public async Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
+        public Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
         {
             var session = ((RavenDBOutboxTransaction)transaction).AsyncSession;
 
-            await session.StoreAsync(new OutboxRecord
+            return session.StoreAsync(new OutboxRecord
             {
                 MessageId = message.MessageId,
                 Dispatched = false,
@@ -73,7 +73,7 @@
                     MessageId = t.MessageId,
                     Options = t.Options
                 }).ToList()
-            }, GetOutboxRecordId(message.MessageId)).ConfigureAwait(false);
+            }, GetOutboxRecordId(message.MessageId));
         }
 
         public async Task SetAsDispatched(string messageId, ContextBag options)

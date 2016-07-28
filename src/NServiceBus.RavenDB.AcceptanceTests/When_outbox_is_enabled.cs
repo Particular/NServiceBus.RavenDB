@@ -72,17 +72,17 @@
 
             class DuplicateMessageHandler : IHandleMessages<DuplicateMessage>
             {
-                public async Task Handle(DuplicateMessage message, IMessageHandlerContext context)
+                public Task Handle(DuplicateMessage message, IMessageHandlerContext context)
                 {
-                    await context.Send(new DownstreamMessage());
+                    return context.Send(new DownstreamMessage());
                 }
             }
 
             class MarkerMessageHandler : IHandleMessages<MarkerMessage>
             {
-                public async Task Handle(MarkerMessage message, IMessageHandlerContext context)
+                public Task Handle(MarkerMessage message, IMessageHandlerContext context)
                 {
-                    await context.Send(message);
+                    return context.Send(message);
                 }
             }
         }
