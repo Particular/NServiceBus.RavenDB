@@ -17,9 +17,9 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
     {
         var storage = new SubscriptionPersister(store);
 
-        await storage.Subscribe(new Subscriber("testEndPoint@localhost", new EndpointName("testEndPoint")), new MessageType("SomeMessageType", "1.0.0.0"), new ContextBag());
+        await storage.Subscribe(new Subscriber("testEndPoint@localhost", "testEndPoint"), new MessageType("SomeMessageType", "1.0.0.0"), new ContextBag());
 
-        await storage.Subscribe(new Subscriber("testEndPoint@localhost", new EndpointName("testEndPoint")), new MessageType("SomeMessageType", "1.0.0.0"), new ContextBag());
+        await storage.Subscribe(new Subscriber("testEndPoint@localhost", "testEndPoint"), new MessageType("SomeMessageType", "1.0.0.0"), new ContextBag());
 
         using (var session = store.OpenAsyncSession())
         {

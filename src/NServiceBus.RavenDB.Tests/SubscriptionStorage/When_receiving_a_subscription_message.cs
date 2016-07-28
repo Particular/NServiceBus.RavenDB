@@ -15,7 +15,7 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
     [Test]
     public async Task A_subscription_entry_should_be_added_to_the_database()
     {
-        var clientEndpoint = new Subscriber("TestEndpoint", new EndpointName("TestEndpoint"));
+        var clientEndpoint = new Subscriber("TestEndpoint", "TestEndpoint");
 
         var storage = new SubscriptionPersister(store);
 

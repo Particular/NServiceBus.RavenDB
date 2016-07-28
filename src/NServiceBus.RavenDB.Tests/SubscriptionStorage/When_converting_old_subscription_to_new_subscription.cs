@@ -51,8 +51,8 @@
             var exception = await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(new []{ MessageTypes.MessageA }, new ContextBag())).ToList(); });
             Assert.Null(exception);
 
-            var timeoutsSubscriber = new Subscriber("timeouts" + "@" + RuntimeEnvironment.MachineName, new EndpointName("timeouts"));
-            var mytestendpointSubscriber = new Subscriber("mytestendpoint" + "@" + RuntimeEnvironment.MachineName, new EndpointName("mytestendpoint"));
+            var timeoutsSubscriber = new Subscriber("timeouts" + "@" + RuntimeEnvironment.MachineName, "timeouts");
+            var mytestendpointSubscriber = new Subscriber("mytestendpoint" + "@" + RuntimeEnvironment.MachineName, "mytestendpoint");
 
             Assert.AreEqual(timeoutsSubscriber.TransportAddress, subscriptions.ElementAt(0).TransportAddress);
             Assert.AreEqual(timeoutsSubscriber.Endpoint, subscriptions.ElementAt(0).Endpoint);
@@ -81,8 +81,8 @@
             var exception = await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(new []{ MessageTypes.MessageA }, new ContextBag())).ToList(); });
             Assert.Null(exception);
 
-            var timeoutsSubscriber = new Subscriber("timeouts", new EndpointName("timeouts"));
-            var mytestendpointSubscriber = new Subscriber("mytestendpoint", new EndpointName("mytestendpoint"));
+            var timeoutsSubscriber = new Subscriber("timeouts", "timeouts");
+            var mytestendpointSubscriber = new Subscriber("mytestendpoint", "mytestendpoint");
 
             Assert.AreEqual(timeoutsSubscriber.TransportAddress, subscriptions.ElementAt(0).TransportAddress);
             Assert.AreEqual(timeoutsSubscriber.Endpoint, subscriptions.ElementAt(0).Endpoint);

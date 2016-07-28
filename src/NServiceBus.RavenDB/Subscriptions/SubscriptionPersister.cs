@@ -102,7 +102,7 @@ namespace NServiceBus.Persistence.RavenDB
                 return subscriptions.Where(s => s != null)
                                     .SelectMany(s => s.Subscribers)
                                     .Distinct()
-                                    .Select(c => new Subscriber(c.TransportAddress, new EndpointName(c.Endpoint)));
+                                    .Select(c => new Subscriber(c.TransportAddress, c.Endpoint));
             }
         }
 

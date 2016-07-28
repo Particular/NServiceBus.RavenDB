@@ -12,6 +12,8 @@ namespace NServiceBus.Persistence.RavenDB
 
     class QueryTimeouts : IQueryTimeouts
     {
+        static TimeoutsChunk.Timeout[] EmptyTimeouts = new TimeoutsChunk.Timeout[0];
+
         public QueryTimeouts(IDocumentStore documentStore, string endpointName)
         {
             this.documentStore = documentStore;
@@ -34,7 +36,7 @@ namespace NServiceBus.Persistence.RavenDB
             // because of stale indexes.
             if (lastCleanupTime == DateTime.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) < now)
             {
-                results = (await GetCleanupChunk(startSlice).ConfigureAwait(false)).ToList();
+                results = await GetCleanupChunk(startSlice).ConfigureAwait(false);
             }
             else
             {
@@ -54,33 +56,25 @@ namespace NServiceBus.Persistence.RavenDB
                 {
                     if (CancellationRequested())
                     {
-                        return new TimeoutsChunk(Enumerable.Empty<TimeoutsChunk.Timeout>(), nextTimeToRunQuery);
+                        return new TimeoutsChunk(EmptyTimeouts, nextTimeToRunQuery);
                     }
 
                     var query = GetChunkQuery(session);
 
                     var dueTimeouts = await
                         query.Statistics(out statistics)
-                            .Where(t => t.Time >= startSlice)
-                            .Where(t => t.Time <= now)
+                            .Where(t => t.Time >= startSlice && t.Time <= now)
                             .Skip(skipCount)
-                            .Select(t => new
-                            {
-                                t.Id,
-                                t.Time
-                            })
+                            .Select(t => new TimeoutsChunk.Timeout(t.Id, t.Time))
                             .Take(maximumPageSize)
                             .ToListAsync()
                             .ConfigureAwait(false);
 
-                    foreach (var dueTimeout in dueTimeouts)
-                    {
-                        results.Add(new TimeoutsChunk.Timeout(dueTimeout.Id, dueTimeout.Time));
-                    }
+                    results.AddRange(dueTimeouts);
 
                     if (CancellationRequested())
                     {
-                        return new TimeoutsChunk(Enumerable.Empty<TimeoutsChunk.Timeout>(), nextTimeToRunQuery);
+                        return new TimeoutsChunk(EmptyTimeouts, nextTimeToRunQuery);
                     }
 
                     skipCount = results.Count + statistics.SkippedResults;
@@ -106,10 +100,10 @@ namespace NServiceBus.Persistence.RavenDB
                 nextTimeToRunQuery = now;
             }
 
-            return new TimeoutsChunk(results, nextTimeToRunQuery);
+            return new TimeoutsChunk(results.ToArray(), nextTimeToRunQuery);
         }
 
-        public async Task<IEnumerable<TimeoutsChunk.Timeout>> GetCleanupChunk(DateTime startSlice)
+        public async Task<List<TimeoutsChunk.Timeout>> GetCleanupChunk(DateTime startSlice)
         {
             using (var session = documentStore.OpenAsyncSession())
             {
@@ -124,7 +118,7 @@ namespace NServiceBus.Persistence.RavenDB
                     .ToListAsync()
                     .ConfigureAwait(false);
 
-                var chunk = query.Select(arg => new TimeoutsChunk.Timeout(arg.Id, arg.Time));
+                var chunk = query.Select(arg => new TimeoutsChunk.Timeout(arg.Id, arg.Time)).ToList();
 
                 lastCleanupTime = DateTime.UtcNow;
 
