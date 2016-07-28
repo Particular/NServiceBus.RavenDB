@@ -11,6 +11,7 @@
         public OutboxRecordsCleaner(IDocumentStore documentStore)
         {
             this.documentStore = documentStore;
+            indexName = new OutboxRecordsIndex().IndexName;
         }
 
         public async Task RemoveEntriesOlderThan(DateTime dateTime, CancellationToken cancellationToken = default(CancellationToken))
@@ -25,7 +26,7 @@
                 AllowStale = true
             };
 
-            var operation = await documentStore.AsyncDatabaseCommands.DeleteByIndexAsync("OutboxRecordsIndex", query, bulkOpts, cancellationToken)
+            var operation = await documentStore.AsyncDatabaseCommands.DeleteByIndexAsync(indexName, query, bulkOpts, cancellationToken)
                 .ConfigureAwait(false);
 
             // This is going to execute multiple "status check" requests to Raven, but this does
@@ -34,5 +35,6 @@
         }
 
         IDocumentStore documentStore;
+        string indexName;
     }
 }
