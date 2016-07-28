@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
@@ -9,7 +8,6 @@
     using NServiceBus.RavenDB.Outbox;
     using NServiceBus.Routing;
     using Raven.Client;
-    using TransportOperation = NServiceBus.Outbox.TransportOperation;
 
     class OutboxPersister : IOutboxStorage
     {
@@ -36,10 +34,15 @@
                 return default(OutboxMessage);
             }
 
-            var operations = new List<TransportOperation>();
+            var operations = new TransportOperation[result.TransportOperations.Length];
             if (!result.Dispatched)
             {
-                operations.AddRange(result.TransportOperations.Select(t => new TransportOperation(t.MessageId, t.Options, t.Message, t.Headers)));
+                var index = 0;
+                foreach (var operation in result.TransportOperations)
+                {
+                    operations[index] = new TransportOperation(operation.MessageId, operation.Options, operation.Message, operation.Headers);
+                    index++;
+                }
             }
 
             var message = new OutboxMessage(result.MessageId, operations);
@@ -60,19 +63,28 @@
 
         public Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
         {
-            var session = ((RavenDBOutboxTransaction)transaction).AsyncSession;
+            var session = ((RavenDBOutboxTransaction) transaction).AsyncSession;
+
+            var operations = new OutboxRecord.OutboxOperation[message.TransportOperations.Length];
+
+            var index = 0;
+            foreach (var transportOperation in message.TransportOperations)
+            {
+                operations[index] = new OutboxRecord.OutboxOperation
+                {
+                    Message = transportOperation.Body,
+                    Headers = transportOperation.Headers,
+                    MessageId = transportOperation.MessageId,
+                    Options = transportOperation.Options
+                };
+                index++;
+            }
 
             return session.StoreAsync(new OutboxRecord
             {
                 MessageId = message.MessageId,
                 Dispatched = false,
-                TransportOperations = message.TransportOperations.Select(t => new OutboxRecord.OutboxOperation
-                {
-                    Message = t.Body,
-                    Headers = t.Headers,
-                    MessageId = t.MessageId,
-                    Options = t.Options
-                }).ToList()
+                TransportOperations = operations
             }, GetOutboxRecordId(message.MessageId));
         }
 
