@@ -3,6 +3,7 @@
     using System;
     using NServiceBus.Persistence;
     using NServiceBus.Persistence.RavenDB;
+    using NServiceBus.Testing;
     using Raven.Client;
 
     /// <summary>
@@ -18,13 +19,18 @@
         public static IAsyncDocumentSession RavenSession(this SynchronizedStorageSession session)
         {
             var synchronizedStorageSession = session as RavenDBSynchronizedStorageSession;
-            
-            if (synchronizedStorageSession == null)
+            if (synchronizedStorageSession != null)
             {
-                throw new InvalidOperationException("It was not possible to retrieve a RavenDB session.");
+                return synchronizedStorageSession.Session;
             }
 
-            return synchronizedStorageSession.Session;
+            var testableStorageSession = session as TestableRavenStorageSession;
+            if (testableStorageSession != null)
+            {
+                return testableStorageSession.Session;
+            }
+
+            throw new InvalidOperationException("It was not possible to retrieve a RavenDB session.");
         }
     }
 }
