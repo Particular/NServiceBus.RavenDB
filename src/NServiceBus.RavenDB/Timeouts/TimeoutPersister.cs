@@ -32,7 +32,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
         public TimeSpan CleanupGapFromTimeslice { get; set; }
         public TimeSpan TriggerCleanupEvery { get; set; }
 
-        public IEnumerable<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
+        public IEnumerable<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeoutToExpire)
         {
             var now = DateTime.UtcNow;
             List<Tuple<string, DateTime>> results;
@@ -50,12 +50,12 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             }
 
             // default return value for when no results are found
-            nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10);
+            nextTimeoutToExpire = now.AddMinutes(10);
 
             using (var session = DocumentStore.OpenSession())
             {
                 var query = GetChunkQuery(session)
-                    .Where(t => t.Time > startSlice)
+                    .Where(t => t.Time > startSlice && t.Time <= now)
                     .Select(t => new
                     {
                         t.Id,
@@ -65,19 +65,6 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 QueryHeaderInformation qhi;
                 using (var enumerator = session.Advanced.Stream(query, out qhi))
                 {
-                    if (qhi.TotalResults < 1000)
-                    {
-                        logger.DebugFormat("Retrieving {0} timeouts.", qhi.TotalResults);
-                    }
-                    else if (qhi.TotalResults < 10000)
-                    {
-                        logger.InfoFormat("Retrieving {0} timeouts. This could take some time.", qhi.TotalResults);
-                    }
-                    else
-                    {
-                        logger.WarnFormat("Retrieving {0} timeouts. This could take quite some time.", qhi.TotalResults);
-                    }
-
                     while (enumerator.MoveNext())
                     {
                         if (CancellationRequested())
@@ -85,25 +72,28 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                             return Enumerable.Empty<Tuple<string, DateTime>>();
                         }
 
-                        var dateTime = enumerator.Current.Document.Time;
-                        nextTimeToRunQuery = dateTime; // since results are sorted on time asc, this will get the max time < now
-
-                        if (dateTime > DateTime.UtcNow)
-                        {
-                            break; // break on first future timeout
-                        }
-
-                        results.Add(new Tuple<string, DateTime>(enumerator.Current.Document.Id, dateTime));
+                        results.Add(new Tuple<string, DateTime>(enumerator.Current.Document.Id, enumerator.Current.Document.Time));
                     }
                 }
 
-                // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
-                if (qhi.IsStale && results.Count == 0)
+                var nextTimeout = GetChunkQuery(session)
+                    .Where(t => t.Time > now)
+                    .Take(1)
+                    .FirstOrDefault();
+
+                if (nextTimeout != null)
                 {
-                    nextTimeToRunQuery = DateTime.UtcNow.AddSeconds(10);
+                    nextTimeoutToExpire = nextTimeout.Time;
+                }
+
+                // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
+                else if (qhi.IsStale && results.Count == 0)
+                {
+                    nextTimeoutToExpire = now.AddSeconds(10);
                 }
             }
 
+            logger.Info($"Returning {results.Count} timeouts, next query at {nextTimeoutToExpire:O}");
             return results;
         }
 
