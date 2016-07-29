@@ -63,10 +63,10 @@ namespace NServiceBus.Persistence.RavenDB
 
                     var dueTimeouts = await
                         query.Statistics(out statistics)
-                            .ProjectFromIndexFieldsInto<TimeoutData>()
                             .Where(t => t.Time >= startSlice && t.Time <= now)
                             .Skip(skipCount)
                             .Take(maximumPageSize)
+                            .ProjectFromIndexFieldsInto<TmpTimeout>()
                             .ToListAsync()
                             .ConfigureAwait(false);
 
@@ -156,5 +156,11 @@ namespace NServiceBus.Persistence.RavenDB
         /// </summary>
         private int maximumPageSize = 1024;
         CancellationTokenSource shutdownTokenSource;
+    }
+
+    class TmpTimeout
+    {
+        public string Id { get; set; }
+        public DateTime Time { get; set; }
     }
 }
