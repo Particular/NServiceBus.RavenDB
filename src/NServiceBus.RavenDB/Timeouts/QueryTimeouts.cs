@@ -63,6 +63,7 @@ namespace NServiceBus.Persistence.RavenDB
 
                     var dueTimeouts = await
                         query.Statistics(out statistics)
+                            .ProjectFromIndexFieldsInto<TimeoutData>()
                             .Where(t => t.Time >= startSlice && t.Time <= now)
                             .Skip(skipCount)
                             .Take(maximumPageSize)
