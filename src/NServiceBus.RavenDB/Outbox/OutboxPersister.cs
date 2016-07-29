@@ -34,12 +34,19 @@
                 return default(OutboxMessage);
             }
 
-            if (result.Dispatched)
+            if (result.Dispatched || result.TransportOperations.Length == 0)
             {
-                return new OutboxMessage(result.MessageId, new TransportOperation[0]);
+                return new OutboxMessage(result.MessageId, emptyTransportOperations);
             }
 
-            var transportOperations = result.TransportOperations.Select(operation => new TransportOperation(operation.MessageId, operation.Options, operation.Message, operation.Headers)).ToArray();
+            var transportOperations = new TransportOperation[result.TransportOperations.Length];
+            var index = 0;
+            foreach (var op in result.TransportOperations)
+            {
+                transportOperations[index] = new TransportOperation(op.MessageId, op.Options, op.Message, op.Headers);
+                index++;
+            }
+
             return new OutboxMessage(result.MessageId, transportOperations);
         }
 
@@ -116,5 +123,6 @@
 
         string endpointName;
         IDocumentStore documentStore;
+        TransportOperation[] emptyTransportOperations = new TransportOperation[0];
     }
 }
