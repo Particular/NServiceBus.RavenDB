@@ -65,12 +65,11 @@ namespace NServiceBus.Persistence.RavenDB
                         query.Statistics(out statistics)
                             .Where(t => t.Time >= startSlice && t.Time <= now)
                             .Skip(skipCount)
-                            .Select(t => new TimeoutsChunk.Timeout(t.Id, t.Time))
                             .Take(maximumPageSize)
                             .ToListAsync()
                             .ConfigureAwait(false);
 
-                    results.AddRange(dueTimeouts);
+                    results.AddRange(dueTimeouts.Select(t => new TimeoutsChunk.Timeout(t.Id, t.Time)));
 
                     if (CancellationRequested())
                     {
