@@ -34,20 +34,13 @@
                 return default(OutboxMessage);
             }
 
-            var operations = new TransportOperation[result.TransportOperations.Length];
-            if (!result.Dispatched)
+            if (result.Dispatched)
             {
-                var index = 0;
-
-                foreach (var operation in result.TransportOperations)
-                {
-                    operations[index] = new TransportOperation(operation.MessageId, operation.Options, operation.Message, operation.Headers);
-                    index++;
-                }
+                return new OutboxMessage(result.MessageId, new TransportOperation[0]);
             }
 
-            var message = new OutboxMessage(result.MessageId, operations);
-            return message;
+            var transportOperations = result.TransportOperations.Select(operation => new TransportOperation(operation.MessageId, operation.Options, operation.Message, operation.Headers)).ToArray();
+            return new OutboxMessage(result.MessageId, transportOperations);
         }
 
 
