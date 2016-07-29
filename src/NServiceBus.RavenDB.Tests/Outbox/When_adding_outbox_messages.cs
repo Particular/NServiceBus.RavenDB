@@ -8,7 +8,6 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using NServiceBus.Outbox;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Outbox;
-    using NServiceBus.Routing;
     using NUnit.Framework;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
@@ -17,7 +16,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     [TestFixture]
     public class When_adding_outbox_messages : RavenDBPersistenceTestBase
     {
-        EndpointName testEndpointName = new EndpointName("TestEndpoint");
+        string testEndpointName = "TestEndpoint";
 
         [SetUp]
         public override void SetUp()
@@ -35,8 +34,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             {
                 using (var transaction = await persister.BeginTransaction(new ContextBag()))
                 {
-                    await persister.Store(new OutboxMessage("MySpecialId", new List<TransportOperation>()), transaction, new ContextBag());
-                    await persister.Store(new OutboxMessage("MySpecialId", new List<TransportOperation>()), transaction, new ContextBag());
+                    await persister.Store(new OutboxMessage("MySpecialId", new TransportOperation[0]), transaction, new ContextBag());
+                    await persister.Store(new OutboxMessage("MySpecialId", new TransportOperation[0]), transaction, new ContextBag());
                     await transaction.Commit();
                 }
             });
@@ -51,7 +50,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             using (var transaction = await persister.BeginTransaction(new ContextBag()))
             {
-                await persister.Store(new OutboxMessage("MySpecialId", new List<TransportOperation>()), transaction, new ContextBag());
+                await persister.Store(new OutboxMessage("MySpecialId", new TransportOperation[0]), transaction, new ContextBag());
 
                 await transaction.Commit();
             }
@@ -60,7 +59,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             {
                 using (var transaction = await persister.BeginTransaction(new ContextBag()))
                 {
-                    await persister.Store(new OutboxMessage("MySpecialId", new List<TransportOperation>()), transaction, new ContextBag());
+                    await persister.Store(new OutboxMessage("MySpecialId", new TransportOperation[0]), transaction, new ContextBag());
 
                     await transaction.Commit();
                 }
@@ -74,7 +73,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var persister = new OutboxPersister(store, testEndpointName);
 
             var id = Guid.NewGuid().ToString("N");
-            var message = new OutboxMessage(id, new List<TransportOperation>
+            var message = new OutboxMessage(id, new[]
             {
                 new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>())
             });
@@ -99,7 +98,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var persister = new OutboxPersister(store, testEndpointName);
 
             var id = Guid.NewGuid().ToString("N");
-            var message = new OutboxMessage(id, new List<TransportOperation>
+            var message = new OutboxMessage(id, new []
             {
                 new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>())
             });
@@ -139,7 +138,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 {
                     MessageId = messageId,
                     Dispatched = false,
-                    TransportOperations = new List<OutboxRecord.OutboxOperation>
+                    TransportOperations = new[]
                     {
                         new OutboxRecord.OutboxOperation
                         {
@@ -177,7 +176,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 {
                     MessageId = messageId,
                     Dispatched = false,
-                    TransportOperations = new List<OutboxRecord.OutboxOperation>
+                    TransportOperations = new []
                     {
                         new OutboxRecord.OutboxOperation
                         {

@@ -21,7 +21,7 @@
             Helpers.SafelyCreateIndex(store, new TimeoutsIndex());
 
             context.Container.ConfigureComponent(() => new TimeoutPersister(store), DependencyLifecycle.InstancePerCall);
-            context.Container.ConfigureComponent(() => new QueryTimeouts(store, context.Settings.EndpointName().ToString()), DependencyLifecycle.SingleInstance); // Needs to be SingleInstance because it contains cleanup state
+            context.Container.ConfigureComponent(() => new QueryTimeouts(store, context.Settings.EndpointName()), DependencyLifecycle.SingleInstance); // Needs to be SingleInstance because it contains cleanup state
 
             context.Container.ConfigureComponent<QueryCanceller>(DependencyLifecycle.InstancePerCall);
             context.RegisterStartupTask(b => b.Build<QueryCanceller>());

@@ -45,7 +45,6 @@
             public Registration()
                 : base("OpenRavenDbAsyncSession", typeof(OpenAsyncSessionBehavior), "Makes sure that there is a RavenDB IAsyncDocumentSession available on the pipeline")
             {
-                InsertAfter(WellKnownStep.ExecuteUnitOfWork);
             }
         }
     }

@@ -3,7 +3,7 @@
     using System;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
-    using NServiceBus.Transports;
+    using NServiceBus.Transport;
     using NUnit.Framework;
     using Raven.Client.Document;
 

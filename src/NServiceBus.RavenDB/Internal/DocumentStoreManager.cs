@@ -135,7 +135,7 @@
                 var storeByParams = new DocumentStore
                 {
                     Url = p.Url,
-                    DefaultDatabase = p.DatabaseName ?? settings.EndpointName().ToString(),
+                    DefaultDatabase = p.DatabaseName ?? settings.EndpointName(),
                     ApiKey = p.ApiKey,
                     Credentials = p.Credentials
                 };
@@ -164,7 +164,7 @@
                 };
                 if (docStore.DefaultDatabase == null)
                 {
-                    docStore.DefaultDatabase = settings.EndpointName().ToString();
+                    docStore.DefaultDatabase = settings.EndpointName();
                 }
 
                 return new DocumentStoreInitializer(docStore);
@@ -181,7 +181,7 @@
 
             if (docStore.DefaultDatabase == null)
             {
-                docStore.DefaultDatabase = settings.EndpointName().ToString();
+                docStore.DefaultDatabase = settings.EndpointName();
             }
 
             return new DocumentStoreInitializer(docStore);

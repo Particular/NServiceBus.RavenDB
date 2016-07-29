@@ -5,7 +5,6 @@ namespace NServiceBus.Persistence.RavenDB
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
-    using NServiceBus.Routing;
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using Raven.Abstractions.Exceptions;
@@ -21,7 +20,7 @@ namespace NServiceBus.Persistence.RavenDB
         public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
             //When the subscriber is running V6 and UseLegacyMessageDrivenSubscriptionMode is enabled at the subscriber the 'subcriber.Endpoint' value is null
-            var endpoint = subscriber.Endpoint?.ToString() ?? subscriber.TransportAddress.Split('@').First();
+            var endpoint = subscriber.Endpoint ?? subscriber.TransportAddress.Split('@').First();
             var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = endpoint };
 
             var attempts = 0;
@@ -69,7 +68,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
-            var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint.ToString() };
+            var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint };
 
             using (var session = OpenAsyncSession())
             {
@@ -102,7 +101,7 @@ namespace NServiceBus.Persistence.RavenDB
                 return subscriptions.Where(s => s != null)
                                     .SelectMany(s => s.Subscribers)
                                     .Distinct()
-                                    .Select(c => new Subscriber(c.TransportAddress, new EndpointName(c.Endpoint)));
+                                    .Select(c => new Subscriber(c.TransportAddress, c.Endpoint));
             }
         }
 
