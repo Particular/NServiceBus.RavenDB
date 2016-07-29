@@ -59,16 +59,15 @@ namespace NServiceBus.Persistence.RavenDB
                         return new TimeoutsChunk(EmptyTimeouts, nextTimeToRunQuery);
                     }
 
-                    var query = GetChunkQuery(session);
+                    // This is all an unexecuted Raven query expression
+                    var query = GetChunkQuery(session)
+                        .Statistics(out statistics)
+                        .Where(t => t.Time >= startSlice && t.Time <= now)
+                        .Skip(skipCount)
+                        .Take(maximumPageSize)
+                        .Select(to => new { to.Id, to.Time }); // Must be anonymous type so Raven server can understand
 
-                    var dueTimeouts = await
-                        query.Statistics(out statistics)
-                            .Where(t => t.Time >= startSlice && t.Time <= now)
-                            .Skip(skipCount)
-                            .Take(maximumPageSize)
-                            .ProjectFromIndexFieldsInto<TmpTimeout>()
-                            .ToListAsync()
-                            .ConfigureAwait(false);
+                    var dueTimeouts = await query.ToListAsync().ConfigureAwait(false);
 
                     results.AddRange(dueTimeouts.Select(t => new TimeoutsChunk.Timeout(t.Id, t.Time)));
 
@@ -156,11 +155,5 @@ namespace NServiceBus.Persistence.RavenDB
         /// </summary>
         private int maximumPageSize = 1024;
         CancellationTokenSource shutdownTokenSource;
-    }
-
-    class TmpTimeout
-    {
-        public string Id { get; set; }
-        public DateTime Time { get; set; }
     }
 }
