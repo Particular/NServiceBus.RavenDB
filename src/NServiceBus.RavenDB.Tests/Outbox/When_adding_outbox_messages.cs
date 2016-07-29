@@ -73,7 +73,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var persister = new OutboxPersister(store, testEndpointName);
 
             var id = Guid.NewGuid().ToString("N");
-            var message = new OutboxMessage(id, new TransportOperation[]
+            var message = new OutboxMessage(id, new[]
             {
                 new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>())
             });
@@ -138,7 +138,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 {
                     MessageId = messageId,
                     Dispatched = false,
-                    TransportOperations = new OutboxRecord.OutboxOperation[]
+                    TransportOperations = new[]
                     {
                         new OutboxRecord.OutboxOperation
                         {

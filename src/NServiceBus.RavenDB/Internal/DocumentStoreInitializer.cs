@@ -57,7 +57,7 @@
             {
                 var sagasEnabled = settings.IsFeatureActive(typeof(Sagas));
                 var timeoutsEnabled = settings.IsFeatureActive(typeof(TimeoutManager));
-                var idConventions = new DocumentIdConventions(docStore, settings.GetAvailableTypes(), settings.EndpointName().ToString(), sagasEnabled, timeoutsEnabled);
+                var idConventions = new DocumentIdConventions(docStore, settings.GetAvailableTypes(), settings.EndpointName(), sagasEnabled, timeoutsEnabled);
                 docStore.Conventions.FindTypeTagName = idConventions.FindTypeTagName;
             }
 

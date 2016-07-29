@@ -3,7 +3,6 @@ using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.RavenDB.Tests;
-using NServiceBus.Routing;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 using NUnit.Framework;
