@@ -84,6 +84,8 @@ namespace NServiceBus
     }
     public class static RavenDbSubscriptionSettingsExtensions
     {
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> AggressivelyCacheSubscriptionsFor(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.TimeSpan aggressiveCacheDuration) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> DoNotAggressivelyCacheSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.IDocumentStore documentStore) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.IDocumentStore> storeCreator) { }
     }

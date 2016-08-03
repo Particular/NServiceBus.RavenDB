@@ -1,7 +1,9 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
+    using System;
     using NServiceBus.Features;
     using NServiceBus.Persistence;
+    using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
     class RavenDbSubscriptionStorage : Feature
     {
@@ -16,7 +18,20 @@
 
             store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
 
-            context.Container.ConfigureComponent(() => new SubscriptionPersister(store), DependencyLifecycle.InstancePerCall);
+            var persister = new SubscriptionPersister(store);
+
+            if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DoNotAggressivelyCacheSubscriptionsSettingsKey))
+            {
+                persister.DisableAggressiveCaching = true;
+            }
+
+            TimeSpan aggressiveCacheDuration;
+            if (context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.AggressiveCacheDurationSettingsKey, out aggressiveCacheDuration))
+            {
+                persister.AggressiveCacheDuration = aggressiveCacheDuration;
+            }
+
+            context.Container.ConfigureComponent<ISubscriptionStorage>(_ => persister, DependencyLifecycle.SingleInstance);
         }
     }
 }
