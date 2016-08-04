@@ -13,7 +13,7 @@
     public static class RavenDbSubscriptionSettingsExtensions
     {
         internal const string DoNotAggressivelyCacheSubscriptionsSettingsKey = "RavenDB.DoNotAggressivelyCacheSubscriptions";
-        internal const string AggressiveCacheDurationSettingsKey = "RavenDB.DoNotAggressivelyCacheSubscriptions";
+        internal const string AggressiveCacheDurationSettingsKey = "RavenDB.AggressiveCacheDuration";
 
         /// <summary>
         ///     Configures the given document store to be used when storing subscriptions
