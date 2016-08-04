@@ -166,6 +166,7 @@
     <Compile Include="SagaPersister\When_updating_a_saga_without_unique_properties.cs" />
     <Compile Include="RavenSessionFactory.cs" />
     <Compile Include="StartSaga.cs" />
+    <Compile Include="SubscriptionStorage\SubscriptionCaching.cs" />
     <Compile Include="SubscriptionStorage\TestData.cs" />
     <Compile Include="SubscriptionStorage\When_converting_old_subscription_to_new_subscription.cs" />
     <Compile Include="SubscriptionStorage\When_listing_subscribers_for_a_non_existing_message_type.cs" />
