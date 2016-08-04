@@ -125,17 +125,23 @@ namespace NServiceBus.Persistence.RavenDB
         {
             if (DisableAggressiveCaching)
             {
-                return new EmptyDisposable();
+                return EmptyDisposable.Instance;
             }
 
             return session.Advanced.DocumentStore.AggressivelyCacheFor(AggressiveCacheDuration);
         }
 
-        struct EmptyDisposable : IDisposable
+        class EmptyDisposable : IDisposable
         {
+            private EmptyDisposable()
+            {
+            }
+
             public void Dispose()
             {
             }
+
+            public static readonly EmptyDisposable Instance = new EmptyDisposable();
         }
 
         IAsyncDocumentSession OpenAsyncSession()
