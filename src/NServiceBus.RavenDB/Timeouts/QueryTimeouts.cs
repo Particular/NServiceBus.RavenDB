@@ -5,7 +5,10 @@ namespace NServiceBus.Persistence.RavenDB
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using NServiceBus.Logging;
     using NServiceBus.Timeout.Core;
+    using Raven.Abstractions.Data;
+    using Raven.Abstractions.Extensions;
     using Raven.Client;
     using Raven.Client.Linq;
     using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
@@ -21,14 +24,16 @@ namespace NServiceBus.Persistence.RavenDB
             TriggerCleanupEvery = TimeSpan.FromMinutes(2);
             CleanupGapFromTimeslice = TimeSpan.FromMinutes(1);
             shutdownTokenSource = new CancellationTokenSource();
+            logger = LogManager.GetLogger<QueryTimeouts>();
         }
 
         public TimeSpan CleanupGapFromTimeslice { get; set; }
         public TimeSpan TriggerCleanupEvery { get; set; }
+        public Func<DateTime> GetUtcNow { get; set; } = () => DateTime.UtcNow;
 
         public async Task<TimeoutsChunk> GetNextChunk(DateTime startSlice)
         {
-            var now = DateTime.UtcNow;
+            var now = GetUtcNow();
             List<TimeoutsChunk.Timeout> results;
 
             // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
@@ -36,7 +41,7 @@ namespace NServiceBus.Persistence.RavenDB
             // because of stale indexes.
             if (lastCleanupTime == DateTime.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) < now)
             {
-                results = await GetCleanupChunk(startSlice).ConfigureAwait(false);
+                results = await GetCleanupChunk(now).ConfigureAwait(false);
             }
             else
             {
@@ -44,70 +49,60 @@ namespace NServiceBus.Persistence.RavenDB
             }
 
             // default return value for when no results are found
-            var nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10);
-
-            RavenQueryStatistics statistics;
+            var nextTimeoutToExpire = now.AddMinutes(10);
 
             using (var session = documentStore.OpenAsyncSession())
             {
-                int totalCount, skipCount = 0;
+                // This is all an unexecuted Raven query expression
+                var query = GetChunkQuery(session)
+                    .Where(t => t.Time > startSlice && t.Time <= now)
+                    .Select(to => new { to.Id, to.Time }); // Must be anonymous type so Raven server can understand
 
-                do
+                var qhi = new Reference<QueryHeaderInformation>();
+                using (var enumerator = await session.Advanced.StreamAsync(query, qhi).ConfigureAwait(false))
                 {
-                    if (CancellationRequested())
+                    while (await enumerator.MoveNextAsync().ConfigureAwait(false))
                     {
-                        return new TimeoutsChunk(EmptyTimeouts, nextTimeToRunQuery);
+                        if (CancellationRequested())
+                        {
+                            return new TimeoutsChunk(EmptyTimeouts, nextTimeoutToExpire);
+                        }
+
+                        results.Add(new TimeoutsChunk.Timeout(enumerator.Current.Document.Id, enumerator.Current.Document.Time));
                     }
-
-                    // This is all an unexecuted Raven query expression
-                    var query = GetChunkQuery(session)
-                        .Statistics(out statistics)
-                        .Where(t => t.Time >= startSlice && t.Time <= now)
-                        .Skip(skipCount)
-                        .Take(maximumPageSize)
-                        .Select(to => new { to.Id, to.Time }); // Must be anonymous type so Raven server can understand
-
-                    var dueTimeouts = await query.ToListAsync().ConfigureAwait(false);
-
-                    results.AddRange(dueTimeouts.Select(t => new TimeoutsChunk.Timeout(t.Id, t.Time)));
-
-                    if (CancellationRequested())
-                    {
-                        return new TimeoutsChunk(EmptyTimeouts, nextTimeToRunQuery);
-                    }
-
-                    skipCount = results.Count + statistics.SkippedResults;
-                    totalCount = statistics.TotalResults;
                 }
-                while (results.Count < totalCount);
 
-                var nextDueTimeout = await
-                    GetChunkQuery(session)
+                var nextTimeout = await GetChunkQuery(session)
                         .Where(t => t.Time > now)
-                        .Select(t => t.Time)
+                        .Take(1)
+                        .Select(to => new { to.Time }) // Must be anonymous type so Raven server can understand
                         .FirstOrDefaultAsync()
                         .ConfigureAwait(false);
 
-                if (nextDueTimeout != default(DateTime))
+                if (nextTimeout != null)
                 {
-                    nextTimeToRunQuery = nextDueTimeout;
+                    nextTimeoutToExpire = nextTimeout.Time;
+                }
+
+                // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
+                else if (qhi.Value.IsStale && results.Count == 0)
+                {
+                    nextTimeoutToExpire = now.AddSeconds(10);
                 }
             }
 
-            if (statistics.IsStale && results.Count == 0)
-            {
-                nextTimeToRunQuery = now;
-            }
-
-            return new TimeoutsChunk(results.ToArray(), nextTimeToRunQuery);
+            logger.DebugFormat("Returning {0} timeouts, next due at {1:O}", results.Count, nextTimeoutToExpire);
+            return new TimeoutsChunk(results.ToArray(), nextTimeoutToExpire);
         }
 
-        public async Task<List<TimeoutsChunk.Timeout>> GetCleanupChunk(DateTime startSlice)
+        public async Task<List<TimeoutsChunk.Timeout>> GetCleanupChunk(DateTime fromTime)
         {
+            var cutoff = fromTime.Subtract(CleanupGapFromTimeslice);
+
             using (var session = documentStore.OpenAsyncSession())
             {
                 var query = await GetChunkQuery(session)
-                    .Where(t => t.Time <= startSlice.Subtract(CleanupGapFromTimeslice))
+                    .Where(t => t.Time <= cutoff)
                     .Select(t => new
                     {
                         t.Id,
@@ -149,11 +144,12 @@ namespace NServiceBus.Persistence.RavenDB
         string endpointName;
         DateTime lastCleanupTime = DateTime.MinValue;
         IDocumentStore documentStore;
-		
+
         /// <summary>
         /// RavenDB server default maximum page size 
         /// </summary>
         private int maximumPageSize = 1024;
         CancellationTokenSource shutdownTokenSource;
+        ILog logger;
     }
 }
