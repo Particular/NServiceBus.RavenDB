@@ -93,7 +93,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                 }
             }
 
-            logger.Info($"Returning {results.Count} timeouts, next query at {nextTimeoutToExpire:O}");
+            logger.Debug($"Returning {results.Count} timeouts, next timeout due at {nextTimeoutToExpire:O}");
             return results;
         }
 
