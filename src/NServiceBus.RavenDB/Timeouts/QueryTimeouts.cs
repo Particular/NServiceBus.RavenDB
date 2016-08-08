@@ -35,13 +35,22 @@ namespace NServiceBus.Persistence.RavenDB
         {
             var now = GetUtcNow();
             List<TimeoutsChunk.Timeout> results;
+            HashSet<string> idDedupe = null;
 
             // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
             // added after startSlice have been set to a later timout and we might have missed them
-            // because of stale indexes.
-            if (lastCleanupTime == DateTime.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) < now)
+            // because of stale indexes. lastCleanupTime may be DateTime.MinValue, in which case it would run.
+            var nextTimeToPerformCleanup = lastCleanupTime.Add(TriggerCleanupEvery);
+            if (now > nextTimeToPerformCleanup)
             {
                 results = await GetCleanupChunk(now).ConfigureAwait(false);
+
+                // Create a HashSet of ids to avoid returning duplicate timeouts from Cleanup + Normal Query
+                idDedupe = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var timeout in results)
+                {
+                    idDedupe.Add(timeout.Id);
+                }
             }
             else
             {
@@ -53,7 +62,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             using (var session = documentStore.OpenAsyncSession())
             {
-                // This is all an unexecuted Raven query expression
+                // This part is all an unexecuted Raven query expression - not sent to server until StreamAsync below.
                 var query = GetChunkQuery(session)
                     .Where(t => t.Time > startSlice && t.Time <= now)
                     .Select(to => new { to.Id, to.Time }); // Must be anonymous type so Raven server can understand
@@ -68,7 +77,16 @@ namespace NServiceBus.Persistence.RavenDB
                             return new TimeoutsChunk(EmptyTimeouts, nextTimeoutToExpire);
                         }
 
-                        results.Add(new TimeoutsChunk.Timeout(enumerator.Current.Document.Id, enumerator.Current.Document.Time));
+                        var timeoutId = enumerator.Current.Document.Id;
+                        var time = enumerator.Current.Document.Time;
+
+                        // Don't include a result already retrieved via a Cleanup run
+                        if (idDedupe != null && idDedupe.Contains(timeoutId))
+                        {
+                            continue;
+                        }
+
+                        results.Add(new TimeoutsChunk.Timeout(timeoutId, time));
                     }
                 }
 
@@ -81,12 +99,13 @@ namespace NServiceBus.Persistence.RavenDB
 
                 if (nextTimeout != null)
                 {
+                    // We know when the next timeout will occur, so use that time. (Although Core will query again in 1 minute max)
                     nextTimeoutToExpire = nextTimeout.Time;
                 }
-
-                // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
                 else if (qhi.Value.IsStale && results.Count == 0)
                 {
+                    // We know we got zero results and that the index is stale. We don't want to query in a tight loop,
+                    // so just delay a few seconds to ease load on the server.
                     nextTimeoutToExpire = now.AddSeconds(10);
                 }
             }
