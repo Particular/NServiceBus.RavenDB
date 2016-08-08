@@ -27,8 +27,26 @@ namespace NServiceBus.Persistence.RavenDB
             logger = LogManager.GetLogger<QueryTimeouts>();
         }
 
-        public TimeSpan CleanupGapFromTimeslice { get; set; }
-        public TimeSpan TriggerCleanupEvery { get; set; }
+        public TimeSpan CleanupGapFromTimeslice
+        {
+            get { return _cleanupGapFromTimeslice; }
+            set
+            {
+                if (value < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(CleanupGapFromTimeslice));
+                _cleanupGapFromTimeslice = value;
+            }
+        }
+
+        public TimeSpan TriggerCleanupEvery
+        {
+            get { return _triggerCleanupEvery; }
+            set
+            {
+                if (value < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(TriggerCleanupEvery));
+                _triggerCleanupEvery = value;
+            }
+        }
+
         public Func<DateTime> GetUtcNow { get; set; } = () => DateTime.UtcNow;
 
         public async Task<TimeoutsChunk> GetNextChunk(DateTime startSlice)
@@ -167,8 +185,10 @@ namespace NServiceBus.Persistence.RavenDB
         /// <summary>
         /// RavenDB server default maximum page size 
         /// </summary>
-        private int maximumPageSize = 1024;
+        int maximumPageSize = 1024;
         CancellationTokenSource shutdownTokenSource;
         ILog logger;
+        TimeSpan _triggerCleanupEvery;
+        TimeSpan _cleanupGapFromTimeslice;
     }
 }
