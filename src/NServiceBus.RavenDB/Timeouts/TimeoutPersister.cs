@@ -83,12 +83,13 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
                 if (nextTimeout != null)
                 {
+                    // We know when the next timeout will occur, so use that time. (Although Core will query again in 1 minute max)
                     nextTimeoutToExpire = nextTimeout.Time;
                 }
-
-                // Next execution is either now if we know we got stale results or at the start of the next chunk, otherwise we delay the next execution a bit
                 else if (qhi.IsStale && results.Count == 0)
                 {
+                    // We know we got zero results and that the index is stale. We don't want to query in a tight loop,
+                    // so just delay a few seconds to ease load on the server.
                     nextTimeoutToExpire = now.AddSeconds(10);
                 }
             }
