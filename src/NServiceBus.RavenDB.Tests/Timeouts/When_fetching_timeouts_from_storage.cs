@@ -59,7 +59,7 @@
         public async Task Should_return_the_next_time_of_retrieval()
         {
             query.CleanupGapFromTimeslice = TimeSpan.FromSeconds(1);
-            query.TriggerCleanupEvery = TimeSpan.MinValue;
+            query.TriggerCleanupEvery = TimeSpan.Zero;
 
             var nextTime = DateTime.UtcNow.AddHours(1);
             var context = new ContextBag();
