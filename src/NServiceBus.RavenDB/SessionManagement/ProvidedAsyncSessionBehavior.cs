@@ -17,15 +17,7 @@
             context.Extensions.Set(getAsyncSession);
             return next();
         }
-        
-        Func<IAsyncDocumentSession> getAsyncSession;
 
-        public class Registration : RegisterStep
-        {
-            public Registration()
-                : base("ProvidedRavenDbAsyncSession", typeof(ProvidedAsyncSessionBehavior), "Makes sure that there is a RavenDB IAsyncDocumentSession available on the pipeline")
-            {
-            }
-        }
+        Func<IAsyncDocumentSession> getAsyncSession;
     }
 }

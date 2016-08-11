@@ -2,7 +2,6 @@
 {
     using System;
     using NServiceBus.Features;
-    using NServiceBus.Persistence;
     using Raven.Client;
 
     class RavenDbStorageSession : Feature
@@ -16,15 +15,12 @@
             var getAsyncSessionFunc = context.Settings.GetOrDefault<Func<IAsyncDocumentSession>>(RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey);
             if (getAsyncSessionFunc != null)
             {
-                context.Container.ConfigureComponent(b => new ProvidedAsyncSessionBehavior(getAsyncSessionFunc), DependencyLifecycle.InstancePerCall);
-                context.Pipeline.Register<ProvidedAsyncSessionBehavior.Registration>();
+                context.Pipeline.Register("ProvidedRavenDbAsyncSession", new ProvidedAsyncSessionBehavior(getAsyncSessionFunc), "Makes sure that there is a RavenDB IAsyncDocumentSession available on the pipeline");
                 return;
             }
 
             var store = DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(context.Settings);
-
-            context.Container.ConfigureComponent<IDocumentStoreWrapper>(b => new DocumentStoreWrapper(store), DependencyLifecycle.SingleInstance);
-            context.Pipeline.Register<OpenAsyncSessionBehavior.Registration>();
+            context.Pipeline.Register("OpenRavenDbAsyncSession", new OpenAsyncSessionBehavior(new DocumentStoreWrapper(store)), "Makes sure that there is a RavenDB IAsyncDocumentSession available on the pipeline");
         }
     }
 }
