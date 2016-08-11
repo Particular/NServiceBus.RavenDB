@@ -1,10 +1,8 @@
 namespace NServiceBus.Persistence.RavenDB
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
-    using NServiceBus.Persistence;
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.Sagas;
     using Raven.Abstractions.Commands;
@@ -14,8 +12,6 @@ namespace NServiceBus.Persistence.RavenDB
 
     class SagaPersister : ISagaPersister
     {
-        const string UniqueDocIdKey = "NServiceBus-UniqueDocId";
-
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
@@ -35,24 +31,6 @@ namespace NServiceBus.Persistence.RavenDB
             await CreateSagaUniqueIdentity(sagaData, correlationProperty, documentSession).ConfigureAwait(false);
         }
 
-        static async Task CreateSagaUniqueIdentity(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, IAsyncDocumentSession documentSession)
-        {
-            var sagaDocId = documentSession.Advanced.DocumentStore.Conventions.FindFullDocumentKeyFromNonStringIdentifier(sagaData.Id, sagaData.GetType(), false);
-            var propertyKeyValuePair = new KeyValuePair<string, object>(correlationProperty.Name, correlationProperty.Value);
-            var sagaUniqueIdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), propertyKeyValuePair);
-
-            await documentSession.StoreAsync(new SagaUniqueIdentity
-            {
-                Id = sagaUniqueIdentityDocId,
-                SagaId = sagaData.Id,
-                UniqueValue = propertyKeyValuePair.Value,
-                SagaDocId = sagaDocId
-            }, id: sagaUniqueIdentityDocId, etag: Etag.Empty).ConfigureAwait(false);
-
-            var metadata = await documentSession.Advanced.GetMetadataForAsync(sagaData).ConfigureAwait(false);
-            metadata[UniqueDocIdKey] = sagaUniqueIdentityDocId;
-        }
-
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             //no-op since the dirty tracking will handle the update for us
@@ -69,7 +47,7 @@ namespace NServiceBus.Persistence.RavenDB
         {
             var documentSession = session.RavenSession();
 
-            var lookupId = SagaUniqueIdentity.FormatId(typeof(T), new KeyValuePair<string, object>(propertyName, propertyValue));
+            var lookupId = SagaUniqueIdentity.FormatId(typeof(T), propertyName, propertyValue);
 
             //store it in the context to be able to optimize deletes for legacy sagas that don't have the id in metadata
             context.Set(UniqueDocIdKey, lookupId);
@@ -128,5 +106,24 @@ namespace NServiceBus.Persistence.RavenDB
                 });
             }
         }
+
+        static async Task CreateSagaUniqueIdentity(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, IAsyncDocumentSession documentSession)
+        {
+            var sagaDocId = documentSession.Advanced.DocumentStore.Conventions.FindFullDocumentKeyFromNonStringIdentifier(sagaData.Id, sagaData.GetType(), false);
+            var sagaUniqueIdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value);
+
+            await documentSession.StoreAsync(new SagaUniqueIdentity
+            {
+                Id = sagaUniqueIdentityDocId,
+                SagaId = sagaData.Id,
+                UniqueValue = correlationProperty.Value,
+                SagaDocId = sagaDocId
+            }, id: sagaUniqueIdentityDocId, etag: Etag.Empty).ConfigureAwait(false);
+
+            var metadata = await documentSession.Advanced.GetMetadataForAsync(sagaData).ConfigureAwait(false);
+            metadata[UniqueDocIdKey] = sagaUniqueIdentityDocId;
+        }
+
+        const string UniqueDocIdKey = "NServiceBus-UniqueDocId";
     }
 }
