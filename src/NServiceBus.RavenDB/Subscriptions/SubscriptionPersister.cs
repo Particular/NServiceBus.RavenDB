@@ -133,7 +133,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         class EmptyDisposable : IDisposable
         {
-            private EmptyDisposable()
+            EmptyDisposable()
             {
             }
 
