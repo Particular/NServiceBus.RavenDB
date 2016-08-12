@@ -1,5 +1,4 @@
 ﻿using System;
-using NServiceBus.Routing;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
@@ -32,7 +31,7 @@ public class MessageTypes
 
 public class TestClients
 {
-    public static Subscriber ClientA = new Subscriber("ClientA", new EndpointName("ClientA"));
-    public static Subscriber ClientB = new Subscriber("ClientB", new EndpointName("ClientB"));
-    public static Subscriber ClientC = new Subscriber("ClientC", new EndpointName("ClientC"));
+    public static Subscriber ClientA = new Subscriber("ClientA","ClientA");
+    public static Subscriber ClientB = new Subscriber("ClientB","ClientB");
+    public static Subscriber ClientC = new Subscriber("ClientC","ClientC");
 }

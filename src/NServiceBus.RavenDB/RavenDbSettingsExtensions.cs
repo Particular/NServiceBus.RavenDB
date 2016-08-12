@@ -21,7 +21,7 @@
         /// <param name="cfg"></param>
         /// <param name="documentStore">Document store managed by me as a user</param>
         /// <returns></returns>
-        public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, IDocumentStore documentStore)
+        public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
             DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), documentStore);
             return cfg;
@@ -33,7 +33,7 @@
         /// <param name="cfg"></param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
         /// <returns></returns>
-        public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IDocumentStore> storeCreator)
+        public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IDocumentStore> storeCreator)
         {
             DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), storeCreator);
             return cfg;
@@ -45,7 +45,7 @@
         /// <param name="cfg"></param>
         /// <param name="connectionParameters">Connection details</param>
         /// <returns></returns>
-        public static PersistenceExtentions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtentions<RavenDBPersistence> cfg, ConnectionParameters connectionParameters)
+        public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, ConnectionParameters connectionParameters)
         {
             if (connectionParameters == null)
             {
@@ -64,7 +64,7 @@
         /// <param name="getSessionFunc">A func returning the session to be used</param>
         /// <returns></returns>
         [ObsoleteEx(Message = "Use the 'UseSharedAsyncSession' configuration extension method to provide an async session.", RemoveInVersion = "5", TreatAsErrorFromVersion = "4")]
-        public static PersistenceExtentions<RavenDBPersistence> UseSharedSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDocumentSession> getSessionFunc)
+        public static PersistenceExtensions<RavenDBPersistence> UseSharedSession(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IDocumentSession> getSessionFunc)
         {
             throw new NotSupportedException();
         }
@@ -76,7 +76,7 @@
         /// <param name="cfg"></param>
         /// <param name="getAsyncSessionFunc">A func returning the async session to be used</param>
         /// <returns></returns>
-        public static PersistenceExtentions<RavenDBPersistence> UseSharedAsyncSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IAsyncDocumentSession> getAsyncSessionFunc)
+        public static PersistenceExtensions<RavenDBPersistence> UseSharedAsyncSession(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IAsyncDocumentSession> getAsyncSessionFunc)
         {
             if (getAsyncSessionFunc == null)
             {
@@ -96,7 +96,7 @@
         /// </param>
         /// <returns>The configuration object.</returns>
      //todo: obsolete
-        public static PersistenceExtentions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDictionary<string,string>, string> convention)
+        public static PersistenceExtensions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IDictionary<string,string>, string> convention)
         {
             OpenAsyncSessionBehavior.GetDatabaseName = convention;
             return cfg;
@@ -107,7 +107,7 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <returns></returns>
-        public static PersistenceExtentions<RavenDBPersistence> DoNotSetupDatabasePermissions(this PersistenceExtentions<RavenDBPersistence> cfg)
+        public static PersistenceExtensions<RavenDBPersistence> DoNotSetupDatabasePermissions(this PersistenceExtensions<RavenDBPersistence> cfg)
         {
             cfg.GetSettings().Set("RavenDB.DoNotSetupPermissions", true);
             return cfg;
@@ -119,7 +119,7 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <returns></returns>
-        public static PersistenceExtentions<RavenDBPersistence> IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled(this PersistenceExtentions<RavenDBPersistence> cfg)
+        public static PersistenceExtensions<RavenDBPersistence> IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled(this PersistenceExtensions<RavenDBPersistence> cfg)
         {
             cfg.GetSettings().Set("RavenDB.IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled", true);
             return cfg;

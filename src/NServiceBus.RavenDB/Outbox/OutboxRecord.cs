@@ -8,7 +8,7 @@
         public string MessageId { get; set; }
         public bool Dispatched { get; set; }
         public DateTime? DispatchedAt { get; set; }
-        public IList<OutboxOperation> TransportOperations { get; set; }
+        public OutboxOperation[] TransportOperations { get; set; }
 
         public class OutboxOperation
         {

@@ -1,19 +1,17 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Outbox;
-    using NServiceBus.Routing;
     using Raven.Client;
     using TransportOperation = NServiceBus.Outbox.TransportOperation;
 
     class OutboxPersister : IOutboxStorage
     {
-        public OutboxPersister(IDocumentStore documentStore, EndpointName endpointName)
+        public OutboxPersister(IDocumentStore documentStore, string endpointName)
         {
             this.documentStore = documentStore;
             this.endpointName = endpointName;
@@ -36,14 +34,20 @@
                 return default(OutboxMessage);
             }
 
-            var operations = new List<TransportOperation>();
-            if (!result.Dispatched)
+            if (result.Dispatched || result.TransportOperations.Length == 0)
             {
-                operations.AddRange(result.TransportOperations.Select(t => new TransportOperation(t.MessageId, t.Options, t.Message, t.Headers)));
+                return new OutboxMessage(result.MessageId, emptyTransportOperations);
             }
 
-            var message = new OutboxMessage(result.MessageId, operations);
-            return message;
+            var transportOperations = new TransportOperation[result.TransportOperations.Length];
+            var index = 0;
+            foreach (var op in result.TransportOperations)
+            {
+                transportOperations[index] = new TransportOperation(op.MessageId, op.Options, op.Message, op.Headers);
+                index++;
+            }
+
+            return new OutboxMessage(result.MessageId, transportOperations);
         }
 
 
@@ -58,22 +62,31 @@
             return Task.FromResult<OutboxTransaction>(transaction);
         }
 
-        public async Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
+        public Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
         {
             var session = ((RavenDBOutboxTransaction)transaction).AsyncSession;
 
-            await session.StoreAsync(new OutboxRecord
+            var operations = new OutboxRecord.OutboxOperation[message.TransportOperations.Length];
+
+            var index = 0;
+            foreach (var transportOperation in message.TransportOperations)
+            {
+                operations[index] = new OutboxRecord.OutboxOperation
+                {
+                    Message = transportOperation.Body,
+                    Headers = transportOperation.Headers,
+                    MessageId = transportOperation.MessageId,
+                    Options = transportOperation.Options
+                };
+                index++;
+            }
+
+            return session.StoreAsync(new OutboxRecord
             {
                 MessageId = message.MessageId,
                 Dispatched = false,
-                TransportOperations = message.TransportOperations.Select(t => new OutboxRecord.OutboxOperation
-                {
-                    Message = t.Body,
-                    Headers = t.Headers,
-                    MessageId = t.MessageId,
-                    Options = t.Options
-                }).ToList()
-            }, GetOutboxRecordId(message.MessageId)).ConfigureAwait(false);
+                TransportOperations = operations
+            }, GetOutboxRecordId(message.MessageId));
         }
 
         public async Task SetAsDispatched(string messageId, ContextBag options)
@@ -108,7 +121,8 @@
 
         string GetOutboxRecordId(string messageId) => $"Outbox/{endpointName}/{messageId}";
 
-        EndpointName endpointName;
+        string endpointName;
         IDocumentStore documentStore;
+        TransportOperation[] emptyTransportOperations = new TransportOperation[0];
     }
 }

@@ -1,11 +1,12 @@
 namespace NServiceBus.Persistence.RavenDB
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using System.Transactions;
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
-    using NServiceBus.Routing;
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using Raven.Abstractions.Exceptions;
@@ -18,10 +19,13 @@ namespace NServiceBus.Persistence.RavenDB
             documentStore = store;
         }
 
+        public TimeSpan AggressiveCacheDuration { get; set; } = TimeSpan.FromMinutes(1);
+        public bool DisableAggressiveCaching { get; set; }
+
         public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
             //When the subscriber is running V6 and UseLegacyMessageDrivenSubscriptionMode is enabled at the subscriber the 'subcriber.Endpoint' value is null
-            var endpoint = subscriber.Endpoint?.ToString() ?? subscriber.TransportAddress.Split('@').First();
+            var endpoint = subscriber.Endpoint ?? subscriber.TransportAddress.Split('@').First();
             var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = endpoint };
 
             var attempts = 0;
@@ -69,7 +73,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
-            var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint.ToString() };
+            var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint };
 
             using (var session = OpenAsyncSession())
             {
@@ -95,15 +99,49 @@ namespace NServiceBus.Persistence.RavenDB
         {
             var ids = messageTypes.Select(Subscription.FormatId).ToList();
 
-            using (var session = OpenAsyncSession())
+            using (var suppressTransaction = new TransactionScope(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled))
             {
-                var subscriptions = await session.LoadAsync<Subscription>(ids).ConfigureAwait(false);
+                Subscriber[] subscribers;
+                using (var session = OpenAsyncSession())
+                {
+                    using (ConfigureAggressiveCaching(session))
+                    {
+                        var subscriptions = await session.LoadAsync<Subscription>(ids).ConfigureAwait(false);
 
-                return subscriptions.Where(s => s != null)
-                                    .SelectMany(s => s.Subscribers)
-                                    .Distinct()
-                                    .Select(c => new Subscriber(c.TransportAddress, new EndpointName(c.Endpoint)));
+                        subscribers = subscriptions.Where(s => s != null)
+                            .SelectMany(s => s.Subscribers)
+                            .Distinct()
+                            .Select(c => new Subscriber(c.TransportAddress, c.Endpoint))
+                            .ToArray();
+                    }
+                }
+
+                suppressTransaction.Complete();
+                return subscribers;
             }
+        }
+
+        IDisposable ConfigureAggressiveCaching(IAsyncDocumentSession session)
+        {
+            if (DisableAggressiveCaching)
+            {
+                return EmptyDisposable.Instance;
+            }
+
+            return session.Advanced.DocumentStore.AggressivelyCacheFor(AggressiveCacheDuration);
+        }
+
+        class EmptyDisposable : IDisposable
+        {
+            EmptyDisposable()
+            {
+            }
+
+            public void Dispose()
+            {
+            }
+
+            public static readonly EmptyDisposable Instance = new EmptyDisposable();
         }
 
         IAsyncDocumentSession OpenAsyncSession()

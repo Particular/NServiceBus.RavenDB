@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using NServiceBus.Routing;
-    using NServiceBus.Transports;
+    using NServiceBus.Transport;
 
     /// <summary>
     /// This is a copy from NServiceBus.AcceptanceTests to allow mocking TransportTransactionMode

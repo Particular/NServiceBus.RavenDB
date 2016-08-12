@@ -2,13 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Outbox;
-    using NServiceBus.Routing;
     using NUnit.Framework;
     using Raven.Client;
 
@@ -29,16 +27,16 @@
             var id = Guid.NewGuid().ToString("N");
             var context = new ContextBag();
 
-            var persister = new OutboxPersister(store, new EndpointName("TestEndpoint"));
+            var persister = new OutboxPersister(store, "TestEndpoint");
 
             using (var transaction = await persister.BeginTransaction(context))
             {
-                await persister.Store(new OutboxMessage("NotDispatched", new List<TransportOperation>()), transaction, context);
+                await persister.Store(new OutboxMessage("NotDispatched", new TransportOperation[0]), transaction, context);
 
                 await transaction.Commit();
             }
 
-            var outboxMessage = new OutboxMessage(id, new List<TransportOperation>
+            var outboxMessage = new OutboxMessage(id, new []
                 {
                     new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>())
                 });
@@ -52,7 +50,7 @@
 
 
             await persister.SetAsDispatched(id, context);
-            Thread.Sleep(TimeSpan.FromSeconds(1)); //Need to wait for dispatch logic to finish
+            await Task.Delay(TimeSpan.FromSeconds(1)); //Need to wait for dispatch logic to finish
 
             //WaitForUserToContinueTheTest(store);
             WaitForIndexing(store);

@@ -3,7 +3,6 @@
     using System;
     using NServiceBus.Persistence;
     using NServiceBus.Persistence.RavenDB;
-    using NServiceBus.Routing;
     using NServiceBus.Settings;
     using NUnit.Framework;
     using Raven.Client;
@@ -18,8 +17,8 @@
             var settings = new SettingsHolder();
             settings.Set("Transactions.SuppressDistributedTransactions", true);
             settings.Set("TypesToScan", new Type[0]);
-            settings.Set("NServiceBus.Routing.EndpointName", new EndpointName("FakeEndpoint"));
-            settings.Set("NServiceBus.Transports.TransportInfrastructure", new FakeRavenDBTransportInfrastructure(TransportTransactionMode.None));
+            settings.Set("NServiceBus.Routing.EndpointName", "FakeEndpoint");
+            settings.Set("NServiceBus.Transport.TransportInfrastructure", new FakeRavenDBTransportInfrastructure(TransportTransactionMode.None));
             
             DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(settings, EmbeddedStore("GatewayDeduplication"));
             DocumentStoreManager.SetDocumentStore<StorageType.Outbox>(settings, EmbeddedStore("Outbox"));
@@ -81,7 +80,7 @@
             settings.Set("NServiceBus.LocalAddress", "FakeAddress");
             settings.Set("EndpointVersion", "FakeVersion");
             settings.SetDefault("Transactions.SuppressDistributedTransactions", false);
-            settings.Set("NServiceBus.Routing.EndpointName", new EndpointName("FakeEndpoint"));
+            settings.Set("NServiceBus.Routing.EndpointName", "FakeEndpoint");
             settings.Set<SingleSharedDocumentStore>(new SingleSharedDocumentStore());
 
             return settings;

@@ -3,6 +3,7 @@
     using System;
     using System.Security.Cryptography;
     using System.Text;
+    using NServiceBus.Features;
     using NServiceBus.Logging;
     using NServiceBus.Settings;
     using Raven.Client;
@@ -52,8 +53,13 @@
 
         void ApplyConventions(ReadOnlySettings settings)
         {
-            var idConventions = new DocumentIdConventions(docStore, settings.GetAvailableTypes(), settings.EndpointName().ToString());
-            docStore.Conventions.FindTypeTagName = idConventions.FindTypeTagName;
+            if (DocumentIdConventionsExtensions.NeedToApplyDocumentIdConventionsToDocumentStore(settings))
+            {
+                var sagasEnabled = settings.IsFeatureActive(typeof(Sagas));
+                var timeoutsEnabled = settings.IsFeatureActive(typeof(TimeoutManager));
+                var idConventions = new DocumentIdConventions(docStore, settings.GetAvailableTypes(), settings.EndpointName(), sagasEnabled, timeoutsEnabled);
+                docStore.Conventions.FindTypeTagName = idConventions.FindTypeTagName;
+            }
 
             var store = docStore as DocumentStore;
             if (store == null)
@@ -66,22 +72,31 @@
             {
                 store.EnlistInDistributedTransactions = false;
             }
-            else if (store.JsonRequestFactory == null) // If the DocStore has not been initialized yet
+            else 
             {
-                // Source: https://github.com/ravendb/ravendb/blob/f56963f23f54b5535eba4f043fb84d5145b11b1d/Raven.Client.Lightweight/Document/DocumentStore.cs#L129
-                var ravenDefaultResourceManagerId = new Guid("e749baa6-6f76-4eef-a069-40a4378954f8");
-
-                if (store.ResourceManagerId == Guid.Empty || store.ResourceManagerId == ravenDefaultResourceManagerId)
+                if (store.JsonRequestFactory == null) // If the DocStore has not been initialized yet
                 {
-                    var resourceManagerId = settings.LocalAddress();
-                    store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
+                    if (store.ResourceManagerId == Guid.Empty || store.ResourceManagerId == ravenDefaultResourceManagerId)
+                    {
+                        var resourceManagerId = settings.LocalAddress();
+                        store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
+                    }
+
+                    // If using the default (Volatile - null should be impossible) then switch to IsolatedStorage
+                    // Leave alone if LocalDirectoryTransactionRecoveryStorage!
+                    if (store.TransactionRecoveryStorage == null || store.TransactionRecoveryStorage is VolatileOnlyTransactionRecoveryStorage)
+                    {
+                        store.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
+                    }
                 }
 
-                // If using the default (Volatile - null should be impossible) then switch to IsolatedStorage
-                // Leave alone if LocalDirectoryTransactionRecoveryStorage!
-                if (store.TransactionRecoveryStorage == null || store.TransactionRecoveryStorage is VolatileOnlyTransactionRecoveryStorage)
+                var dtcSettingsNotIdeal = store.ResourceManagerId == Guid.Empty ||
+                                          store.ResourceManagerId == ravenDefaultResourceManagerId ||
+                                          !(store.TransactionRecoveryStorage is LocalDirectoryTransactionRecoveryStorage);
+
+                if (dtcSettingsNotIdeal)
                 {
-                    store.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
+                    Logger.Warn("NServiceBus has detected that a RavenDB DocumentStore is being used with Distributed Transaction Coordinator transactions, but without the recommended production-safe settings for ResourceManagerId or TransactionStorageRecovery. Refer to \"Setting RavenDB DTC settings manually\" in the NServiceBus documentation for more information.");
                 }
             }
         }
@@ -98,6 +113,8 @@
             }
         }
 
+        // Source: https://github.com/ravendb/ravendb/blob/f56963f23f54b5535eba4f043fb84d5145b11b1d/Raven.Client.Lightweight/Document/DocumentStore.cs#L129
+        static readonly Guid ravenDefaultResourceManagerId = new Guid("e749baa6-6f76-4eef-a069-40a4378954f8");
         Func<ReadOnlySettings, IDocumentStore> storeCreator;
         IDocumentStore docStore;
         bool isInitialized;

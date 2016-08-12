@@ -13,16 +13,20 @@
         private readonly IDocumentStore store;
         private readonly Func<Type, string> userSuppliedConventions;
         private readonly string endpointName;
+        private readonly bool sagasEnabled;
+        private readonly bool timeoutsEnabled;
         private readonly string collectionNamesDocId;
         private readonly object padlock;
         private Dictionary<Type, string> mappedTypes;
         private IEnumerable<Type> types;
 
-        public DocumentIdConventions(IDocumentStore store, IEnumerable<Type> types, string endpointName)
+        public DocumentIdConventions(IDocumentStore store, IEnumerable<Type> types, string endpointName, bool sagasEnabled = true, bool timeoutsEnabled = true)
         {
             this.store = store;
             this.types = types;
             this.endpointName = endpointName;
+            this.sagasEnabled = sagasEnabled;
+            this.timeoutsEnabled = timeoutsEnabled;
 
             collectionNamesDocId = $"NServiceBus/DocumentCollectionNames/{SHA1Hash(endpointName)}";
             userSuppliedConventions = store.Conventions.FindTypeTagName;
@@ -64,10 +68,16 @@
                     }
                 }
 
-                MapTypeToCollectionName(typeof(TimeoutPersisters.RavenDB.TimeoutData), collectionData);
-                foreach (var sagaType in types.Where(IsSagaEntity))
+                if (timeoutsEnabled)
                 {
-                    MapTypeToCollectionName(sagaType, collectionData);
+                    MapTypeToCollectionName(typeof(TimeoutPersisters.RavenDB.TimeoutData), collectionData);
+                }
+                if (sagasEnabled)
+                {
+                    foreach (var sagaType in types.Where(IsSagaEntity))
+                    {
+                        MapTypeToCollectionName(sagaType, collectionData);
+                    }
                 }
 
                 if (collectionData.Changed)
@@ -98,7 +108,7 @@
             var index = store.DatabaseCommands.GetIndex(DocsByEntityNameIndex);
             if (index == null)
             {
-                throw new InvalidOperationException("The Raven/DocumentsByEntityName index must exist in order to determine the document ID strategy. This index is created by RavenDB automatically. Please check in Raven Studio to make sure it exists.");
+                throw new InvalidOperationException("The Raven/DocumentsByEntityName index must exist in order to determine the document ID strategy. This index is created by RavenDB automatically. Check in Raven Studio to make sure it exists.");
             }
 
             var terms = store.DatabaseCommands.GetTerms(DocsByEntityNameIndex, "Tag", null, 1024);
@@ -119,6 +129,7 @@
             };
 
             var configuredName = mappingsInPriorityOrder
+                .Distinct()
                 .SingleOrDefault(name => collectionData.Collections.Contains(name));
 
             if (configuredName == null)
@@ -133,14 +144,14 @@
                     .Where(name => collectionData.IndexResults.Contains(name))
                     .ToArray();
 
-                
+
                 if (collectionsThatExist.Length > 1)
                 {
                     var options = string.Join(", ", collectionsThatExist);
-                    throw new InvalidOperationException($"Multiple RavenDB collection names ({options}) found for type `{type.FullName}`. Unable to determine DocumentId naming strategy for this type. Please remove or modify the documents that were mapped incorrectly.");
+                    throw new InvalidOperationException($"Multiple RavenDB collection names ({options}) found for type `{type.FullName}`. Unable to determine DocumentId naming strategy for this type. Remove or modify the documents that were mapped incorrectly.");
                 }
 
-                configuredName = collectionsThatExist.FirstOrDefault() ?? byLegacy;
+                configuredName = collectionsThatExist.FirstOrDefault() ?? ravenDefault;
                 collectionData.Collections.Add(configuredName);
                 collectionData.Changed = true;
             }
