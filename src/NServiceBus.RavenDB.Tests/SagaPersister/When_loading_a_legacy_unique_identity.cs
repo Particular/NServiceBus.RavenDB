@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
@@ -61,7 +60,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
         var uniqueIdentity = new SagaUniqueIdentity
         {
-            Id = SagaUniqueIdentity.FormatId(typeof(SagaWithUniqueProperty), new KeyValuePair<string, object>("UniqueString", unique)),
+            Id = SagaUniqueIdentity.FormatId(typeof(SagaWithUniqueProperty), "UniqueString", unique),
             SagaId = sagaId,
             SagaDocId = sagaDocId,
             UniqueValue = unique
