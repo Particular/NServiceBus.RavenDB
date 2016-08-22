@@ -55,6 +55,14 @@ namespace NServiceBus.Persistence.RavenDB
             List<TimeoutsChunk.Timeout> results;
             HashSet<string> idDedupe = null;
 
+            // default return value for when no results are found
+            var nextTimeoutToExpire = now.AddMinutes(10);
+
+            if (CancellationRequested())
+            {
+                return new TimeoutsChunk(EmptyTimeouts, nextTimeoutToExpire);
+            }
+
             // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
             // added after startSlice have been set to a later timout and we might have missed them
             // because of stale indexes. lastCleanupTime may be DateTime.MinValue, in which case it would run.
@@ -75,8 +83,10 @@ namespace NServiceBus.Persistence.RavenDB
                 results = new List<TimeoutsChunk.Timeout>();
             }
 
-            // default return value for when no results are found
-            var nextTimeoutToExpire = now.AddMinutes(10);
+            if (CancellationRequested())
+            {
+                return new TimeoutsChunk(EmptyTimeouts, nextTimeoutToExpire);
+            }
 
             using (var session = documentStore.OpenAsyncSession())
             {
