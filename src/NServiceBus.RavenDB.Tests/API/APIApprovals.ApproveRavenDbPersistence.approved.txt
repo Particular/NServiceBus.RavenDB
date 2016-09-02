@@ -54,8 +54,8 @@ namespace NServiceBus
     }
     public class static RavenDBOutboxExtensions
     {
-        public static NServiceBus.EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this NServiceBus.EndpointConfiguration configuration, System.TimeSpan frequencyToRunDeduplicationDataCleanup) { }
-        public static NServiceBus.EndpointConfiguration SetTimeToKeepDeduplicationData(this NServiceBus.EndpointConfiguration configuration, System.TimeSpan timeToKeepDeduplicationData) { }
+        public static NServiceBus.Outbox.OutboxSettings SetFrequencyToRunDeduplicationDataCleanup(this NServiceBus.Outbox.OutboxSettings configuration, System.TimeSpan frequencyToRunDeduplicationDataCleanup) { }
+        public static NServiceBus.Outbox.OutboxSettings SetTimeToKeepDeduplicationData(this NServiceBus.Outbox.OutboxSettings configuration, System.TimeSpan timeToKeepDeduplicationData) { }
     }
     public class RavenDBPersistence : NServiceBus.Persistence.PersistenceDefinition
     {
