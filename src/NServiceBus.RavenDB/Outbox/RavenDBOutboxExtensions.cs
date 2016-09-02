@@ -39,5 +39,28 @@
             configuration.GetSettings().Set("Outbox.FrequencyToRunDeduplicationDataCleanup", frequencyToRunDeduplicationDataCleanup);
             return configuration;
         }
+
+
+#pragma warning disable 1591
+
+        [ObsoleteEx(
+            RemoveInVersion = "5",
+            TreatAsErrorFromVersion = "4",
+            Message = "Use endpointConfiguration.EnableOutbox().SetTimeToKeepDeduplicationData(timeToKeepDeduplicationData)")]
+        public static EndpointConfiguration SetTimeToKeepDeduplicationData(this EndpointConfiguration configuration, TimeSpan timeToKeepDeduplicationData)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ObsoleteEx(
+            RemoveInVersion = "5",
+            TreatAsErrorFromVersion = "4",
+            Message = "Use endpointConfiguration.EnableOutbox().SetFrequencyToRunDeduplicationDataCleanup(frequencyToRunDeduplicationDataCleanup)")]
+        public static EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this EndpointConfiguration configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
+        {
+            throw new NotImplementedException();
+        }
+
+#pragma warning restore 1591
     }
 }
