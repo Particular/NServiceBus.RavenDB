@@ -6,7 +6,6 @@
     using NServiceBus.Features;
     using NServiceBus.Logging;
     using NServiceBus.Persistence;
-    using NServiceBus.Settings;
 
     class RavenDbOutboxStorage : Feature
     {
@@ -28,24 +27,25 @@
 
             context.Container.ConfigureComponent<OutboxCleaner>(DependencyLifecycle.InstancePerCall);
 
-            context.RegisterStartupTask(builder => builder.Build<OutboxCleaner>());
+            var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
+
+            var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
+
+            context.RegisterStartupTask(builder => new OutboxCleaner(builder.Build<OutboxRecordsCleaner>(), timeToKeepDeduplicationData, frequencyToRunDeduplicationDataCleanup));
         }
 
         class OutboxCleaner : FeatureStartupTask
         {
-            public OutboxCleaner(OutboxRecordsCleaner cleaner, ReadOnlySettings settings)
+            public OutboxCleaner(OutboxRecordsCleaner cleaner, TimeSpan timeToKeepDeduplicationData, TimeSpan frequencyToRunDeduplicationDataCleanup)
             {
                 this.cleaner = cleaner;
-                this.settings = settings;
                 this.logger = LogManager.GetLogger<OutboxCleaner>();
+                this.timeToKeepDeduplicationData = timeToKeepDeduplicationData;
+                this.frequencyToRunDeduplicationDataCleanup = frequencyToRunDeduplicationDataCleanup;
             }
 
             protected override Task OnStart(IMessageSession session)
             {
-                timeToKeepDeduplicationData = settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
-
-                frequencyToRunDeduplicationDataCleanup = settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
-
                 cancellationTokenSource = new CancellationTokenSource();
                 cancellationToken = cancellationTokenSource.Token;
 
@@ -98,7 +98,6 @@
 
             Task cleanupTask;
             OutboxRecordsCleaner cleaner;
-            ReadOnlySettings settings;
             TimeSpan timeToKeepDeduplicationData;
             TimeSpan frequencyToRunDeduplicationDataCleanup;
             CancellationTokenSource cancellationTokenSource;
