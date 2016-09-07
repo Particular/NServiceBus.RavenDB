@@ -16,7 +16,7 @@
         /// <param name="timeToKeepDeduplicationData">The time to keep the deduplication data. 
         /// The cleanup process removes entries older than the specified time to keep deduplication data, therefore the time span cannot be negative</param>
         /// <returns>The configuration</returns>
-        public static OutboxSettings SetTimeToKeepDeduplicationData(this OutboxSettings configuration, TimeSpan timeToKeepDeduplicationData)
+        public static OutboxSettings TimeToKeepDeduplicationData(this OutboxSettings configuration, TimeSpan timeToKeepDeduplicationData)
         {
             var now = DateTime.UtcNow;
             if (now - timeToKeepDeduplicationData >= now)
@@ -34,7 +34,7 @@
         /// <param name="configuration">The configuration being extended</param>
         /// <param name="frequencyToRunDeduplicationDataCleanup">The frequency to run the deduplication data cleanup task. By specifying a negative time span (-1) the cleanup task will never run.</param>
         /// <returns>The configuration</returns>
-        public static OutboxSettings SetFrequencyToRunDeduplicationDataCleanup(this OutboxSettings configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
+        public static OutboxSettings FrequencyToRunDeduplicationDataCleanup(this OutboxSettings configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
         {
             configuration.GetSettings().Set("Outbox.FrequencyToRunDeduplicationDataCleanup", frequencyToRunDeduplicationDataCleanup);
             return configuration;
@@ -46,7 +46,7 @@
         [ObsoleteEx(
             RemoveInVersion = "5",
             TreatAsErrorFromVersion = "4",
-            Message = "Use endpointConfiguration.EnableOutbox().SetTimeToKeepDeduplicationData(timeToKeepDeduplicationData)")]
+            Message = "Use endpointConfiguration.EnableOutbox().TimeToKeepDeduplicationData(timeToKeepDeduplicationData)")]
         public static EndpointConfiguration SetTimeToKeepDeduplicationData(this EndpointConfiguration configuration, TimeSpan timeToKeepDeduplicationData)
         {
             throw new NotImplementedException();
@@ -55,7 +55,7 @@
         [ObsoleteEx(
             RemoveInVersion = "5",
             TreatAsErrorFromVersion = "4",
-            Message = "Use endpointConfiguration.EnableOutbox().SetFrequencyToRunDeduplicationDataCleanup(frequencyToRunDeduplicationDataCleanup)")]
+            Message = "Use endpointConfiguration.EnableOutbox().FrequencyToRunDeduplicationDataCleanup(frequencyToRunDeduplicationDataCleanup)")]
         public static EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this EndpointConfiguration configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
         {
             throw new NotImplementedException();

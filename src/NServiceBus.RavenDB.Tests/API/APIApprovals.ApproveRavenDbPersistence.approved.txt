@@ -54,14 +54,14 @@ namespace NServiceBus
     }
     public class static RavenDBOutboxExtensions
     {
-        public static NServiceBus.Outbox.OutboxSettings SetFrequencyToRunDeduplicationDataCleanup(this NServiceBus.Outbox.OutboxSettings configuration, System.TimeSpan frequencyToRunDeduplicationDataCleanup) { }
-        [System.ObsoleteAttribute("Use endpointConfiguration.EnableOutbox().SetFrequencyToRunDeduplicationDataCleanu" +
-            "p(frequencyToRunDeduplicationDataCleanup). Will be removed in version 5.0.0.", true)]
+        public static NServiceBus.Outbox.OutboxSettings FrequencyToRunDeduplicationDataCleanup(this NServiceBus.Outbox.OutboxSettings configuration, System.TimeSpan frequencyToRunDeduplicationDataCleanup) { }
+        [System.ObsoleteAttribute("Use endpointConfiguration.EnableOutbox().FrequencyToRunDeduplicationDataCleanup(f" +
+            "requencyToRunDeduplicationDataCleanup). Will be removed in version 5.0.0.", true)]
         public static NServiceBus.EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this NServiceBus.EndpointConfiguration configuration, System.TimeSpan frequencyToRunDeduplicationDataCleanup) { }
-        public static NServiceBus.Outbox.OutboxSettings SetTimeToKeepDeduplicationData(this NServiceBus.Outbox.OutboxSettings configuration, System.TimeSpan timeToKeepDeduplicationData) { }
-        [System.ObsoleteAttribute("Use endpointConfiguration.EnableOutbox().SetTimeToKeepDeduplicationData(timeToKee" +
-            "pDeduplicationData). Will be removed in version 5.0.0.", true)]
+        [System.ObsoleteAttribute("Use endpointConfiguration.EnableOutbox().TimeToKeepDeduplicationData(timeToKeepDe" +
+            "duplicationData). Will be removed in version 5.0.0.", true)]
         public static NServiceBus.EndpointConfiguration SetTimeToKeepDeduplicationData(this NServiceBus.EndpointConfiguration configuration, System.TimeSpan timeToKeepDeduplicationData) { }
+        public static NServiceBus.Outbox.OutboxSettings TimeToKeepDeduplicationData(this NServiceBus.Outbox.OutboxSettings configuration, System.TimeSpan timeToKeepDeduplicationData) { }
     }
     public class RavenDBPersistence : NServiceBus.Persistence.PersistenceDefinition
     {
