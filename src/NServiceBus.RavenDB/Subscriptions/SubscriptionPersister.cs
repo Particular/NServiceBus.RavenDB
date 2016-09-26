@@ -58,6 +58,15 @@ namespace NServiceBus.Persistence.RavenDB
                         {
                             subscription.Subscribers.Add(subscriptionClient);
                         }
+                        else
+                        {
+
+                            var savedSubscription = subscription.Subscribers.Single(s => s.Equals(subscriptionClient));
+                            if (savedSubscription.Endpoint == null && subscriber.Endpoint != null)
+                            {
+                                savedSubscription.Endpoint = subscriber.Endpoint;
+                            }
+                        }
 
                         await session.SaveChangesAsync().ConfigureAwait(false);
                     }

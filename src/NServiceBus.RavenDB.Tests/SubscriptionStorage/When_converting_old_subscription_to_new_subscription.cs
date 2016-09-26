@@ -130,6 +130,40 @@
             Assert.Null(exception);
         }
 
+        [Test]
+        public async Task The_old_subscription_can_be_overwritten()
+        {
+            var session = store.OpenAsyncSession();
+
+            await session.StoreAsync(new OldSubscription
+            {
+                Clients = new List<LegacyAddress>
+                {
+                    new LegacyAddress("timeouts", RuntimeEnvironment.MachineName),
+                    new LegacyAddress("mytestendpoint", RuntimeEnvironment.MachineName)
+                },
+                MessageType = MessageTypes.MessageA
+            }, Subscription.FormatId(MessageTypes.MessageA))
+            .ConfigureAwait(false);
+            await session.SaveChangesAsync().ConfigureAwait(false);
+
+            List<Subscriber> subscriptions = null;
+
+            var timeoutsSubscriber = new Subscriber("timeouts" + "@" + RuntimeEnvironment.MachineName, "timeouts");
+            var mytestendpointSubscriber = new Subscriber("mytestendpoint" + "@" + RuntimeEnvironment.MachineName, "mytestendpoint");
+
+            await persister.Subscribe(timeoutsSubscriber, MessageTypes.MessageA, null);
+            await persister.Subscribe(mytestendpointSubscriber, MessageTypes.MessageA, null);
+
+            await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(new[] { MessageTypes.MessageA }, new ContextBag())).ToList(); });
+            
+            Assert.AreEqual(timeoutsSubscriber.TransportAddress, subscriptions.ElementAt(0).TransportAddress);
+            Assert.AreEqual(timeoutsSubscriber.Endpoint, subscriptions.ElementAt(0).Endpoint);
+
+            Assert.AreEqual(mytestendpointSubscriber.TransportAddress, subscriptions.ElementAt(1).TransportAddress);
+            Assert.AreEqual(mytestendpointSubscriber.Endpoint, subscriptions.ElementAt(1).Endpoint);
+        }
+
         SubscriptionPersister persister;
 
         class FakeSubscriptionClrType : IDocumentConversionListener
