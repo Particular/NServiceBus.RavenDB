@@ -54,10 +54,10 @@
             var mytestendpointSubscriber = new Subscriber("mytestendpoint" + "@" + RuntimeEnvironment.MachineName, "mytestendpoint");
 
             Assert.AreEqual(timeoutsSubscriber.TransportAddress, subscriptions.ElementAt(0).TransportAddress);
-            Assert.AreEqual(timeoutsSubscriber.Endpoint, subscriptions.ElementAt(0).Endpoint);
+            Assert.AreEqual(null, subscriptions.ElementAt(0).Endpoint);
 
             Assert.AreEqual(mytestendpointSubscriber.TransportAddress, subscriptions.ElementAt(1).TransportAddress);
-            Assert.AreEqual(mytestendpointSubscriber.Endpoint, subscriptions.ElementAt(1).Endpoint);
+            Assert.AreEqual(null, subscriptions.ElementAt(1).Endpoint);
         }
 
         [Test]
@@ -84,10 +84,10 @@
             var mytestendpointSubscriber = new Subscriber("mytestendpoint", "mytestendpoint");
 
             Assert.AreEqual(timeoutsSubscriber.TransportAddress, subscriptions.ElementAt(0).TransportAddress);
-            Assert.AreEqual(timeoutsSubscriber.Endpoint, subscriptions.ElementAt(0).Endpoint);
+            Assert.AreEqual(null, subscriptions.ElementAt(0).Endpoint);
 
             Assert.AreEqual(mytestendpointSubscriber.TransportAddress, subscriptions.ElementAt(1).TransportAddress);
-            Assert.AreEqual(mytestendpointSubscriber.Endpoint, subscriptions.ElementAt(1).Endpoint);
+            Assert.AreEqual(null, subscriptions.ElementAt(1).Endpoint);
         }
 
         [Test]
