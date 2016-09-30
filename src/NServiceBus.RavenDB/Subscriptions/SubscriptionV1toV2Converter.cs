@@ -1,5 +1,6 @@
 namespace NServiceBus.Persistence.RavenDB
 {
+    using System.Linq;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using Raven.Client.Listeners;
     using Raven.Json.Linq;
@@ -32,7 +33,13 @@ namespace NServiceBus.Persistence.RavenDB
 
             if (clients != null)
             {
-                subscription.Subscribers = LegacyAddress.ParseMultipleToSubscriptionClient((RavenJArray)document["Clients"]);
+                var converted = LegacyAddress.ParseMultipleToSubscriptionClient((RavenJArray)document["Clients"]);
+
+                var legacySubscriptions = converted.Except(subscription.Subscribers).ToArray();
+                foreach (var legacySubscription in legacySubscriptions)
+                {
+                    subscription.Subscribers.Add(legacySubscription);
+                }
             }
         }
     }

@@ -21,8 +21,8 @@
             return obj is SubscriptionClient && Equals((SubscriptionClient)obj);
         }
 
-        bool Equals(SubscriptionClient obj) => string.Equals(TransportAddress, obj.TransportAddress) && Equals(Endpoint, obj.Endpoint);
+        bool Equals(SubscriptionClient obj) => string.Equals(TransportAddress, obj.TransportAddress);
 
-        public override int GetHashCode() => (TransportAddress + Endpoint).GetHashCode();
+        public override int GetHashCode() => TransportAddress.GetHashCode();
     }
 }

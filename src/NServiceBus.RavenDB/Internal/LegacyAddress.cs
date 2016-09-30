@@ -19,10 +19,10 @@ namespace NServiceBus.Persistence.RavenDB
             // Previously known as IgnoreMachineName (for brokers)
             if (string.IsNullOrEmpty(machine))
             {
-                return new SubscriptionClient { TransportAddress = queue, Endpoint = queue };
+                return new SubscriptionClient { TransportAddress = queue, Endpoint = null };
             }
 
-            return new SubscriptionClient { TransportAddress = queue + "@" + machine, Endpoint = queue };
+            return new SubscriptionClient { TransportAddress = queue + "@" + machine, Endpoint = null };
         }
 
         public static string ParseToString(Func<RavenJToken> tokenSelector)
