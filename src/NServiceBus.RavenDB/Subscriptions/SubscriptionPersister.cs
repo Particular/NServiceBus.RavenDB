@@ -9,7 +9,6 @@ namespace NServiceBus.Persistence.RavenDB
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-    using Raven.Abstractions.Data;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
 
