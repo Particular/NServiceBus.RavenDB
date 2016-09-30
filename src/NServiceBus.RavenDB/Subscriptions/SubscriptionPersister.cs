@@ -9,6 +9,7 @@ namespace NServiceBus.Persistence.RavenDB
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
+    using Raven.Abstractions.Data;
     using Raven.Abstractions.Exceptions;
     using Raven.Client;
 
@@ -60,9 +61,8 @@ namespace NServiceBus.Persistence.RavenDB
                         }
                         else
                         {
-
                             var savedSubscription = subscription.Subscribers.Single(s => s.Equals(subscriptionClient));
-                            if (savedSubscription.Endpoint == null && subscriber.Endpoint != null)
+                            if (savedSubscription.Endpoint != subscriber.Endpoint)
                             {
                                 savedSubscription.Endpoint = subscriber.Endpoint;
                             }

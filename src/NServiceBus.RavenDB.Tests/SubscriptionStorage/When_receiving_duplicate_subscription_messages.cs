@@ -38,12 +38,12 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
     {
         const string subscriberAddress = "testEndPoint@localhost";
         var messageType = new MessageType("SomeMessageType", "1.0.0.0");
-        var subscriber_v5 = new Subscriber(subscriberAddress, null);
         var subscriber_v6 = new Subscriber(subscriberAddress, "endpoint_name");
+        var subscriber_v6_2 = new Subscriber(subscriberAddress, "new_endpoint_name");
 
         var storage = new SubscriptionPersister(store);
-        await storage.Subscribe(subscriber_v5, messageType, new ContextBag());
         await storage.Subscribe(subscriber_v6, messageType, new ContextBag());
+        await storage.Subscribe(subscriber_v6_2, messageType, new ContextBag());
  
         var subscriber = (await storage.GetSubscriberAddressesForMessage(new[]
         {
@@ -52,6 +52,6 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
  
         Assert.AreEqual(1, subscriber.Length);
         Assert.AreEqual(subscriberAddress, subscriber[0].TransportAddress);
-        Assert.AreEqual("testEndPoint", subscriber[0].Endpoint);
+        Assert.AreEqual("new_endpoint_name", subscriber[0].Endpoint);
     }
 }
