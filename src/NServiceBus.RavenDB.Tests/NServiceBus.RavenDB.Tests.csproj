@@ -145,6 +145,7 @@
     <Compile Include="Persistence\DocumentIds\InconsistentTimeoutIdConventions.cs" />
     <Compile Include="Persistence\DocumentStoreExtensionsForVoron.cs" />
     <Compile Include="Persistence\DocumentStoreManagerTests.cs" />
+    <Compile Include="Persistence\RavenSerializerAssumptions.cs" />
     <Compile Include="Persistence\RavenSessionExtensionTests.cs" />
     <Compile Include="Persistence\TestStorageEngineVerifier.cs" />
     <Compile Include="RavenDBPersistenceTestBase.cs" />
