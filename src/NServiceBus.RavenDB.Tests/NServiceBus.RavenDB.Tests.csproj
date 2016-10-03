@@ -175,6 +175,7 @@
     <Compile Include="SubscriptionStorage\When_receiving_an_unsubscription_message.cs" />
     <Compile Include="SubscriptionStorage\When_receiving_a_subscription_message.cs" />
     <Compile Include="SubscriptionStorage\When_receiving_duplicate_subscription_messages.cs" />
+    <Compile Include="SubscriptionStorage\When_using_subscription_converter.cs" />
     <Compile Include="Timeouts\FakeLegacyTimoutDataClrTypeConversionListener.cs" />
     <Compile Include="Timeouts\LegacyTimeoutData.cs" />
     <Compile Include="Timeouts\Should_not_skip_timeouts.cs" />
