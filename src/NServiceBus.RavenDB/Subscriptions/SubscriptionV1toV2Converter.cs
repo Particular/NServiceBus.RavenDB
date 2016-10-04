@@ -9,11 +9,23 @@ namespace NServiceBus.Persistence.RavenDB
     {
         public void BeforeConversionToDocument(string key, object entity, RavenJObject metadata)
         {
+            var subscription = entity as Subscription;
+
+            if (subscription == null)
+            {
+                return;
+            }
+
+            var converted = LegacyAddress.ConvertMultipleToLegacyAddress(subscription.Subscribers);
+            foreach (var convert in converted.Except(subscription.LegacySubscriptions))
+            {
+                subscription.LegacySubscriptions.Add(convert);
+            }
         }
 
         public void AfterConversionToDocument(string key, object entity, RavenJObject document, RavenJObject metadata)
         {
-            // we will not save the old format, so no conversion needed
+            
         }
 
         public void BeforeConversionToEntity(string key, RavenJObject document, RavenJObject metadata)
@@ -33,7 +45,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             if (clients != null)
             {
-                var converted = LegacyAddress.ParseMultipleToSubscriptionClient((RavenJArray)document["Clients"]);
+                var converted = LegacyAddress.ParseMultipleToSubscriptionClient(subscription.LegacySubscriptions);
 
                 var legacySubscriptions = converted.Except(subscription.Subscribers).ToArray();
                 foreach (var legacySubscription in legacySubscriptions)
