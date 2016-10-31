@@ -12,7 +12,7 @@
         [Test]
         public void Throws_when_voron_combined_with_dtc()
         {
-            using (var documentStore = new DocumentStore { Url = "http://localhost:8083" })
+            using (var documentStore = new DocumentStore { Url = TestConstants.RavenUrl })
             using (documentStore.SetupVoronTest())
             {
                 var settings = new SettingsHolder();
@@ -24,7 +24,7 @@
         [Test]
         public void DoesntThrow_when_voron_combined_with_dtc_including_confirmation()
         {
-            using (var documentStore = new DocumentStore { Url = "http://localhost:8083" })
+            using (var documentStore = new DocumentStore { Url = TestConstants.RavenUrl })
             using (documentStore.SetupVoronTest())
             {
 
@@ -39,7 +39,7 @@
         [Test]
         public void DoesntThrow_when_voron_without_dtc()
         {
-            using (var documentStore = new DocumentStore { Url = "http://localhost:8083" })
+            using (var documentStore = new DocumentStore { Url = TestConstants.RavenUrl })
             using (documentStore.SetupVoronTest())
             {
                 var settings = new SettingsHolder();

@@ -133,6 +133,7 @@
     <Compile Include="API\APIApprovals.cs" />
     <Compile Include="App_Packages\ApiApprover.3.0.1\PublicApiApprover.cs" />
     <Compile Include="App_Packages\ApiApprover.3.0.1\PublicApiGenerator.cs" />
+    <Compile Include="TestConstants.cs" />
     <Compile Include="FakeRavenDBTestTransport.cs" />
     <Compile Include="Infrastructure\ReusableDB.cs" />
     <Compile Include="Infrastructure\StoreSnooper.cs" />
