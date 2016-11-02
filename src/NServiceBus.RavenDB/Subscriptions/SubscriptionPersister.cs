@@ -120,8 +120,7 @@ namespace NServiceBus.Persistence.RavenDB
                             var ret = session.Advanced
                                 .AsyncDocumentQuery<Subscription>($"{collectionName}Index")
                                 .Where($"MessageType: \"{messageType.TypeName}, Version=*\"")
-                                .LazilyAsync(x => 
-                                x.ToList());
+                                .LazilyAsync(null);
                             //var ret = session.Query<Subscription>().Where(c =>
                             //    c.MessageType.TypeName.Equals(messageType.TypeName)).LazilyAsync(); //TODO: double check we ignore versions completely (not major!)
                             lazyDocuments.Add(ret);
