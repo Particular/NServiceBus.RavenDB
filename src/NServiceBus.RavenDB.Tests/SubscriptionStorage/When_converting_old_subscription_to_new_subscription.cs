@@ -34,7 +34,6 @@
         {
             var messageType = MessageTypes.MessageA;
 
-
             await RavenUtils.StoreAsType(store, Subscription.FormatId(messageType), typeof(Subscription), new OldSubscription
             {
                 Clients = new List<LegacyAddress>
