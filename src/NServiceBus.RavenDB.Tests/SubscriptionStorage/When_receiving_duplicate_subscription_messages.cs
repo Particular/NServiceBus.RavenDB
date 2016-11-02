@@ -46,6 +46,8 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
         var storage = new SubscriptionPersister(store);
         await storage.Subscribe(subscriber_v6, messageType, new ContextBag());
         await storage.Subscribe(subscriber_v6_2, messageType, new ContextBag());
+
+        WaitForIndexing(store);
  
         var subscriber = (await storage.GetSubscriberAddressesForMessage(new[]
         {
