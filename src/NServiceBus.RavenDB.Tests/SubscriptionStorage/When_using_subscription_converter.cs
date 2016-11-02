@@ -1,14 +1,11 @@
 ﻿
 namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
 {
-    using System;
     using System.Threading.Tasks;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions;
     using NUnit.Framework;
-    using Raven.Abstractions.Data;
-    using Raven.Json.Linq;
     using System.Collections.Generic;
     using System.Linq;
     using NServiceBus.Extensibility;
@@ -47,7 +44,7 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
                 }
             };
 
-            await StoreAsType(subscriptionsV3.Id, typeof(Subscription), subscriptionsV3);
+            await RavenUtils.StoreAsType(store, subscriptionsV3.Id, typeof(Subscription), subscriptionsV3);
 
             await persister.Subscribe(new Subscriber("QueueC@MachineC", "QueueC"), msgType, new ContextBag());
 
@@ -88,7 +85,7 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
                 }
             };
 
-            await StoreAsType(subscriptionsV3.Id, typeof(Subscription), subscriptionsV3);
+            await RavenUtils.StoreAsType(store, subscriptionsV3.Id, typeof(Subscription), subscriptionsV3);
 
             await persister.Subscribe(new Subscriber("QueueB@MachineB", "QueueB"), msgType, new ContextBag());
 
@@ -149,16 +146,6 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
             [JsonConverter(typeof(MessageTypeConverter))]
             public MessageType MessageType { get; set; }
             public List<LegacyAddress> Clients { get; set; }
-        }
-
-        Task StoreAsType(string documentId, Type storeAsType, object document)
-        {
-            var docJson = RavenJObject.FromObject(document);
-            var metadata = new RavenJObject();
-            metadata["Raven-Entity-Name"] = storeAsType.Name;
-            metadata["Raven-Clr-Type"] = storeAsType.AssemblyQualifiedName;
-
-            return store.AsyncDatabaseCommands.PutAsync(documentId, Etag.Empty, docJson, metadata);
         }
     }
 }

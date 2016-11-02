@@ -112,15 +112,14 @@ namespace NServiceBus.Persistence.RavenDB
                 using (var session = OpenAsyncSession())
                 {
                     var collectionName = session.Advanced.DocumentStore.Conventions.FindTypeTagName(typeof(Subscription));
-                    //using (ConfigureAggressiveCaching(session))
-                    //{
-                    var lazyDocuments = new List<Lazy<Task<IEnumerable<Subscription>>>>();
+                    using (ConfigureAggressiveCaching(session))
+                    {
+                        var lazyDocuments = new List<Lazy<Task<IEnumerable<Subscription>>>>();
                         foreach (var messageType in messageTypes)
                         {
                             var ret = session.Advanced
                                 .AsyncDocumentQuery<Subscription>($"{collectionName}Index")
-                                //.Where($"MessageType: {messageType.TypeName},*")
-                                .WaitForNonStaleResults()
+                                .Where($"MessageType: \"{messageType.TypeName}, Version=*\"")
                                 .LazilyAsync(x => 
                                 x.ToList());
                             //var ret = session.Query<Subscription>().Where(c =>
@@ -135,7 +134,7 @@ namespace NServiceBus.Persistence.RavenDB
                             .Distinct()
                             .Select(c => new Subscriber(c.TransportAddress, c.Endpoint))
                             .ToArray();
-                    //}
+                    }
                 }
 
                 suppressTransaction.Complete();

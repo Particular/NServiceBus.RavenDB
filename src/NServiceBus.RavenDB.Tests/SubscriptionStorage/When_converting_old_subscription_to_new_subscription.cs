@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
-    using NServiceBus.Persistence.RavenDB.Subscriptions;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Support;
     using NServiceBus.Unicast.Subscriptions;
@@ -33,9 +32,10 @@
         [Test]
         public async Task Should_allow_old_subscriptions()
         {
-            var session = store.OpenAsyncSession();
             var messageType = MessageTypes.MessageA;
-            await session.StoreAsync(new OldSubscription
+
+
+            await RavenUtils.StoreAsType(store, Subscription.FormatId(messageType), typeof(Subscription), new OldSubscription
             {
                 Clients = new List<LegacyAddress>
                 {
@@ -43,9 +43,7 @@
                     new LegacyAddress("mytestendpoint", RuntimeEnvironment.MachineName)
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType))
-            .ConfigureAwait(false);
-            await session.SaveChangesAsync().ConfigureAwait(false);
+            }).ConfigureAwait(false);
 
             List<Subscriber> subscriptions = null;
 
@@ -64,9 +62,9 @@
         [Test]
         public async Task Should_allow_old_subscriptions_without_machine_name()
         {
-            var session = store.OpenAsyncSession();
             var messageType = MessageTypes.MessageA;
-            await session.StoreAsync(new OldSubscription
+
+            await RavenUtils.StoreAsType(store, Subscription.FormatId(messageType), typeof(Subscription), new OldSubscription
             {
                 Clients = new List<LegacyAddress>
                 {
@@ -74,8 +72,7 @@
                     new LegacyAddress("mytestendpoint", null)
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
-            await session.SaveChangesAsync().ConfigureAwait(false);
+            }).ConfigureAwait(false);
 
             List<Subscriber> subscriptions = null;
             var exception = await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(new []{ MessageTypes.MessageA }, new ContextBag())).ToList(); });
@@ -134,9 +131,7 @@
         [Test]
         public async Task The_old_subscription_can_be_overwritten()
         {
-            var session = store.OpenAsyncSession();
-
-            await session.StoreAsync(new OldSubscription
+            await RavenUtils.StoreAsType(store, Subscription.FormatId(MessageTypes.MessageA), typeof(Subscription), new OldSubscription
             {
                 Clients = new List<LegacyAddress>
                 {
@@ -144,9 +139,8 @@
                     new LegacyAddress("mytestendpoint", RuntimeEnvironment.MachineName)
                 },
                 MessageType = MessageTypes.MessageA
-            }, Subscription.FormatId(MessageTypes.MessageA))
+            })
             .ConfigureAwait(false);
-            await session.SaveChangesAsync().ConfigureAwait(false);
 
             List<Subscriber> subscriptions = null;
 

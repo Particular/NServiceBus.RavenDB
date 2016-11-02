@@ -12,6 +12,8 @@ public class When_listing_subscribers_for_message_types : RavenDBPersistenceTest
     [Test]
     public async Task The_names_of_all_subscribers_should_be_returned()
     {
+        await SubscriptionIndex.Create(store);
+
         var storage = new SubscriptionPersister(store);
         var context = new ContextBag();
 
@@ -34,6 +36,8 @@ public class When_listing_subscribers_for_message_types : RavenDBPersistenceTest
     [Test]
     public async Task Duplicates_should_not_be_generated_for_interface_inheritance_chains()
     {
+        await SubscriptionIndex.Create(store);
+
         var storage = new SubscriptionPersister(store);
         var context = new ContextBag();
 
