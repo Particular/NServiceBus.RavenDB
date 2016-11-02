@@ -18,6 +18,8 @@
 
             store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
 
+            SubscriptionIndex.Create(store);
+
             var persister = new SubscriptionPersister(store);
 
             if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DoNotAggressivelyCacheSubscriptionsSettingsKey))
