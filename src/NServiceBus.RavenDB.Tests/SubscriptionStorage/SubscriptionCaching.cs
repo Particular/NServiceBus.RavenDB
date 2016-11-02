@@ -31,7 +31,7 @@
                 requests.Add(args);
             };
 
-            SubscriptionIndex.Create(store).GetAwaiter().GetResult();
+            SubscriptionIndex.Create(store);
         }
 
         [TestCase(false, RequestStatus.AggressivelyCached)]

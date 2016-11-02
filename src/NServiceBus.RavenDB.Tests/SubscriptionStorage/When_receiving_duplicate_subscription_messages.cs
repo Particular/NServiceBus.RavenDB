@@ -36,7 +36,7 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
     [Test]
     public async Task should_overwrite_existing_subscription()
     {
-        await SubscriptionIndex.Create(store);
+        await SubscriptionIndex.CreateAsync(store);
 
         const string subscriberAddress = "testEndPoint@localhost";
         var messageType = new MessageType("SomeMessageType", "1.0.0.0");

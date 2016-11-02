@@ -26,7 +26,7 @@
             store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
             
             persister = new SubscriptionPersister(store);
-            SubscriptionIndex.Create(store).GetAwaiter().GetResult();
+            SubscriptionIndex.Create(store);
         }
 
         [Test]

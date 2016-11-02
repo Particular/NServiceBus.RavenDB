@@ -11,7 +11,7 @@ public class When_listing_subscribers_for_a_non_existing_message_type : RavenDBP
     [Test]
     public async Task No_subscribers_should_be_returned()
     {
-        await SubscriptionIndex.Create(store);
+        await SubscriptionIndex.CreateAsync(store);
 
         var persister = new SubscriptionPersister(store);
         var subscriptionsForMessageType = await persister.GetSubscriberAddressesForMessage(new []{ MessageTypes.MessageA }, new ContextBag());
