@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
+    using NServiceBus.Persistence.RavenDB.Subscriptions;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Support;
     using NServiceBus.Unicast.Subscriptions;
@@ -24,8 +25,9 @@
 
             store.Listeners.RegisterListener(new FakeSubscriptionClrType());
             store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
-
+            
             persister = new SubscriptionPersister(store);
+            SubscriptionIndex.Create(store).GetAwaiter().GetResult();
         }
 
         [Test]

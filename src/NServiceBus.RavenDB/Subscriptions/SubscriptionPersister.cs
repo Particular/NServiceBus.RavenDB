@@ -102,26 +102,40 @@ namespace NServiceBus.Persistence.RavenDB
                 await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
+    
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
-            var ids = messageTypes.Select(Subscription.FormatId).ToList();
-
             using (var suppressTransaction = new TransactionScope(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled))
             {
                 Subscriber[] subscribers;
                 using (var session = OpenAsyncSession())
                 {
-                    using (ConfigureAggressiveCaching(session))
-                    {
-                        var subscriptions = await session.LoadAsync<Subscription>(ids).ConfigureAwait(false);
-
-                        subscribers = subscriptions.Where(s => s != null)
-                            .SelectMany(s => s.Subscribers)
+                    var collectionName = session.Advanced.DocumentStore.Conventions.FindTypeTagName(typeof(Subscription));
+                    //using (ConfigureAggressiveCaching(session))
+                    //{
+                    var lazyDocuments = new List<Lazy<Task<IEnumerable<Subscription>>>>();
+                        foreach (var messageType in messageTypes)
+                        {
+                            var ret = session.Advanced
+                                .AsyncDocumentQuery<Subscription>($"{collectionName}Index")
+                                //.Where($"MessageType: {messageType.TypeName},*")
+                                .WaitForNonStaleResults()
+                                .LazilyAsync(x => 
+                                x.ToList());
+                            //var ret = session.Query<Subscription>().Where(c =>
+                            //    c.MessageType.TypeName.Equals(messageType.TypeName)).LazilyAsync(); //TODO: double check we ignore versions completely (not major!)
+                            lazyDocuments.Add(ret);
+                        }
+                        await session.Advanced.Eagerly.ExecuteAllPendingLazyOperationsAsync().ConfigureAwait(false);
+                        subscribers = lazyDocuments
+                            .Select(el => el.Value.Result)
+                            .SelectMany(s => s)
+                            .SelectMany(x => x.Subscribers)
                             .Distinct()
                             .Select(c => new Subscriber(c.TransportAddress, c.Endpoint))
                             .ToArray();
-                    }
+                    //}
                 }
 
                 suppressTransaction.Complete();
