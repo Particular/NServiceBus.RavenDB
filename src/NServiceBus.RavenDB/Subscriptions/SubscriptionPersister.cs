@@ -17,6 +17,7 @@ namespace NServiceBus.Persistence.RavenDB
         public SubscriptionPersister(IDocumentStore store)
         {
             documentStore = store;
+            subscriptionCollectionName = store.Conventions.FindTypeTagName(typeof(Subscription));
         }
 
         public TimeSpan AggressiveCacheDuration { get; set; } = TimeSpan.FromMinutes(1);
@@ -111,14 +112,13 @@ namespace NServiceBus.Persistence.RavenDB
                 Subscriber[] subscribers;
                 using (var session = OpenAsyncSession())
                 {
-                    var collectionName = session.Advanced.DocumentStore.Conventions.FindTypeTagName(typeof(Subscription));
                     using (ConfigureAggressiveCaching(session))
                     {
                         var lazyDocuments = new List<Lazy<Task<IEnumerable<Subscription>>>>();
                         foreach (var messageType in messageTypes)
                         {
                             var ret = session.Advanced
-                                .AsyncDocumentQuery<Subscription>($"{collectionName}Index")
+                                .AsyncDocumentQuery<Subscription>($"{subscriptionCollectionName}Index")
                                 .Where($"MessageType: \"{messageType.TypeName}, Version=*\"")
                                 .LazilyAsync(null);
                             //var ret = session.Query<Subscription>().Where(c =>
@@ -173,5 +173,6 @@ namespace NServiceBus.Persistence.RavenDB
         }
 
         IDocumentStore documentStore;
+        string subscriptionCollectionName;
     }
 }
