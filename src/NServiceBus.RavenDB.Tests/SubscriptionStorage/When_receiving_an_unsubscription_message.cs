@@ -21,6 +21,8 @@ public class When_receiving_an_unsubscribe_message : RavenDBPersistenceTestBase
         await storage.Unsubscribe(TestClients.ClientA, MessageTypes.MessageA, context);
         await storage.Unsubscribe(TestClients.ClientA, MessageTypes.MessageB, context);
 
+        WaitForIndexing(store);
+
         var clients = await storage.GetSubscriberAddressesForMessage(new []{ MessageTypes.MessageA, MessageTypes.MessageB }, context);
 
         Assert.IsEmpty(clients);
@@ -40,7 +42,9 @@ public class When_receiving_an_unsubscribe_message : RavenDBPersistenceTestBase
         await storage.Unsubscribe(TestClients.ClientA, MessageTypes.MessageAv2, context);
         await storage.Unsubscribe(TestClients.ClientA, MessageTypes.MessageB, context);
 
-        var clients = await storage.GetSubscriberAddressesForMessage(new[] { MessageTypes.MessageA, MessageTypes.MessageB }, context);
+        WaitForIndexing(store);
+
+        var clients = await storage.GetSubscriberAddressesForMessage(new[] { MessageTypes.MessageAv2, MessageTypes.MessageB }, context);
 
         Assert.IsEmpty(clients);
     }
