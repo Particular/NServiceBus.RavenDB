@@ -141,7 +141,6 @@ namespace NServiceBus.Persistence.RavenDB
                         {
                             var ret = session.Advanced
                                 .AsyncDocumentQuery<Subscription>($"{subscriptionCollectionName}Index")
-                                .WaitForNonStaleResultsAsOfLastWrite()
                                 .Where($"MessageType: \"{messageType.TypeName}, Version=*\"")
                                 .LazilyAsync(null);
                             lazyDocuments.Add(ret);
