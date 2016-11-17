@@ -27,7 +27,9 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
 
             persister = new SubscriptionPersister(store);
             msgType = new MessageType(typeof(MessageA));
-            docId = Subscription.FormatId(msgType);
+            docId = Subscription.FormatVersionlessId(msgType);
+
+            SubscriptionIndex.Create(store);
         }
 
         [Test]

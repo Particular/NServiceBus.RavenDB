@@ -13,6 +13,12 @@ using System.Linq;
 [TestFixture]
 public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
 {
+    public override void SetUp()
+    {
+        base.SetUp();
+        SubscriptionIndex.Create(store);
+    }
+
     [Test]
     public async Task A_subscription_entry_should_be_added_to_the_database()
     {
@@ -36,8 +42,6 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
     [Test]
     public async Task Versioned_subscription_should_update_all_documents()
     {
-        await SubscriptionIndex.CreateAsync(store);
-
         var storage = new SubscriptionPersister(store);
         var context = new ContextBag();
 

@@ -71,10 +71,11 @@ public class When_receiving_an_unsubscribe_message : RavenDBPersistenceTestBase
 
         Assert.IsEmpty(messageAClients);
         Assert.AreEqual(1, messageBClients.Count());
-        Assert.AreEqual(0, subs[0].Subscribers.Count); // A
-        Assert.AreEqual(0, subs[0].Subscribers.Count); // Av11
-        Assert.AreEqual(0, subs[0].Subscribers.Count); // Av2
-        Assert.AreEqual(1, subs[0].Subscribers.Count); // B
+        Assert.IsNull(subs[0]); // A
+        Assert.IsNull(subs[1]); // Av11
+        Assert.IsNull(subs[2]); // Av2
+        Assert.IsNotNull(subs[3]);
+        Assert.AreEqual(1, subs[3].Subscribers.Count); // B
     }
 
     Task CreateSeedSubscription(MessageType msgType, Guid id, params Subscriber[] subscribers)

@@ -37,40 +37,7 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 try
                 {
-                    using (var session = OpenAsyncSession())
-                    {
-                        var subscriptionDocId = Subscription.FormatId(messageType);
-
-                        var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
-
-                        if (subscription == null)
-                        {
-                            subscription = new Subscription
-                            {
-                                Id = subscriptionDocId,
-                                MessageType = messageType,
-                                Subscribers = new List<SubscriptionClient>()
-                            };
-
-                            await session.StoreAsync(subscription).ConfigureAwait(false);
-                        }
-
-                        if (!subscription.Subscribers.Contains(subscriptionClient))
-                        {
-                            subscription.Subscribers.Add(subscriptionClient);
-                        }
-                        else
-                        {
-                            var savedSubscription = subscription.Subscribers.Single(s => s.Equals(subscriptionClient));
-                            if (savedSubscription.Endpoint != subscriber.Endpoint)
-                            {
-                                savedSubscription.Endpoint = subscriber.Endpoint;
-                            }
-                        }
-
-                        await session.SaveChangesAsync().ConfigureAwait(false);
-                    }
-
+                    await TrySubscribe(subscriber, messageType, subscriptionClient).ConfigureAwait(false);
                     return;
                 }
                 catch (ConcurrencyException)
@@ -80,30 +47,85 @@ namespace NServiceBus.Persistence.RavenDB
             } while (attempts < 5);
         }
 
+        async Task TrySubscribe(Subscriber subscriber, MessageType messageType, SubscriptionClient subscriptionClient)
+        {
+            using (var session = OpenAsyncSession())
+            {
+                var subscriptionDocId = Subscription.FormatVersionlessId(messageType);
+
+                var subscriptionDocs = await session.Advanced
+                    .AsyncDocumentQuery<Subscription>($"{subscriptionCollectionName}Index")
+                    .NoCaching()
+                    .WaitForNonStaleResultsAsOfLastWrite()
+                    .Where($"MessageType: \"{messageType.TypeName}, Version=*\"")
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                if (subscriptionDocs.All(sub => sub.Id != subscriptionDocId))
+                {
+                    var subscription = new Subscription
+                    {
+                        Id = subscriptionDocId,
+                        MessageType = messageType,
+                        Subscribers = new List<SubscriptionClient>()
+                    };
+                    subscriptionDocs.Add(subscription);
+
+                    await session.StoreAsync(subscription).ConfigureAwait(false);
+                }
+
+                var subscribers = subscriptionDocs.SelectMany(doc => doc.Subscribers).Distinct().ToList();
+
+                if (!subscribers.Contains(subscriptionClient))
+                {
+                    subscribers.Add(subscriptionClient);
+                }
+                else
+                {
+                    var savedSubscription = subscribers.Single(s => s.Equals(subscriptionClient));
+                    if (savedSubscription.Endpoint != subscriber.Endpoint)
+                    {
+                        savedSubscription.Endpoint = subscriber.Endpoint;
+                    }
+                }
+
+                foreach (var doc in subscriptionDocs)
+                {
+                    doc.Subscribers = subscribers;
+                }
+
+                await session.SaveChangesAsync().ConfigureAwait(false);
+            }
+        }
+
         public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
             var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint };
 
             using (var session = OpenAsyncSession())
             {
-                var subscriptionDocId = Subscription.FormatId(messageType);
+                var subscriptionDocs = await session.Advanced
+                    .AsyncDocumentQuery<Subscription>($"{subscriptionCollectionName}Index")
+                    .NoCaching()
+                    .WaitForNonStaleResultsAsOfLastWrite()
+                    .Where($"MessageType: \"{messageType.TypeName}, Version=*\"")
+                    .ToListAsync()
+                    .ConfigureAwait(false);
 
-                var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
-
-                if (subscription == null)
+                foreach (var doc in subscriptionDocs)
                 {
-                    return;
-                }
-
-                if (subscription.Subscribers.Contains(subscriptionClient))
-                {
-                    subscription.Subscribers.Remove(subscriptionClient);
+                    // Uses overridden Equals that evaluates based on values
+                    doc.Subscribers.RemoveAll(sub => sub.Equals(subscriptionClient));
+                    if (doc.Subscribers.Count == 0)
+                    {
+                        session.Delete(doc);
+                    }
                 }
 
                 await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
-    
+
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
@@ -121,8 +143,6 @@ namespace NServiceBus.Persistence.RavenDB
                                 .AsyncDocumentQuery<Subscription>($"{subscriptionCollectionName}Index")
                                 .Where($"MessageType: \"{messageType.TypeName}, Version=*\"")
                                 .LazilyAsync(null);
-                            //var ret = session.Query<Subscription>().Where(c =>
-                            //    c.MessageType.TypeName.Equals(messageType.TypeName)).LazilyAsync(); //TODO: double check we ignore versions completely (not major!)
                             lazyDocuments.Add(ret);
                         }
                         await session.Advanced.Eagerly.ExecuteAllPendingLazyOperationsAsync().ConfigureAwait(false);

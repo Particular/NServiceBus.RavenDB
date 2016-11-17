@@ -12,6 +12,12 @@ using Raven.Client;
 [TestFixture]
 public class When_receiving_duplicate_subscription_messages : RavenDBPersistenceTestBase
 {
+    public override void SetUp()
+    {
+        base.SetUp();
+        SubscriptionIndex.Create(store);
+    }
+
     [Test]
     public async Task should_not_create_additional_db_rows()
     {
@@ -56,8 +62,6 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
     [Test]
     public async Task should_overwrite_existing_subscription()
     {
-        await SubscriptionIndex.CreateAsync(store);
-
         const string subscriberAddress = "testEndPoint@localhost";
         var messageType = new MessageType("SomeMessageType", "1.0.0.0");
         var subscriber_v6 = new Subscriber(subscriberAddress, "endpoint_name");
