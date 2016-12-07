@@ -137,6 +137,7 @@
     <Compile Include="Infrastructure\ReusableDB.cs" />
     <Compile Include="Infrastructure\StoreSnooper.cs" />
     <Compile Include="LegacyAddress.cs" />
+    <Compile Include="Outbox\OutboxApiExtensions.cs" />
     <Compile Include="Outbox\When_adding_outbox_messages.cs" />
     <Compile Include="Outbox\When_cleaning_outbox_messages.cs" />
     <Compile Include="Persistence\DocumentIds\DocumentIdConventionTestBase.cs" />
