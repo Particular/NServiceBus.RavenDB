@@ -23,7 +23,7 @@
             var db = Guid.NewGuid().ToString();
             using (var documentStore = new DocumentStore
             {
-                Url = "http://localhost:8083",
+                Url = TestConstants.RavenUrl,
                 DefaultDatabase = db
             }.Initialize())
             {
@@ -119,7 +119,7 @@
             var db = Guid.NewGuid().ToString();
             using (var documentStore = new DocumentStore
             {
-                Url = "http://localhost:8083",
+                Url = TestConstants.RavenUrl,
                 DefaultDatabase = db
             }.Initialize())
             {
@@ -166,7 +166,7 @@
                 {
                     using (var store = new DocumentStore
                     {
-                        Url = "http://localhost:8083",
+                        Url = TestConstants.RavenUrl,
                         DefaultDatabase = db
                     }.Initialize())
                     {

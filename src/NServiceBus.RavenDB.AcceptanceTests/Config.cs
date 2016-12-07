@@ -58,7 +58,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
         var documentStore = new DocumentStore
         {
-            Url = "http://localhost:8083",
+            Url = "http://localhost:8084",
             DefaultDatabase = defaultDatabase,
             ResourceManagerId = resourceManagerId,
             TransactionRecoveryStorage = new LocalDirectoryTransactionRecoveryStorage(recoveryPath)

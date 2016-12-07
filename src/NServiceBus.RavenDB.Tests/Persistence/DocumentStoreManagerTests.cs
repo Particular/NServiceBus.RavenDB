@@ -41,7 +41,7 @@
         {
             var connectionParams = new ConnectionParameters
             {
-                Url = "http://localhost:8083",
+                Url = TestConstants.RavenUrl,
                 DatabaseName = "TestConnectionParams"
             };
 
@@ -51,8 +51,8 @@
             var storeInitializer = DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Sagas>(settings);
 
             storeInitializer.EnsureDocStoreCreated(settings);
-            Assert.AreEqual("http://localhost:8083", storeInitializer.Url);
-            Assert.AreEqual("http://localhost:8083 (DB: TestConnectionParams)", storeInitializer.Identifier);
+            Assert.AreEqual(TestConstants.RavenUrl, storeInitializer.Url);
+            Assert.AreEqual($"{TestConstants.RavenUrl} (DB: TestConnectionParams)", storeInitializer.Identifier);
         }
 
         [Test]
