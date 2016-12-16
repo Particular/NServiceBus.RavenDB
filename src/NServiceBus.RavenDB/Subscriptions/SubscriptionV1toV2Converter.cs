@@ -17,10 +17,8 @@ namespace NServiceBus.Persistence.RavenDB
             }
 
             var converted = LegacyAddress.ConvertMultipleToLegacyAddress(subscription.Subscribers);
-            foreach (var convert in converted.Except(subscription.LegacySubscriptions))
-            {
-                subscription.LegacySubscriptions.Add(convert);
-            }
+            subscription.LegacySubscriptions.Clear();
+            subscription.LegacySubscriptions.AddRange(converted);
         }
 
         public void AfterConversionToDocument(string key, object entity, RavenJObject document, RavenJObject metadata)
