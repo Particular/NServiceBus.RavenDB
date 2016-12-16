@@ -10,24 +10,24 @@
     public class When_using_a_received_message_for_timeout : NServiceBusAcceptanceTest
     {
         [Test]
-        public Task Timeout_should_be_received_after_expiration()
+        public async Task Timeout_should_be_received_after_expiration()
         {
-            return Scenario.Define<Context>(c => { c.Id = Guid.NewGuid(); })
+            var context = await Scenario.Define<Context>()
                 .WithEndpoint<ReceiveMessageForTimeoutEndpoint>(g => g.When(session => session.SendLocal(new StartSagaMessage
                 {
                     SomeId = Guid.NewGuid()
                 })))
                 .Done(c => c.TimeoutReceived)
                 .Run();
+
+            Assert.True(context.TimeoutReceived);
+            Assert.AreEqual(1, context.HandlerCalled);
         }
 
         public class Context : ScenarioContext
         {
-            public Guid Id { get; set; }
-
-            public bool StartSagaMessageReceived { get; set; }
-
             public bool TimeoutReceived { get; set; }
+            public int HandlerCalled { get; set; }
         }
 
         public class ReceiveMessageForTimeoutEndpoint : EndpointConfigurationBuilder
@@ -43,7 +43,7 @@
 
                 public Task Handle(StartSagaMessage message, IMessageHandlerContext context)
                 {
-                    Data.SomeId = message.SomeId;
+                    TestContext.HandlerCalled++;
                     return RequestTimeout(context, TimeSpan.FromMilliseconds(100), message);
                 }
 
