@@ -7,6 +7,7 @@ branches:
     prevent-increment-of-merged-branch-version: true
   releases?[/-]:
     tag: rc
-    prevent-increment-of-merged-branch-version: true    
-disabled-base-version-strategies:
-  - MergeMessageBaseVersionStrategy
+    prevent-increment-of-merged-branch-version: true
+ignore:
+  sha:
+    - efe8a7a49fd589fb497821b98124dc28c670d8d2
