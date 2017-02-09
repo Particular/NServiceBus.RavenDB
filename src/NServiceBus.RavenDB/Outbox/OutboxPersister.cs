@@ -105,6 +105,7 @@
 
                 outboxMessage.Dispatched = true;
                 outboxMessage.DispatchedAt = DateTime.UtcNow;
+                outboxMessage.TransportOperations = emptyOutboxOperations;
 
                 await session.SaveChangesAsync().ConfigureAwait(false);
             }
@@ -124,5 +125,6 @@
         string endpointName;
         IDocumentStore documentStore;
         TransportOperation[] emptyTransportOperations = new TransportOperation[0];
+        OutboxRecord.OutboxOperation[] emptyOutboxOperations = new OutboxRecord.OutboxOperation[0];
     }
 }
