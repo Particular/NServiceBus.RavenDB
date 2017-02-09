@@ -79,12 +79,14 @@
 
                 outboxMessage.Dispatched = true;
                 outboxMessage.DispatchedAt = DateTime.UtcNow;
+                outboxMessage.TransportOperations = emptyOutboxOperations;
 
                 session.SaveChanges();
             }
         }
 
         static string GetOutboxRecordIdWithoutEndpointName(string messageId) => $"Outbox/{messageId}";
+        OutboxRecord.OutboxOperation[] emptyOutboxOperations = new OutboxRecord.OutboxOperation[0];
 
         string GetOutboxRecordId(string messageId) => $"Outbox/{EndpointName}/{messageId}";
     }
