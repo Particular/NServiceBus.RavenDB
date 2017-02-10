@@ -1,16 +1,20 @@
 ﻿namespace NServiceBus.RavenDB.Outbox
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Raven.Abstractions.Commands;
     using Raven.Abstractions.Data;
     using Raven.Client;
 
     class OutboxRecordsCleaner
     {
         volatile bool doingCleanup;
-        public IDocumentStore DocumentStore { get; set; }
+        IDocumentStore documentStore;
+        string indexName;
+
+        public OutboxRecordsCleaner(IDocumentStore documentStore)
+        {
+            this.documentStore = documentStore;
+            indexName = new OutboxRecordsIndex().IndexName;
+        }
 
         public void RemoveEntriesOlderThan(DateTime dateTime)
         {
@@ -26,38 +30,28 @@
 
             try
             {
-                var deletionCommands = new List<ICommandData>();
-
-                using (var session = DocumentStore.OpenSession())
+                var query = new IndexQuery
                 {
-                    var query = session.Query<OutboxRecord, OutboxRecordsIndex>()
-                        .Where(o => o.Dispatched)
-                        .OrderBy(o => o.DispatchedAt);
+                    Query = $"Dispatched:true AND DispatchedAt:[* TO {dateTime:o}]"
+                };
 
-                    QueryHeaderInformation qhi;
-                    using (var enumerator = session.Advanced.Stream(query, out qhi))
-                    {
-                        while (enumerator.MoveNext())
-                        {
-                            if (enumerator.Current.Document.DispatchedAt >= dateTime)
-                            {
-                                break; // break streaming if we went past the threshold
-                            }
+                var bulkOpts = new BulkOperationOptions
+                {
+                    AllowStale = true
+                };
 
-                            deletionCommands.Add(new DeleteCommandData
-                            {
-                                Key = enumerator.Current.Key
-                            });
-                        }
-                    }
-                }
+                var operation = documentStore.DatabaseCommands.DeleteByIndex(indexName, query, bulkOpts);
 
-                DocumentStore.DatabaseCommands.Batch(deletionCommands);
+                // This is going to execute multiple "status check" requests to Raven, but
+                // not much we can do about it
+                operation.WaitForCompletion();
             }
             finally
             {
                 doingCleanup = false;
             }
         }
+
+
     }
 }
