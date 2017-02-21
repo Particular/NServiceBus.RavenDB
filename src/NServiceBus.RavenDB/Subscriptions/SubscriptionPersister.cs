@@ -6,6 +6,7 @@ namespace NServiceBus.Persistence.RavenDB
     using System.Threading.Tasks;
     using System.Transactions;
     using NServiceBus.Extensibility;
+    using NServiceBus.Persistence.SubscriptionStorage;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
@@ -38,6 +39,25 @@ namespace NServiceBus.Persistence.RavenDB
                 {
                     using (var session = OpenAsyncSession())
                     {
+                        //create or update new subscription
+                        var newSubsDocId = SubscriptionData.FormatId(messageType, subscriber);
+                        var newSubs = await session.LoadAsync<SubscriptionData>(newSubsDocId).ConfigureAwait(false);
+                        if (newSubs == null)
+                        {
+                            newSubs = new SubscriptionData
+                            {
+                                Endpoint = subscriber.Endpoint,
+                                TransportAddress = subscriber.TransportAddress
+                            };
+                            await session.StoreAsync(newSubs).ConfigureAwait(false);
+                        }
+                        if (newSubs.Endpoint != subscriber.Endpoint)
+                        {
+                            newSubs.Endpoint = subscriber.Endpoint;
+                        }
+
+
+                        //create or update old subscription => do we need to create? only updates should be ok?
                         var subscriptionDocId = Subscription.FormatId(messageType);
 
                         var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
@@ -85,6 +105,11 @@ namespace NServiceBus.Persistence.RavenDB
 
             using (var session = OpenAsyncSession())
             {
+                //remove new subscription //TODO: verify what happens if I try to delete non-existing document
+                var newSubsDocId = SubscriptionData.FormatId(messageType, subscriber);
+                session.Delete(newSubsDocId);
+                
+                //remove old subscription
                 var subscriptionDocId = Subscription.FormatId(messageType);
 
                 var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
@@ -105,6 +130,20 @@ namespace NServiceBus.Persistence.RavenDB
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
+            using (var session = OpenAsyncSession())
+            {
+                foreach (var messageType in messageTypes)
+                {
+                    var newSubs = session.Advanced.LoadStartingWithAsync<SubscriptionData>($"SubscriptionDatas/{messageType.TypeName}");
+                    if (newSubs == null)
+                    {
+
+                        //TODO: here transfor
+                    }
+
+                }
+            }
+
             var ids = messageTypes.Select(Subscription.FormatId).ToList();
 
             using (var suppressTransaction = new TransactionScope(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled))

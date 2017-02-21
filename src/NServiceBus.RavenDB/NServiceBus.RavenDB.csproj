@@ -120,6 +120,7 @@
     <Compile Include="Subscriptions\RavenDbSubscriptionSettingsExtensions.cs" />
     <Compile Include="Subscriptions\RavenDbSubscriptionStorage.cs" />
     <Compile Include="Subscriptions\SubscriptionClient.cs" />
+    <Compile Include="Subscriptions\SubscriptionData.cs" />
     <Compile Include="Subscriptions\SubscriptionPersister.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionV1toV2Converter.cs" />
