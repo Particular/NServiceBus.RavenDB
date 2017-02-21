@@ -41,7 +41,7 @@
 
             WaitForIndexing(store);
 
-            var cleaner = new OutboxRecordsCleaner { DocumentStore = store };
+            var cleaner = new OutboxRecordsCleaner(store);
             cleaner.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));
 
             using (var session = store.OpenSession())

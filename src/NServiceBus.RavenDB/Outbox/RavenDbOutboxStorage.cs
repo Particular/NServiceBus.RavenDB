@@ -30,8 +30,7 @@
                 .ConfigureProperty(x => x.DocumentStore, store)
                 .ConfigureProperty(x => x.EndpointName, context.Settings.EndpointName());
 
-            context.Container.ConfigureComponent<OutboxRecordsCleaner>(DependencyLifecycle.InstancePerCall)
-                .ConfigureProperty(x => x.DocumentStore, store);
+            context.Container.ConfigureComponent(b => new OutboxRecordsCleaner(store), DependencyLifecycle.InstancePerCall);
         }
 
         class OutboxCleaner : FeatureStartupTask, IDisposable
