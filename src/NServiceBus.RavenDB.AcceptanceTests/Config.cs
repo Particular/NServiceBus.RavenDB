@@ -66,6 +66,8 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
         documentStore.Initialize();
 
+        documentStore.Conventions.ShouldCacheRequest = url => false;
+
         return documentStore;
     }
 

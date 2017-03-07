@@ -58,5 +58,11 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
                 return $"Subscriptions/{id}";
             }
         }
+
+        public static string FormatVersionlessId(MessageType messageType)
+        {
+            var hash = Helpers.SHA1Hash(messageType.TypeName);
+            return $"Subscriptions/{hash}";
+        }
     }
 }

@@ -3,8 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Security.Cryptography;
-    using System.Text;
     using Raven.Client;
     using Raven.Json.Linq;
 
@@ -28,7 +26,7 @@
             this.sagasEnabled = sagasEnabled;
             this.timeoutsEnabled = timeoutsEnabled;
 
-            collectionNamesDocId = $"NServiceBus/DocumentCollectionNames/{SHA1Hash(endpointName)}";
+            collectionNamesDocId = $"NServiceBus/DocumentCollectionNames/{Helpers.SHA1Hash(endpointName)}";
             userSuppliedConventions = store.Conventions.FindTypeTagName;
             padlock = new object();
         }
@@ -157,21 +155,6 @@
             }
 
             collectionData.Mappings.Add(type, configuredName);
-        }
-
-        private string SHA1Hash(string input)
-        {
-            using (var sha = new SHA1CryptoServiceProvider()) // Is FIPS compliant
-            {
-                var inBytes = Encoding.UTF8.GetBytes(input);
-                var hashBytes = sha.ComputeHash(inBytes);
-                var builder = new StringBuilder();
-                foreach (var b in hashBytes)
-                {
-                    builder.Append(b.ToString("x2"));
-                }
-                return builder.ToString();
-            }
         }
 
         private static string LegacyFindTypeTagName(Type t)

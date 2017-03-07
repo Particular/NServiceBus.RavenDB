@@ -136,6 +136,7 @@
     <Compile Include="SubscriptionStorage\SubscriptionClientTests.cs" />
     <Compile Include="TestConstants.cs" />
     <Compile Include="FakeRavenDBTestTransport.cs" />
+    <Compile Include="Infrastructure\RavenUtils.cs" />
     <Compile Include="Infrastructure\ReusableDB.cs" />
     <Compile Include="Infrastructure\StoreSnooper.cs" />
     <Compile Include="LegacyAddress.cs" />

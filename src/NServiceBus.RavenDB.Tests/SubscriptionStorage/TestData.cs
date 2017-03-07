@@ -11,15 +11,13 @@ public interface ISomeInterface2
 public interface ISomeInterface3
 {
 }
-
+public class MessageA
+{
+}
 public class MessageB
 {
 }
 
-public class MessageA
-{
-
-}
 public class MessageTypes
 {
     public static MessageType MessageA = new MessageType(typeof(MessageA).FullName, new Version(1, 0, 0, 0));
@@ -33,5 +31,6 @@ public class TestClients
 {
     public static Subscriber ClientA = new Subscriber("ClientA","ClientA");
     public static Subscriber ClientB = new Subscriber("ClientB","ClientB");
-    public static Subscriber ClientC = new Subscriber("ClientC","ClientC");
+    public static Subscriber ClientC = new Subscriber("ClientC", "ClientC");
+    public static Subscriber ClientD = new Subscriber("ClientD", "ClientD");
 }

@@ -1,12 +1,14 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
+    using System.Security.Cryptography;
+    using System.Text;
     using NServiceBus.Logging;
     using Raven.Client;
     using Raven.Client.Indexes;
     using Raven.Json.Linq;
 
-    class Helpers
+    static class Helpers
     {
         static readonly ILog Logger = LogManager.GetLogger(typeof(RavenDBPersistence));
 
@@ -54,6 +56,21 @@ Original exception: {exception}";
                 var existingIndex = store.DatabaseCommands.GetIndex(index.IndexName);
                 if (existingIndex == null || !index.CreateIndexDefinition().Equals(existingIndex))
                     throw;
+            }
+        }
+
+        internal static string SHA1Hash(string input)
+        {
+            using (var sha = new SHA1CryptoServiceProvider()) // Is FIPS compliant
+            {
+                var inBytes = Encoding.UTF8.GetBytes(input);
+                var hashBytes = sha.ComputeHash(inBytes);
+                var builder = new StringBuilder();
+                foreach (var b in hashBytes)
+                {
+                    builder.Append(b.ToString("x2"));
+                }
+                return builder.ToString();
             }
         }
     }

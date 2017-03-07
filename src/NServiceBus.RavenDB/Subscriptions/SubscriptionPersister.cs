@@ -17,6 +17,7 @@ namespace NServiceBus.Persistence.RavenDB
         public SubscriptionPersister(IDocumentStore store)
         {
             documentStore = store;
+            subscriptionCollectionName = store.Conventions.FindTypeTagName(typeof(Subscription));
         }
 
         public TimeSpan AggressiveCacheDuration { get; set; } = TimeSpan.FromMinutes(1);
@@ -36,40 +37,7 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 try
                 {
-                    using (var session = OpenAsyncSession())
-                    {
-                        var subscriptionDocId = Subscription.FormatId(messageType);
-
-                        var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
-
-                        if (subscription == null)
-                        {
-                            subscription = new Subscription
-                            {
-                                Id = subscriptionDocId,
-                                MessageType = messageType,
-                                Subscribers = new List<SubscriptionClient>()
-                            };
-
-                            await session.StoreAsync(subscription).ConfigureAwait(false);
-                        }
-
-                        if (!subscription.Subscribers.Contains(subscriptionClient))
-                        {
-                            subscription.Subscribers.Add(subscriptionClient);
-                        }
-                        else
-                        {
-                            var savedSubscription = subscription.Subscribers.Single(s => s.Equals(subscriptionClient));
-                            if (savedSubscription.Endpoint != subscriber.Endpoint)
-                            {
-                                savedSubscription.Endpoint = subscriber.Endpoint;
-                            }
-                        }
-
-                        await session.SaveChangesAsync().ConfigureAwait(false);
-                    }
-
+                    await TrySubscribe(subscriber, messageType, subscriptionClient).ConfigureAwait(false);
                     return;
                 }
                 catch (ConcurrencyException)
@@ -79,34 +47,88 @@ namespace NServiceBus.Persistence.RavenDB
             } while (attempts < 5);
         }
 
-        public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
+        async Task TrySubscribe(Subscriber subscriber, MessageType messageType, SubscriptionClient subscriptionClient)
         {
-            var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint };
-
             using (var session = OpenAsyncSession())
             {
-                var subscriptionDocId = Subscription.FormatId(messageType);
+                var subscriptionDocId = Subscription.FormatVersionlessId(messageType);
 
-                var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
+                var subscriptionDocs = await session.Advanced
+                    .AsyncDocumentQuery<Subscription>($"{subscriptionCollectionName}Index")
+                    .NoCaching()
+                    .WaitForNonStaleResultsAsOfLastWrite()
+                    .Where($"MessageType: \"{messageType.TypeName}, Version=*\"")
+                    .ToListAsync()
+                    .ConfigureAwait(false);
 
-                if (subscription == null)
+                if (subscriptionDocs.All(sub => sub.Id != subscriptionDocId))
                 {
-                    return;
+                    var subscription = new Subscription
+                    {
+                        Id = subscriptionDocId,
+                        MessageType = messageType,
+                        Subscribers = new List<SubscriptionClient>()
+                    };
+                    subscriptionDocs.Add(subscription);
+
+                    await session.StoreAsync(subscription).ConfigureAwait(false);
                 }
 
-                if (subscription.Subscribers.Contains(subscriptionClient))
+                var subscribers = subscriptionDocs.SelectMany(doc => doc.Subscribers).Distinct().ToList();
+
+                if (!subscribers.Contains(subscriptionClient))
                 {
-                    subscription.Subscribers.Remove(subscriptionClient);
+                    subscribers.Add(subscriptionClient);
+                }
+                else
+                {
+                    var savedSubscription = subscribers.Single(s => s.Equals(subscriptionClient));
+                    if (savedSubscription.Endpoint != subscriber.Endpoint)
+                    {
+                        savedSubscription.Endpoint = subscriber.Endpoint;
+                    }
+                }
+
+                foreach (var doc in subscriptionDocs)
+                {
+                    doc.Subscribers = subscribers;
                 }
 
                 await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
+        public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
+        {
+            var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint };
+
+            using (var session = OpenAsyncSession())
+            {
+                var subscriptionDocs = await session.Advanced
+                    .AsyncDocumentQuery<Subscription>($"{subscriptionCollectionName}Index")
+                    .NoCaching()
+                    .WaitForNonStaleResultsAsOfLastWrite()
+                    .Where($"MessageType: \"{messageType.TypeName}, Version=*\"")
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                foreach (var doc in subscriptionDocs)
+                {
+                    // Uses overridden Equals that evaluates based on values
+                    doc.Subscribers.RemoveAll(sub => sub.Equals(subscriptionClient));
+                    if (doc.Subscribers.Count == 0)
+                    {
+                        session.Delete(doc);
+                    }
+                }
+
+                await session.SaveChangesAsync().ConfigureAwait(false);
+            }
+        }
+
+
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
-            var ids = messageTypes.Select(Subscription.FormatId).ToList();
-
             using (var suppressTransaction = new TransactionScope(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled))
             {
                 Subscriber[] subscribers;
@@ -114,10 +136,20 @@ namespace NServiceBus.Persistence.RavenDB
                 {
                     using (ConfigureAggressiveCaching(session))
                     {
-                        var subscriptions = await session.LoadAsync<Subscription>(ids).ConfigureAwait(false);
-
-                        subscribers = subscriptions.Where(s => s != null)
-                            .SelectMany(s => s.Subscribers)
+                        var lazyDocuments = new List<Lazy<Task<IEnumerable<Subscription>>>>();
+                        foreach (var messageType in messageTypes)
+                        {
+                            var ret = session.Advanced
+                                .AsyncDocumentQuery<Subscription>($"{subscriptionCollectionName}Index")
+                                .Where($"MessageType: \"{messageType.TypeName}, Version=*\"")
+                                .LazilyAsync(null);
+                            lazyDocuments.Add(ret);
+                        }
+                        await session.Advanced.Eagerly.ExecuteAllPendingLazyOperationsAsync().ConfigureAwait(false);
+                        subscribers = lazyDocuments
+                            .Select(el => el.Value.Result)
+                            .SelectMany(s => s)
+                            .SelectMany(x => x.Subscribers)
                             .Distinct()
                             .Select(c => new Subscriber(c.TransportAddress, c.Endpoint))
                             .ToArray();
@@ -161,5 +193,6 @@ namespace NServiceBus.Persistence.RavenDB
         }
 
         IDocumentStore documentStore;
+        string subscriptionCollectionName;
     }
 }
