@@ -3,7 +3,6 @@
     using System;
     using System.Security.Cryptography;
     using System.Text;
-    using NServiceBus.Logging;
     using NServiceBus.Settings;
     using Raven.Client;
     using Raven.Client.Document;
@@ -11,8 +10,6 @@
 
     class DocumentStoreInitializer
     {
-        static readonly ILog Logger = LogManager.GetLogger(typeof(DocumentStoreInitializer));
-
         internal DocumentStoreInitializer(IDocumentStore store)
         {
             this.docStore = store;

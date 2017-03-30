@@ -7,6 +7,7 @@
     using System.Text;
     using NServiceBus.Saga;
     using Raven.Client;
+    using Raven.Client.Indexes;
     using Raven.Json.Linq;
 
     class DocumentIdConventions
@@ -105,14 +106,10 @@
 
         private HashSet<string> GetTerms()
         {
-            const string DocsByEntityNameIndex = "Raven/DocumentsByEntityName";
-            var index = store.DatabaseCommands.GetIndex(DocsByEntityNameIndex);
-            if (index == null)
-            {
-                throw new InvalidOperationException("The Raven/DocumentsByEntityName index must exist in order to determine the document ID strategy. This index is created by RavenDB automatically. Please check in Raven Studio to make sure it exists.");
-            }
+            var index = new RavenDocumentsByEntityName();
+            store.ExecuteIndex(index);
 
-            var terms = store.DatabaseCommands.GetTerms(DocsByEntityNameIndex, "Tag", null, 1024);
+            var terms = store.DatabaseCommands.GetTerms(index.IndexName, "Tag", null, 1024);
             return new HashSet<string>(terms);
         }
 
@@ -194,8 +191,8 @@
 
         class CollectionData
         {
-            public HashSet<string> Collections { get; private set; } = new HashSet<string>();
-            public Dictionary<Type, string> Mappings { get; private set; } = new Dictionary<Type, string>();
+            public HashSet<string> Collections { get; } = new HashSet<string>();
+            public Dictionary<Type, string> Mappings { get; } = new Dictionary<Type, string>();
             public HashSet<string> IndexResults { get; set; }
             public bool Changed { get; set; }
         }
