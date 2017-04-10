@@ -21,7 +21,7 @@ public class ConfigureRavenDBPersistence
 
         documentStore = new DocumentStore
         {
-            Url = "http://localhost:8083",
+            Url = "http://localhost:8084",
             DefaultDatabase = Guid.NewGuid().ToString(),
             ResourceManagerId = resourceManagerId,
             TransactionRecoveryStorage = new LocalDirectoryTransactionRecoveryStorage(recoveryPath)
