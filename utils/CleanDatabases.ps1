@@ -1,5 +1,5 @@
-$DatabaseUrl = "http://localhost:8083"
-$DatabasePath = "C:\RavenDBv3\Data"
+$DatabaseUrl = "http://localhost:8084"
+$DatabasePath = "C:\RavenDBv35\Databases"
 $WaitMinutes = 0
 $ignore = @( "system", "databases" )
 
