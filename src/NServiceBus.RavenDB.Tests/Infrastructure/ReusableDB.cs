@@ -39,7 +39,7 @@
         {
             return new DocumentStore
             {
-                Url = "http://localhost:8083",
+                Url = TestConstants.RavenUrl,
                 DefaultDatabase = databaseName
             };
         }
@@ -63,7 +63,7 @@
 
             var docStore = new DocumentStore
             {
-                Url = "http://localhost:8083"
+                Url = TestConstants.RavenUrl
             };
 
             docStore.Initialize();
