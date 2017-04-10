@@ -10,13 +10,13 @@
     <projectUrl>$projectUrl$</projectUrl>
     <iconUrl>$iconUrl$</iconUrl>
     <requireLicenseAcceptance>$requireLicenseAcceptance$</requireLicenseAcceptance>
-    <description>RavenDB integration for the NServicebus</description>
+    <description>RavenDB integration for NServicebus</description>
     <releaseNotes></releaseNotes>
     <copyright>$copyright$</copyright>
     <tags>nservicebus servicebus msmq cqrs publish subscribe ravendb</tags>
     <dependencies>
       <dependency id="NServiceBus" version="[5.2.8, 6.0.0)" />
-      <dependency id="RavenDB.Client" version="[3.0.3800, 3.1.0)" />
+      <dependency id="RavenDB.Client" version="[3.5.3, 3.6.0)" />
     </dependencies>
   </metadata>
   <files>

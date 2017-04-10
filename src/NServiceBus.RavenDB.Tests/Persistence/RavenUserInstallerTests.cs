@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using NServiceBus.RavenDB.Persistence;
+using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
 using Raven.Client.Document;
 using Raven.Client.Embedded;
@@ -21,7 +22,7 @@ public class RavenUserInstallerTests
     {
         using (var documentStore = new DocumentStore
             {
-                Url = "http://localhost:8083",
+                Url = TestConstants.RavenUrl,
                 DefaultDatabase = "Test"
             })
         {
