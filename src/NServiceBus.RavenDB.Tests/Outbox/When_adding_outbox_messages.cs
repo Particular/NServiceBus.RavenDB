@@ -174,5 +174,33 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             Assert.NotNull(result);
             Assert.True(result.Dispatched);
         }
+
+        [Test]
+        public void Should_filter_invalid_docid_character()
+        {
+            var sessionFactory = new RavenSessionFactory(store);
+            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store, EndpointName = "TestEndpoint" };
+
+            var guid = Guid.NewGuid();
+            var messageId = $@"{guid}\12345";
+            var emptyDictionary = new Dictionary<string, string>();
+
+            using (sessionFactory.Session)
+            {
+                persister.Store(messageId, new [] { new TransportOperation("test", emptyDictionary, new byte[0], emptyDictionary) });
+
+                sessionFactory.SaveChanges();
+            }
+
+            OutboxMessage outboxMessage;
+            var result = persister.TryGet(messageId, out outboxMessage);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(messageId, outboxMessage.MessageId);
+            Assert.AreEqual(1, outboxMessage.TransportOperations.Count);
+            Assert.AreEqual("test", outboxMessage.TransportOperations[0].MessageId);
+        }
+
+
     }
 }
