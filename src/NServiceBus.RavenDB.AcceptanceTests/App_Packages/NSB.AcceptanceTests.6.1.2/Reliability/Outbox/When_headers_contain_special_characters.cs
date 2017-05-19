@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.RavenDB.AcceptanceTests.App_Packages.NSB.AcceptanceTests._6._1._2.Reliability.Outbox
+﻿namespace NServiceBus.AcceptanceTests.Reliability.Outbox
 {
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests;
