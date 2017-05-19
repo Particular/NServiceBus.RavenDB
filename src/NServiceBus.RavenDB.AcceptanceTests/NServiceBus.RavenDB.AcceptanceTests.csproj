@@ -217,6 +217,7 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.6.1.2\Reliability\Outbox\When_blowing_up_just_after_dispatch.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.6.1.2\Reliability\Outbox\When_clearing_saga_timeouts.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.6.1.2\Reliability\Outbox\When_dispatching_forwarded_messages.cs" />
+    <Compile Include="App_Packages\NSB.AcceptanceTests.6.1.2\Reliability\Outbox\When_headers_contain_special_characters.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.6.1.2\Reliability\Outbox\When_receiving_a_message.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.6.1.2\Reliability\Outbox\When_sending_from_a_non_dtc_endpoint.cs" />
     <Compile Include="App_Packages\NSB.AcceptanceTests.6.1.2\Routing\AutomaticSubscriptions\When_starting_an_endpoint_with_autoSubscribe.cs" />
