@@ -51,8 +51,8 @@
             {
                 EndpointSetup<DefaultServer>(b =>
                 {
-                    b.EnableOutbox();
                     b.GetSettings().Set("DisableOutboxTransportCheck", true);
+                    b.EnableOutbox();
                     b.Pipeline.Register("BlowUpBeforeDispatchBehavior", new BlowUpBeforeDispatchBehavior((Context)ScenarioContext), "Force reading the message from Outbox storage.");
                     b.Recoverability().Immediate(a => a.NumberOfRetries(1));
                 });
