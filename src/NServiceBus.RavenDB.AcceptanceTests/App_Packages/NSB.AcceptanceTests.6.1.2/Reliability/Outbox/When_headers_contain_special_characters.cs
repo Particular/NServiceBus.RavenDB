@@ -11,21 +11,19 @@
 
     public class When_headers_contain_special_characters : NServiceBusAcceptanceTest
     {
-        static Guid messageId = Guid.NewGuid();
-        static bool SavedOutBoxRecord = false;
         static Dictionary<string, string> sentHeaders = new Dictionary<string, string>
-            {
-                { "a-B1", "a-B" },
-                { "a-B2", "a-ɤϡ֎ᾣ♥-b" },
-                { "a-ɤϡ֎ᾣ♥-B3", "a-B" },
-                { "a-B4", "a-\U0001F60D-b" },
-                { "a-\U0001F605-B5", "a-B" },
-                { "a-B6", "a-😍-b" },
-                { "a-😅-B7", "a-B" },
-                {"a-b8", "奥曼克"},
-                {"a-B9", "٩(-̮̮̃-̃)۶ ٩(●̮̮̃•̃)۶ ٩(͡๏̯͡๏)۶ ٩(-̮̮̃•̃)" },
-                {"a-b10", "தமிழ்" }
-            };
+        {
+            { "a-B1", "a-B" },
+            { "a-B2", "a-ɤϡ֎ᾣ♥-b" },
+            { "a-ɤϡ֎ᾣ♥-B3", "a-B" },
+            { "a-B4", "a-\U0001F60D-b" },
+            { "a-\U0001F605-B5", "a-B" },
+            { "a-B6", "a-😍-b" },
+            { "a-😅-B7", "a-B" },
+            {"a-b8", "奥曼克"},
+            {"a-B9", "٩(-̮̮̃-̃)۶ ٩(●̮̮̃•̃)۶ ٩(͡๏̯͡๏)۶ ٩(-̮̮̃•̃)" },
+            {"a-b10", "தமிழ்" }
+        };
 
         [Test]
         public async Task Outbox_should_work()
@@ -34,7 +32,7 @@
                 await Scenario.Define<Context>()
                     .WithEndpoint<OutboxEndpoint>(b => b.When(session => session.SendLocal(new PlaceOrder())))
                     .Done(c => c.MessageReceived)
-                    .Run(TimeSpan.FromSeconds(20));
+                    .Run();
 
             Assert.IsNotEmpty(context.UnicodeHeaders);
             CollectionAssert.IsSubsetOf(sentHeaders, context.UnicodeHeaders);
@@ -42,8 +40,9 @@
 
         class Context : ScenarioContext
         {
-            public Dictionary<string, string> UnicodeHeaders { get; set; }
+            public IReadOnlyDictionary<string, string> UnicodeHeaders { get; set; }
             public bool MessageReceived { get; set; }
+            public bool SavedOutBoxRecord { get; set; }
         }
 
         public class OutboxEndpoint : EndpointConfigurationBuilder
@@ -53,24 +52,29 @@
                 EndpointSetup<DefaultServer>(b =>
                 {
                     b.EnableOutbox();
-                    b.Pipeline.Register("BlowUpBeforeDispatchBehavior", new BlowUpBeforeDispatchBehavior(), "Force reading the message from Outbox storage.");
+                    b.Pipeline.Register("BlowUpBeforeDispatchBehavior", new BlowUpBeforeDispatchBehavior((Context)ScenarioContext), "Force reading the message from Outbox storage.");
                     b.Recoverability().Immediate(a => a.NumberOfRetries(1));
                 });
             }
             class BlowUpBeforeDispatchBehavior : IBehavior<IBatchDispatchContext, IBatchDispatchContext>
             {
+                Context _context;
+                public BlowUpBeforeDispatchBehavior(Context context)
+                {
+                    _context = context;
+                }
                 public async Task Invoke(IBatchDispatchContext context, Func<IBatchDispatchContext, Task> next)
                 {
-                    if (!SavedOutBoxRecord)
+                    if (!_context.SavedOutBoxRecord)
                     {
-                        SavedOutBoxRecord = true;
+                        _context.SavedOutBoxRecord = true;
                         throw new Exception();
                     }
-
 
                     await next(context).ConfigureAwait(false);
                 }
             }
+
             class PlaceOrderHandler : IHandleMessages<PlaceOrder>
             {
                 public Task Handle(PlaceOrder message, IMessageHandlerContext context)
@@ -82,7 +86,6 @@
                     {
                         sendOptions.SetHeader(header.Key, header.Value);
                     }
-                    sendOptions.SetMessageId(messageId.ToString());
                     return context.Send(sendOrderAcknowledgement, sendOptions);
                 }
             }
@@ -94,7 +97,7 @@
                 public Task Handle(SendOrderAcknowledgement message, IMessageHandlerContext context)
                 {
                     Context.MessageReceived = true;
-                    Context.UnicodeHeaders = (Dictionary<string, string>)context.MessageHeaders;
+                    Context.UnicodeHeaders = context.MessageHeaders;
                     return Task.FromResult(0);
                 }
             }
