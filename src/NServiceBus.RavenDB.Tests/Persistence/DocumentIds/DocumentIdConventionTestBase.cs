@@ -25,7 +25,7 @@
 
         protected void StoreHiLo(IDocumentStore store, string entityName, int number)
         {
-            string hiloId = $"Raven/Hilo/{entityName}";
+            var hiloId = $"Raven/Hilo/{entityName}";
             var document = new RavenJObject();
             document["Max"] = 32;
             var metadata = new RavenJObject();

@@ -85,9 +85,9 @@
             }
         }
 
-        static string GetOutboxRecordIdWithoutEndpointName(string messageId) => $"Outbox/{messageId}";
+        static string GetOutboxRecordIdWithoutEndpointName(string messageId) => $"Outbox/{messageId.Replace('\\', '_')}";
         OutboxRecord.OutboxOperation[] emptyOutboxOperations = new OutboxRecord.OutboxOperation[0];
 
-        string GetOutboxRecordId(string messageId) => $"Outbox/{EndpointName}/{messageId}";
+        string GetOutboxRecordId(string messageId) => $"Outbox/{EndpointName}/{messageId.Replace('\\', '_')}";
     }
 }
