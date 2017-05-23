@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.AcceptanceTests.Reliability.Outbox
 {
+    using Configuration.AdvanceExtensibility;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
