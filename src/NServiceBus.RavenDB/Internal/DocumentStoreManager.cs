@@ -57,7 +57,7 @@
             SetDocumentStoreInternal(settings, typeof(TStorageType), storeCreator);
         }
 
-        private static void SetDocumentStoreInternal(SettingsHolder settings, Type storageType, Func<ReadOnlySettings, IDocumentStore> storeCreator)
+        static void SetDocumentStoreInternal(SettingsHolder settings, Type storageType, Func<ReadOnlySettings, IDocumentStore> storeCreator)
         {
             var initContext = new DocumentStoreInitializer(storeCreator);
             settings.Set(featureSettingsKeys[storageType], initContext);
@@ -127,7 +127,7 @@
             return docStoreInitializer;
         }
 
-        private static DocumentStoreInitializer CreateDefaultDocumentStore(ReadOnlySettings settings)
+        static DocumentStoreInitializer CreateDefaultDocumentStore(ReadOnlySettings settings)
         {
             var p = settings.GetOrDefault<ConnectionParameters>(RavenDbSettingsExtensions.DefaultConnectionParameters);
             if (p != null)

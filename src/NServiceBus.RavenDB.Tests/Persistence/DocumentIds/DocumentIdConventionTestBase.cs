@@ -55,7 +55,7 @@
             store.Conventions.FindTypeTagName = conventions.FindTypeTagName;
         }
 
-        private void ApplyConventionsInternal(IDocumentStore store, ConventionType type, bool forPrefill)
+        void ApplyConventionsInternal(IDocumentStore store, ConventionType type, bool forPrefill)
         {
             switch (type)
             {

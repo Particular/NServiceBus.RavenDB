@@ -8,8 +8,8 @@
 
     class ReusableDB : IDisposable
     {
-        private readonly string databaseName;
-        private readonly bool deleteOnCompletion;
+        readonly string databaseName;
+        readonly bool deleteOnCompletion;
 
         public ReusableDB(bool deleteOnCompletion = true)
         {
@@ -35,7 +35,7 @@
             return CreateStore();
         }
 
-        private IDocumentStore CreateStore()
+        IDocumentStore CreateStore()
         {
             return new DocumentStore
             {
