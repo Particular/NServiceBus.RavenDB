@@ -3,6 +3,7 @@
     using System;
     using System.Security.Cryptography;
     using System.Text;
+    using NServiceBus.ConsistencyGuarantees;
     using NServiceBus.Features;
     using NServiceBus.Logging;
     using NServiceBus.Settings;
@@ -67,8 +68,9 @@
                 return;
             }
 
-            bool suppressDistributedTransactions;
-            if (settings.TryGet("Transactions.SuppressDistributedTransactions", out suppressDistributedTransactions) && suppressDistributedTransactions)
+            var usingDtc = settings.GetRequiredTransactionModeForReceives() == TransportTransactionMode.TransactionScope;
+
+            if (!usingDtc)
             {
                 store.EnlistInDistributedTransactions = false;
             }
