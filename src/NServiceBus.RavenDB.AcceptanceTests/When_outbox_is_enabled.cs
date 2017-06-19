@@ -5,6 +5,7 @@
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.AcceptanceTesting.Customization;
     using NServiceBus.Features;
     using NUnit.Framework;
 
@@ -65,9 +66,10 @@
                         b.GetSettings().Set("DisableOutboxTransportCheck", true);
                         b.EnableFeature<TimeoutManager>();
                         b.EnableOutbox();
-                    })
-                    .AddMapping<DownstreamMessage>(typeof(DownstreamEndpoint))
-                    .AddMapping<MarkerMessage>(typeof(DownstreamEndpoint));
+
+                        b.ConfigureTransport().Routing().RouteToEndpoint(typeof(DownstreamMessage), typeof(DownstreamEndpoint));
+                        b.ConfigureTransport().Routing().RouteToEndpoint(typeof(MarkerMessage), typeof(DownstreamEndpoint));
+                    });
             }
 
             class DuplicateMessageHandler : IHandleMessages<DuplicateMessage>

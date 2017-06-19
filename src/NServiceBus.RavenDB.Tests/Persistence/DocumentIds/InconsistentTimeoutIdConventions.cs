@@ -145,7 +145,7 @@
             }
         }
 
-        private async Task Prefill(IDocumentStore store, ConventionType seedType)
+        async Task Prefill(IDocumentStore store, ConventionType seedType)
         {
             Console.WriteLine($"Filling database with timeout data, using {seedType} conventions");
             var timeout = new TimeoutData
@@ -172,7 +172,7 @@
             await StoreHiLo(store, name);
         }
 
-        private string CreateTimeoutIndex(IDocumentStore store)
+        string CreateTimeoutIndex(IDocumentStore store)
         {
             Console.WriteLine("Creating index TimeoutsIndex:");
 
