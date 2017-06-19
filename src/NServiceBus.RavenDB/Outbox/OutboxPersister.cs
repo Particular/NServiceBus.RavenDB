@@ -115,12 +115,14 @@
         {
             return new[]
             {
+                // Current format, already replaces \ with _
                 GetOutboxRecordId(messageId),
-                $"Outbox/{messageId}"
+                // Legacy format without endpoint id
+                $"Outbox/{messageId.Replace('\\', '_')}"
             };
         }
 
-        string GetOutboxRecordId(string messageId) => $"Outbox/{endpointName}/{messageId}";
+        string GetOutboxRecordId(string messageId) => $"Outbox/{endpointName}/{messageId.Replace('\\', '_')}";
 
         string endpointName;
         IDocumentStore documentStore;

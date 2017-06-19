@@ -203,5 +203,29 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             
         }
 
+        [Test]
+        public async Task Should_filter_invalid_docid_character()
+        {
+            var persister = new OutboxPersister(store, testEndpointName);
+
+            var guid = Guid.NewGuid();
+            var messageId = $@"{guid}\12345";
+            var emptyDictionary = new Dictionary<string, string>();
+            var operation = new TransportOperation("test", emptyDictionary, new byte[0], emptyDictionary);
+            var transportOperations = new [] { operation };
+
+            using (var transaction = await persister.BeginTransaction(new ContextBag()))
+            {
+                await persister.Store(new OutboxMessage(messageId, transportOperations), transaction, new ContextBag());
+                await transaction.Commit();
+            }
+
+            var outboxMessage = await persister.Get(messageId, new ContextBag());
+
+            Assert.AreEqual(messageId, outboxMessage.MessageId);
+            Assert.AreEqual(1, outboxMessage.TransportOperations.Length);
+            Assert.AreEqual("test", outboxMessage.TransportOperations[0].MessageId);
+        }
+
     }
 }
