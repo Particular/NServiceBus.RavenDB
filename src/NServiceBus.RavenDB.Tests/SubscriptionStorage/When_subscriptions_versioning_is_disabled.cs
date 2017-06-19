@@ -41,4 +41,30 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
         Assert.AreEqual(2, subscribers_looked_up_by_v1.Length);
         Assert.AreEqual(2, subscribers_looked_up_by_v2.Length);
     }
+
+    [Test]
+    public async Task At_unsubscribe_time_should_ignore_message_version()
+    {
+        var subscriberAddress = "subscriber@localhost";
+        var endpointName = "endpoint_name";
+        var messageType_v1 = new MessageType("SomeMessageType", "1.0.0.0");
+        var messageType_v2 = new MessageType("SomeMessageType", "2.0.0.0");
+        var subscriber_v1 = new Subscriber(subscriberAddress, endpointName);
+        var subscriber_v2 = new Subscriber(subscriberAddress, endpointName);
+
+        var storage = new SubscriptionPersister(store)
+        {
+            DisableSubscriptionsVersioning = true
+        };
+
+        await storage.Subscribe(subscriber_v1, messageType_v1, new ContextBag());
+        await storage.Unsubscribe(subscriber_v2, messageType_v2, new ContextBag());
+
+        var subscribers = (await storage.GetSubscriberAddressesForMessage(new[]
+        {
+            messageType_v1
+        }, new ContextBag())).ToArray();
+
+        Assert.AreEqual(0, subscribers.Length);
+    }
 }

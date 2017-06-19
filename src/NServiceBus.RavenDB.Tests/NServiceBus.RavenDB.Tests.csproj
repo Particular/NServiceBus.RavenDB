@@ -135,7 +135,7 @@
     <Compile Include="App_Packages\ApiApprover.3.0.1\PublicApiApprover.cs" />
     <Compile Include="App_Packages\ApiApprover.3.0.1\PublicApiGenerator.cs" />
     <Compile Include="SubscriptionStorage\SubscriptionClientTests.cs" />
-    <Compile Include="SubscriptionStorage\When_receiving_multiple_subscription_messages_with_defferent_versions.cs" />
+    <Compile Include="SubscriptionStorage\When_subscriptions_versioning_is_disabled.cs" />
     <Compile Include="TestConstants.cs" />
     <Compile Include="FakeRavenDBTestTransport.cs" />
     <Compile Include="Infrastructure\ReusableDB.cs" />
