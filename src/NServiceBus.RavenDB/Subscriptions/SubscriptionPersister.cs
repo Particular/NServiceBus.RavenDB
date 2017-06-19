@@ -21,6 +21,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public TimeSpan AggressiveCacheDuration { get; set; } = TimeSpan.FromMinutes(1);
         public bool DisableAggressiveCaching { get; set; }
+        public bool DisableSubscriptionsVersioning { get; set; }
 
         public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
@@ -38,7 +39,7 @@ namespace NServiceBus.Persistence.RavenDB
                 {
                     using (var session = OpenAsyncSession())
                     {
-                        var subscriptionDocId = Subscription.FormatId(messageType);
+                        var subscriptionDocId = Subscription.FormatId(messageType, DisableSubscriptionsVersioning);
 
                         var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
 
@@ -85,7 +86,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             using (var session = OpenAsyncSession())
             {
-                var subscriptionDocId = Subscription.FormatId(messageType);
+                var subscriptionDocId = Subscription.FormatId(messageType, DisableSubscriptionsVersioning);
 
                 var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
 
@@ -105,7 +106,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
-            var ids = messageTypes.Select(Subscription.FormatId).ToList();
+            var ids = messageTypes.Select(messageType => Subscription.FormatId(messageType, DisableSubscriptionsVersioning)).ToList();
 
             using (var suppressTransaction = new TransactionScope(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled))
             {

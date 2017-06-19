@@ -25,6 +25,11 @@
                 persister.DisableAggressiveCaching = true;
             }
 
+            if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DisableSubscriptionsVersioningKey))
+            {
+                persister.DisableSubscriptionsVersioning = true;
+            }
+
             TimeSpan aggressiveCacheDuration;
             if (context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.AggressiveCacheDurationSettingsKey, out aggressiveCacheDuration))
             {

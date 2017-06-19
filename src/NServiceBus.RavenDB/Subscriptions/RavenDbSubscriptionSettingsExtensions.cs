@@ -14,6 +14,7 @@
     {
         internal const string DoNotAggressivelyCacheSubscriptionsSettingsKey = "RavenDB.DoNotAggressivelyCacheSubscriptions";
         internal const string AggressiveCacheDurationSettingsKey = "RavenDB.AggressiveCacheDuration";
+        internal const string DisableSubscriptionsVersioningKey = "RavenDB.DisableSubscriptionsVersioning";
 
         /// <summary>
         ///     Configures the given document store to be used when storing subscriptions
@@ -60,6 +61,19 @@
         public static PersistenceExtensions<RavenDBPersistence> CacheSubscriptionsFor(this PersistenceExtensions<RavenDBPersistence> cfg, TimeSpan aggressiveCacheDuration)
         {
             cfg.GetSettings().Set(AggressiveCacheDurationSettingsKey, aggressiveCacheDuration);
+            return cfg;
+        }
+
+        /// <summary>
+        /// Stop using message versions to store subscriptions. By default RavenDB Persistence subscriptions storage format includes
+        /// the message version, by enabling this setting the storage will store subscription using the message type as subscription key
+        /// simplifying the evolution of large systems where message assembly versioning is required.
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <returns></returns>
+        public static PersistenceExtensions<RavenDBPersistence> DisableSubscriptionsVersioning(this PersistenceExtensions<RavenDBPersistence> cfg)
+        {
+            cfg.GetSettings().Set(DisableSubscriptionsVersioningKey, true);
             return cfg;
         }
     }

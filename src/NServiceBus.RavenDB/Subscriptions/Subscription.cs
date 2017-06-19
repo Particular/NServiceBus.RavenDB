@@ -45,12 +45,16 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
             }
         }
 
-        public static string FormatId(MessageType messageType)
+        //setting doNotUseVersionInSubscriptionId top false as it's the default behavior
+        public static string FormatId(MessageType messageType, bool doNotUseVersionInSubscriptionId = false)
         {
             // use MD5 hash to get a 16-byte hash of the string
             using (var provider = new MD5CryptoServiceProvider())
             {
-                var inputBytes = Encoding.Default.GetBytes(messageType.TypeName + "/" + messageType.Version.Major);
+                var inputString = doNotUseVersionInSubscriptionId ?
+                    messageType.TypeName
+                    : messageType.TypeName + "/" + messageType.Version.Major;
+                var inputBytes = Encoding.Default.GetBytes(inputString);
                 var hashBytes = provider.ComputeHash(inputBytes);
                 // generate a guid from the hash:
                 var id = new Guid(hashBytes);
