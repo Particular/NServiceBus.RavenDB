@@ -2,12 +2,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
-using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.RavenDB.Tests;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 using NUnit.Framework;
-using Raven.Client;
 
 [TestFixture]
 public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestBase
@@ -42,7 +40,5 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
 
         Assert.AreEqual(2, subscribers_looked_up_by_v1.Length);
         Assert.AreEqual(2, subscribers_looked_up_by_v2.Length);
-        //Assert.AreEqual(subscriberAddress, subscribers[0].TransportAddress);
-        //Assert.AreEqual("new_endpoint_name", subscribers[0].Endpoint);
     }
 }
