@@ -58,13 +58,21 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
         };
 
         await storage.Subscribe(subscriber_v1, messageType_v1, new ContextBag());
-        await storage.Unsubscribe(subscriber_v2, messageType_v2, new ContextBag());
 
         var subscribers = (await storage.GetSubscriberAddressesForMessage(new[]
         {
             messageType_v1
         }, new ContextBag())).ToArray();
 
-        Assert.AreEqual(0, subscribers.Length);
+        Assert.AreEqual(1, subscribers.Length);
+
+        await storage.Unsubscribe(subscriber_v2, messageType_v2, new ContextBag());
+
+        var subscribers_looked_up_by_v1 = (await storage.GetSubscriberAddressesForMessage(new[]
+        {
+            messageType_v1
+        }, new ContextBag())).ToArray();
+
+        Assert.AreEqual(0, subscribers_looked_up_by_v1.Length);
     }
 }
