@@ -18,6 +18,8 @@
     [TestFixture]
     public class When_converting_old_subscription_to_new_subscription : RavenDBPersistenceTestBase
     {
+        SubscriptionIdFormatter idFormatter;
+
         public override void SetUp()
         {
             base.SetUp();
@@ -25,7 +27,8 @@
             store.Listeners.RegisterListener(new FakeSubscriptionClrType());
             store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
 
-            persister = new SubscriptionPersister(store);
+            idFormatter = new SubscriptionIdFormatter(useMessageVersionToGenerateSubscriptionId: true);
+            persister = new SubscriptionPersister(store, idFormatter);
         }
 
         [Test]
@@ -41,7 +44,7 @@
                     new LegacyAddress("mytestendpoint", RuntimeEnvironment.MachineName)
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType))
+            }, idFormatter.FormatId(messageType))
             .ConfigureAwait(false);
             await session.SaveChangesAsync().ConfigureAwait(false);
 
@@ -72,7 +75,7 @@
                     new LegacyAddress("mytestendpoint", null)
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+            }, idFormatter.FormatId(messageType)).ConfigureAwait(false);
             await session.SaveChangesAsync().ConfigureAwait(false);
 
             List<Subscriber> subscriptions = null;
@@ -98,7 +101,7 @@
             {
                 Clients = new List<LegacyAddress>(),
                 MessageType = messageType
-            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+            }, idFormatter.FormatId(messageType)).ConfigureAwait(false);
             await session.SaveChangesAsync().ConfigureAwait(false);
 
             List<Subscriber> subscriptions = null;
@@ -121,7 +124,7 @@
                     new SubscriptionClient { TransportAddress = "mytestendpoint" + "@" + RuntimeEnvironment.MachineName, Endpoint = "mytestendpoint" }
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+            }, idFormatter.FormatId(messageType)).ConfigureAwait(false);
 
             await session.SaveChangesAsync().ConfigureAwait(false);
 
@@ -142,7 +145,7 @@
                     new LegacyAddress("mytestendpoint", RuntimeEnvironment.MachineName)
                 },
                 MessageType = MessageTypes.MessageA
-            }, Subscription.FormatId(MessageTypes.MessageA))
+            }, idFormatter.FormatId(MessageTypes.MessageA))
             .ConfigureAwait(false);
             await session.SaveChangesAsync().ConfigureAwait(false);
 

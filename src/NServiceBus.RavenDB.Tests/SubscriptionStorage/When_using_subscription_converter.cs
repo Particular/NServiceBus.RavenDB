@@ -28,9 +28,10 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
             //store.Listeners.RegisterListener(new FakeSubscriptionClrType());
             store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
 
-            persister = new SubscriptionPersister(store);
+            var idFormatter = new SubscriptionIdFormatter(useMessageVersionToGenerateSubscriptionId: true);
+            persister = new SubscriptionPersister(store, idFormatter);
             msgType = new MessageType(typeof(MessageA));
-            docId = Subscription.FormatId(msgType);
+            docId = idFormatter.FormatId(msgType);
         }
 
         [Test]

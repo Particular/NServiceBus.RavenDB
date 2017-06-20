@@ -14,14 +14,14 @@ namespace NServiceBus.Persistence.RavenDB
 
     class SubscriptionPersister : ISubscriptionStorage
     {
-        public SubscriptionPersister(IDocumentStore store)
+        public SubscriptionPersister(IDocumentStore store, SubscriptionIdFormatter formatter)
         {
             documentStore = store;
+            subscriptionIdFormatter = formatter;
         }
 
         public TimeSpan AggressiveCacheDuration { get; set; } = TimeSpan.FromMinutes(1);
         public bool DisableAggressiveCaching { get; set; }
-        public bool DisableSubscriptionsVersioning { get; set; }
 
         public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
@@ -39,7 +39,7 @@ namespace NServiceBus.Persistence.RavenDB
                 {
                     using (var session = OpenAsyncSession())
                     {
-                        var subscriptionDocId = Subscription.FormatId(messageType, DisableSubscriptionsVersioning);
+                        var subscriptionDocId = subscriptionIdFormatter.FormatId(messageType);
 
                         var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
 
@@ -86,7 +86,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             using (var session = OpenAsyncSession())
             {
-                var subscriptionDocId = Subscription.FormatId(messageType, DisableSubscriptionsVersioning);
+                var subscriptionDocId = subscriptionIdFormatter.FormatId(messageType);
 
                 var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
 
@@ -106,7 +106,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
-            var ids = messageTypes.Select(messageType => Subscription.FormatId(messageType, DisableSubscriptionsVersioning)).ToList();
+            var ids = messageTypes.Select(subscriptionIdFormatter.FormatId).ToList();
 
             using (var suppressTransaction = new TransactionScope(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -162,5 +162,6 @@ namespace NServiceBus.Persistence.RavenDB
         }
 
         IDocumentStore documentStore;
+        SubscriptionIdFormatter subscriptionIdFormatter;
     }
 }

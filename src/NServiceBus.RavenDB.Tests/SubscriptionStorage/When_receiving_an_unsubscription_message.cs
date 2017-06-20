@@ -3,6 +3,7 @@ using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
+using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 
 [TestFixture]
 public class When_receiving_an_unsubscribe_message : RavenDBPersistenceTestBase
@@ -10,7 +11,8 @@ public class When_receiving_an_unsubscribe_message : RavenDBPersistenceTestBase
     [Test]
     public async Task All_subscription_entries_for_specified_message_types_should_be_removed()
     {
-        var storage = new SubscriptionPersister(store);
+        var idFormatter = new SubscriptionIdFormatter(useMessageVersionToGenerateSubscriptionId: true);
+        var storage = new SubscriptionPersister(store, idFormatter);
         var context = new ContextBag();
 
         await storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA, context);

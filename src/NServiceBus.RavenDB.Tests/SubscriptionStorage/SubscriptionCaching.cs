@@ -9,6 +9,7 @@
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using NUnit.Framework;
     using Raven.Client.Connection.Profiling;
+    using RavenDB.Persistence.SubscriptionStorage;
 
     [TestFixture]
     public class SubscriptionCaching : RavenDBPersistenceTestBase
@@ -36,7 +37,8 @@
         [TestCase(true, RequestStatus.Cached)]
         public async Task Subscription_queries_should_be_cached(bool disableAggressiveCache, RequestStatus expectedResultOnSubscriptionQueries)
         {
-            persister = new SubscriptionPersister(store);
+            var idFormatter = new SubscriptionIdFormatter(useMessageVersionToGenerateSubscriptionId: true);
+            persister = new SubscriptionPersister(store, idFormatter);
             persister.DisableAggressiveCaching = disableAggressiveCache;
 
             await persister.Subscribe(new Subscriber("TransportAddress1", "Endpoint1"), MessageTypes.MessageA, new ContextBag());

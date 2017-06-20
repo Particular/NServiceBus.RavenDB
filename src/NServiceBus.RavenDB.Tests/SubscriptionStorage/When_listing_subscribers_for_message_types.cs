@@ -5,6 +5,7 @@ using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NServiceBus.Unicast.Subscriptions;
 using NUnit.Framework;
+using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 
 [TestFixture]
 public class When_listing_subscribers_for_message_types : RavenDBPersistenceTestBase
@@ -12,7 +13,8 @@ public class When_listing_subscribers_for_message_types : RavenDBPersistenceTest
     [Test]
     public async Task The_names_of_all_subscribers_should_be_returned()
     {
-        var storage = new SubscriptionPersister(store);
+        var idFormatter = new SubscriptionIdFormatter(useMessageVersionToGenerateSubscriptionId: true);
+        var storage = new SubscriptionPersister(store, idFormatter);
         var context = new ContextBag();
 
         await storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA, context);
@@ -34,7 +36,8 @@ public class When_listing_subscribers_for_message_types : RavenDBPersistenceTest
     [Test]
     public async Task Duplicates_should_not_be_generated_for_interface_inheritance_chains()
     {
-        var storage = new SubscriptionPersister(store);
+        var idFormatter = new SubscriptionIdFormatter(useMessageVersionToGenerateSubscriptionId: true);
+        var storage = new SubscriptionPersister(store, idFormatter);
         var context = new ContextBag();
 
         await storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface)), context);
