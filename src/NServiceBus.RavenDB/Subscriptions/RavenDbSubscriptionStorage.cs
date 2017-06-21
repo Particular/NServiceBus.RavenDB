@@ -26,7 +26,7 @@
                 persister.DisableAggressiveCaching = true;
             }
 
-            if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DisableSubscriptionsVersioningKey))
+            if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DisableSubscriptionVersioningKey))
             {
                 persister.SubscriptionIdFormatter = new NonVersionedSubscriptionIdFormatter();
             }

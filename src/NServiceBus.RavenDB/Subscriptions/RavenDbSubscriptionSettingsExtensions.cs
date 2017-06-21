@@ -14,7 +14,7 @@
     {
         internal const string DoNotAggressivelyCacheSubscriptionsSettingsKey = "RavenDB.DoNotAggressivelyCacheSubscriptions";
         internal const string AggressiveCacheDurationSettingsKey = "RavenDB.AggressiveCacheDuration";
-        internal const string DisableSubscriptionsVersioningKey = "RavenDB.DisableSubscriptionsVersioning";
+        internal const string DisableSubscriptionVersioningKey = "RavenDB.DisableSubscriptionVersioning";
 
         /// <summary>
         ///     Configures the given document store to be used when storing subscriptions
@@ -71,9 +71,9 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <returns></returns>
-        public static PersistenceExtensions<RavenDBPersistence> DisableSubscriptionsVersioning(this PersistenceExtensions<RavenDBPersistence> cfg)
+        public static PersistenceExtensions<RavenDBPersistence> DisableSubscriptionVersioning(this PersistenceExtensions<RavenDBPersistence> cfg)
         {
-            cfg.GetSettings().Set(DisableSubscriptionsVersioningKey, true);
+            cfg.GetSettings().Set(DisableSubscriptionVersioningKey, true);
             return cfg;
         }
     }
