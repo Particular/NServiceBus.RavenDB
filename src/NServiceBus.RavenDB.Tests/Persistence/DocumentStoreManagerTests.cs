@@ -79,7 +79,6 @@
             var settings = new SettingsHolder();
             settings.Set("NServiceBus.LocalAddress", "FakeAddress");
             settings.Set("EndpointVersion", "FakeVersion");
-            settings.SetDefault("Transactions.SuppressDistributedTransactions", false);
             settings.Set("NServiceBus.Routing.EndpointName", "FakeEndpoint");
             settings.Set<SingleSharedDocumentStore>(new SingleSharedDocumentStore());
 
