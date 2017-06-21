@@ -6,6 +6,7 @@ using NServiceBus.RavenDB.Tests;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 using NUnit.Framework;
+using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 
 [TestFixture]
 public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestBase
@@ -22,7 +23,7 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
 
         var storage = new SubscriptionPersister(store)
         {
-            DisableSubscriptionsVersioning = true
+            SubscriptionIdFormatter = new NonVersionedSubscriptionIdFormatter()
         };
 
         await storage.Subscribe(subscriber_v1, messageType_v1, new ContextBag());
@@ -54,7 +55,7 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
 
         var storage = new SubscriptionPersister(store)
         {
-            DisableSubscriptionsVersioning = true
+            SubscriptionIdFormatter = new NonVersionedSubscriptionIdFormatter()
         };
 
         await storage.Subscribe(subscriber_v1, messageType_v1, new ContextBag());
