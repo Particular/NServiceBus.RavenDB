@@ -1,6 +1,5 @@
 ﻿namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
 {
-    using System;
     using System.Security.Cryptography;
     using System.Text;
     using Unicast.Subscriptions;
@@ -9,15 +8,22 @@
     {
         public string FormatId(MessageType messageType)
         {
-            // use MD5 hash to get a 16-byte hash of the string
-            using (var provider = new MD5CryptoServiceProvider())
+            using (var provider = new SHA1CryptoServiceProvider())
             {
-                var inputBytes = Encoding.Default.GetBytes(messageType.TypeName);
+                var inputBytes = Encoding.UTF8.GetBytes(messageType.TypeName);
                 var hashBytes = provider.ComputeHash(inputBytes);
-                // generate a guid from the hash:
-                var id = new Guid(hashBytes);
 
-                return $"Subscriptions/{id}";
+                // 54ch for perf - "Subscriptions/" (14ch) + 40ch hash
+                var idBuilder = new StringBuilder(54);
+
+                idBuilder.Append("Subscriptions/");
+
+                for (var i = 0; i < hashBytes.Length; i++)
+                {
+                    idBuilder.Append(hashBytes[i].ToString("x2"));
+                }
+
+                return idBuilder.ToString();
             }
         }
     }
