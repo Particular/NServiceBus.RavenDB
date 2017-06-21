@@ -65,9 +65,9 @@
         }
 
         /// <summary>
-        /// Stop using message versions to store subscriptions. By default RavenDB Persistence subscriptions storage format includes
-        /// the message version, by enabling this setting the storage will store subscription using the message type as subscription key
-        /// simplifying the evolution of large systems where message assembly versioning is required.
+        /// Do not include message assembly major version in subscription document lookup key.
+        /// Subscription behavior will be changed such that all existing subscriptions will be rendered invalid.
+        /// Do not enable in an existing system without converting subscription documents first.
         /// </summary>
         /// <param name="cfg"></param>
         /// <returns></returns>
