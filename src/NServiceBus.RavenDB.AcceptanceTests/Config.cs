@@ -18,7 +18,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
     const string DefaultDocumentStoreKey = "$.ConfigureEndpointRavenDBPersistence.DefaultDocumentStore";
     const string DefaultPersistenceExtensionsKey = "$.ConfigureRavenDBPersistence.DefaultPersistenceExtensions";
 
-    public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings)
+    public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings, PublisherMetadata publisherMetadata)
     {
         var documentStore = GetDocumentStore();
 
