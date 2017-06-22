@@ -4,6 +4,7 @@
     using NServiceBus.Features;
     using NServiceBus.Persistence;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
+    using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 
     class RavenDbSubscriptionStorage : Feature
     {
@@ -23,6 +24,11 @@
             if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DoNotAggressivelyCacheSubscriptionsSettingsKey))
             {
                 persister.DisableAggressiveCaching = true;
+            }
+
+            if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DisableSubscriptionVersioningKey))
+            {
+                persister.SubscriptionIdFormatter = new NonVersionedSubscriptionIdFormatter();
             }
 
             TimeSpan aggressiveCacheDuration;

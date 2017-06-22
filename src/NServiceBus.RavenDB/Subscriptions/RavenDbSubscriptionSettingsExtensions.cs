@@ -14,6 +14,7 @@
     {
         internal const string DoNotAggressivelyCacheSubscriptionsSettingsKey = "RavenDB.DoNotAggressivelyCacheSubscriptions";
         internal const string AggressiveCacheDurationSettingsKey = "RavenDB.AggressiveCacheDuration";
+        internal const string DisableSubscriptionVersioningKey = "RavenDB.DisableSubscriptionVersioning";
 
         /// <summary>
         ///     Configures the given document store to be used when storing subscriptions
@@ -60,6 +61,19 @@
         public static PersistenceExtensions<RavenDBPersistence> CacheSubscriptionsFor(this PersistenceExtensions<RavenDBPersistence> cfg, TimeSpan aggressiveCacheDuration)
         {
             cfg.GetSettings().Set(AggressiveCacheDurationSettingsKey, aggressiveCacheDuration);
+            return cfg;
+        }
+
+        /// <summary>
+        /// Do not include message assembly major version in subscription document lookup key.
+        /// Subscription behavior will be changed such that all existing subscriptions will be rendered invalid.
+        /// Do not enable in an existing system without converting subscription documents first.
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <returns></returns>
+        public static PersistenceExtensions<RavenDBPersistence> DisableSubscriptionVersioning(this PersistenceExtensions<RavenDBPersistence> cfg)
+        {
+            cfg.GetSettings().Set(DisableSubscriptionVersioningKey, true);
             return cfg;
         }
     }
