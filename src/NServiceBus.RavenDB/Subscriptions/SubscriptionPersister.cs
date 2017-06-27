@@ -17,10 +17,12 @@ namespace NServiceBus.Persistence.RavenDB
         public SubscriptionPersister(IDocumentStore store)
         {
             documentStore = store;
+            SubscriptionIdFormatter = new VersionedSubscriptionIdFormatter();
         }
 
         public TimeSpan AggressiveCacheDuration { get; set; } = TimeSpan.FromMinutes(1);
         public bool DisableAggressiveCaching { get; set; }
+        public ISubscriptionIdFormatter SubscriptionIdFormatter { get; set; }
 
         public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
@@ -38,7 +40,7 @@ namespace NServiceBus.Persistence.RavenDB
                 {
                     using (var session = OpenAsyncSession())
                     {
-                        var subscriptionDocId = Subscription.FormatId(messageType);
+                        var subscriptionDocId = SubscriptionIdFormatter.FormatId(messageType);
 
                         var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
 
@@ -85,7 +87,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             using (var session = OpenAsyncSession())
             {
-                var subscriptionDocId = Subscription.FormatId(messageType);
+                var subscriptionDocId = SubscriptionIdFormatter.FormatId(messageType);
 
                 var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
 
@@ -105,7 +107,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
-            var ids = messageTypes.Select(Subscription.FormatId).ToList();
+            var ids = messageTypes.Select(messageType => SubscriptionIdFormatter.FormatId(messageType)).ToList();
 
             using (var suppressTransaction = new TransactionScope(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled))
             {

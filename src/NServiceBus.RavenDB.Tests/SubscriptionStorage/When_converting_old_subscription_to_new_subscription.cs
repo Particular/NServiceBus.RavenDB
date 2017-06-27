@@ -41,7 +41,7 @@
                     new LegacyAddress("mytestendpoint", RuntimeEnvironment.MachineName)
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType))
+            }, new VersionedSubscriptionIdFormatter().FormatId(messageType))
             .ConfigureAwait(false);
             await session.SaveChangesAsync().ConfigureAwait(false);
 
@@ -72,7 +72,7 @@
                     new LegacyAddress("mytestendpoint", null)
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+            }, new VersionedSubscriptionIdFormatter().FormatId(messageType)).ConfigureAwait(false);
             await session.SaveChangesAsync().ConfigureAwait(false);
 
             List<Subscriber> subscriptions = null;
@@ -98,7 +98,7 @@
             {
                 Clients = new List<LegacyAddress>(),
                 MessageType = messageType
-            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+            }, new VersionedSubscriptionIdFormatter().FormatId(messageType)).ConfigureAwait(false);
             await session.SaveChangesAsync().ConfigureAwait(false);
 
             List<Subscriber> subscriptions = null;
@@ -121,7 +121,7 @@
                     new SubscriptionClient { TransportAddress = "mytestendpoint" + "@" + RuntimeEnvironment.MachineName, Endpoint = "mytestendpoint" }
                 },
                 MessageType = messageType
-            }, Subscription.FormatId(messageType)).ConfigureAwait(false);
+            }, new VersionedSubscriptionIdFormatter().FormatId(messageType)).ConfigureAwait(false);
 
             await session.SaveChangesAsync().ConfigureAwait(false);
 
@@ -142,7 +142,7 @@
                     new LegacyAddress("mytestendpoint", RuntimeEnvironment.MachineName)
                 },
                 MessageType = MessageTypes.MessageA
-            }, Subscription.FormatId(MessageTypes.MessageA))
+            }, new VersionedSubscriptionIdFormatter().FormatId(MessageTypes.MessageA))
             .ConfigureAwait(false);
             await session.SaveChangesAsync().ConfigureAwait(false);
 

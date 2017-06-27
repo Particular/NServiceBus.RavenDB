@@ -23,7 +23,7 @@
             }
             catch (Exception ex)
             {
-                exceptionToVerify = ex?.InnerException?.InnerException;
+                exceptionToVerify = ex;
             }
             Assert.IsNotNull(exceptionToVerify);
 
