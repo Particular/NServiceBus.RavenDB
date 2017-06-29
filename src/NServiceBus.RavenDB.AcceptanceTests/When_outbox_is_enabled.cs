@@ -65,9 +65,11 @@
                         b.GetSettings().Set("DisableOutboxTransportCheck", true);
                         b.EnableFeature<TimeoutManager>();
                         b.EnableOutbox();
-                    })
-                    .AddMapping<DownstreamMessage>(typeof(DownstreamEndpoint))
-                    .AddMapping<MarkerMessage>(typeof(DownstreamEndpoint));
+
+                        var routingConfig = b.ConfigureTransport().Routing();
+                        routingConfig.RouteToEndpoint(typeof(DownstreamMessage), "DownstreamEndpoint");
+                        routingConfig.RouteToEndpoint(typeof(MarkerMessage), "DownstreamEndpoint");
+                    });
             }
 
             class DuplicateMessageHandler : IHandleMessages<DuplicateMessage>
