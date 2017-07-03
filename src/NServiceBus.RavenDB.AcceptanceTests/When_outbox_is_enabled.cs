@@ -19,14 +19,7 @@
                 {
                     b.When(async busSession =>
                     {
-                        var sendOptions = new SendOptions();
-                        sendOptions.SetHeader("NServiceBus.MessageId", Guid.NewGuid().ToString());
-                        sendOptions.RouteToThisEndpoint();
-
-                        await busSession.Send(new DuplicateMessage(), sendOptions);
-                        await busSession.Send(new DuplicateMessage(), sendOptions);
-
-                        await busSession.SendLocal(new MarkerMessage());
+                        await busSession.SendLocal(new KickoffMessage());
                     })
                     .DoNotFailOnErrorMessages();
                 })
@@ -42,6 +35,10 @@
         {
             public int DownstreamMessageCount { get; set; }
             public bool Done { get; set; }
+        }
+
+        public class KickoffMessage : IMessage
+        {
         }
 
         public class DuplicateMessage : IMessage
@@ -71,6 +68,21 @@
                         routingConfig.RouteToEndpoint(typeof(DownstreamMessage), typeof(DownstreamEndpoint));
                         routingConfig.RouteToEndpoint(typeof(MarkerMessage), typeof(DownstreamEndpoint));
                     });
+            }
+
+            class KickoffMessageHandler : IHandleMessages<KickoffMessage>
+            {
+                public async Task Handle(KickoffMessage message, IMessageHandlerContext context)
+                {
+                    var sendOptions = new SendOptions();
+                    sendOptions.SetHeader("NServiceBus.MessageId", Guid.NewGuid().ToString());
+                    sendOptions.RouteToThisEndpoint();
+
+                    await context.Send(new DuplicateMessage(), sendOptions);
+                    await context.Send(new DuplicateMessage(), sendOptions);
+
+                    await context.SendLocal(new MarkerMessage());
+                }
             }
 
             class DuplicateMessageHandler : IHandleMessages<DuplicateMessage>
