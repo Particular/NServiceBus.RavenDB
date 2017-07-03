@@ -7,6 +7,7 @@
     using NServiceBus.Configuration.AdvanceExtensibility;
     using NServiceBus.Features;
     using NUnit.Framework;
+    using AcceptanceTesting.Customization;
 
     public class When_outbox_is_enabled : NServiceBusAcceptanceTest
     {
@@ -67,8 +68,8 @@
                         b.EnableOutbox();
 
                         var routingConfig = b.ConfigureTransport().Routing();
-                        routingConfig.RouteToEndpoint(typeof(DownstreamMessage), "DownstreamEndpoint");
-                        routingConfig.RouteToEndpoint(typeof(MarkerMessage), "DownstreamEndpoint");
+                        routingConfig.RouteToEndpoint(typeof(DownstreamMessage), typeof(DownstreamEndpoint));
+                        routingConfig.RouteToEndpoint(typeof(MarkerMessage), typeof(DownstreamEndpoint));
                     });
             }
 
