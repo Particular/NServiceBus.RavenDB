@@ -199,7 +199,7 @@
             }
         }
 
-        private async Task<List<TestSagaData>> Prefill(IDocumentStore store, ConventionType seedType)
+        async Task<List<TestSagaData>> Prefill(IDocumentStore store, ConventionType seedType)
         {
             var snooper = StoreSnooper.Install(store);
 
