@@ -22,12 +22,12 @@
 
         internal DocumentStoreInitializer(IDocumentStore store)
         {
-            this.storeCreator = readOnlySettings => store;
+            storeCreator = readOnlySettings => store;
         }
 
-        public string Url => this.docStore?.Url;
+        public string Url => docStore?.Url;
 
-        public string Identifier => this.docStore?.Identifier;
+        public string Identifier => docStore?.Identifier;
 
         internal IDocumentStore Init(ReadOnlySettings settings)
         {
