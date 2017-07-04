@@ -6,7 +6,7 @@
     using Raven.Abstractions.Data;
     using Raven.Client.Document;
 
-    internal static class DocumentStoreExtensionsForVoron
+    static class DocumentStoreExtensionsForVoron
     {
         public static IDisposable SetupVoronTest(this DocumentStore store)
         {

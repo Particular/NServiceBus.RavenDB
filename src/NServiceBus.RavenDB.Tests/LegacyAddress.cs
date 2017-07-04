@@ -64,9 +64,9 @@ namespace NServiceBus.RavenDB.Tests
             return Queue + "@" + Machine;
         }
 
-        public string Queue { get; }
+        string Queue { get; }
 
-        public string Machine { get; }
+        string Machine { get; }
 
         /// <summary>
         /// Overloading for the == for the class LegacyAddress

@@ -67,14 +67,14 @@
             Assert.AreEqual("http://localhost:8080 (DB: FakeEndpoint)", storeInitializer.Identifier);
         }
 
-        private IDocumentStore EmbeddedStore(string identifier)
+        IDocumentStore EmbeddedStore(string identifier)
         {
             var store = NewDocumentStore();
             store.Identifier = identifier;
             return store;
         }
 
-        private SettingsHolder DefaultSettings()
+        SettingsHolder DefaultSettings()
         {
             var settings = new SettingsHolder();
             settings.Set("NServiceBus.LocalAddress", "FakeAddress");

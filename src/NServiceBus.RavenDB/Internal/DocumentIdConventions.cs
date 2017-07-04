@@ -10,15 +10,15 @@
 
     class DocumentIdConventions
     {
-        private readonly IDocumentStore store;
-        private readonly Func<Type, string> userSuppliedConventions;
-        private readonly string endpointName;
-        private readonly bool sagasEnabled;
-        private readonly bool timeoutsEnabled;
-        private readonly string collectionNamesDocId;
-        private readonly object padlock;
-        private Dictionary<Type, string> mappedTypes;
-        private IEnumerable<Type> types;
+        readonly IDocumentStore store;
+        readonly Func<Type, string> userSuppliedConventions;
+        readonly string endpointName;
+        readonly bool sagasEnabled;
+        readonly bool timeoutsEnabled;
+        readonly string collectionNamesDocId;
+        readonly object padlock;
+        Dictionary<Type, string> mappedTypes;
+        IEnumerable<Type> types;
 
         public DocumentIdConventions(IDocumentStore store, IEnumerable<Type> types, string endpointName, bool sagasEnabled = true, bool timeoutsEnabled = true)
         {
@@ -46,7 +46,7 @@
             return userSuppliedConventions(type);
         }
 
-        private void Initialize()
+        void Initialize()
         {
             if (mappedTypes != null)
                 return;
@@ -88,21 +88,21 @@
                     {
                         list.Add(new RavenJValue(name));
                     }
-                    newDoc["EndpointName"] = this.endpointName;
-                    newDoc["EndpointName"] = this.endpointName;
+                    newDoc["EndpointName"] = endpointName;
+                    newDoc["EndpointName"] = endpointName;
                     newDoc["Collections"] = list;
                     var metadata = new RavenJObject();
                     store.DatabaseCommands.Put(collectionNamesDocId, null, newDoc, metadata);
                 }
 
                 // Completes initialization
-                this.mappedTypes = collectionData.Mappings;
+                mappedTypes = collectionData.Mappings;
             }
         }
 
 
 
-        private HashSet<string> GetTerms()
+        HashSet<string> GetTerms()
         {
             const string DocsByEntityNameIndex = "Raven/DocumentsByEntityName";
             var index = store.DatabaseCommands.GetIndex(DocsByEntityNameIndex);
@@ -115,7 +115,7 @@
             return new HashSet<string>(terms);
         }
 
-        private void MapTypeToCollectionName(Type type, CollectionData collectionData)
+        void MapTypeToCollectionName(Type type, CollectionData collectionData)
         {
             var byUserConvention = userSuppliedConventions(type);
             var ravenDefault = Raven.Client.Document.DocumentConvention.DefaultTypeTagName(type);
@@ -159,7 +159,7 @@
             collectionData.Mappings.Add(type, configuredName);
         }
 
-        private string SHA1Hash(string input)
+        string SHA1Hash(string input)
         {
             using (var sha = new SHA1CryptoServiceProvider()) // Is FIPS compliant
             {
@@ -174,7 +174,7 @@
             }
         }
 
-        private static string LegacyFindTypeTagName(Type t)
+        static string LegacyFindTypeTagName(Type t)
         {
             var tagName = t.Name;
 
@@ -186,7 +186,7 @@
             return tagName;
         }
 
-        private static bool IsSagaEntity(Type t)
+        static bool IsSagaEntity(Type t)
         {
             return !t.IsAbstract && !t.IsInterface && !t.IsGenericType && typeof(IContainSagaData).IsAssignableFrom(t);
         }
