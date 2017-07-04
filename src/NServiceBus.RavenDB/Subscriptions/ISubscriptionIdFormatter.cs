@@ -2,7 +2,7 @@
 {
     using NServiceBus.Unicast.Subscriptions;
 
-    internal interface ISubscriptionIdFormatter
+    interface ISubscriptionIdFormatter
     {
         string FormatId(MessageType messageType);
     }
