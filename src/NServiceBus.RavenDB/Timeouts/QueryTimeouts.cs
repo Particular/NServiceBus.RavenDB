@@ -47,7 +47,7 @@ namespace NServiceBus.Persistence.RavenDB
             }
         }
 
-        public Func<DateTime> GetUtcNow { get; set; } = () => DateTime.UtcNow;
+        internal Func<DateTime> GetUtcNow { get; } = () => DateTime.UtcNow;
 
         public async Task<TimeoutsChunk> GetNextChunk(DateTime startSlice)
         {
