@@ -3,8 +3,8 @@
     using System;
     using System.Threading.Tasks;
     using AcceptanceTesting;
-    using NServiceBus.AcceptanceTests.EndpointTemplates;
-    using NServiceBus.Configuration.AdvanceExtensibility;
+    using EndpointTemplates;
+    using Configuration.AdvanceExtensibility;
     using NUnit.Framework;
     using Raven.Client;
 

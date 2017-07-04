@@ -11,7 +11,7 @@ namespace NServiceBus.Persistence.RavenDB
         public static List<SubscriptionClient> ParseMultipleToSubscriptionClient(List<LegacyAddress> addresses) => addresses.ConvertAll(ParseToSubscriptionClient);
         public static List<LegacyAddress> ConvertMultipleToLegacyAddress(List<SubscriptionClient> subscriptions) => subscriptions.ConvertAll(ConvertToLegacyAddress);
 
-        public static SubscriptionClient ParseToSubscriptionClient(LegacyAddress address)
+        static SubscriptionClient ParseToSubscriptionClient(LegacyAddress address)
         {
             var queue = address.Queue;
             var machine = address.Machine;
@@ -25,7 +25,7 @@ namespace NServiceBus.Persistence.RavenDB
             return new SubscriptionClient { TransportAddress = queue + "@" + machine, Endpoint = null };
         }
 
-        public static LegacyAddress ConvertToLegacyAddress(SubscriptionClient client)
+        static LegacyAddress ConvertToLegacyAddress(SubscriptionClient client)
         {
             var atIndex = client.TransportAddress?.IndexOf("@", StringComparison.InvariantCulture);
 
