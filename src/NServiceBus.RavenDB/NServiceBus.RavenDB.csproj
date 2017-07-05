@@ -1,70 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Particular.CodeRules.0.1.1\build\Particular.CodeRules.props" Condition="Exists('..\packages\Particular.CodeRules.0.1.1\build\Particular.CodeRules.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{281646E3-32E0-4F4D-BCF6-1DC5EFC6C268}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NServiceBus.Persistence.RavenDB</RootNamespace>
+    <TargetFramework>net452</TargetFramework>
     <AssemblyName>NServiceBus.RavenDB</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
+    <Product>NServiceBus.RavenDB</Product>
+    <AssemblyTitle>NServiceBus.RavenDB</AssemblyTitle>
     <SignAssembly>true</SignAssembly>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <NuGetPackageImportStamp>010419af</NuGetPackageImportStamp>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
     <OutputPath>..\..\binaries\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\binaries\NServiceBus.RavenDB.xml</DocumentationFile>
-    <NoWarn>1573</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\..\binaries\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\binaries\NServiceBus.RavenDB.xml</DocumentationFile>
-    <NoWarn>1591,1573</NoWarn>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="NServiceBus.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NServiceBus.6.1.2\lib\net452\NServiceBus.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Obsolete, Version=4.0.3.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
-      <HintPath>..\packages\Obsolete.Fody.4.0.3\Lib\portable-net4+sl5+wp8+win8+wpa81+MonoAndroid16+MonoTouch40\Obsolete.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Raven.Abstractions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
-      <HintPath>..\packages\RavenDB.Client.3.5.0\lib\net45\Raven.Abstractions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Raven.Client.Lightweight, Version=3.5.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
-      <HintPath>..\packages\RavenDB.Client.3.5.0\lib\net45\Raven.Client.Lightweight.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.configuration" />
@@ -72,94 +20,36 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="Gateway\GatewayMessage.cs" />
-    <Compile Include="Gateway\RavenDbGatewayDeduplicationSettingsExtensions.cs" />
-    <Compile Include="Gateway\RavenDbGatewayDeduplication.cs" />
-    <Compile Include="Internal\DocumentIdConventions.cs" />
-    <Compile Include="Internal\DocumentStoreInitializer.cs" />
-    <Compile Include="Internal\DocumentStoreManager.cs" />
-    <Compile Include="Internal\DocumentIdConventionsExtensions.cs" />
-    <Compile Include="Internal\IDocumentStoreWrapper.cs" />
-    <Compile Include="Internal\LegacyAddress.cs" />
-    <Compile Include="Internal\BackwardsCompatibilityHelper.cs" />
-    <Compile Include="Internal\DocumentStoreWrapper.cs" />
-    <Compile Include="Internal\Helpers.cs" />
-    <Compile Include="ConnectionParameters.cs" />
-    <Compile Include="Internal\RavenDBSynchronizedStorage.cs" />
-    <Compile Include="Internal\SingleSharedDocumentStore.cs" />
-    <Compile Include="Internal\StorageEngineVerifier.cs" />
-    <Compile Include="Internal\TaskEx.cs" />
-    <Compile Include="Outbox\OutboxPersister.cs" />
-    <Compile Include="Outbox\OutboxRecord.cs" />
-    <Compile Include="Outbox\OutboxRecordsCleaner.cs" />
-    <Compile Include="Outbox\OutboxRecordsIndex.cs" />
-    <Compile Include="Outbox\RavenDBOutboxExtensions.cs" />
-    <Compile Include="Outbox\RavenDbOutboxStorage.cs" />
-    <Compile Include="Outbox\RavenDBOutboxTransaction.cs" />
-    <Compile Include="RavenDbSettingsExtensions.cs" />
-    <Compile Include="SagaPersister\RavenDbSagaSettingsExtensions.cs" />
-    <Compile Include="SessionManagement\ContextBagExtensions.cs" />
-    <Compile Include="SessionManagement\RavenDBSynchronizedStorageAdapter.cs" />
-    <Compile Include="SessionManagement\RavenDBSynchronizedStorageSession.cs" />
-    <Compile Include="SessionManagement\ISessionProvider.cs" />
-    <Compile Include="SessionManagement\IAsyncSessionProvider.cs" />
-    <Compile Include="Gateway\RavenDeduplication.cs" />
-    <Compile Include="Internal\NoOpLogManager.cs" />
-    <Compile Include="Internal\SharedDocumentStore.cs" />
-    <Compile Include="RavenDBPersistence.cs" />
-    <Compile Include="SessionManagement\ProvidedAsyncSessionBehavior.cs" />
-    <Compile Include="SessionManagement\OpenAsyncSessionBehavior.cs" />
-    <Compile Include="SessionManagement\RavenDbStorageSession.cs" />
-    <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />
-    <Compile Include="SagaPersister\SagaPersister.cs" />
-    <Compile Include="SagaPersister\SagaUniqueIdentity.cs" />
-    <Compile Include="SessionManagement\RavenSessionExtension.cs" />
-    <Compile Include="Subscriptions\ISubscriptionIdFormatter.cs" />
-    <Compile Include="Subscriptions\NonVersionedSubscriptionIdFormatter.cs" />
-    <Compile Include="Subscriptions\VersionedSubscriptionIdFormatter.cs" />
-    <Compile Include="Subscriptions\MessageTypeConverter.cs" />
-    <Compile Include="Subscriptions\RavenDbSubscriptionSettingsExtensions.cs" />
-    <Compile Include="Subscriptions\RavenDbSubscriptionStorage.cs" />
-    <Compile Include="Subscriptions\SubscriptionClient.cs" />
-    <Compile Include="Subscriptions\SubscriptionPersister.cs" />
-    <Compile Include="Subscriptions\Subscription.cs" />
-    <Compile Include="Subscriptions\SubscriptionV1toV2Converter.cs" />
-    <Compile Include="Testing\TestableRavenStorageSession.cs" />
-    <Compile Include="Timeouts\QueryTimeouts.cs" />
-    <Compile Include="Timeouts\RavenDbTimeoutSettingsExtensions.cs" />
-    <Compile Include="Timeouts\RavenDbTimeoutStorage.cs" />
-    <Compile Include="Timeouts\TimeoutDataV1toV2Converter.cs" />
-    <Compile Include="Timeouts\TimeoutPersister.cs" />
-    <Compile Include="Timeouts\TimeoutData.cs" />
-    <Compile Include="Timeouts\TimeoutsIndex.cs" />
+    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012" PrivateAssets="All" />
+    <PackageReference Include="Janitor.Fody" Version="1.4.1" PrivateAssets="All" />
+    <PackageReference Include="NServiceBus" Version="[6.0.0, 7.0.0)" PrivateAssets="None" />
+    <PackageReference Include="Obsolete.Fody" Version="4.2.2" PrivateAssets="All" />
+    <PackageReference Include="Particular.CodeRules" Version="0.2.0" PrivateAssets="All" />
+    <PackageReference Include="RavenDB.Client" Version="3.5.0" PrivateAssets="None" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <PackageId>NServiceBus.RavenDB</PackageId>
+    <Authors>NServiceBus Ltd</Authors>
+    <Company>NServiceBus Ltd</Company>
+    <Description>RavenDB persitence support for NServicebus</Description>
+    <PackageLicenseUrl>http://particular.net/LicenseAgreement</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Copyright>Copyright 2010-$([System.DateTime]::UtcNow.ToString(yyyy)) NServiceBus. All rights reserved</Copyright>
+    <PackageTags>nservicebus servicebus msmq cqrs publish subscribe</PackageTags>
+    <PackageIconUrl>http://s3.amazonaws.com/nuget.images/NServiceBus_32.png</PackageIconUrl>
+    <PackageProjectUrl>https://docs.particular.net/nuget/$(PackageId)</PackageProjectUrl>
+    <PackageOutputPath>..\..\nugets</PackageOutputPath>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
   <ItemGroup>
-    <None Include="..\..\packaging\nuget\nservicebus.ravendb.nuspec">
-      <Link>nservicebus.ravendb.nuspec</Link>
-    </None>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <Content Include="$(OutputPath)$(AssemblyName).pdb">
+      <Pack>true</Pack>
+      <PackagePath>lib/net452</PackagePath>
+    </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="FodyWeavers.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\packages\Particular.CodeRules.0.1.1\tools\..\analyzers\dotnet\cs\Particular.CodeRules.dll" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Fody.1.29.2\build\portable-net+sl+win+wpa+wp\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.1.29.2\build\portable-net+sl+win+wpa+wp\Fody.targets'))" />
-    <Error Condition="!Exists('..\packages\Particular.CodeRules.0.1.1\build\Particular.CodeRules.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Particular.CodeRules.0.1.1\build\Particular.CodeRules.props'))" />
-    <Error Condition="!Exists('..\packages\NuGetPackager.0.6.0\build\NuGetPackager.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NuGetPackager.0.6.0\build\NuGetPackager.targets'))" />
-    <Error Condition="!Exists('..\packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets'))" />
-  </Target>
-  <Import Project="..\packages\Fody.1.29.2\build\portable-net+sl+win+wpa+wp\Fody.targets" Condition="Exists('..\packages\Fody.1.29.2\build\portable-net+sl+win+wpa+wp\Fody.targets')" />
-  <Import Project="..\packages\NuGetPackager.0.6.0\build\NuGetPackager.targets" Condition="Exists('..\packages\NuGetPackager.0.6.0\build\NuGetPackager.targets')" />
-  <Import Project="..\packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets" Condition="Exists('..\packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets')" />
+
 </Project>
