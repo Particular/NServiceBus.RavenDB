@@ -8,11 +8,6 @@ using NServiceBus.Settings;
 using Raven.Client.Document;
 using Raven.Client.Document.DTC;
 
-public class ConfigureScenariosForRavenDBPersistence : IConfigureSupportedScenariosForTestExecution
-{
-    public IEnumerable<Type> UnsupportedScenarioDescriptorTypes => new List<Type>();
-}
-
 public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecution
 {
     const string DefaultDocumentStoreKey = "$.ConfigureEndpointRavenDBPersistence.DefaultDocumentStore";
@@ -51,7 +46,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
         return documentStore;
     }
 
-    private static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
+    static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
     {
         var resourceManagerId = Guid.NewGuid();
         var recoveryPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)}\NServiceBus.RavenDB\{resourceManagerId}";
@@ -135,4 +130,3 @@ public class TestDatabaseInfo
     public string Url { get; set; }
     public string DatabaseName { get; set; }
 }
-
