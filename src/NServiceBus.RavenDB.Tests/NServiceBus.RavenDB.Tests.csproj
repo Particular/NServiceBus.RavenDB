@@ -1,196 +1,30 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7F6284D7-8DBE-44D3-875C-C59FC7489287}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NServiceBus.RavenDB.Tests</RootNamespace>
-    <AssemblyName>NServiceBus.RavenDB.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
+    <TargetFramework>net452</TargetFramework>
     <SignAssembly>true</SignAssembly>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
+    <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="ApprovalTests, Version=1.22.0.0, Culture=neutral, PublicKeyToken=11bd7d124fc62e0f, processorArchitecture=MSIL">
-      <HintPath>..\packages\ApprovalTests.1.22.2\lib\net40\ApprovalTests.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="ApprovalUtilities, Version=1.22.0.0, Culture=neutral, PublicKeyToken=11bd7d124fc62e0f, processorArchitecture=MSIL">
-      <HintPath>..\packages\ApprovalUtilities.1.22.2\lib\net35\ApprovalUtilities.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.Data.Edm, Version=5.6.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Data.Edm.5.6.2\lib\net40\Microsoft.Data.Edm.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Data.OData, Version=5.6.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Data.OData.5.6.2\lib\net40\Microsoft.Data.OData.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Data.Services.Client, Version=5.6.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.2\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Cecil.Mdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Mdb.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Cecil.Pdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Pdb.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Cecil.Rocks, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Rocks.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NServiceBus.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NServiceBus.6.1.2\lib\net452\NServiceBus.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="nunit.framework, Version=3.7.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NUnit.3.2.1\lib\net45\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="Raven.Abstractions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
-      <HintPath>..\packages\RavenDB.Tests.Helpers.3.5.0\lib\net45\Raven.Abstractions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Raven.Client.Lightweight, Version=3.5.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
-      <HintPath>..\packages\RavenDB.Client.3.5.0\lib\net45\Raven.Client.Lightweight.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Raven.Database, Version=3.5.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
-      <HintPath>..\packages\RavenDB.Database.3.5.0\lib\net45\Raven.Database.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Raven.Server, Version=3.5.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
-      <HintPath>..\packages\RavenDB.Tests.Helpers.3.5.0\lib\net45\Raven.Server.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Raven.Tests.Helpers, Version=3.5.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=AMD64">
-      <HintPath>..\packages\RavenDB.Tests.Helpers.3.5.0\lib\net45\Raven.Tests.Helpers.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.Services.Client" />
-    <Reference Include="System.Transactions" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
+    <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <PackageReference Include="ApprovalTests" Version="3.0.13" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
+    <PackageReference Include="NUnit" Version="3.7.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.7.0" />
+    <PackageReference Include="PublicApiGenerator" Version="6.1.0-beta2" />
+    <PackageReference Include="RavenDB.Client" Version="3.5.0" />
+    <PackageReference Include="RavenDB.Database" Version="3.5.0" />
+    <PackageReference Include="RavenDB.Embedded" Version="3.5.0" />
+    <PackageReference Include="RavenDB.Tests.Helpers" Version="3.5.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj">
-      <Project>{281646e3-32e0-4f4d-bcf6-1dc5efc6c268}</Project>
-      <Name>NServiceBus.RavenDB</Name>
-    </ProjectReference>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="API\APIApprovals.cs" />
-    <Compile Include="App_Packages\ApiApprover.3.0.1\PublicApiApprover.cs" />
-    <Compile Include="App_Packages\ApiApprover.3.0.1\PublicApiGenerator.cs" />
-    <Compile Include="SubscriptionStorage\SubscriptionClientTests.cs" />
-    <Compile Include="SubscriptionStorage\When_subscriptions_versioning_is_disabled.cs" />
-    <Compile Include="TestConstants.cs" />
-    <Compile Include="FakeRavenDBTestTransport.cs" />
-    <Compile Include="Infrastructure\ReusableDB.cs" />
-    <Compile Include="Infrastructure\StoreSnooper.cs" />
-    <Compile Include="LegacyAddress.cs" />
-    <Compile Include="Outbox\When_adding_outbox_messages.cs" />
-    <Compile Include="Outbox\When_cleaning_outbox_messages.cs" />
-    <Compile Include="Persistence\DocumentIds\DocumentIdConventionTestBase.cs" />
-    <Compile Include="Persistence\DocumentIds\DocumentIdStrategyTests.cs" />
-    <Compile Include="Persistence\DocumentIds\InconsistentSagaIdConventions.cs" />
-    <Compile Include="Persistence\DocumentIds\InconsistentTimeoutIdConventions.cs" />
-    <Compile Include="Persistence\DocumentStoreExtensionsForVoron.cs" />
-    <Compile Include="Persistence\DocumentStoreManagerTests.cs" />
-    <Compile Include="Persistence\RavenSerializerAssumptions.cs" />
-    <Compile Include="Persistence\RavenSessionExtensionTests.cs" />
-    <Compile Include="Persistence\TestStorageEngineVerifier.cs" />
-    <Compile Include="RavenDBPersistenceTestBase.cs" />
-    <Compile Include="RavenDBPersistenceTestBaseExtensions.cs" />
-    <Compile Include="SagaPersister\RavenTestBaseForSagaPersistenceOptions.cs" />
-    <Compile Include="SagaPersister\Saga_with_unique_property_set_to_null.cs" />
-    <Compile Include="SagaPersister\When_completing_a_version3_saga.cs" />
-    <Compile Include="SagaPersister\When_completing_a_saga_with_unique_property.cs" />
-    <Compile Include="SagaPersister\When_loading_a_legacy_unique_identity.cs" />
-    <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_an_Enum_property.cs" />
-    <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_a_concrete_class_property.cs" />
-    <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_a_date_time_property.cs" />
-    <Compile Include="SagaPersister\When_persisting_a_saga_entity_with_inherited_property.cs" />
-    <Compile Include="SagaPersister\When_persisting_a_saga_with_the_same_unique_property_as_another_saga.cs" />
-    <Compile Include="SagaPersister\When_persisting_a_saga_with_the_same_unique_property_as_a_completed_saga.cs" />
-    <Compile Include="SagaPersister\When_storing_a_saga_with_a_long_namespace.cs" />
-    <Compile Include="SagaPersister\When_trying_to_fetch_a_non_existing_saga_by_its_unique_property.cs" />
-    <Compile Include="SagaPersister\When_updating_a_saga_property_that_does_not_have_a_unique_attribute.cs" />
-    <Compile Include="SagaPersister\When_updating_a_saga_without_unique_properties.cs" />
-    <Compile Include="RavenSessionFactory.cs" />
-    <Compile Include="StartSaga.cs" />
-    <Compile Include="SubscriptionStorage\SubscriptionCaching.cs" />
-    <Compile Include="SubscriptionStorage\TestData.cs" />
-    <Compile Include="SubscriptionStorage\When_converting_old_subscription_to_new_subscription.cs" />
-    <Compile Include="SubscriptionStorage\When_listing_subscribers_for_a_non_existing_message_type.cs" />
-    <Compile Include="SubscriptionStorage\When_listing_subscribers_for_message_types.cs" />
-    <Compile Include="SubscriptionStorage\When_receiving_an_unsubscription_message.cs" />
-    <Compile Include="SubscriptionStorage\When_receiving_a_subscription_message.cs" />
-    <Compile Include="SubscriptionStorage\When_receiving_duplicate_subscription_messages.cs" />
-    <Compile Include="SubscriptionStorage\When_using_subscription_converter.cs" />
-    <Compile Include="Timeouts\FakeLegacyTimoutDataClrTypeConversionListener.cs" />
-    <Compile Include="Timeouts\LegacyTimeoutData.cs" />
-    <Compile Include="Timeouts\Should_not_skip_timeouts.cs" />
-    <Compile Include="Timeouts\When_adding_timeouts.cs" />
-    <Compile Include="Timeouts\When_converting_old_timeout_to_new_timeout.cs" />
-    <Compile Include="Timeouts\When_fetching_old_timeouts_from_storage.cs" />
-    <Compile Include="Timeouts\When_fetching_timeouts_from_storage.cs" />
-    <Compile Include="Timeouts\When_removing_timeouts_from_storage.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>
