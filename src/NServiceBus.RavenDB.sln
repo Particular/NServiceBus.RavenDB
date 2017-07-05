@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
-MinimumVisualStudioVersion = 10.0.40219.1
+VisualStudioVersion = 15.0.26430.12
+MinimumVisualStudioVersion = 15.0.26430.12
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB", "NServiceBus.RavenDB\NServiceBus.RavenDB.csproj", "{281646E3-32E0-4F4D-BCF6-1DC5EFC6C268}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.Tests", "NServiceBus.RavenDB.Tests\NServiceBus.RavenDB.Tests.csproj", "{7F6284D7-8DBE-44D3-875C-C59FC7489287}"
