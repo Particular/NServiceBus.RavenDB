@@ -54,22 +54,27 @@
             {
                 store.EnlistInDistributedTransactions = false;
             }
-            else if (store.JsonRequestFactory == null) // If the DocStore has not been initialized yet
+            else
             {
-                // Source: https://github.com/ravendb/ravendb/blob/f56963f23f54b5535eba4f043fb84d5145b11b1d/Raven.Client.Lightweight/Document/DocumentStore.cs#L129
-                var ravenDefaultResourceManagerId = new Guid("e749baa6-6f76-4eef-a069-40a4378954f8");
-
-                if (store.ResourceManagerId == Guid.Empty || store.ResourceManagerId == ravenDefaultResourceManagerId)
+                Logger.Error("It's possible for RavenDB to lose data when used with Distributed Transaction Coordinator (DTC) transactions. Future versions of NServiceBus RavenDB Persistence will not support this combination. If using the same RavenDB database for NServiceBus data and all business data, you can disable enlisting by calling Transactions().DisableDistributedTransactions() on the BusConfiguration instance and enable the Outbox feature to maintain consistency between messaging operations and data persistence. See 'DTC not supported for RavenDB Persistence' in the documentation for more details.");
+                
+                if (store.JsonRequestFactory == null) // If the DocStore has not been initialized yet
                 {
-                    var resourceManagerId = settings.Get<string>("NServiceBus.LocalAddress") + "-" + settings.Get<string>("EndpointVersion");
-                    store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
-                }
+                    // Source: https://github.com/ravendb/ravendb/blob/f56963f23f54b5535eba4f043fb84d5145b11b1d/Raven.Client.Lightweight/Document/DocumentStore.cs#L129
+                    var ravenDefaultResourceManagerId = new Guid("e749baa6-6f76-4eef-a069-40a4378954f8");
 
-                // If using the default (Volatile - null should be impossible) then switch to IsolatedStorage
-                // Leave alone if LocalDirectoryTransactionRecoveryStorage!
-                if (store.TransactionRecoveryStorage == null || store.TransactionRecoveryStorage is VolatileOnlyTransactionRecoveryStorage)
-                {
-                    store.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
+                    if (store.ResourceManagerId == Guid.Empty || store.ResourceManagerId == ravenDefaultResourceManagerId)
+                    {
+                        var resourceManagerId = settings.Get<string>("NServiceBus.LocalAddress") + "-" + settings.Get<string>("EndpointVersion");
+                        store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
+                    }
+
+                    // If using the default (Volatile - null should be impossible) then switch to IsolatedStorage
+                    // Leave alone if LocalDirectoryTransactionRecoveryStorage!
+                    if (store.TransactionRecoveryStorage == null || store.TransactionRecoveryStorage is VolatileOnlyTransactionRecoveryStorage)
+                    {
+                        store.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
+                    }
                 }
             }
         }
