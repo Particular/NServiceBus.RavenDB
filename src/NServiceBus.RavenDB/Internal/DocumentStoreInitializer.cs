@@ -76,6 +76,8 @@
             }
             else 
             {
+                Logger.Error("It's possible for RavenDB to lose data when used with Distributed Transaction Coordinator (DTC) transactions. Future versions of NServiceBus RavenDB Persistence will not support this combination. If using the same RavenDB database for NServiceBus data and all business data, you can change the TransportTransactionMode and enable the Outbox feature to maintain consistency between messaging operations and data persistence. See 'DTC not supported for RavenDB Persistence' in the documentation for more details.");  
+
                 if (store.JsonRequestFactory == null) // If the DocStore has not been initialized yet
                 {
                     if (store.ResourceManagerId == Guid.Empty || store.ResourceManagerId == ravenDefaultResourceManagerId)
