@@ -1,13 +1,13 @@
 ﻿namespace NServiceBus.AcceptanceTests.NonDTC
 {
-    using System;
-    using System.Threading.Tasks;
+    using AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Configuration.AdvanceExtensibility;
     using NServiceBus.Features;
     using NUnit.Framework;
-    using AcceptanceTesting.Customization;
+    using System;
+    using System.Threading.Tasks;
 
     public class When_outbox_is_enabled : NServiceBusAcceptanceTest
     {
@@ -19,7 +19,11 @@
                 {
                     b.When(async busSession =>
                     {
-                        await busSession.SendLocal(new KickoffMessage());
+                        var sendOptions = new SendOptions();
+                        sendOptions.SetMessageId("KickoffMessage-" + Guid.NewGuid().ToString());
+                        sendOptions.RouteToThisEndpoint();
+
+                        await busSession.Send(new KickoffMessage(), sendOptions);
                     })
                     .DoNotFailOnErrorMessages();
                 })
@@ -75,7 +79,7 @@
                 public async Task Handle(KickoffMessage message, IMessageHandlerContext context)
                 {
                     var sendOptions = new SendOptions();
-                    sendOptions.SetHeader("NServiceBus.MessageId", Guid.NewGuid().ToString());
+                    sendOptions.SetMessageId("DuplicateMessage-" + Guid.NewGuid().ToString());
                     sendOptions.RouteToThisEndpoint();
 
                     await context.Send(new DuplicateMessage(), sendOptions);
