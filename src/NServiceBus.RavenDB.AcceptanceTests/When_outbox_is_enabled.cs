@@ -1,12 +1,13 @@
 ﻿namespace NServiceBus.AcceptanceTests.NonDTC
 {
-    using System;
-    using System.Threading.Tasks;
+    using AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Configuration.AdvanceExtensibility;
     using NServiceBus.Features;
     using NUnit.Framework;
+    using System;
+    using System.Threading.Tasks;
 
     public class When_outbox_is_enabled : NServiceBusAcceptanceTest
     {
@@ -19,13 +20,10 @@
                     b.When(async busSession =>
                     {
                         var sendOptions = new SendOptions();
-                        sendOptions.SetHeader("NServiceBus.MessageId", Guid.NewGuid().ToString());
+                        sendOptions.SetMessageId("KickoffMessage-" + Guid.NewGuid().ToString());
                         sendOptions.RouteToThisEndpoint();
 
-                        await busSession.Send(new DuplicateMessage(), sendOptions);
-                        await busSession.Send(new DuplicateMessage(), sendOptions);
-
-                        await busSession.SendLocal(new MarkerMessage());
+                        await busSession.Send(new KickoffMessage(), sendOptions);
                     })
                     .DoNotFailOnErrorMessages();
                 })
@@ -41,6 +39,10 @@
         {
             public int DownstreamMessageCount { get; set; }
             public bool Done { get; set; }
+        }
+
+        public class KickoffMessage : IMessage
+        {
         }
 
         public class DuplicateMessage : IMessage
@@ -65,9 +67,26 @@
                         b.GetSettings().Set("DisableOutboxTransportCheck", true);
                         b.EnableFeature<TimeoutManager>();
                         b.EnableOutbox();
-                    })
-                    .AddMapping<DownstreamMessage>(typeof(DownstreamEndpoint))
-                    .AddMapping<MarkerMessage>(typeof(DownstreamEndpoint));
+
+                        var routingConfig = b.ConfigureTransport().Routing();
+                        routingConfig.RouteToEndpoint(typeof(DownstreamMessage), typeof(DownstreamEndpoint));
+                        routingConfig.RouteToEndpoint(typeof(MarkerMessage), typeof(DownstreamEndpoint));
+                    });
+            }
+
+            class KickoffMessageHandler : IHandleMessages<KickoffMessage>
+            {
+                public async Task Handle(KickoffMessage message, IMessageHandlerContext context)
+                {
+                    var sendOptions = new SendOptions();
+                    sendOptions.SetMessageId("DuplicateMessage-" + Guid.NewGuid().ToString());
+                    sendOptions.RouteToThisEndpoint();
+
+                    await context.Send(new DuplicateMessage(), sendOptions);
+                    await context.Send(new DuplicateMessage(), sendOptions);
+
+                    await context.SendLocal(new MarkerMessage());
+                }
             }
 
             class DuplicateMessageHandler : IHandleMessages<DuplicateMessage>

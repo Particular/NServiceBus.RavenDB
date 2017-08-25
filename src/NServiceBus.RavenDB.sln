@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB", "NServiceBus.RavenDB\NServiceBus.RavenDB.csproj", "{281646E3-32E0-4F4D-BCF6-1DC5EFC6C268}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.26621.2
+MinimumVisualStudioVersion = 15.0.26430.12
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB", "NServiceBus.RavenDB\NServiceBus.RavenDB.csproj", "{281646E3-32E0-4F4D-BCF6-1DC5EFC6C268}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.Tests", "NServiceBus.RavenDB.Tests\NServiceBus.RavenDB.Tests.csproj", "{7F6284D7-8DBE-44D3-875C-C59FC7489287}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.Tests", "NServiceBus.RavenDB.Tests\NServiceBus.RavenDB.Tests.csproj", "{7F6284D7-8DBE-44D3-875C-C59FC7489287}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.AcceptanceTests", "NServiceBus.RavenDB.AcceptanceTests\NServiceBus.RavenDB.AcceptanceTests.csproj", "{8BF5E2C0-8F97-4746-9A8B-10CB38CF8B97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.AcceptanceTests", "NServiceBus.RavenDB.AcceptanceTests\NServiceBus.RavenDB.AcceptanceTests.csproj", "{4238BEB3-9860-47FF-862C-9EFB5061DC12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,12 +23,15 @@ Global
 		{7F6284D7-8DBE-44D3-875C-C59FC7489287}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F6284D7-8DBE-44D3-875C-C59FC7489287}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F6284D7-8DBE-44D3-875C-C59FC7489287}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8BF5E2C0-8F97-4746-9A8B-10CB38CF8B97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8BF5E2C0-8F97-4746-9A8B-10CB38CF8B97}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8BF5E2C0-8F97-4746-9A8B-10CB38CF8B97}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8BF5E2C0-8F97-4746-9A8B-10CB38CF8B97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4238BEB3-9860-47FF-862C-9EFB5061DC12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4238BEB3-9860-47FF-862C-9EFB5061DC12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4238BEB3-9860-47FF-862C-9EFB5061DC12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4238BEB3-9860-47FF-862C-9EFB5061DC12}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2805161C-B6B9-4930-AD94-FB9910BBAFC3}
 	EndGlobalSection
 EndGlobal
