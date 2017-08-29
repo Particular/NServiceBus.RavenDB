@@ -100,16 +100,13 @@
             return cfg;
         }
 
-        /// <summary>
-        ///     Confirms the usage of a storage engine (i.ex. voron) which doesn't support distributed transactions
-        ///     whilst leaving the distributed transaction support enabled.
-        /// </summary>
+        /// <summary>RavenDB Persistence no longer supports distributed transactions.</summary>
         /// <param name="cfg"></param>
         /// <returns></returns>
+        [ObsoleteEx(Message = "RavenDB Persistence no longer supports distributed transactions.", TreatAsErrorFromVersion = "5.0", RemoveInVersion = "6.0")]
         public static PersistenceExtensions<RavenDBPersistence> IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled(this PersistenceExtensions<RavenDBPersistence> cfg)
         {
-            cfg.GetSettings().Set("RavenDB.IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled", true);
-            return cfg;
+            throw new NotImplementedException();
         }
     }
 }
