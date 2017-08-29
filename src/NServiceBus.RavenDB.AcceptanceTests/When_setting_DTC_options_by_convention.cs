@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using EndpointTemplates;
     using AcceptanceTesting;
-    using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using NUnit.Framework;
     using Raven.Client.Document;
     using Raven.Client.Document.DTC;
@@ -46,7 +46,7 @@
                 })
                 .Done(c => c.MessageReceived)
                 .Run();
-            
+
             Assert.AreEqual(context.ExpectedResourceManagerId, context.ObservedResourceManagerId);
             Assert.AreEqual(typeof(TestTxRecoveryStorage), context.TxRecoveryType);
         }
@@ -73,7 +73,7 @@
                 })
                 .Done(c => c.MessageReceived)
                 .Run();
-            
+
             Assert.AreEqual(context.ExpectedResourceManagerId, context.ObservedResourceManagerId);
             Assert.AreEqual(typeof(TestTxRecoveryStorage), context.TxRecoveryType);
         }

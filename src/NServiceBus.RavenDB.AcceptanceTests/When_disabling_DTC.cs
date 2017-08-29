@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using EndpointTemplates;
     using AcceptanceTesting;
-    using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using NUnit.Framework;
     using Raven.Client.Document;
     using Raven.Client.Document.DTC;

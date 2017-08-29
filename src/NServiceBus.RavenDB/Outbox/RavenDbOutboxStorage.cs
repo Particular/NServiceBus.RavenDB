@@ -37,7 +37,7 @@
             {
                 this.cleaner = cleaner;
                 this.settings = settings;
-                this.logger = LogManager.GetLogger<OutboxCleaner>();
+                logger = LogManager.GetLogger<OutboxCleaner>();
             }
 
             protected override Task OnStart(IMessageSession session)

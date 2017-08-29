@@ -28,7 +28,7 @@
                 {typeof(StorageType.Timeouts), "RavenDbDocumentStore/Timeouts"}
             };
 
-            connStrKeys = new Dictionary<Type, string>()
+            connStrKeys = new Dictionary<Type, string>
             {
                 {typeof(StorageType.GatewayDeduplication), "NServiceBus/Persistence/RavenDB/GatewayDeduplication"},
                 {typeof(StorageType.Subscriptions), "NServiceBus/Persistence/RavenDB/Subscription"},

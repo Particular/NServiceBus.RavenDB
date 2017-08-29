@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
     using Raven.Client;
@@ -54,19 +54,6 @@
             cfg.GetSettings().Set(DefaultConnectionParameters, connectionParameters);
             // This will be registered with RavenUserInstaller once we initialize the document store object internally
             return cfg;
-        }
-
-        /// <summary>
-        ///     Specifies the session that the shared persisters (saga + outbox) that should be used. The lifecycle is controled by
-        ///     me
-        /// </summary>
-        /// <param name="cfg"></param>
-        /// <param name="getSessionFunc">A func returning the session to be used</param>
-        /// <returns></returns>
-        [ObsoleteEx(Message = "Use the 'UseSharedAsyncSession' configuration extension method to provide an async session.", RemoveInVersion = "5", TreatAsErrorFromVersion = "4")]
-        public static PersistenceExtensions<RavenDBPersistence> UseSharedSession(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IDocumentSession> getSessionFunc)
-        {
-            throw new NotSupportedException();
         }
 
         /// <summary>

@@ -1,7 +1,7 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.Persistence;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;

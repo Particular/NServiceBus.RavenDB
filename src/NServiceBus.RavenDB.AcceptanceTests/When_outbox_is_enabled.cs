@@ -3,11 +3,11 @@
     using AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
-    using NServiceBus.Configuration.AdvanceExtensibility;
     using NServiceBus.Features;
     using NUnit.Framework;
     using System;
     using System.Threading.Tasks;
+    using NServiceBus.Configuration.AdvancedExtensibility;
 
     public class When_outbox_is_enabled : NServiceBusAcceptanceTest
     {
