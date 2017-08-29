@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using EndpointTemplates;
     using AcceptanceTesting;
-    using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using NUnit.Framework;
     using Raven.Client.Document;
     using Raven.Client.Document.DTC;
@@ -17,7 +17,6 @@
             var context = await Scenario.Define<Context>(testContext => { testContext.ExpectedResourceManagerId = Guid.NewGuid(); })
                 .WithEndpoint<CustomizeDocStoreEndpoint>(b =>
                 {
-                    
                     b.When(bus => bus.SendLocal(new TestCmd { Name = "Doesn't matter, let's say George" }));
 
                     b.CustomConfig((cfg, c) =>

@@ -88,15 +88,15 @@
                     {
                         list.Add(new RavenJValue(name));
                     }
-                    newDoc["EndpointName"] = this.endpointName;
-                    newDoc["EndpointName"] = this.endpointName;
+                    newDoc["EndpointName"] = endpointName;
+                    newDoc["EndpointName"] = endpointName;
                     newDoc["Collections"] = list;
                     var metadata = new RavenJObject();
                     store.DatabaseCommands.Put(collectionNamesDocId, null, newDoc, metadata);
                 }
 
                 // Completes initialization
-                this.mappedTypes = collectionData.Mappings;
+                mappedTypes = collectionData.Mappings;
             }
         }
 
@@ -180,7 +180,7 @@
 
             if (IsSagaEntity(t))
             {
-                tagName = tagName.Replace("Data", String.Empty);
+                tagName = tagName.Replace("Data", string.Empty);
             }
 
             return tagName;

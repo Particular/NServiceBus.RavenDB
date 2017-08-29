@@ -1,11 +1,11 @@
 ﻿using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
-using NServiceBus.Configuration.AdvanceExtensibility;
 using NServiceBus.Settings;
 using Raven.Client.Document;
 using Raven.Client.Document.DTC;
 using System;
 using System.Threading.Tasks;
+using NServiceBus.Configuration.AdvancedExtensibility;
 
 public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecution
 {
