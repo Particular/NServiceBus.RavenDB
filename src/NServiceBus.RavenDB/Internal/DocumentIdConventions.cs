@@ -161,7 +161,7 @@
 
         private string SHA1Hash(string input)
         {
-            using (var sha = new SHA1CryptoServiceProvider()) // Is FIPS compliant
+            using (var sha = SHA1.Create()) // Is FIPS compliant
             {
                 var inBytes = Encoding.UTF8.GetBytes(input);
                 var hashBytes = sha.ComputeHash(inBytes);

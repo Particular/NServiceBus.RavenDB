@@ -1,7 +1,9 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
+#if NET452
     using NServiceBus.ConsistencyGuarantees;
+#endif
     using NServiceBus.Features;
     using NServiceBus.Settings;
     using Raven.Client;
@@ -61,6 +63,7 @@
                 return;
             }
 
+#if NET452
             var usingDtc = settings.GetRequiredTransactionModeForReceives() == TransportTransactionMode.TransactionScope;
             if (usingDtc)
             {
@@ -68,6 +71,7 @@
             }
 
             store.EnlistInDistributedTransactions = false;
+#endif
         }
 
         Func<ReadOnlySettings, IDocumentStore> storeCreator;
