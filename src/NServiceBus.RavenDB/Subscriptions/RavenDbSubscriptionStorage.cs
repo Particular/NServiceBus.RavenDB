@@ -2,6 +2,7 @@
 {
     using System;
     using NServiceBus.Features;
+    using NServiceBus.Logging;
     using NServiceBus.Persistence;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
@@ -26,10 +27,23 @@
                 persister.DisableAggressiveCaching = true;
             }
 
-            if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DisableSubscriptionVersioningKey))
+            var useLegacySubscriptionVersioning = context.Settings.GetOrDefault<bool?>(RavenDbSubscriptionSettingsExtensions.LegacySubscriptionVersioningKey);
+
+            if (!useLegacySubscriptionVersioning.HasValue)
             {
-                persister.SubscriptionIdFormatter = new NonVersionedSubscriptionIdFormatter();
+                throw new Exception("RavenDB subscription storage requires using either `persistence.DisableSubscriptionVersioning()` or `persistence.UseLegacyVersionedSubscriptions()` to determine whether legacy versioned subscriptions should be used.");
             }
+
+            if (useLegacySubscriptionVersioning.Value)
+            { 
+                // This is the default in the persister class, to facilitate tests verifying legacy behavior
+                Log.Warn("RavenDB Persistence is using legacy versioned subscription storage. This capability will be removed in NServiceBus.RavenDB 6.0.0. Subscription documents need to be converted to the new unversioned format, after which `persistence.DisableSubscriptionVersioning()` should be used.");
+            }
+            else
+            {
+                persister.SubscriptionIdFormatter = new VersionedSubscriptionIdFormatter();
+            }
+
 
             TimeSpan aggressiveCacheDuration;
             if (context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.AggressiveCacheDurationSettingsKey, out aggressiveCacheDuration))
@@ -39,5 +53,7 @@
 
             context.Container.ConfigureComponent<ISubscriptionStorage>(_ => persister, DependencyLifecycle.SingleInstance);
         }
+
+        static readonly ILog Log = LogManager.GetLogger<RavenDbSubscriptionStorage>();
     }
 }

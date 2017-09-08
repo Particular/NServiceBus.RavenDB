@@ -60,6 +60,9 @@ namespace NServiceBus
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> DoNotCacheSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.IDocumentStore documentStore) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.IDocumentStore> storeCreator) { }
+        [System.ObsoleteAttribute("Will be treated as an error from version 6.0.0. Will be removed in version 7.0.0." +
+            "", false)]
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseLegacyVersionedSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
     }
     public class static RavenDbTimeoutSettingsExtensions
     {
