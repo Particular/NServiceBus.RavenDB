@@ -85,7 +85,8 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <returns></returns>
-        [ObsoleteEx(TreatAsErrorFromVersion = "6.0.0", RemoveInVersion = "7.0.0")]
+        [ObsoleteEx(Message = "Subscriptions should be converted to the new format, after which the DisableSubscriptionVersioning() option should be used instead.",
+            TreatAsErrorFromVersion = "6.0.0", RemoveInVersion = "7.0.0")]
         public static PersistenceExtensions<RavenDBPersistence> UseLegacyVersionedSubscriptions(this PersistenceExtensions<RavenDBPersistence> cfg)
         {
             SetLegacyVersionedSubscriptions(cfg, true);
@@ -95,8 +96,7 @@
         static void SetLegacyVersionedSubscriptions(PersistenceExtensions<RavenDBPersistence> cfg, bool value)
         {
             var settings = cfg.GetSettings();
-            var current = settings.GetOrDefault<bool?>(LegacySubscriptionVersioningKey);
-            if (current.HasValue && current.Value != value)
+            if(settings.TryGet(LegacySubscriptionVersioningKey, out bool existingSetting) && existingSetting != value)
             {
                 throw new Exception("RavenDB Persistence options `persistence.DisableSubscriptionVersioning()` and `persistence.UseLegacyVersionedSubscriptions()` can't be used simultaneously.");
             }
