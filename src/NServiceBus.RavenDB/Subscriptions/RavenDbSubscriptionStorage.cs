@@ -27,21 +27,19 @@
                 persister.DisableAggressiveCaching = true;
             }
 
-            if (context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.LegacySubscriptionVersioningKey, out bool useLegacy))
+            if (!context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.LegacySubscriptionVersioningKey, out bool useLegacy))
             {
-                if (useLegacy)
-                {
-                    // This is the default in the persister class, to facilitate tests verifying legacy behavior
-                    Log.Warn("RavenDB Persistence is using legacy versioned subscription storage. This capability will be removed in NServiceBus.RavenDB 6.0.0. Subscription documents need to be converted to the new unversioned format, after which `persistence.DisableSubscriptionVersioning()` should be used.");
-                }
-                else
-                {
-                    persister.SubscriptionIdFormatter = new VersionedSubscriptionIdFormatter();
-                }
+                throw new Exception("RavenDB subscription storage requires using either `persistence.DisableSubscriptionVersioning()` or `persistence.UseLegacyVersionedSubscriptions()` to determine whether legacy versioned subscriptions should be used.");
+            }
+
+            if (useLegacy)
+            {
+                // This is the default in the persister class, to facilitate tests verifying legacy behavior
+                Log.Warn("RavenDB Persistence is using legacy versioned subscription storage. This capability will be removed in NServiceBus.RavenDB 6.0.0. Subscription documents need to be converted to the new unversioned format, after which `persistence.DisableSubscriptionVersioning()` should be used.");
             }
             else
             {
-                throw new Exception("RavenDB subscription storage requires using either `persistence.DisableSubscriptionVersioning()` or `persistence.UseLegacyVersionedSubscriptions()` to determine whether legacy versioned subscriptions should be used.");
+                persister.SubscriptionIdFormatter = new VersionedSubscriptionIdFormatter();
             }
 
             if (context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.AggressiveCacheDurationSettingsKey, out TimeSpan aggressiveCacheDuration))
