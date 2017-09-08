@@ -24,8 +24,7 @@
 
         public Task<CompletableSynchronizedStorageSession> TryAdapt(TransportTransaction transportTransaction, ContextBag context)
         {
-            Transaction ambientTransaction;
-            if (transportTransaction.TryGet(out ambientTransaction))
+            if (transportTransaction.TryGet(out Transaction _))
             {
                 var session = context.GetAsyncSession();
                 CompletableSynchronizedStorageSession completableSynchronizedStorageSession = new RavenDBSynchronizedStorageSession(session, true);
