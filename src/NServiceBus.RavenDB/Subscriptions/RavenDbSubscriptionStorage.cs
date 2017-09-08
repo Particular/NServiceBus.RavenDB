@@ -39,7 +39,7 @@
             }
             else
             {
-                persister.SubscriptionIdFormatter = new VersionedSubscriptionIdFormatter();
+                persister.SubscriptionIdFormatter = new NonVersionedSubscriptionIdFormatter();
             }
 
             if (context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.AggressiveCacheDurationSettingsKey, out TimeSpan aggressiveCacheDuration))

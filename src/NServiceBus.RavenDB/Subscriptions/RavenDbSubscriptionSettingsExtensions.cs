@@ -100,7 +100,7 @@
             {
                 throw new Exception("RavenDB Persistence options `persistence.DisableSubscriptionVersioning()` and `persistence.UseLegacyVersionedSubscriptions()` can't be used simultaneously.");
             }
-            settings.Set(LegacySubscriptionVersioningKey, true);
+            settings.Set(LegacySubscriptionVersioningKey, value);
         }
     }
 }
