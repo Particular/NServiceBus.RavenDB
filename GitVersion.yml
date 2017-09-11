@@ -3,7 +3,7 @@ next-version: 5.0
 commit-message-incrementing: Disabled
 branches:
   develop:
-    tag: alpha
+    tag: beta
     prevent-increment-of-merged-branch-version: true
   release:
     tag: rc
