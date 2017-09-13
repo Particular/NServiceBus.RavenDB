@@ -2,8 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+#if NET452
     using System.Configuration;
     using System.Linq;
+#endif
     using NServiceBus.Logging;
     using NServiceBus.Persistence;
     using NServiceBus.Settings;
@@ -15,7 +17,10 @@
         static readonly ILog Logger = LogManager.GetLogger(typeof(DocumentStoreManager));
         const string defaultDocStoreSettingsKey = "RavenDbDocumentStore";
         static Dictionary<Type, string> featureSettingsKeys;
+
+#if NET452
         static Dictionary<Type, string> connStrKeys;
+#endif
 
         static DocumentStoreManager()
         {
@@ -28,6 +33,7 @@
                 {typeof(StorageType.Timeouts), "RavenDbDocumentStore/Timeouts"}
             };
 
+#if NET452
             connStrKeys = new Dictionary<Type, string>
             {
                 {typeof(StorageType.GatewayDeduplication), "NServiceBus/Persistence/RavenDB/GatewayDeduplication"},
@@ -36,6 +42,7 @@
                 {typeof(StorageType.Sagas), "NServiceBus/Persistence/RavenDB/Saga"},
                 {typeof(StorageType.Timeouts), "NServiceBus/Persistence/RavenDB/Timeout"}
             };
+#endif
         }
 
         public static void SetDocumentStore<TStorageType>(SettingsHolder settings, IDocumentStore documentStore)
@@ -94,11 +101,13 @@
             // First try to get a document store specific to a storage type (Subscriptions, Gateway, etc.)
             var docStoreInitializer = settings.GetOrDefault<DocumentStoreInitializer>(featureSettingsKeys[typeof(TStorageType)]);
 
+#if NET452
             // Next, if a connection string name exists for the storage type, create based on that
             if (docStoreInitializer == null)
             {
                 docStoreInitializer = CreateStoreByConnectionStringName(settings, connStrKeys[typeof(TStorageType)]);
             }
+#endif
 
             // Next try finding a shared DocumentStore
             if (docStoreInitializer == null)
@@ -143,15 +152,34 @@
                 return new DocumentStoreInitializer(storeByParams);
             }
 
+#if NET452
             var initContext = CreateStoreByConnectionStringName(settings, "NServiceBus/Persistence/RavenDB", "NServiceBus/Persistence");
 
             if (initContext != null)
             {
                 return initContext;
             }
+#endif
 
             return CreateStoreByUrl(settings, "http://localhost:8080");
         }
+
+        static DocumentStoreInitializer CreateStoreByUrl(ReadOnlySettings settings, string url)
+        {
+            var docStore = new DocumentStore
+            {
+                Url = url
+            };
+
+            if (docStore.DefaultDatabase == null)
+            {
+                docStore.DefaultDatabase = settings.EndpointName();
+            }
+
+            return new DocumentStoreInitializer(docStore);
+        }
+
+#if NET452
 
         static DocumentStoreInitializer CreateStoreByConnectionStringName(ReadOnlySettings settings, params string[] connectionStringNames)
         {
@@ -170,21 +198,6 @@
                 return new DocumentStoreInitializer(docStore);
             }
             return null;
-        }
-
-        static DocumentStoreInitializer CreateStoreByUrl(ReadOnlySettings settings, string url)
-        {
-            var docStore = new DocumentStore
-            {
-                Url = url
-            };
-
-            if (docStore.DefaultDatabase == null)
-            {
-                docStore.DefaultDatabase = settings.EndpointName();
-            }
-
-            return new DocumentStoreInitializer(docStore);
         }
 
         static string GetFirstNonEmptyConnectionString(params string[] connectionStringNames)
@@ -206,5 +219,8 @@
                 return null;
             }
         }
+
+#endif
     }
 }
+
