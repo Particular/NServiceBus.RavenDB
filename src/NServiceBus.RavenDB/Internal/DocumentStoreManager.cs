@@ -187,12 +187,15 @@
             return new DocumentStoreInitializer(docStore);
         }
 
+        [ObsoleteEx(RemoveInVersion = "6.0")]
         static string GetFirstNonEmptyConnectionString(params string[] connectionStringNames)
         {
             try
             {
                 var foundConnectionStringNames = connectionStringNames.Where(name => ConfigurationManager.ConnectionStrings[name] != null).ToArray();
                 var firstFound = foundConnectionStringNames.FirstOrDefault();
+
+                Logger.Warn("Specifying RavenDB connection information using app.config/web.config <connectionStrings> section has been deprecated and will be ignored starting in NServiceBus.RavenDB 6.0.");
 
                 if (foundConnectionStringNames.Length > 1)
                 {
