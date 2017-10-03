@@ -5,7 +5,6 @@
     using System.Configuration;
     using System.Linq;
     using NServiceBus.Logging;
-    using NServiceBus.Persistence;
     using NServiceBus.Settings;
     using Raven.Client;
     using Raven.Client.Document;

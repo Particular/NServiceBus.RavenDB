@@ -2,7 +2,6 @@
 {
     using System;
     using NServiceBus.Configuration.AdvancedExtensibility;
-    using NServiceBus.Persistence;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
     using Raven.Client;

@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.RavenDB.Tests.Persistence
 {
     using System;
-    using NServiceBus.Persistence;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
     using NUnit.Framework;

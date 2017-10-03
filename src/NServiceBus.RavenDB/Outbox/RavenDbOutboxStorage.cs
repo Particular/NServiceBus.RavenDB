@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using NServiceBus.Features;
     using NServiceBus.Logging;
-    using NServiceBus.Persistence;
     using NServiceBus.Settings;
 
     class RavenDbOutboxStorage : Feature

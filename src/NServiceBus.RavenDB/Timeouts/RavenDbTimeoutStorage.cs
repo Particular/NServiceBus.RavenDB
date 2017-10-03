@@ -2,7 +2,6 @@
 {
     using System.Threading.Tasks;
     using NServiceBus.Features;
-    using NServiceBus.Persistence;
 
     class RavenDbTimeoutStorage : Feature
     {

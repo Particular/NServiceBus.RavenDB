@@ -3,7 +3,6 @@
     using System;
     using NServiceBus.Features;
     using NServiceBus.Logging;
-    using NServiceBus.Persistence;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 
