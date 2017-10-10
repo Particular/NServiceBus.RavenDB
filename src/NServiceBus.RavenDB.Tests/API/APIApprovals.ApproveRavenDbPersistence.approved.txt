@@ -63,8 +63,9 @@ namespace NServiceBus
     }
     public class static RavenDbSagaSettingsExtensions
     {
-        [System.ObsoleteAttribute("As of Version 6 of NServiceBus core all correlated properties are unique by defau" +
-            "lt so you can safely remove this setting. Will be removed in version 5.0.0.", true)]
+        [System.ObsoleteAttribute("As of Version 6 of NServiceBus core by default sagas are correlated by a single u" +
+            "nique property, the upgrade guide contains guidance about removing this setting." +
+            " Will be removed in version 5.0.0.", true)]
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> AllowStaleSagaReads(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSagas(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.IDocumentStore documentStore) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSagas(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.IDocumentStore> storeCreator) { }
