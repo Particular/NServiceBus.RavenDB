@@ -41,7 +41,7 @@
         /// </summary>
         /// <param name="cfg">Object to attach to</param>
         /// <returns></returns>
-        [ObsoleteEx(RemoveInVersion = "5", TreatAsErrorFromVersion = "4", Message = "As of Version 6 of NServiceBus core all correlated properties are unique by default so you can safely remove this setting.")]
+        [ObsoleteEx(RemoveInVersion = "5", TreatAsErrorFromVersion = "4", Message = "As of Version 6 of NServiceBus core by default sagas are correlated by a single unique property, the upgrade guide contains guidance about removing this setting.")]
         public static PersistenceExtensions<RavenDBPersistence> AllowStaleSagaReads(this PersistenceExtensions<RavenDBPersistence> cfg)
         {
             cfg.GetSettings().Set(AllowStaleSagaReadsKey, true);
