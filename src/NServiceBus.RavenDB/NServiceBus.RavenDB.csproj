@@ -5,7 +5,7 @@
     <RootNamespace>NServiceBus.Persistence.RavenDB</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>RavenDB persistence support for NServiceBus</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,11 +20,13 @@
     <PackageReference Include="Obsolete.Fody" Version="4.*" PrivateAssets="All" />
     <PackageReference Include="Particular.CodeRules" Version="0.2.0" PrivateAssets="All" />
     <PackageReference Include="RavenDB.Client" Version="[3.5.0, 3.6.0)" />
+	<PackageReference Include="Particular.Packaging" Version="*" PrivateAssets="All" />
   </ItemGroup>
-
+  
+  <!--Workaround for https://github.com/dotnet/sdk/issues/1469 -->
   <PropertyGroup>
-    <Description>RavenDB persistence support for NServiceBus</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <DisableLockFileFrameworks>true</DisableLockFileFrameworks>
   </PropertyGroup>
+  <!-- End Workaround -->
 
 </Project>
