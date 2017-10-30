@@ -5,25 +5,18 @@ using System.Messaging;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
-using NServiceBus.AcceptanceTests.ScenarioDescriptors;
 using NServiceBus.Configuration.AdvancedExtensibility;
 using NServiceBus.Transport;
 
 public class ConfigureEndpointMsmqTransport : IConfigureEndpointTestExecution
 {
-    const string DefaultConnectionString = "cacheSendConnection=false;journal=false;";
-
     public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings, PublisherMetadata publisherMetadata)
     {
         queueBindings = configuration.GetSettings().Get<QueueBindings>();
-        var connectionString =
-            EnvironmentHelper.GetEnvironmentVariable($"{nameof(MsmqTransport)}.ConnectionString")
-            ?? DefaultConnectionString;
+        
         var transportConfig = configuration.UseTransport<MsmqTransport>();
-
-
         transportConfig.Transactions(TransportTransactionMode.SendsAtomicWithReceive);
-        transportConfig.ConnectionString(connectionString);
+        transportConfig.DisableConnectionCachingForSends();
 
         var routingConfig = transportConfig.Routing();
 
