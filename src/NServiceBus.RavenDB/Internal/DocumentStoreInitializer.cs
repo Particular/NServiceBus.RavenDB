@@ -61,10 +61,14 @@
                 return;
             }
 
-            var usingDtc = settings.GetRequiredTransactionModeForReceives() == TransportTransactionMode.TransactionScope;
-            if (usingDtc)
+            var isSendOnly = settings.GetOrDefault<bool>("Endpoint.SendOnly");
+            if (!isSendOnly)
             {
-                throw new Exception("RavenDB Persistence does not support Distributed Transaction Coordinator (DTC) transactions. You must change the TransportTransactionMode in order to continue.");
+                var usingDtc = settings.GetRequiredTransactionModeForReceives() == TransportTransactionMode.TransactionScope;
+                if (usingDtc)
+                {
+                    throw new Exception("RavenDB Persistence does not support Distributed Transaction Coordinator (DTC) transactions. You must change the TransportTransactionMode in order to continue.");
+                }
             }
 
             store.EnlistInDistributedTransactions = false;
