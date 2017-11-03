@@ -2,7 +2,6 @@
 using NServiceBus.AcceptanceTesting.Support;
 using NServiceBus.Settings;
 using Raven.Client.Document;
-using Raven.Client.Document.DTC;
 using System;
 using System.Threading.Tasks;
 using NServiceBus.Configuration.AdvancedExtensibility;
@@ -48,15 +47,11 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
     {
-        var resourceManagerId = Guid.NewGuid();
-        var recoveryPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)}\NServiceBus.RavenDB\{resourceManagerId}";
-
         var documentStore = new DocumentStore
         {
             Url = "http://localhost:8084",
             DefaultDatabase = defaultDatabase,
-            ResourceManagerId = resourceManagerId,
-            TransactionRecoveryStorage = new LocalDirectoryTransactionRecoveryStorage(recoveryPath)
+            EnlistInDistributedTransactions = false
         };
 
         documentStore.Initialize();
