@@ -15,11 +15,28 @@
         [Test]
         public async Task Should_honor_SetMessageToDatabaseMappingConvention_with_Outbox()
         {
-            var context = await Scenario.Define<Context>(c =>
+            await RunTest(cfg =>
             {
-                c.Db1 = "Tenant1-" + Guid.NewGuid().ToString("n").Substring(16);
-                c.Db2 = "Tenant2-" + Guid.NewGuid().ToString("n").Substring(16);
-            })
+                cfg.PersistenceExtensions.SetMessageToDatabaseMappingConvention(headers => headers.TryGetValue("RavenDatabaseName", out var dbName) ? dbName : cfg.DefaultStore.DefaultDatabase);
+            });
+        }
+
+        [Test]
+        public async Task Should_honor_UseSharedAsyncSession_with_Outbox()
+        {
+            await RunTest(cfg =>
+            {
+                cfg.PersistenceExtensions.UseSharedAsyncSession(() => cfg.DefaultStore.OpenAsyncSession());
+            });
+        }
+
+        async Task RunTest(Action<ContextDbConfig> configureMultiTenant)
+        {
+            var context = await Scenario.Define<Context>(c =>
+                {
+                    c.Db1 = "Tenant1-" + Guid.NewGuid().ToString("n").Substring(16);
+                    c.Db2 = "Tenant2-" + Guid.NewGuid().ToString("n").Substring(16);
+                })
                 .WithEndpoint<MultiTenantEndpoint>(b =>
                 {
                     b.CustomConfig((cfg, c) =>
@@ -30,19 +47,21 @@
 
                         var defaultStore = ConfigureEndpointRavenDBPersistence.GetDefaultDocumentStore(settings);
                         c.DefaultDb = defaultStore.DefaultDatabase;
+                        c.DbConfig.DefaultStore = defaultStore;
 
                         ConfigureEndpointRavenDBPersistence.GetInitializedDocumentStore(c.Db1);
                         ConfigureEndpointRavenDBPersistence.GetInitializedDocumentStore(c.Db2);
 
-                        var persistence = ConfigureEndpointRavenDBPersistence.GetDefaultPersistenceExtensions(settings);
-                        //persistence.UseSharedAsyncSession(() => store.OpenAsyncSession());
-
-                        persistence.SetMessageToDatabaseMappingConvention(headers => headers.TryGetValue("RavenDatabaseName", out var dbName) ? dbName : defaultStore.DefaultDatabase);
+                        c.DbConfig.PersistenceExtensions = ConfigureEndpointRavenDBPersistence.GetDefaultPersistenceExtensions(settings);
+                        configureMultiTenant(c.DbConfig);
                     });
 
                     async Task SendMessage(IMessageSession session, string orderId, string dbName)
                     {
-                        var msg = new TestMsg { OrderId = orderId };
+                        var msg = new TestMsg
+                        {
+                            OrderId = orderId
+                        };
                         var opts = new SendOptions();
                         opts.RouteToThisEndpoint();
                         opts.SetHeader("RavenDatabaseName", dbName);
@@ -74,6 +93,15 @@
             public string Db2 { get; set; }
             public List<string> ObservedDbs { get; } = new List<string>();
             public string ObservedDbsOutput => String.Join(", ", ObservedDbs);
+            public ContextDbConfig DbConfig { get; } = new ContextDbConfig();
+        }
+
+        public class ContextDbConfig
+        {
+            public DocumentStore DefaultStore { get; set; }
+            public DocumentStore Tenant1 { get; set; }
+            public DocumentStore Tenant2 { get; set; }
+            public PersistenceExtensions<RavenDBPersistence> PersistenceExtensions { get; set; }
         }
 
         public class MultiTenantEndpoint : EndpointConfigurationBuilder
