@@ -26,7 +26,7 @@
                 var storeWrapper = new DocumentStoreWrapper(store);
 
                 var dbNameConvention = context.Settings.GetOrDefault<Func<IDictionary<string, string>, string>>("RavenDB.SetMessageToDatabaseMappingConvention");
-                sessionCreator = new OpenRavenSessionsByDatabaseName(storeWrapper, dbNameConvention);
+                sessionCreator = new OpenRavenSessionByDatabaseName(storeWrapper, dbNameConvention);
             }
 
             context.Container.RegisterSingleton(sessionCreator);
@@ -39,12 +39,12 @@
         IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders);
     }
 
-    class OpenRavenSessionsByDatabaseName : IOpenRavenSessionsInPipeline
+    class OpenRavenSessionByDatabaseName : IOpenRavenSessionsInPipeline
     {
         IDocumentStoreWrapper documentStoreWrapper;
         Func<IDictionary<string, string>, string> getDatabaseName;
 
-        public OpenRavenSessionsByDatabaseName(IDocumentStoreWrapper documentStoreWrapper, Func<IDictionary<string, string>, string> getDatabaseName = null)
+        public OpenRavenSessionByDatabaseName(IDocumentStoreWrapper documentStoreWrapper, Func<IDictionary<string, string>, string> getDatabaseName = null)
         {
             this.documentStoreWrapper = documentStoreWrapper;
             this.getDatabaseName = getDatabaseName ?? (context => string.Empty);

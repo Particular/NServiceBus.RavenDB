@@ -16,7 +16,7 @@
         {
             this.documentStore = documentStore;
             this.endpointName = endpointName;
-            this.sessionCreator = sessionCreator ?? new OpenRavenSessionsByDatabaseName(new DocumentStoreWrapper(documentStore));
+            this.sessionCreator = sessionCreator ?? new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore));
         }
 
         public async Task<OutboxMessage> Get(string messageId, ContextBag options)
