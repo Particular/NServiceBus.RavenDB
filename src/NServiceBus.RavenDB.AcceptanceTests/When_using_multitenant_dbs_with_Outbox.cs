@@ -10,10 +10,10 @@
     using NUnit.Framework;
     using Raven.Client.Document;
 
-    public class When_using_multitenant_dbs : NServiceBusAcceptanceTest
+    public class When_using_multitenant_dbs_with_Outbox : NServiceBusAcceptanceTest
     {
         [Test]
-        public async Task Should_honor_SetMessageToDatabaseMappingConvention_with_Outbox()
+        public async Task Should_honor_SetMessageToDatabaseMappingConvention()
         {
             await RunTest(cfg =>
             {
@@ -22,7 +22,7 @@
         }
 
         [Test]
-        public async Task Should_honor_UseSharedAsyncSession_with_Outbox()
+        public async Task Should_honor_UseSharedAsyncSession()
         {
             await RunTest(cfg =>
             {

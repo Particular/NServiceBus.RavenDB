@@ -350,7 +350,7 @@
     <Compile Include="When_setting_DTC_options_by_convention.cs" />
     <Compile Include="When_specify_ConnectionParameters.cs" />
     <Compile Include="When_using_a_sagafinder.cs" />
-    <Compile Include="When_using_multitenant_dbs.cs" />
+    <Compile Include="When_using_multitenant_dbs_with_Outbox.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj">
