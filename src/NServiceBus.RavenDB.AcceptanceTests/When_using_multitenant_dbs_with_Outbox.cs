@@ -26,7 +26,7 @@
         {
             await RunTest(cfg =>
             {
-                cfg.PersistenceExtensions.UseSharedAsyncSession(() => cfg.DefaultStore.OpenAsyncSession());
+                cfg.PersistenceExtensions.UseSharedAsyncSession(headers => cfg.DefaultStore.OpenAsyncSession(headers["RavenDatabaseName"]));
             });
         }
 

@@ -15,10 +15,16 @@
             IOpenRavenSessionsInPipeline sessionCreator;
 
             // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
-            var getAsyncSessionFunc = context.Settings.GetOrDefault<Func<IAsyncDocumentSession>>(RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey);
+            var getAsyncSessionFunc = context.Settings.GetOrDefault<Func<IDictionary<string, string>, IAsyncDocumentSession>>(RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey);
+            var getAsyncSessionFuncObsolete = context.Settings.GetOrDefault<Func<IAsyncDocumentSession>>(RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey + ".Obsolete");
+
             if (getAsyncSessionFunc != null)
             {
                 sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc);
+            }
+            else if (getAsyncSessionFuncObsolete != null)
+            {
+                sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFuncObsolete);
             }
             else
             {
@@ -67,7 +73,14 @@
     class OpenRavenSessionByCustomDelegate : IOpenRavenSessionsInPipeline
     {
         Func<IAsyncDocumentSession> getAsyncSession;
+        Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSessionUsingHeaders;
 
+        public OpenRavenSessionByCustomDelegate(Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSession)
+        {
+            this.getAsyncSessionUsingHeaders = getAsyncSession;
+        }
+
+        [ObsoleteEx(RemoveInVersion = "6.0.0")]
         public OpenRavenSessionByCustomDelegate(Func<IAsyncDocumentSession> getAsyncSession)
         {
             this.getAsyncSession = getAsyncSession;
@@ -75,6 +88,10 @@
 
         public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
         {
+            if (getAsyncSessionUsingHeaders != null)
+            {
+                return getAsyncSessionUsingHeaders(messageHeaders);
+            }
             return getAsyncSession();
         }
     }
