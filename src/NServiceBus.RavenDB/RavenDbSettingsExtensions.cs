@@ -98,7 +98,7 @@
      //todo: obsolete
         public static PersistenceExtensions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IDictionary<string,string>, string> convention)
         {
-            OpenAsyncSessionBehavior.GetDatabaseName = convention;
+            cfg.GetSettings().Set("RavenDB.SetMessageToDatabaseMappingConvention", convention);
             return cfg;
         }
 

@@ -109,7 +109,6 @@
     <Compile Include="Internal\NoOpLogManager.cs" />
     <Compile Include="Internal\SharedDocumentStore.cs" />
     <Compile Include="RavenDBPersistence.cs" />
-    <Compile Include="SessionManagement\ProvidedAsyncSessionBehavior.cs" />
     <Compile Include="SessionManagement\OpenAsyncSessionBehavior.cs" />
     <Compile Include="SessionManagement\RavenDbStorageSession.cs" />
     <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />
