@@ -56,9 +56,17 @@
 
         public Task<OutboxTransaction> BeginTransaction(ContextBag context)
         {
-            var receiveContext = (ITransportReceiveContext)context;
+            IAsyncDocumentSession session;
 
-            var session = sessionCreator.OpenSession(receiveContext.Message.Headers);
+            var receiveContext = context as ITransportReceiveContext;
+            if (receiveContext != null)
+            {
+                session = sessionCreator.OpenSession(receiveContext.Message.Headers);
+            }
+            else
+            {
+                session = documentStore.OpenAsyncSession();
+            }
 
             session.Advanced.UseOptimisticConcurrency = true;
 
