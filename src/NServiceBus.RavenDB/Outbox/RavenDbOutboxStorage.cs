@@ -23,7 +23,7 @@
 
             Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
 
-            context.Container.ConfigureComponent(b => new OutboxPersister(store, endpointName/*, b.Build<IOpenRavenSessionsInPipeline>()*/), DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(b => new OutboxPersister(store, endpointName, b.Build<IOpenRavenSessionsInPipeline>()), DependencyLifecycle.InstancePerCall);
 
             context.Container.ConfigureComponent(b => new OutboxRecordsCleaner(store), DependencyLifecycle.InstancePerCall);
 

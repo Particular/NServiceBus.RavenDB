@@ -22,7 +22,7 @@
             }
             else
             {
-                using (session = sessionCreator.OpenSession(context.Message))
+                using (session = sessionCreator.OpenSession(context.Message.Headers))
                 {
                     context.Extensions.Set(session);
                     await next().ConfigureAwait(false);

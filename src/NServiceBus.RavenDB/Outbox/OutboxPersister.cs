@@ -57,7 +57,8 @@
         public Task<OutboxTransaction> BeginTransaction(ContextBag context)
         {
             var receiveContext = (ITransportReceiveContext)context;
-            var session = sessionCreator.OpenSession(receiveContext.Message);
+
+            var session = sessionCreator.OpenSession(receiveContext.Message.Headers);
 
             session.Advanced.UseOptimisticConcurrency = true;
 

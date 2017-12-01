@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using NServiceBus.Features;
-    using NServiceBus.Transport;
     using Raven.Client;
 
     class RavenDbStorageSession : Feature
@@ -37,7 +36,7 @@
 
     interface IOpenRavenSessionsInPipeline
     {
-        IAsyncDocumentSession OpenSession(IncomingMessage message);
+        IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders);
     }
 
     class OpenRavenSessionsByDatabaseName : IOpenRavenSessionsInPipeline
@@ -51,9 +50,9 @@
             this.getDatabaseName = getDatabaseName ?? (context => string.Empty);
         }
 
-        public IAsyncDocumentSession OpenSession(IncomingMessage message)
+        public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
         {
-            var databaseName = getDatabaseName(message.Headers);
+            var databaseName = getDatabaseName(messageHeaders);
             var documentSession = string.IsNullOrEmpty(databaseName)
                 ? documentStoreWrapper.DocumentStore.OpenAsyncSession()
                 : documentStoreWrapper.DocumentStore.OpenAsyncSession(databaseName);
@@ -74,7 +73,7 @@
             this.getAsyncSession = getAsyncSession;
         }
 
-        public IAsyncDocumentSession OpenSession(IncomingMessage message)
+        public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
         {
             return getAsyncSession();
         }

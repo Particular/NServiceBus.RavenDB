@@ -17,8 +17,8 @@
         {
             var context = await Scenario.Define<Context>(c =>
             {
-                c.Db1 = Guid.NewGuid().ToString("N");
-                c.Db2 = Guid.NewGuid().ToString("N");
+                c.Db1 = "Tenant1-" + Guid.NewGuid().ToString("n").Substring(16);
+                c.Db2 = "Tenant2-" + Guid.NewGuid().ToString("n").Substring(16);
             })
                 .WithEndpoint<MultiTenantEndpoint>(b =>
                 {
@@ -55,14 +55,7 @@
                         await SendMessage(session, "OrderB", ctx.Db2);
                     });
                 })
-                .Done(c =>
-                {
-                    if (c.ObservedDbs.Count >= 2)
-                    {
-                        return true;
-                    }
-                    return false;
-                })
+                .Done(c => c.ObservedDbs.Count >= 1)
                 .Run();
 
             await ConfigureEndpointRavenDBPersistence.DeleteDatabase(context.Db1);
@@ -80,6 +73,7 @@
             public string Db1 { get; set; }
             public string Db2 { get; set; }
             public List<string> ObservedDbs { get; } = new List<string>();
+            public string ObservedDbsOutput => String.Join(", ", ObservedDbs);
         }
 
         public class MultiTenantEndpoint : EndpointConfigurationBuilder
@@ -109,11 +103,8 @@
                     var ravenSession = context.SynchronizedStorageSession.RavenSession();
                     if (ravenSession is InMemoryDocumentSessionOperations ravenSessionOps)
                     {
-                        Task.Run(async () =>
-                        {
-                            await Task.Delay(5000);
-                            testCtx.ObservedDbs.Add(ravenSessionOps.DatabaseName);
-                        });
+                        var dbName = ravenSessionOps.DatabaseName;
+                        testCtx.ObservedDbs.Add(dbName);
                     }
                     return Task.FromResult(0);
                 }
