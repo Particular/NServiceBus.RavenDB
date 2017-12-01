@@ -140,7 +140,7 @@
 
             public class MTSagaData : ContainSagaData
             {
-                public string OrderId { get; set; }
+                public virtual string OrderId { get; set; }
             }
         }
 
