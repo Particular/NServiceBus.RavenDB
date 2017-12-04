@@ -12,11 +12,11 @@
 
     class OutboxPersister : IOutboxStorage
     {
-        public OutboxPersister(IDocumentStore documentStore, string endpointName, IOpenRavenSessionsInPipeline sessionCreator = null)
+        public OutboxPersister(IDocumentStore documentStore, string endpointName, IOpenRavenSessionsInPipeline sessionCreator)
         {
             this.documentStore = documentStore;
             this.endpointName = endpointName;
-            this.sessionCreator = sessionCreator ?? new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore));
+            this.sessionCreator = sessionCreator;
         }
 
         public async Task<OutboxMessage> Get(string messageId, ContextBag options)
