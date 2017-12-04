@@ -5,8 +5,8 @@
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
-    using NServiceBus.Pipeline;
     using NServiceBus.RavenDB.Outbox;
+    using NServiceBus.Transport;
     using Raven.Client;
     using TransportOperation = NServiceBus.Outbox.TransportOperation;
 
@@ -57,11 +57,10 @@
         public Task<OutboxTransaction> BeginTransaction(ContextBag context)
         {
             IAsyncDocumentSession session;
-
-            var receiveContext = context as ITransportReceiveContext;
-            if (receiveContext != null)
+            IncomingMessage message;
+            if (context.TryGet(out message))
             {
-                session = sessionCreator.OpenSession(receiveContext.Message.Headers);
+                session = sessionCreator.OpenSession(message.Headers);
             }
             else
             {
