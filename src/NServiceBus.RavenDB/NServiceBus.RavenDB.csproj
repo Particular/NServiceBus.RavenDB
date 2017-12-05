@@ -101,6 +101,9 @@
     <Compile Include="RavenDbSettingsExtensions.cs" />
     <Compile Include="SagaPersister\RavenDbSagaSettingsExtensions.cs" />
     <Compile Include="SessionManagement\ContextBagExtensions.cs" />
+    <Compile Include="SessionManagement\OpenSessionsInPipeline\IOpenRavenSessionsInPipeline.cs" />
+    <Compile Include="SessionManagement\OpenSessionsInPipeline\OpenRavenSessionByCustomDelegate.cs" />
+    <Compile Include="SessionManagement\OpenSessionsInPipeline\OpenRavenSessionByDatabaseName.cs" />
     <Compile Include="SessionManagement\RavenDBSynchronizedStorageAdapter.cs" />
     <Compile Include="SessionManagement\RavenDBSynchronizedStorageSession.cs" />
     <Compile Include="SessionManagement\ISessionProvider.cs" />
@@ -109,7 +112,6 @@
     <Compile Include="Internal\NoOpLogManager.cs" />
     <Compile Include="Internal\SharedDocumentStore.cs" />
     <Compile Include="RavenDBPersistence.cs" />
-    <Compile Include="SessionManagement\ProvidedAsyncSessionBehavior.cs" />
     <Compile Include="SessionManagement\OpenAsyncSessionBehavior.cs" />
     <Compile Include="SessionManagement\RavenDbStorageSession.cs" />
     <Compile Include="SagaPersister\RavenDbSagaStorage.cs" />

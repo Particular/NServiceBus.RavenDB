@@ -6,16 +6,19 @@
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Outbox;
+    using NServiceBus.Transport;
     using Raven.Client;
     using TransportOperation = NServiceBus.Outbox.TransportOperation;
 
     class OutboxPersister : IOutboxStorage
     {
-        public OutboxPersister(IDocumentStore documentStore, string endpointName)
+        public OutboxPersister(IDocumentStore documentStore, string endpointName, IOpenRavenSessionsInPipeline sessionCreator)
         {
             this.documentStore = documentStore;
             this.endpointName = endpointName;
+            this.sessionCreator = sessionCreator;
         }
+
         public async Task<OutboxMessage> Get(string messageId, ContextBag options)
         {
             OutboxRecord result;
@@ -53,7 +56,16 @@
 
         public Task<OutboxTransaction> BeginTransaction(ContextBag context)
         {
-            var session = documentStore.OpenAsyncSession();
+            IAsyncDocumentSession session;
+            IncomingMessage message;
+            if (context.TryGet(out message))
+            {
+                session = sessionCreator.OpenSession(message.Headers);
+            }
+            else
+            {
+                session = documentStore.OpenAsyncSession();
+            }
 
             session.Advanced.UseOptimisticConcurrency = true;
 
@@ -128,5 +140,6 @@
         IDocumentStore documentStore;
         TransportOperation[] emptyTransportOperations = new TransportOperation[0];
         OutboxRecord.OutboxOperation[] emptyOutboxOperations = new OutboxRecord.OutboxOperation[0];
+        IOpenRavenSessionsInPipeline sessionCreator;
     }
 }

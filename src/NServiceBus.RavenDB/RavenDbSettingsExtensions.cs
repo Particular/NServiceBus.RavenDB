@@ -76,7 +76,26 @@
         /// <param name="cfg"></param>
         /// <param name="getAsyncSessionFunc">A func returning the async session to be used</param>
         /// <returns></returns>
+        [ObsoleteEx(Message = "This overload doesn't provide enough information to the Func to do anything useful. Use the overload that supplies the message headers as an input instead.",
+            TreatAsErrorFromVersion = "5.0.0", RemoveInVersion = "6.0.0")]
         public static PersistenceExtensions<RavenDBPersistence> UseSharedAsyncSession(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IAsyncDocumentSession> getAsyncSessionFunc)
+        {
+            if (getAsyncSessionFunc == null)
+            {
+                throw new ArgumentNullException(nameof(getAsyncSessionFunc));
+            }
+            cfg.GetSettings().Set(SharedAsyncSessionSettingsKey + ".Obsolete", getAsyncSessionFunc);
+            return cfg;
+        }
+
+        /// <summary>
+        ///     Specifies the async session that the shared persisters (saga + outbox) that should be used. The lifecycle is controlled by
+        ///     me
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <param name="getAsyncSessionFunc">A func returning the async session to be used</param>
+        /// <returns></returns>
+        public static PersistenceExtensions<RavenDBPersistence> UseSharedAsyncSession(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSessionFunc)
         {
             if (getAsyncSessionFunc == null)
             {
@@ -98,7 +117,7 @@
      //todo: obsolete
         public static PersistenceExtensions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IDictionary<string,string>, string> convention)
         {
-            OpenAsyncSessionBehavior.GetDatabaseName = convention;
+            cfg.GetSettings().Set("RavenDB.SetMessageToDatabaseMappingConvention", convention);
             return cfg;
         }
 
