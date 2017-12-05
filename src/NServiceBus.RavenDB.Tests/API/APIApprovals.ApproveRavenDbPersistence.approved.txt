@@ -51,7 +51,11 @@ namespace NServiceBus
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.IDocumentStore> storeCreator) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, NServiceBus.Persistence.RavenDB.ConnectionParameters connectionParameters) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetMessageToDatabaseMappingConvention(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<System.Collections.Generic.IDictionary<string, string>, string> convention) { }
+        [System.ObsoleteAttribute("This overload doesn\'t provide enough information to the Func to do anything usefu" +
+            "l. Use the overload that supplies the message headers as an input instead. Will " +
+            "be removed in version 6.0.0.", true)]
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseSharedAsyncSession(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<Raven.Client.IAsyncDocumentSession> getAsyncSessionFunc) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseSharedAsyncSession(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<System.Collections.Generic.IDictionary<string, string>, Raven.Client.IAsyncDocumentSession> getAsyncSessionFunc) { }
     }
     public class static RavenDbSubscriptionSettingsExtensions
     {
