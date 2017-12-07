@@ -64,7 +64,7 @@
                 EndpointSetup<DefaultServer>((config, context) =>
                 {
                     var scenarioContext = context.ScenarioContext as RavenSessionTestContext;
-                    config.UsePersistence<RavenDBPersistence>().UseSharedAsyncSession(() => scenarioContext.RavenSessionFromTest);
+                    config.UsePersistence<RavenDBPersistence>().UseSharedAsyncSession(_ => scenarioContext.RavenSessionFromTest);
                 });
             }
 

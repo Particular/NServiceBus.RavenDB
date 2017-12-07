@@ -24,6 +24,7 @@
 
         public Task<CompletableSynchronizedStorageSession> TryAdapt(TransportTransaction transportTransaction, ContextBag context)
         {
+            // ReSharper disable once NotAccessedVariable - No way to just check for existence otherwise
             Transaction ambientTransaction;
             if (transportTransaction.TryGet(out ambientTransaction))
             {
