@@ -45,7 +45,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
         return documentStore;
     }
 
-    static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
+    internal static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
     {
         var documentStore = new DocumentStore
         {

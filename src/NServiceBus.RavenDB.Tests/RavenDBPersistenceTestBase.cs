@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
     using Raven.Client;
     using Raven.Tests.Helpers;
@@ -59,5 +60,25 @@
         {
             s.Configuration.DefaultStorageTypeName = "esent";
         } );
+
+        internal IOpenRavenSessionsInPipeline CreateTestSessionOpener()
+        {
+            return new TestOpenSessionsInPipeline(this.store);
+        }
+
+        class TestOpenSessionsInPipeline : IOpenRavenSessionsInPipeline
+        {
+            IDocumentStore store;
+
+            public TestOpenSessionsInPipeline(IDocumentStore store)
+            {
+                this.store = store;
+            }
+
+            public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
+            {
+                return store.OpenAsyncSession();
+            }
+        }
     }
 }

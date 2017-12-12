@@ -24,7 +24,9 @@
 
         public Task<CompletableSynchronizedStorageSession> TryAdapt(TransportTransaction transportTransaction, ContextBag context)
         {
-            if (transportTransaction.TryGet(out Transaction _))
+            // ReSharper disable once NotAccessedVariable - No way to just check for existence otherwise
+            Transaction ambientTransaction;
+            if (transportTransaction.TryGet(out ambientTransaction))
             {
                 var session = context.GetAsyncSession();
                 CompletableSynchronizedStorageSession completableSynchronizedStorageSession = new RavenDBSynchronizedStorageSession(session, true);
