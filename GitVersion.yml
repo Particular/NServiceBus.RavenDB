@@ -1,13 +1,10 @@
 assembly-versioning-scheme: Major
 next-version: 5.0
-commit-message-incrementing: Disabled
 branches:
   develop:
     tag: beta
-    prevent-increment-of-merged-branch-version: true
   release:
     tag: rc
-    prevent-increment-of-merged-branch-version: true
 ignore:
   sha:
     - efe8a7a49fd589fb497821b98124dc28c670d8d2
