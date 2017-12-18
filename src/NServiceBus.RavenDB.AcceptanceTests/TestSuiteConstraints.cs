@@ -14,7 +14,7 @@
 
         public bool SupportsOutbox => true;
 
-        public IConfigureEndpointTestExecution CreateTransportConfiguration() => new ConfigureEndpointMsmqTransport();
+        public IConfigureEndpointTestExecution CreateTransportConfiguration() => new ConfigureAcceptanceTestingTransport(false, false);
 
         public IConfigureEndpointTestExecution CreatePersistenceConfiguration() => new ConfigureEndpointRavenDBPersistence();
     }
