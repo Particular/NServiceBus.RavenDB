@@ -2,7 +2,7 @@
 {
     using NServiceBus.RavenDB.AcceptanceTests;
 
-    public partial class GatewayTestSuiteConstraints : IGatewayTestSuiteConstraints
+    public partial class GatewayTestSuiteConstraints
     {
         public IConfigureGatewayPersitenceExecution CreatePersistenceConfiguration()
         {
