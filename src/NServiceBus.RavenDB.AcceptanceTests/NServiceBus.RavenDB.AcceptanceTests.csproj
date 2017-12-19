@@ -18,4 +18,9 @@
     <PackageReference Include="RavenDB.Client" Version="3.5.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Until we have a core beta 14 or higher that excludes this -->
+    <Compile Remove="$(NuGetPackageRoot)**\NSB.AcceptanceTests\ConventionEnforcementTests.cs" />
+  </ItemGroup>
+
 </Project>
