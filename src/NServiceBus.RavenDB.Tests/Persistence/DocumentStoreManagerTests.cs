@@ -18,6 +18,7 @@
                 settings.Set("TypesToScan", new Type[0]);
                 settings.Set("NServiceBus.Routing.EndpointName", "FakeEndpoint");
                 settings.Set("NServiceBus.Transport.TransportInfrastructure", new FakeRavenDBTransportInfrastructure(TransportTransactionMode.None));
+                settings.Set("Endpoint.SendOnly", true);
 
                 DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(settings, db.NewStore("GatewayDeduplication"));
                 DocumentStoreManager.SetDocumentStore<StorageType.Outbox>(settings, db.NewStore("Outbox"));
