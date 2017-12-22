@@ -51,7 +51,9 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
         {
             Url = "http://localhost:8084",
             DefaultDatabase = defaultDatabase,
+#if NET452
             EnlistInDistributedTransactions = false
+#endif
         };
 
         documentStore.Initialize();
