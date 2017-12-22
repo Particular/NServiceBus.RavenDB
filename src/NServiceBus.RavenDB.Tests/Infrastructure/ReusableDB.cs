@@ -28,11 +28,18 @@
             Console.WriteLine($"Provisioned new Raven database name {databaseName}");
         }
 
-        public IDocumentStore NewStore()
+        public IDocumentStore NewStore(string identifier = null)
         {
             Console.WriteLine();
             Console.WriteLine($"Creating new DocumentStore for {databaseName}");
-            return CreateStore();
+            var store = CreateStore();
+
+            if (identifier != null)
+            {
+                store.Identifier = identifier;
+            }
+
+            return store;
         }
 
         private IDocumentStore CreateStore()

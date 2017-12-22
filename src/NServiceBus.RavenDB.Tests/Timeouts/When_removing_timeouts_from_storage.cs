@@ -13,12 +13,6 @@
 
     public class When_removing_timeouts_from_storage : RavenDBPersistenceTestBase
     {
-        public When_removing_timeouts_from_storage()
-        {
-            // in-memory store doesn't support dtc
-            DocumentStoreFactory = t => t.NewDocumentStore(false, "esent");
-        }
-
         [Test]
         public async Task Remove_WhenNoTimeoutRemoved_ShouldReturnFalse()
         {
