@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
@@ -23,7 +24,7 @@
             store.JsonRequestFactory.LogRequest += (state, args) =>
             {
                 var uri = new Uri(args.Url);
-                if (uri.AbsolutePath.StartsWith("/changes"))
+                if(Regex.IsMatch(uri.AbsolutePath, "^/databases/[a-z0-9]+/changes/config$"))
                 {
                     return;
                 }
