@@ -29,6 +29,7 @@
                     Environment.NewLine
                 }, StringSplitOptions.RemoveEmptyEntries)
                 .Where(l => !l.StartsWith("[assembly: ReleaseDateAttribute("))
+                .Where(l => !l.StartsWith("[assembly: System.Runtime.Versioning.TargetFrameworkAttribute("))
                 .Where(l => !string.IsNullOrWhiteSpace(l))
             );
         }
