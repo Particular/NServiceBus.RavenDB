@@ -6,11 +6,11 @@ namespace NServiceBus.RavenDB.Tests
     [Serializable]
     class LegacyAddress : ISerializable
     {
-        public LegacyAddress(string queueName, string machineName, bool ignoreMachineName = false, string defaultMachineName = "")
+        public LegacyAddress(string queue, string machine, bool ignoreMachineName = false, string defaultMachineName = "")
         {
-            Queue = queueName;
-            queueLowerCased = queueName.ToLower();
-            Machine = machineName ?? defaultMachineName;
+            Queue = queue;
+            queueLowerCased = queue.ToLower();
+            Machine = machine ?? defaultMachineName;
             machineLowerCased = Machine.ToLower();
             this.ignoreMachineName = ignoreMachineName;
         }

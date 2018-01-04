@@ -1,6 +1,8 @@
 ﻿namespace NServiceBus.RavenDB.Tests.Persistence
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NUnit.Framework;
@@ -31,6 +33,7 @@
                 var docMetadata = new RavenJObject();
                 var fakeDocType = typeof(LikeV3Subscriptions);
                 docMetadata["Raven-Entity-Name"] = fakeDocType.Name;
+                // Doesn't appear to matter, but $"{fakeDocType.FullName}, {fakeDocType.Assembly.GetName().Name}" may be more accurate
                 docMetadata["Raven-Clr-Type"] = fakeDocType.AssemblyQualifiedName;
 
                 // Store document as "old" format
@@ -53,11 +56,53 @@
                 Assert.IsNotNull(clients);
                 Assert.IsNotNull(subscriptions);
                 Assert.AreEqual(1, subscriptions.Length);
+                Assert.AreEqual(2, clients.Length);
 
                 var sub = (RavenJObject)subscriptions[0];
                 Assert.AreEqual("C", sub["Endpoint"].Value<string>());
                 Assert.AreEqual("D", sub["TransportAddress"].Value<string>());
+
+                var client0 = (RavenJObject)clients[0];
+                var client1 = (RavenJObject)clients[1];
+                Assert.AreEqual("A", client0["Queue"].Value<string>());
+                Assert.AreEqual("B", client0["Machine"].Value<string>());
+                Assert.AreEqual("E", client1["Queue"].Value<string>());
+                Assert.AreEqual("F", client1["Machine"].Value<string>());
             }
+        }
+
+        /// <summary>
+        /// In order for JSON.NET to be able to deserialize a LegacyAddress in netcoreapp2.0, it needs to be able to find a constructor where the
+        /// parameter names are (case-insensitive) matches to the property names. "queue" works, "queueName" doesn't.
+        /// </summary>
+        [Test]
+        public void LegacyAddressNamingToSupportNetCoreJsonSerializer()
+        {
+            var legacyAddress = typeof(LegacyAddress);
+            var ignoreCase = StringComparison.InvariantCultureIgnoreCase;
+
+            var extractedParams = legacyAddress.GetConstructors()
+                .Select(ctor => ctor.GetParameters())
+                .Select(plist => new
+                {
+                    List = plist,
+                    QueueParam = plist.FirstOrDefault(pi => pi.Name.Equals(nameof(LegacyAddress.Queue), ignoreCase)),
+                    MachineParam = plist.FirstOrDefault(pi => pi.Name.Equals(nameof(LegacyAddress.Machine), ignoreCase))
+                })
+                .Select(x => new
+                {
+                    x.QueueParam,
+                    x.MachineParam,
+                    Rest = x.List.Where(pi => pi != x.QueueParam && pi != x.MachineParam).ToArray()
+                })
+                .ToList();
+
+            var valid = extractedParams
+                .Where(x => x.QueueParam != null && x.MachineParam != null)
+                .Where(x => x.Rest.All(pi => pi.IsOptional))
+                .ToArray();
+
+            Assert.AreEqual(1, valid.Length);
         }
 
         class LikeV3Subscriptions
