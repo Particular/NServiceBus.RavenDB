@@ -47,7 +47,10 @@
             return new DocumentStore
             {
                 Url = TestConstants.RavenUrl,
-                DefaultDatabase = databaseName
+                DefaultDatabase = databaseName,
+#if NET452
+                EnlistInDistributedTransactions = false
+#endif
             };
         }
 
