@@ -47,10 +47,13 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     internal static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
     {
+        var ravenUrl = Environment.GetEnvironmentVariable("RavenDbUrl") ?? "http://localhost:8084";
+        var apiKey = Environment.GetEnvironmentVariable("RavenDbApiKey");
         var documentStore = new DocumentStore
         {
-            Url = "http://localhost:8084",
+            Url = ravenUrl,
             DefaultDatabase = defaultDatabase,
+            ApiKey = apiKey,
 #if NET452
             EnlistInDistributedTransactions = false
 #endif

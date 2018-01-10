@@ -43,7 +43,8 @@
             var connectionParams = new ConnectionParameters
             {
                 Url = TestConstants.RavenUrl,
-                DatabaseName = "TestConnectionParams"
+                DatabaseName = "TestConnectionParams",
+                ApiKey = TestConstants.RavenApiKey
             };
 
             var settings = DefaultSettings();

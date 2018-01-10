@@ -48,6 +48,7 @@
             {
                 Url = TestConstants.RavenUrl,
                 DefaultDatabase = databaseName,
+                ApiKey = TestConstants.RavenApiKey,
 #if NET452
                 EnlistInDistributedTransactions = false
 #endif
@@ -73,7 +74,8 @@
 
             var docStore = new DocumentStore
             {
-                Url = TestConstants.RavenUrl
+                Url = TestConstants.RavenUrl,
+                ApiKey = TestConstants.RavenApiKey
             };
 
             docStore.Initialize();
