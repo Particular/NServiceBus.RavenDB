@@ -154,6 +154,7 @@
 
         static DocumentStoreInitializer CreateStoreByConnectionStringName(ReadOnlySettings settings, params string[] connectionStringNames)
         {
+#if NET452
             var connectionStringName = GetFirstNonEmptyConnectionString(connectionStringNames);
             if (!string.IsNullOrWhiteSpace(connectionStringName))
             {
@@ -168,6 +169,7 @@
 
                 return new DocumentStoreInitializer(docStore);
             }
+#endif
             return null;
         }
 
@@ -186,6 +188,7 @@
             return new DocumentStoreInitializer(docStore);
         }
 
+#if NET452
         [ObsoleteEx(RemoveInVersion = "6.0")]
         static string GetFirstNonEmptyConnectionString(params string[] connectionStringNames)
         {
@@ -211,5 +214,6 @@
                 return null;
             }
         }
+#endif
     }
 }

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
@@ -74,7 +75,7 @@
                         await SendMessage(session, "OrderB", ctx.Db2);
                     });
                 })
-                .Done(c => c.ObservedDbs.Count >= 1)
+                .Done(c => c.MessagesReceived >= 2)
                 .Run();
 
             await ConfigureEndpointRavenDBPersistence.DeleteDatabase(context.Db1);
@@ -88,6 +89,7 @@
 
         public class Context : ScenarioContext
         {
+            public int MessagesReceived;
             public string DefaultDb { get; set; }
             public string Db1 { get; set; }
             public string Db2 { get; set; }
@@ -134,6 +136,7 @@
                         var dbName = ravenSessionOps.DatabaseName;
                         testCtx.ObservedDbs.Add(dbName);
                     }
+                    Interlocked.Increment(ref testCtx.MessagesReceived);
                     return Task.FromResult(0);
                 }
             }

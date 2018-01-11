@@ -6,14 +6,14 @@
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
     using Raven.Client;
-    using Raven.Tests.Helpers;
 
-    public class RavenDBPersistenceTestBase : RavenTestBase
+    public class RavenDBPersistenceTestBase
     {
         [SetUp]
         public virtual void SetUp()
         {
-            store = DocumentStoreFactory(this);
+            db = new ReusableDB();
+            store = db.NewStore().Initialize();
         }
 
         [TearDown]
@@ -22,6 +22,7 @@
             sessions.ForEach(s => s.Dispose());
             sessions.Clear();
             store.Dispose();
+            db.Dispose();
         }
 
         protected internal IAsyncDocumentSession OpenAsyncSession()
@@ -31,6 +32,11 @@
             documentSession.Advanced.UseOptimisticConcurrency = true;
             sessions.Add(documentSession);
             return documentSession;
+        }
+
+        protected void WaitForIndexing()
+        {
+            db.WaitForIndexing(store);
         }
 
         protected static Task<Exception> Catch(Func<Task> action)
@@ -56,10 +62,7 @@
 
         List<IAsyncDocumentSession> sessions = new List<IAsyncDocumentSession>();
         protected IDocumentStore store;
-        protected Func<RavenTestBase, IDocumentStore> DocumentStoreFactory { get; set; } = t => t.NewDocumentStore(configureStore: s=> 
-        {
-            s.Configuration.DefaultStorageTypeName = "esent";
-        } );
+        ReusableDB db;
 
         internal IOpenRavenSessionsInPipeline CreateTestSessionOpener()
         {

@@ -111,7 +111,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
             await persister.SetAsDispatched(id, new ContextBag());
 
-            WaitForIndexing(store);
+            WaitForIndexing();
 
             using (var s = store.OpenAsyncSession())
             {
