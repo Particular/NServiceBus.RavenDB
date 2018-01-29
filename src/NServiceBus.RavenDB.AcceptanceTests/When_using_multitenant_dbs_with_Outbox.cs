@@ -42,6 +42,7 @@
                     b.CustomConfig((cfg, c) =>
                     {
                         cfg.EnableOutbox();
+                        cfg.LimitMessageProcessingConcurrencyTo(1);
 
                         var settings = cfg.GetSettings();
 
@@ -56,7 +57,7 @@
                         configureMultiTenant(c.DbConfig);
                     });
 
-                    async Task SendMessage(IMessageSession session, string orderId, string dbName)
+                    async Task SendMessage(IMessageSession session, string messageId, string orderId, string dbName)
                     {
                         var msg = new TestMsg
                         {
@@ -65,13 +66,19 @@
                         var opts = new SendOptions();
                         opts.RouteToThisEndpoint();
                         opts.SetHeader("RavenDatabaseName", dbName);
+                        opts.SetMessageId(messageId);
                         await session.Send(msg, opts);
                     }
 
                     b.When(async (session, ctx) =>
                     {
-                        await SendMessage(session, "OrderA", ctx.Db1);
-                        await SendMessage(session, "OrderB", ctx.Db2);
+                        var msgId1 = Guid.NewGuid().ToString();
+                        var msgId2 = Guid.NewGuid().ToString();
+
+                        await SendMessage(session, msgId1, "OrderA", ctx.Db1);
+                        await SendMessage(session, msgId1, "OrderA", ctx.Db1);
+                        await SendMessage(session, msgId2, "OrderB", ctx.Db2);
+                        await SendMessage(session, msgId2, "OrderB", ctx.Db2);
                     });
                 })
                 .Done(c => c.ObservedDbs.Count >= 1)
