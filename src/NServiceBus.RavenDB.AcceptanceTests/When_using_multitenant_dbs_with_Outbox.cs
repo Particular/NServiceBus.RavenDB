@@ -3,10 +3,12 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Pipeline;
     using NUnit.Framework;
     using Raven.Client.Document;
 
@@ -43,6 +45,7 @@
                     {
                         cfg.EnableOutbox();
                         cfg.LimitMessageProcessingConcurrencyTo(1);
+                        cfg.Pipeline.Register(new MessageCountingBehavior(c), "Counts all messages processed");
 
                         var settings = cfg.GetSettings();
 
@@ -81,12 +84,13 @@
                         await SendMessage(session, msgId2, "OrderB", ctx.Db2);
                     });
                 })
-                .Done(c => c.ObservedDbs.Count >= 1)
+                .Done(c => c.MessagesObserved >= 4)
                 .Run();
 
             await ConfigureEndpointRavenDBPersistence.DeleteDatabase(context.Db1);
             await ConfigureEndpointRavenDBPersistence.DeleteDatabase(context.Db2);
 
+            Assert.AreEqual(4, context.MessagesObserved);
             Assert.AreEqual(2, context.ObservedDbs.Count);
             Assert.IsFalse(context.ObservedDbs.Any(db => db == context.DefaultDb));
             Assert.Contains(context.Db1, context.ObservedDbs);
@@ -101,6 +105,7 @@
             public List<string> ObservedDbs { get; } = new List<string>();
             public string ObservedDbsOutput => String.Join(", ", ObservedDbs);
             public ContextDbConfig DbConfig { get; } = new ContextDbConfig();
+            public int MessagesObserved;
         }
 
         public class ContextDbConfig
@@ -154,6 +159,23 @@
         public class TestMsg : ICommand
         {
             public string OrderId { get; set; }
+        }
+
+        public class MessageCountingBehavior : IBehavior<ITransportReceiveContext, ITransportReceiveContext>
+        {
+            Context testContext;
+
+            public MessageCountingBehavior(Context testContext)
+            {
+                this.testContext = testContext;
+            }
+
+            public async Task Invoke(ITransportReceiveContext context, Func<ITransportReceiveContext, Task> next)
+            {
+                await next(context);
+
+                Interlocked.Increment(ref testContext.MessagesObserved);
+            }
         }
     }
 }
