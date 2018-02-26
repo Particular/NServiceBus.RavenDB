@@ -96,7 +96,10 @@
     <Compile Include="Internal\NoOpLogManager.cs" />
     <Compile Include="Internal\SharedDocumentStore.cs" />
     <Compile Include="RavenDBPersistence.cs" />
-    <Compile Include="SessionManagement\ProvidedSessionBehavior.cs" />
+    <Compile Include="SessionManagement\OpenSessionsInPipeline\FakeMessageContextContainingOnlyHeaders.cs" />
+    <Compile Include="SessionManagement\OpenSessionsInPipeline\IOpenRavenSessionsInPipeline.cs" />
+    <Compile Include="SessionManagement\OpenSessionsInPipeline\OpenRavenSessionByCustomDelegate.cs" />
+    <Compile Include="SessionManagement\OpenSessionsInPipeline\OpenRavenSessionByDatabaseName.cs" />
     <Compile Include="SessionManagement\OpenSessionBehavior.cs" />
     <Compile Include="SessionManagement\RavenDbStorageSession.cs" />
     <Compile Include="Internal\RavenUserInstaller.cs" />

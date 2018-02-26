@@ -217,6 +217,7 @@
     <Compile Include="When_loading_sagas_with_no_unique.cs" />
     <Compile Include="When_outbox_is_enabled.cs" />
     <Compile Include="When_using_a_sagafinder.cs" />
+    <Compile Include="When_using_multitenant_dbs_with_Outbox.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj">
@@ -225,6 +226,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

@@ -4,17 +4,23 @@
     using System.Collections.Generic;
     using System.Linq;
     using NServiceBus.Outbox;
+    using NServiceBus.Persistence.RavenDB;
+    using NServiceBus.Pipeline.Contexts;
     using NServiceBus.RavenDB.Persistence;
+    using NServiceBus.RavenDB.SessionManagement;
     using Raven.Client;
 
     class OutboxPersister : IOutboxStorage
     {
         readonly ISessionProvider sessionProvider;
+        readonly IOpenRavenSessionsInPipeline sessionCreator;
+
         public string EndpointName { get; set; }
 
-        public OutboxPersister(ISessionProvider sessionProvider)
+        public OutboxPersister(ISessionProvider sessionProvider, IOpenRavenSessionsInPipeline sessionCreator)
         {
             this.sessionProvider = sessionProvider;
+            this.sessionCreator = sessionCreator;
         }
 
         public IDocumentStore DocumentStore { get; set; }
@@ -22,7 +28,7 @@
         public bool TryGet(string messageId, out OutboxMessage message)
         {
             OutboxRecord result;
-            using (var session = DocumentStore.OpenSession())
+            using (var session = GetSession())
             {
                 session.Advanced.AllowNonAuthoritativeInformation = false;
                 // We use Load operation and not queries to avoid stale results
@@ -66,7 +72,7 @@
 
         public void SetAsDispatched(string messageId)
         {
-            using (var session = DocumentStore.OpenSession())
+            using (var session = GetSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
                 session.Advanced.AllowNonAuthoritativeInformation = false;
@@ -83,6 +89,19 @@
 
                 session.SaveChanges();
             }
+        }
+
+        IDocumentSession GetSession()
+        {
+            var ravenSessionProvider = sessionProvider as RavenSessionProvider;
+            if (ravenSessionProvider != null)
+            {
+                var incomingContext = (IncomingContext) ravenSessionProvider.PipelineExecutor.CurrentContext;
+
+                return sessionCreator.OpenSession(incomingContext.PhysicalMessage.Headers);
+            }
+
+            return DocumentStore.OpenSession();
         }
 
         static string GetOutboxRecordIdWithoutEndpointName(string messageId) => $"Outbox/{messageId.Replace('\\', '_')}";

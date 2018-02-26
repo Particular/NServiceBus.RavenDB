@@ -1,11 +1,11 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using System.Collections.Generic;
     using NServiceBus.Configuration.AdvanceExtensibility;
     using NServiceBus.Persistence;
     using NServiceBus.RavenDB;
     using NServiceBus.RavenDB.Internal;
-    using NServiceBus.RavenDB.SessionManagement;
     using Raven.Client;
 
     /// <summary>
@@ -48,8 +48,30 @@
         /// <param name="cfg"></param>
         /// <param name="getSessionFunc">A func returning the session to be used</param>
         /// <returns></returns>
+        [Obsolete("TODO: Obsolete Message", false)]
         public static PersistenceExtentions<RavenDBPersistence> UseSharedSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDocumentSession> getSessionFunc)
         {
+            if (getSessionFunc == null)
+            {
+                throw new ArgumentNullException(nameof(getSessionFunc));
+            }
+            cfg.GetSettings().Set(SharedSessionSettingsKey + ".Obsolete", getSessionFunc);
+            return cfg;
+        }
+
+        /// <summary>
+        ///     Specifies the session that the shared persisters (saga + outbox) that should be used. The lifecycle is controled by
+        ///     me
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <param name="getSessionFunc">A func returning the session to be used</param>
+        /// <returns></returns>
+        public static PersistenceExtentions<RavenDBPersistence> UseSharedSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDictionary<string, string>, IDocumentSession> getSessionFunc)
+        {
+            if (getSessionFunc == null)
+            {
+                throw new ArgumentNullException(nameof(getSessionFunc));
+            }
             cfg.GetSettings().Set(SharedSessionSettingsKey, getSessionFunc);
             return cfg;
         }
@@ -65,7 +87,7 @@
         /// <returns>The configuration object.</returns>
         public static PersistenceExtentions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IMessageContext, string> convention)
         {
-            OpenSessionBehavior.GetDatabaseName = convention;
+            cfg.GetSettings().Set("RavenDB.SetMessageToDatabaseMappingConvention", convention);
             return cfg;
         }
 
