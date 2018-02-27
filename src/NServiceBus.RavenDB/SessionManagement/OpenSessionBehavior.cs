@@ -1,17 +1,20 @@
 ﻿namespace NServiceBus.RavenDB.SessionManagement
 {
     using System;
+    using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
-    using NServiceBus.RavenDB.Internal;
     using NServiceBus.RavenDB.Persistence;
-    using NServiceBus.Unicast;
     using Raven.Client;
 
     class OpenSessionBehavior : IBehavior<IncomingContext>
     {
-        public static Func<IMessageContext, string> GetDatabaseName = context => String.Empty;
-        public IDocumentStoreWrapper DocumentStoreWrapper { get; set; }
+        private IOpenRavenSessionsInPipeline sessionCreator;
+
+        public OpenSessionBehavior(IOpenRavenSessionsInPipeline sessionCreator)
+        {
+            this.sessionCreator = sessionCreator;
+        }
 
         public void Invoke(IncomingContext context, Action next)
         {
@@ -25,8 +28,7 @@
 
         IDocumentSession OpenSession(IncomingContext context)
         {
-            var databaseName = GetDatabaseName(new MessageContext(context.PhysicalMessage));
-            var documentSession = string.IsNullOrEmpty(databaseName) ? DocumentStoreWrapper.DocumentStore.OpenSession() : DocumentStoreWrapper.DocumentStore.OpenSession(databaseName);
+            var documentSession = sessionCreator.OpenSession(context.PhysicalMessage.Headers);
             documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
             return documentSession;
