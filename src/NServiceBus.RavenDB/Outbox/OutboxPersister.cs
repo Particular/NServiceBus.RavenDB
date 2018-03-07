@@ -22,7 +22,7 @@
         public async Task<OutboxMessage> Get(string messageId, ContextBag options)
         {
             OutboxRecord result;
-            using (var session = documentStore.OpenAsyncSession())
+            using (var session = GetSession(options))
             {
                 session.Advanced.AllowNonAuthoritativeInformation = false;
 
@@ -56,16 +56,7 @@
 
         public Task<OutboxTransaction> BeginTransaction(ContextBag context)
         {
-            IAsyncDocumentSession session;
-            IncomingMessage message;
-            if (context.TryGet(out message))
-            {
-                session = sessionCreator.OpenSession(message.Headers);
-            }
-            else
-            {
-                session = documentStore.OpenAsyncSession();
-            }
+            var session = GetSession(context);
 
             session.Advanced.UseOptimisticConcurrency = true;
 
@@ -103,7 +94,7 @@
 
         public async Task SetAsDispatched(string messageId, ContextBag options)
         {
-            using (var session = documentStore.OpenAsyncSession())
+            using (var session = GetSession(options))
             {
                 session.Advanced.UseOptimisticConcurrency = true;
                 session.Advanced.AllowNonAuthoritativeInformation = false;
@@ -121,6 +112,17 @@
 
                 await session.SaveChangesAsync().ConfigureAwait(false);
             }
+        }
+
+        IAsyncDocumentSession GetSession(ContextBag context)
+        {
+            IncomingMessage message;
+            if (context.TryGet(out message))
+            {
+                return sessionCreator.OpenSession(message.Headers);
+            }
+
+            return documentStore.OpenAsyncSession();
         }
 
         string[] GetPossibleOutboxDocumentIds(string messageId)

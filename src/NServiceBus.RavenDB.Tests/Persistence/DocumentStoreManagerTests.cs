@@ -4,35 +4,37 @@
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
     using NUnit.Framework;
-    using Raven.Client;
-    using Raven.Tests.Helpers;
 
     [TestFixture]
-    public class DocumentStoreManagerTests : RavenTestBase
+    public class DocumentStoreManagerTests
     {
         [Test]
         public void Specific_stores_should_mask_default()
         {
-            var settings = new SettingsHolder();
-            settings.Set("Transactions.SuppressDistributedTransactions", true);
-            settings.Set("TypesToScan", new Type[0]);
-            settings.Set("NServiceBus.Routing.EndpointName", "FakeEndpoint");
-            settings.Set("NServiceBus.Transport.TransportInfrastructure", new FakeRavenDBTransportInfrastructure(TransportTransactionMode.None));
-            
-            DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(settings, EmbeddedStore("GatewayDeduplication"));
-            DocumentStoreManager.SetDocumentStore<StorageType.Outbox>(settings, EmbeddedStore("Outbox"));
-            DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(settings, EmbeddedStore("Sagas"));
-            DocumentStoreManager.SetDocumentStore<StorageType.Subscriptions>(settings, EmbeddedStore("Subscriptions"));
-            DocumentStoreManager.SetDocumentStore<StorageType.Timeouts>(settings, EmbeddedStore("Timeouts"));
-            DocumentStoreManager.SetDefaultStore(settings, EmbeddedStore("Default"));
+            using (var db = new ReusableDB())
+            {
+                var settings = new SettingsHolder();
+                settings.Set("Transactions.SuppressDistributedTransactions", true);
+                settings.Set("TypesToScan", new Type[0]);
+                settings.Set("NServiceBus.Routing.EndpointName", "FakeEndpoint");
+                settings.Set("NServiceBus.Transport.TransportInfrastructure", new FakeRavenDBTransportInfrastructure(TransportTransactionMode.None));
+                settings.Set("Endpoint.SendOnly", true);
 
-            var readOnly = settings as ReadOnlySettings;
+                DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(settings, db.NewStore("GatewayDeduplication"));
+                DocumentStoreManager.SetDocumentStore<StorageType.Outbox>(settings, db.NewStore("Outbox"));
+                DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(settings, db.NewStore("Sagas"));
+                DocumentStoreManager.SetDocumentStore<StorageType.Subscriptions>(settings, db.NewStore("Subscriptions"));
+                DocumentStoreManager.SetDocumentStore<StorageType.Timeouts>(settings, db.NewStore("Timeouts"));
+                DocumentStoreManager.SetDefaultStore(settings, db.NewStore("Default"));
 
-            Assert.AreEqual("GatewayDeduplication", DocumentStoreManager.GetDocumentStore<StorageType.GatewayDeduplication>(readOnly).Identifier);
-            Assert.AreEqual("Outbox", DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(readOnly).Identifier);
-            Assert.AreEqual("Sagas", DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(readOnly).Identifier);
-            Assert.AreEqual("Subscriptions", DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(readOnly).Identifier);
-            Assert.AreEqual("Timeouts", DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(readOnly).Identifier);
+                var readOnly = settings as ReadOnlySettings;
+
+                Assert.AreEqual("GatewayDeduplication", DocumentStoreManager.GetDocumentStore<StorageType.GatewayDeduplication>(readOnly).Identifier);
+                Assert.AreEqual("Outbox", DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(readOnly).Identifier);
+                Assert.AreEqual("Sagas", DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(readOnly).Identifier);
+                Assert.AreEqual("Subscriptions", DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(readOnly).Identifier);
+                Assert.AreEqual("Timeouts", DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(readOnly).Identifier);
+            }
         }
 
         [Test]
@@ -41,7 +43,8 @@
             var connectionParams = new ConnectionParameters
             {
                 Url = TestConstants.RavenUrl,
-                DatabaseName = "TestConnectionParams"
+                DatabaseName = "TestConnectionParams",
+                ApiKey = TestConstants.RavenApiKey
             };
 
             var settings = DefaultSettings();
@@ -64,13 +67,6 @@
             storeInitializer.EnsureDocStoreCreated(settings);
             Assert.AreEqual("http://localhost:8080", storeInitializer.Url);
             Assert.AreEqual("http://localhost:8080 (DB: FakeEndpoint)", storeInitializer.Identifier);
-        }
-
-        private IDocumentStore EmbeddedStore(string identifier)
-        {
-            var store = NewDocumentStore();
-            store.Identifier = identifier;
-            return store;
         }
 
         private SettingsHolder DefaultSettings()
