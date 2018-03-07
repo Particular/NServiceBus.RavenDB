@@ -48,7 +48,7 @@
         /// <param name="cfg"></param>
         /// <param name="getSessionFunc">A func returning the session to be used</param>
         /// <returns></returns>
-        [Obsolete("TODO: Obsolete Message", false)]
+        [Obsolete("This overload doesn\'t provide enough information to the Func to do anything useful. Use the overload that supplies the message headers as an input instead. Will be removed in version 6.0.0.", false)]
         public static PersistenceExtentions<RavenDBPersistence> UseSharedSession(this PersistenceExtentions<RavenDBPersistence> cfg, Func<IDocumentSession> getSessionFunc)
         {
             if (getSessionFunc == null)
