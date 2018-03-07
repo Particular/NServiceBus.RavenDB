@@ -3,10 +3,12 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Configuration.AdvancedExtensibility;
+    using NServiceBus.Pipeline;
     using NUnit.Framework;
     using Raven.Client.Document;
 
@@ -42,6 +44,8 @@
                     b.CustomConfig((cfg, c) =>
                     {
                         cfg.EnableOutbox();
+                        cfg.LimitMessageProcessingConcurrencyTo(1);
+                        cfg.Pipeline.Register(new MessageCountingBehavior(c), "Counts all messages processed");
 
                         var settings = cfg.GetSettings();
 
@@ -56,7 +60,7 @@
                         configureMultiTenant(c.DbConfig);
                     });
 
-                    async Task SendMessage(IMessageSession session, string orderId, string dbName)
+                    async Task SendMessage(IMessageSession session, string messageId, string orderId, string dbName)
                     {
                         var msg = new TestMsg
                         {
@@ -65,21 +69,28 @@
                         var opts = new SendOptions();
                         opts.RouteToThisEndpoint();
                         opts.SetHeader("RavenDatabaseName", dbName);
+                        opts.SetMessageId(messageId);
                         await session.Send(msg, opts);
                     }
 
                     b.When(async (session, ctx) =>
                     {
-                        await SendMessage(session, "OrderA", ctx.Db1);
-                        await SendMessage(session, "OrderB", ctx.Db2);
+                        var msgId1 = Guid.NewGuid().ToString();
+                        var msgId2 = Guid.NewGuid().ToString();
+
+                        await SendMessage(session, msgId1, "OrderA", ctx.Db1);
+                        await SendMessage(session, msgId1, "OrderA", ctx.Db1);
+                        await SendMessage(session, msgId2, "OrderB", ctx.Db2);
+                        await SendMessage(session, msgId2, "OrderB", ctx.Db2);
                     });
                 })
-                .Done(c => c.ObservedDbs.Count >= 1)
+                .Done(c => c.MessagesObserved >= 4)
                 .Run();
 
             await ConfigureEndpointRavenDBPersistence.DeleteDatabase(context.Db1);
             await ConfigureEndpointRavenDBPersistence.DeleteDatabase(context.Db2);
 
+            Assert.AreEqual(4, context.MessagesObserved);
             Assert.AreEqual(2, context.ObservedDbs.Count);
             Assert.IsFalse(context.ObservedDbs.Any(db => db == context.DefaultDb));
             Assert.Contains(context.Db1, context.ObservedDbs);
@@ -88,12 +99,14 @@
 
         public class Context : ScenarioContext
         {
+            public int MessagesReceived;
             public string DefaultDb { get; set; }
             public string Db1 { get; set; }
             public string Db2 { get; set; }
             public List<string> ObservedDbs { get; } = new List<string>();
             public string ObservedDbsOutput => String.Join(", ", ObservedDbs);
             public ContextDbConfig DbConfig { get; } = new ContextDbConfig();
+            public int MessagesObserved;
         }
 
         public class ContextDbConfig
@@ -134,6 +147,7 @@
                         var dbName = ravenSessionOps.DatabaseName;
                         testCtx.ObservedDbs.Add(dbName);
                     }
+                    Interlocked.Increment(ref testCtx.MessagesReceived);
                     return Task.FromResult(0);
                 }
             }
@@ -147,6 +161,23 @@
         public class TestMsg : ICommand
         {
             public string OrderId { get; set; }
+        }
+
+        public class MessageCountingBehavior : IBehavior<ITransportReceiveContext, ITransportReceiveContext>
+        {
+            Context testContext;
+
+            public MessageCountingBehavior(Context testContext)
+            {
+                this.testContext = testContext;
+            }
+
+            public async Task Invoke(ITransportReceiveContext context, Func<ITransportReceiveContext, Task> next)
+            {
+                await next(context);
+
+                Interlocked.Increment(ref testContext.MessagesObserved);
+            }
         }
     }
 }

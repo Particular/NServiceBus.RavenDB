@@ -28,11 +28,18 @@
             Console.WriteLine($"Provisioned new Raven database name {databaseName}");
         }
 
-        public IDocumentStore NewStore()
+        public IDocumentStore NewStore(string identifier = null)
         {
             Console.WriteLine();
             Console.WriteLine($"Creating new DocumentStore for {databaseName}");
-            return CreateStore();
+            var store = CreateStore();
+
+            if (identifier != null)
+            {
+                store.Identifier = identifier;
+            }
+
+            return store;
         }
 
         private IDocumentStore CreateStore()
@@ -40,7 +47,11 @@
             return new DocumentStore
             {
                 Url = TestConstants.RavenUrl,
-                DefaultDatabase = databaseName
+                DefaultDatabase = databaseName,
+                ApiKey = TestConstants.RavenApiKey,
+#if NET452
+                EnlistInDistributedTransactions = false
+#endif
             };
         }
 
@@ -63,7 +74,8 @@
 
             var docStore = new DocumentStore
             {
-                Url = TestConstants.RavenUrl
+                Url = TestConstants.RavenUrl,
+                ApiKey = TestConstants.RavenApiKey
             };
 
             docStore.Initialize();
