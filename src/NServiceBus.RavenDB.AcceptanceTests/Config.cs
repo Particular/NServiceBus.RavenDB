@@ -16,16 +16,7 @@ public class ConfigureRavenDBPersistence
 
     public void Configure(BusConfiguration config)
     {
-        var resourceManagerId = Guid.NewGuid();
-        var recoveryPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)}\NServiceBus.RavenDB\{resourceManagerId}";
-
-        documentStore = new DocumentStore
-        {
-            Url = "http://localhost:8084",
-            DefaultDatabase = Guid.NewGuid().ToString(),
-            ResourceManagerId = resourceManagerId,
-            TransactionRecoveryStorage = new LocalDirectoryTransactionRecoveryStorage(recoveryPath)
-        };
+        documentStore = CreateDocumentStore(Guid.NewGuid().ToString());
 
         var settings = config.GetSettings();
         
@@ -38,6 +29,20 @@ public class ConfigureRavenDBPersistence
         settings.Set(DefaultPersistenceExtensionsKey, persistenceExtensions);
 
         Console.WriteLine("Created '{0}' database", documentStore.DefaultDatabase);
+    }
+
+    public static DocumentStore CreateDocumentStore(string dbName)
+    {
+        var resourceManagerId = Guid.NewGuid();
+        var recoveryPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)}\NServiceBus.RavenDB\{resourceManagerId}";
+
+        return new DocumentStore
+        {
+            Url = "http://localhost:8084",
+            DefaultDatabase = dbName,
+            ResourceManagerId = resourceManagerId,
+            TransactionRecoveryStorage = new LocalDirectoryTransactionRecoveryStorage(recoveryPath)
+        };
     }
 
     public void Cleanup()

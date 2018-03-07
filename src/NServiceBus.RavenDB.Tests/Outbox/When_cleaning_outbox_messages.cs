@@ -26,7 +26,7 @@
 
             var sessionFactory = new RavenSessionFactory(store);
 
-            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store, EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(sessionFactory, CreateTestSessionOpener()) { DocumentStore = store, EndpointName = "TestEndpoint" };
             persister.Store("NotDispatched", Enumerable.Empty<TransportOperation>());
             persister.Store(id, new List<TransportOperation>
             {

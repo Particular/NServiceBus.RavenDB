@@ -23,7 +23,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public void Should_throw_if__trying_to_insert_same_messageid()
         {
             var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory) { EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(sessionFactory, CreateTestSessionOpener()) { EndpointName = "TestEndpoint" };
             persister.EndpointName = "TestEndpoint";
 
             using (sessionFactory.Session)
@@ -39,7 +39,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public void Should_throw_if__trying_to_insert_same_messageid2()
         {
             var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory) { EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(sessionFactory, CreateTestSessionOpener()) { EndpointName = "TestEndpoint" };
 
             persister.Store("MySpecialId", Enumerable.Empty<TransportOperation>());
             sessionFactory.SaveChanges();
@@ -55,7 +55,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var id = Guid.NewGuid().ToString("N");
             var sessionFactory = new RavenSessionFactory(store);
 
-            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store, EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(sessionFactory, CreateTestSessionOpener()) { DocumentStore = store, EndpointName = "TestEndpoint" };
             persister.Store(id, new List<TransportOperation>
             {
                 new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>()),
@@ -78,7 +78,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var id = Guid.NewGuid().ToString("N");
 
             var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store, EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(sessionFactory, CreateTestSessionOpener()) { DocumentStore = store, EndpointName = "TestEndpoint" };
             persister.Store(id, new List<TransportOperation>
             {
                 new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>()),
@@ -106,7 +106,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public void Should_get_messages_with_old_and_new_recordId_format(string outboxRecordIdPrefix)
         {
             var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store, EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(sessionFactory, CreateTestSessionOpener()) { DocumentStore = store, EndpointName = "TestEndpoint" };
 
             var messageId = Guid.NewGuid().ToString();
 
@@ -142,7 +142,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public void Should_set_messages_as_dispatched_with_old_and_new_recordId_format(string outboxRecordIdPrefix)
         {
             var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store, EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(sessionFactory, CreateTestSessionOpener()) { DocumentStore = store, EndpointName = "TestEndpoint" };
 
             var messageId = Guid.NewGuid().ToString();
 
@@ -179,7 +179,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public void Should_filter_invalid_docid_character()
         {
             var sessionFactory = new RavenSessionFactory(store);
-            var persister = new OutboxPersister(sessionFactory) { DocumentStore = store, EndpointName = "TestEndpoint" };
+            var persister = new OutboxPersister(sessionFactory, CreateTestSessionOpener()) { DocumentStore = store, EndpointName = "TestEndpoint" };
 
             var guid = Guid.NewGuid();
             var messageId = $@"{guid}\12345";
