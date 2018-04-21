@@ -30,7 +30,8 @@ namespace NServiceBus.Persistence.RavenDB
 
         static bool IsTimeoutData(RavenJObject ravenJObject)
         {
-            var clrMetaData = ravenJObject["Raven-Clr-Type"];
+            //metadata can be null when loading data using a transformers
+            var clrMetaData = ravenJObject?["Raven-Clr-Type"];
             //not all raven document types have 'Raven-Clr-Type' metadata
             if (clrMetaData == null)
             {
