@@ -27,7 +27,7 @@
     <Prefer32Bit>false</Prefer32Bit>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <UseVSHostingProcess>false</UseVSHostingProcess>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -189,6 +189,7 @@
     <Compile Include="Timeouts\When_fetching_old_timeouts_from_storage.cs" />
     <Compile Include="Timeouts\When_fetching_timeouts_from_storage.cs" />
     <Compile Include="Timeouts\When_removing_timeouts_from_storage.cs" />
+    <Compile Include="Timeouts\When_using_transformers_with_timeoutdatav1tov2converter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
