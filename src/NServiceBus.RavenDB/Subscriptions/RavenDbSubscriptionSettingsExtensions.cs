@@ -1,8 +1,7 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using NServiceBus.Configuration.AdvanceExtensibility;
-    using NServiceBus.Persistence;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
     using Raven.Client;
@@ -14,7 +13,7 @@
     {
         internal const string DoNotAggressivelyCacheSubscriptionsSettingsKey = "RavenDB.DoNotAggressivelyCacheSubscriptions";
         internal const string AggressiveCacheDurationSettingsKey = "RavenDB.AggressiveCacheDuration";
-        internal const string DisableSubscriptionVersioningKey = "RavenDB.DisableSubscriptionVersioning";
+        internal const string LegacySubscriptionVersioningKey = "RavenDB.LegacySubscriptionVersioning";
 
         /// <summary>
         ///     Configures the given document store to be used when storing subscriptions
@@ -73,8 +72,34 @@
         /// <returns></returns>
         public static PersistenceExtensions<RavenDBPersistence> DisableSubscriptionVersioning(this PersistenceExtensions<RavenDBPersistence> cfg)
         {
-            cfg.GetSettings().Set(DisableSubscriptionVersioningKey, true);
+            SetLegacyVersionedSubscriptions(cfg, false);
             return cfg;
+        }
+
+        /// <summary>
+        /// Continue to use legacy method of subscription versioning that includes the message assembly
+        /// major version in the subscription document lookup key. This option will be obsoleted in NServiceBus.RavenDB 6.0.0,
+        /// so subscriptions should be converted to the new format, after which the <see cref="DisableSubscriptionVersioning"/>
+        /// option should be used instead.
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <returns></returns>
+        [ObsoleteEx(Message = "Subscriptions should be converted to the new format, after which the DisableSubscriptionVersioning() option should be used instead.",
+            TreatAsErrorFromVersion = "6.0.0", RemoveInVersion = "7.0.0")]
+        public static PersistenceExtensions<RavenDBPersistence> UseLegacyVersionedSubscriptions(this PersistenceExtensions<RavenDBPersistence> cfg)
+        {
+            SetLegacyVersionedSubscriptions(cfg, true);
+            return cfg;
+        }
+
+        static void SetLegacyVersionedSubscriptions(PersistenceExtensions<RavenDBPersistence> cfg, bool value)
+        {
+            var settings = cfg.GetSettings();
+            if(settings.TryGet(LegacySubscriptionVersioningKey, out bool existingSetting) && existingSetting != value)
+            {
+                throw new Exception("RavenDB Persistence options `persistence.DisableSubscriptionVersioning()` and `persistence.UseLegacyVersionedSubscriptions()` can't be used simultaneously.");
+            }
+            settings.Set(LegacySubscriptionVersioningKey, value);
         }
     }
 }

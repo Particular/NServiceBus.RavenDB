@@ -53,7 +53,7 @@
             await Task.Delay(TimeSpan.FromSeconds(1)); //Need to wait for dispatch logic to finish
 
             //WaitForUserToContinueTheTest(store);
-            WaitForIndexing(store);
+            WaitForIndexing();
 
             var cleaner = new OutboxRecordsCleaner(store);
 

@@ -1,20 +1,14 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
-    using System.Security.Cryptography;
-    using System.Text;
     using NServiceBus.ConsistencyGuarantees;
     using NServiceBus.Features;
-    using NServiceBus.Logging;
     using NServiceBus.Settings;
     using Raven.Client;
     using Raven.Client.Document;
-    using Raven.Client.Document.DTC;
 
     class DocumentStoreInitializer
     {
-        static readonly ILog Logger = LogManager.GetLogger(typeof(DocumentStoreInitializer));
-
         internal DocumentStoreInitializer(Func<ReadOnlySettings, IDocumentStore> storeCreator)
         {
             this.storeCreator = storeCreator;
@@ -22,12 +16,12 @@
 
         internal DocumentStoreInitializer(IDocumentStore store)
         {
-            this.storeCreator = readOnlySettings => store;
+            storeCreator = readOnlySettings => store;
         }
 
-        public string Url => this.docStore?.Url;
+        public string Url => docStore?.Url;
 
-        public string Identifier => this.docStore?.Identifier;
+        public string Identifier => docStore?.Identifier;
 
         internal IDocumentStore Init(ReadOnlySettings settings)
         {
@@ -38,7 +32,6 @@
                 BackwardsCompatibilityHelper.SupportOlderClrTypes(docStore);
 
                 docStore.Initialize();
-                StorageEngineVerifier.VerifyStorageEngineSupportsDtcIfRequired(docStore, settings);
             }
             isInitialized = true;
             return docStore;
@@ -68,57 +61,20 @@
                 return;
             }
 
-            var usingDtc = settings.GetRequiredTransactionModeForReceives() == TransportTransactionMode.TransactionScope;
-
-            if (!usingDtc)
+            var isSendOnly = settings.GetOrDefault<bool>("Endpoint.SendOnly");
+            if (!isSendOnly)
             {
-                store.EnlistInDistributedTransactions = false;
-            }
-            else 
-            {
-                Logger.Error("It's possible for RavenDB to lose data when used with Distributed Transaction Coordinator (DTC) transactions. Future versions of NServiceBus RavenDB Persistence will not support this combination. If using the same RavenDB database for NServiceBus data and all business data, you can change the TransportTransactionMode and enable the Outbox feature to maintain consistency between messaging operations and data persistence. See 'DTC not supported for RavenDB Persistence' in the documentation for more details.");
-
-                if (store.JsonRequestFactory == null) // If the DocStore has not been initialized yet
+                var usingDtc = settings.GetRequiredTransactionModeForReceives() == TransportTransactionMode.TransactionScope;
+                if (usingDtc)
                 {
-                    if (store.ResourceManagerId == Guid.Empty || store.ResourceManagerId == ravenDefaultResourceManagerId)
-                    {
-                        var resourceManagerId = settings.LocalAddress();
-                        store.ResourceManagerId = DeterministicGuidBuilder(resourceManagerId);
-                    }
-
-                    // If using the default (Volatile - null should be impossible) then switch to IsolatedStorage
-                    // Leave alone if LocalDirectoryTransactionRecoveryStorage!
-                    if (store.TransactionRecoveryStorage == null || store.TransactionRecoveryStorage is VolatileOnlyTransactionRecoveryStorage)
-                    {
-                        store.TransactionRecoveryStorage = new IsolatedStorageTransactionRecoveryStorage();
-                    }
-                }
-
-                var dtcSettingsNotIdeal = store.ResourceManagerId == Guid.Empty ||
-                                          store.ResourceManagerId == ravenDefaultResourceManagerId ||
-                                          !(store.TransactionRecoveryStorage is LocalDirectoryTransactionRecoveryStorage);
-
-                if (dtcSettingsNotIdeal)
-                {
-                    Logger.Warn("NServiceBus has detected that a RavenDB DocumentStore is being used with Distributed Transaction Coordinator transactions, but without the recommended production-safe settings for ResourceManagerId or TransactionStorageRecovery. Refer to \"Setting RavenDB DTC settings manually\" in the NServiceBus documentation for more information.");
+                    throw new Exception("RavenDB Persistence does not support Distributed Transaction Coordinator (DTC) transactions. You must change the TransportTransactionMode in order to continue. See the RavenDB Persistence documentation for more details.");
                 }
             }
+#if NET452
+            store.EnlistInDistributedTransactions = false;
+#endif
         }
 
-        static Guid DeterministicGuidBuilder(string input)
-        {
-            // use MD5 hash to get a 16-byte hash of the string
-            using (var provider = new MD5CryptoServiceProvider())
-            {
-                var inputBytes = Encoding.Default.GetBytes(input);
-                var hashBytes = provider.ComputeHash(inputBytes);
-                // generate a guid from the hash:
-                return new Guid(hashBytes);
-            }
-        }
-
-        // Source: https://github.com/ravendb/ravendb/blob/f56963f23f54b5535eba4f043fb84d5145b11b1d/Raven.Client.Lightweight/Document/DocumentStore.cs#L129
-        static readonly Guid ravenDefaultResourceManagerId = new Guid("e749baa6-6f76-4eef-a069-40a4378954f8");
         Func<ReadOnlySettings, IDocumentStore> storeCreator;
         IDocumentStore docStore;
         bool isInitialized;

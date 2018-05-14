@@ -7,7 +7,7 @@
     using System.Threading.Tasks;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
-    using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.Pipeline;
     using NUnit.Framework;
     using Raven.Client.Document;
@@ -99,6 +99,7 @@
 
         public class Context : ScenarioContext
         {
+            public int MessagesReceived;
             public string DefaultDb { get; set; }
             public string Db1 { get; set; }
             public string Db2 { get; set; }
@@ -146,6 +147,7 @@
                         var dbName = ravenSessionOps.DatabaseName;
                         testCtx.ObservedDbs.Add(dbName);
                     }
+                    Interlocked.Increment(ref testCtx.MessagesReceived);
                     return Task.FromResult(0);
                 }
             }

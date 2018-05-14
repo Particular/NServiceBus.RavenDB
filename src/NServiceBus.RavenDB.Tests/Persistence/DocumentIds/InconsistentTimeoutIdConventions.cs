@@ -88,6 +88,8 @@
                     ApplyTestConventions(store, ConventionType.RavenDefault);
                     store.Initialize();
 
+                    db.WaitForIndexing(store);
+
                     var exception = Assert.Throws<InvalidOperationException>(() => store.Conventions.FindTypeTagName(typeof(TimeoutPersisters.RavenDB.TimeoutData)));
                     Console.WriteLine($"Got expected exception: {exception.Message}");
                 }

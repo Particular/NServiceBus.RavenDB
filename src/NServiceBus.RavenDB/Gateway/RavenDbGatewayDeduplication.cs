@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using NServiceBus.Features;
-    using NServiceBus.Persistence;
 
     class RavenDbGatewayDeduplication : Feature
     {

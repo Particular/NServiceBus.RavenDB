@@ -20,6 +20,6 @@
         /// <summary>
         /// The document session which is retrieved by calling <see cref="RavenSessionExtension.RavenSession"/>.
         /// </summary>
-        public IAsyncDocumentSession Session { get; private set; }
+        public IAsyncDocumentSession Session { get; }
     }
 }

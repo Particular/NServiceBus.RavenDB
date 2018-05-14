@@ -1,7 +1,7 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Configuration.AdvancedExtensibility;
 
     /// <summary>
     /// Contains extensions methods which allow to configure RavenDB outbox specific configuration
@@ -12,7 +12,7 @@
         /// Sets the time to keep the deduplication data to the specified time span.
         /// </summary>
         /// <param name="configuration">The configuration being extended</param>
-        /// <param name="timeToKeepDeduplicationData">The time to keep the deduplication data. 
+        /// <param name="timeToKeepDeduplicationData">The time to keep the deduplication data.
         /// The cleanup process removes entries older than the specified time to keep deduplication data, therefore the time span cannot be negative</param>
         /// <returns>The configuration</returns>
         public static EndpointConfiguration SetTimeToKeepDeduplicationData(this EndpointConfiguration configuration, TimeSpan timeToKeepDeduplicationData)

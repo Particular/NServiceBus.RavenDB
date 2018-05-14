@@ -5,7 +5,6 @@
     using System.Configuration;
     using System.Linq;
     using NServiceBus.Logging;
-    using NServiceBus.Persistence;
     using NServiceBus.Settings;
     using Raven.Client;
     using Raven.Client.Document;
@@ -28,7 +27,7 @@
                 {typeof(StorageType.Timeouts), "RavenDbDocumentStore/Timeouts"}
             };
 
-            connStrKeys = new Dictionary<Type, string>()
+            connStrKeys = new Dictionary<Type, string>
             {
                 {typeof(StorageType.GatewayDeduplication), "NServiceBus/Persistence/RavenDB/GatewayDeduplication"},
                 {typeof(StorageType.Subscriptions), "NServiceBus/Persistence/RavenDB/Subscription"},
@@ -155,6 +154,7 @@
 
         static DocumentStoreInitializer CreateStoreByConnectionStringName(ReadOnlySettings settings, params string[] connectionStringNames)
         {
+#if NET452
             var connectionStringName = GetFirstNonEmptyConnectionString(connectionStringNames);
             if (!string.IsNullOrWhiteSpace(connectionStringName))
             {
@@ -169,6 +169,7 @@
 
                 return new DocumentStoreInitializer(docStore);
             }
+#endif
             return null;
         }
 
@@ -187,12 +188,19 @@
             return new DocumentStoreInitializer(docStore);
         }
 
+#if NET452
+        [ObsoleteEx(RemoveInVersion = "6.0")]
         static string GetFirstNonEmptyConnectionString(params string[] connectionStringNames)
         {
             try
             {
                 var foundConnectionStringNames = connectionStringNames.Where(name => ConfigurationManager.ConnectionStrings[name] != null).ToArray();
                 var firstFound = foundConnectionStringNames.FirstOrDefault();
+
+                if (firstFound != null)
+                {
+                    Logger.Warn("Specifying RavenDB connection information using app.config/web.config <connectionStrings> section has been deprecated and will be ignored starting in NServiceBus.RavenDB 6.0.");
+                }
 
                 if (foundConnectionStringNames.Length > 1)
                 {
@@ -206,5 +214,6 @@
                 return null;
             }
         }
+#endif
     }
 }

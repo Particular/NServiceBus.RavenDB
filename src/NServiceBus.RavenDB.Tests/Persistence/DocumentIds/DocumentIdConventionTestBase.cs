@@ -80,7 +80,7 @@
 
             if (IsASagaEntity(t))
             {
-                tagName = tagName.Replace("Data", String.Empty);
+                tagName = tagName.Replace("Data", string.Empty);
             }
 
             return tagName;

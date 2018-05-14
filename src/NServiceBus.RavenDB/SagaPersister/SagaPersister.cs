@@ -37,13 +37,15 @@ namespace NServiceBus.Persistence.RavenDB
             return TaskEx.CompletedTask;
         }
 
-        public Task<T> Get<T>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where T : IContainSagaData
+        public Task<T> Get<T>(Guid sagaId, SynchronizedStorageSession session, ContextBag context)
+            where T : class, IContainSagaData
         {
             var documentSession = session.RavenSession();
             return documentSession.LoadAsync<T>(sagaId);
         }
 
-        public async Task<T> Get<T>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where T : IContainSagaData
+        public async Task<T> Get<T>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context)
+            where T : class, IContainSagaData
         {
             var documentSession = session.RavenSession();
 

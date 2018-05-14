@@ -1,10 +1,10 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
-    using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.Settings;
 
     /// <summary>
-    /// This class provides advanced extension methods for RavenDB persistence configuration. 
+    /// This class provides advanced extension methods for RavenDB persistence configuration.
     /// </summary>
     public static class DocumentIdConventionsExtensions
     {

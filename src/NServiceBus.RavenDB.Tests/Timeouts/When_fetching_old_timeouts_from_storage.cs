@@ -46,7 +46,7 @@
             }
             await session.SaveChangesAsync();
 
-            WaitForIndexing(store);
+            WaitForIndexing();
 
             Assert.AreEqual(numberOfTimeoutsToAdd, (await query.GetNextChunk(DateTime.UtcNow.AddYears(-3))).DueTimeouts.Count());
         }
@@ -96,7 +96,7 @@
             }
             await session.SaveChangesAsync();
 
-            WaitForIndexing(store);
+            WaitForIndexing();
 
             Assert.AreEqual(numberOfTimeoutsToAdd, (await query.GetNextChunk(DateTime.UtcNow.AddYears(-3))).DueTimeouts.Count());
         }
@@ -121,7 +121,7 @@
             });
             await session.SaveChangesAsync();
 
-            WaitForIndexing(store);
+            WaitForIndexing();
 
             var nextTimeToRunQuery = (await query.GetNextChunk(DateTime.UtcNow.AddYears(-3))).NextTimeToQuery;
 

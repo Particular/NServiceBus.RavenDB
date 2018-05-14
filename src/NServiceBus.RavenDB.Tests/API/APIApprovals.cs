@@ -1,27 +1,32 @@
 ﻿namespace NServiceBus.RavenDB.Tests.API
 {
-    using System.IO;
+    using System;
+    using System.Linq;
     using System.Runtime.CompilerServices;
-    using ApiApprover;
-    using ApprovalTests;
-    using ApprovalTests.Reporters;
-    using Mono.Cecil;
     using NUnit.Framework;
+    using PublicApiGenerator;
 
     [TestFixture]
     class APIApprovals
     {
         [Test]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UseReporter(typeof(DiffReporter))]
-        public void ApproveRavenDbPersistence()
+        public void ApproveRavenDBPersistence()
         {
-            Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
-            var assemblyPath = Path.GetFullPath(typeof(RavenDBPersistence).Assembly.Location);
-            var asm = AssemblyDefinition.ReadAssembly(assemblyPath);
-            var publicApi = PublicApiGenerator.CreatePublicApiForAssembly(asm, definition => true, false);
+            var publicApi = Filter(ApiGenerator.GeneratePublicApi(typeof(RavenDBPersistence).Assembly));
+            TestApprover.Verify(publicApi);
+        }
 
-            Approvals.Verify(publicApi);
+        string Filter(string text)
+        {
+            return string.Join(Environment.NewLine, text.Split(new[]
+                {
+                    Environment.NewLine
+                }, StringSplitOptions.RemoveEmptyEntries)
+                .Where(l => !l.StartsWith("[assembly: ReleaseDateAttribute("))
+                .Where(l => !l.StartsWith("[assembly: System.Runtime.Versioning.TargetFrameworkAttribute("))
+                .Where(l => !string.IsNullOrWhiteSpace(l))
+            );
         }
     }
 }

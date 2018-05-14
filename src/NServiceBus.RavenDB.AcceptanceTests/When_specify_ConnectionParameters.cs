@@ -13,7 +13,7 @@
         [Test]
         public async Task Should_work()
         {
-            var context = await Scenario.Define<Context>()
+            await Scenario.Define<Context>()
                 .WithEndpoint<ConnectionParamsEndpoint>(b =>
                 {
                     b.When(bus => bus.SendLocal(new TestCmd { Name = "Doesn't matter, let's say George" }));
@@ -28,14 +28,12 @@
                             {
                                 Url = dbInfo.Url,
                                 DatabaseName = dbInfo.DatabaseName,
-                                ApiKey = "FakeApiKey-DocStoreCreatedByConnectionParameters"
+                                ApiKey = Environment.GetEnvironmentVariable("RavenDbApiKey")
                             });
                     });
                 })
                 .Done(c => c.MessageReceived)
                 .Run();
-
-            Assert.AreEqual("FakeApiKey-DocStoreCreatedByConnectionParameters", context.DocStoreApiKey);
         }
 
         public class Context : ScenarioContext
