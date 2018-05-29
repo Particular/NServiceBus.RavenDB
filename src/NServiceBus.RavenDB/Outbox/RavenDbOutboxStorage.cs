@@ -51,6 +51,11 @@
 
             protected override void OnStart()
             {
+                if (Settings.GetOrDefault<bool>(DisableCleanupSettingKey))
+                {
+                    return;
+                }
+
                 timeToKeepDeduplicationData = Settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
 
                 var frequencyToRunDeduplicationDataCleanup = Settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
@@ -60,6 +65,11 @@
 
             protected override void OnStop()
             {
+                if (Settings.GetOrDefault<bool>(DisableCleanupSettingKey))
+                {
+                    return;
+                }
+
                 using (var waitHandle = new ManualResetEvent(false))
                 {
                     cleanupTimer.Dispose(waitHandle);
@@ -73,5 +83,7 @@
                 Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData);
             }
         }
+
+        internal static string DisableCleanupSettingKey = "Outbox.DisableCleanup";
     }
 }

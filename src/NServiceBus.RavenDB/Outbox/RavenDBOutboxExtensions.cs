@@ -38,5 +38,15 @@
             configuration.GetSettings().Set("Outbox.FrequencyToRunDeduplicationDataCleanup", frequencyToRunDeduplicationDataCleanup);
             return configuration;
         }
+
+        /// <summary>
+        /// Disables the built-in outbox cleanup process.
+        /// </summary>
+        /// <returns>The configuration</returns>
+        public static BusConfiguration DisableOutboxCleanup(this BusConfiguration configuration)
+        {
+            configuration.GetSettings().Set(RavenDbOutboxStorage.DisableCleanupSettingKey, true);
+            return configuration;
+        }
     }
 }
