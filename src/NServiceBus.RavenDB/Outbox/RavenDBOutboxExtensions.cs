@@ -2,6 +2,7 @@
 {
     using System;
     using NServiceBus.Configuration.AdvancedExtensibility;
+    using NServiceBus.Persistence.RavenDB;
 
     /// <summary>
     /// Contains extensions methods which allow to configure RavenDB outbox specific configuration
@@ -36,6 +37,16 @@
         public static EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this EndpointConfiguration configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
         {
             configuration.GetSettings().Set("Outbox.FrequencyToRunDeduplicationDataCleanup", frequencyToRunDeduplicationDataCleanup);
+            return configuration;
+        }
+
+        /// <summary>
+        /// Disables the built-in outbox cleanup process.
+        /// </summary>
+        /// <returns>The configuration</returns>
+        public static EndpointConfiguration DisableOutboxCleanup(this EndpointConfiguration configuration)
+        {
+            configuration.GetSettings().Set(RavenDbOutboxStorage.DisableCleanupSettingKey, true);
             return configuration;
         }
     }

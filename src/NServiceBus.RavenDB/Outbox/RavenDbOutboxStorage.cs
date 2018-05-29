@@ -42,6 +42,11 @@
 
             protected override Task OnStart(IMessageSession session)
             {
+                if (settings.GetOrDefault<bool>(DisableCleanupSettingKey))
+                {
+                    return TaskEx.CompletedTask;
+                }
+
                 timeToKeepDeduplicationData = settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
 
                 frequencyToRunDeduplicationDataCleanup = settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
@@ -57,6 +62,11 @@
             protected override async Task OnStop(IMessageSession session)
             {
                 cancellationTokenSource.Cancel();
+
+                if (settings.GetOrDefault<bool>(DisableCleanupSettingKey))
+                {
+                    return;
+                }
 
                 // ReSharper disable once MethodSupportsCancellation
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30));
@@ -105,5 +115,7 @@
             CancellationToken cancellationToken;
             ILog logger;
         }
+
+        internal static string DisableCleanupSettingKey = "Outbox.DisableCleanup";
     }
 }
