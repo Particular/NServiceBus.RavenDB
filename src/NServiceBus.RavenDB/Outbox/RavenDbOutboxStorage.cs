@@ -42,14 +42,14 @@
 
             protected override Task OnStart(IMessageSession session)
             {
-                if (settings.GetOrDefault<bool>(DisableCleanupSettingKey))
+                if (settings.GetOrDefault<bool>(DisableCleanupSettingsKey))
                 {
                     return TaskEx.CompletedTask;
                 }
 
-                timeToKeepDeduplicationData = settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
+                timeToKeepDeduplicationData = settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationDataSettingsKey) ?? TimeSpan.FromDays(7);
 
-                frequencyToRunDeduplicationDataCleanup = settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
+                frequencyToRunDeduplicationDataCleanup = settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanupSettingsKey) ?? TimeSpan.FromMinutes(1);
 
                 cancellationTokenSource = new CancellationTokenSource();
                 cancellationToken = cancellationTokenSource.Token;
@@ -63,7 +63,7 @@
             {
                 cancellationTokenSource.Cancel();
 
-                if (settings.GetOrDefault<bool>(DisableCleanupSettingKey))
+                if (settings.GetOrDefault<bool>(DisableCleanupSettingsKey))
                 {
                     return;
                 }
@@ -116,6 +116,8 @@
             ILog logger;
         }
 
-        internal static string DisableCleanupSettingKey = "Outbox.DisableCleanup";
+        internal static string DisableCleanupSettingsKey = "Outbox.DisableCleanup";
+        internal static string TimeToKeepDeduplicationDataSettingsKey = "Outbox.TimeToKeepDeduplicationData";
+        internal static string FrequencyToRunDeduplicationDataCleanupSettingsKey = "Outbox.FrequencyToRunDeduplicationDataCleanup";
     }
 }
