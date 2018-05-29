@@ -20,7 +20,7 @@
             var now = DateTime.UtcNow;
             if (now - timeToKeepDeduplicationData >= now)
             {
-                throw new ArgumentException("Specify a non-negative TimeSpan. The cleanup process removes entries older than the specified time to keep deduplication data, therefore the time span cannot be negative.", "timeToKeepDeduplicationData");
+                throw new ArgumentException("Specify a non-negative TimeSpan. The cleanup process removes entries older than the specified time to keep deduplication data, therefore the time span cannot be negative.", nameof(timeToKeepDeduplicationData));
             }
 
             configuration.GetSettings().Set("Outbox.TimeToKeepDeduplicationData", timeToKeepDeduplicationData);
@@ -35,6 +35,11 @@
         /// <returns>The configuration</returns>
         public static EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this EndpointConfiguration configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
         {
+            if (frequencyToRunDeduplicationDataCleanup <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(frequencyToRunDeduplicationDataCleanup), "Provide a non-negative TimeSpan to specify cleanup task execution frequency.");
+            }
+
             configuration.GetSettings().Set("Outbox.FrequencyToRunDeduplicationDataCleanup", frequencyToRunDeduplicationDataCleanup);
             return configuration;
         }
