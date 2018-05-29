@@ -42,9 +42,14 @@
 
             protected override Task OnStart(IMessageSession session)
             {
-                timeToKeepDeduplicationData = settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
+                if (settings.GetOrDefault<bool>(DisableCleanupSettingsKey))
+                {
+                    return TaskEx.CompletedTask;
+                }
 
-                frequencyToRunDeduplicationDataCleanup = settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
+                timeToKeepDeduplicationData = settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationDataSettingsKey) ?? TimeSpan.FromDays(7);
+
+                frequencyToRunDeduplicationDataCleanup = settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanupSettingsKey) ?? TimeSpan.FromMinutes(1);
 
                 cancellationTokenSource = new CancellationTokenSource();
                 cancellationToken = cancellationTokenSource.Token;
@@ -57,6 +62,11 @@
             protected override async Task OnStop(IMessageSession session)
             {
                 cancellationTokenSource.Cancel();
+
+                if (settings.GetOrDefault<bool>(DisableCleanupSettingsKey))
+                {
+                    return;
+                }
 
                 // ReSharper disable once MethodSupportsCancellation
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30));
@@ -105,5 +115,9 @@
             CancellationToken cancellationToken;
             ILog logger;
         }
+
+        internal static string DisableCleanupSettingsKey = "Outbox.DisableCleanup";
+        internal static string TimeToKeepDeduplicationDataSettingsKey = "Outbox.TimeToKeepDeduplicationData";
+        internal static string FrequencyToRunDeduplicationDataCleanupSettingsKey = "Outbox.FrequencyToRunDeduplicationDataCleanup";
     }
 }

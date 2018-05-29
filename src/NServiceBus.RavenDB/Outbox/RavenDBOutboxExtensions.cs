@@ -2,6 +2,7 @@
 {
     using System;
     using NServiceBus.Configuration.AdvancedExtensibility;
+    using NServiceBus.Persistence.RavenDB;
 
     /// <summary>
     /// Contains extensions methods which allow to configure RavenDB outbox specific configuration
@@ -23,7 +24,7 @@
                 throw new ArgumentException("Specify a non-negative TimeSpan. The cleanup process removes entries older than the specified time to keep deduplication data, therefore the time span cannot be negative.", "timeToKeepDeduplicationData");
             }
 
-            configuration.GetSettings().Set("Outbox.TimeToKeepDeduplicationData", timeToKeepDeduplicationData);
+            configuration.GetSettings().Set(RavenDbOutboxStorage.TimeToKeepDeduplicationDataSettingsKey, timeToKeepDeduplicationData);
             return configuration;
         }
 
@@ -35,7 +36,17 @@
         /// <returns>The configuration</returns>
         public static EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this EndpointConfiguration configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
         {
-            configuration.GetSettings().Set("Outbox.FrequencyToRunDeduplicationDataCleanup", frequencyToRunDeduplicationDataCleanup);
+            configuration.GetSettings().Set(RavenDbOutboxStorage.FrequencyToRunDeduplicationDataCleanupSettingsKey, frequencyToRunDeduplicationDataCleanup);
+            return configuration;
+        }
+
+        /// <summary>
+        /// Disables the built-in outbox cleanup process.
+        /// </summary>
+        /// <returns>The configuration</returns>
+        public static EndpointConfiguration DisableOutboxCleanup(this EndpointConfiguration configuration)
+        {
+            configuration.GetSettings().Set(RavenDbOutboxStorage.DisableCleanupSettingsKey, true);
             return configuration;
         }
     }
