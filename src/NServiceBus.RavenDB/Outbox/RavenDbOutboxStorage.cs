@@ -56,9 +56,10 @@
                     return;
                 }
 
-                timeToKeepDeduplicationData = Settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
+                
+                timeToKeepDeduplicationData = Settings.GetOrDefault<TimeSpan?>(OutboxTimeToKeepDataSettingsKey) ?? TimeSpan.FromDays(7);
 
-                var frequencyToRunDeduplicationDataCleanup = Settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
+                var frequencyToRunDeduplicationDataCleanup = Settings.GetOrDefault<TimeSpan?>(OutboxCleanupFrequencySettingsKey) ?? TimeSpan.FromMinutes(1);
 
                 cleanupTimer = new Timer(PerformCleanup, null, TimeSpan.FromMinutes(1), frequencyToRunDeduplicationDataCleanup);
             }
@@ -85,5 +86,7 @@
         }
 
         internal static string DisableCleanupSettingKey = "Outbox.DisableCleanup";
+        internal static string OutboxTimeToKeepDataSettingsKey = "Outbox.TimeToKeepDeduplicationData";
+        internal static string OutboxCleanupFrequencySettingsKey = "Outbox.FrequencyToRunDeduplicationDataCleanup";
     }
 }

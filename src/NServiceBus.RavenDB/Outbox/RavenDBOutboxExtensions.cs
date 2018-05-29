@@ -23,7 +23,7 @@
                 throw new ArgumentException("Please Specify a non-negative TimeSpan. The cleanup process removes entries older than the specified time to keep deduplication data, therefore the time span cannot be negative.", "timeToKeepDeduplicationData");
             }
 
-            configuration.GetSettings().Set("Outbox.TimeToKeepDeduplicationData", timeToKeepDeduplicationData);
+            configuration.GetSettings().Set(RavenDbOutboxStorage.OutboxTimeToKeepDataSettingsKey, timeToKeepDeduplicationData);
             return configuration;
         }
 
@@ -35,7 +35,7 @@
         /// <returns>The configuration</returns>
         public static BusConfiguration SetFrequencyToRunDeduplicationDataCleanup(this BusConfiguration configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
         {
-            configuration.GetSettings().Set("Outbox.FrequencyToRunDeduplicationDataCleanup", frequencyToRunDeduplicationDataCleanup);
+            configuration.GetSettings().Set(RavenDbOutboxStorage.OutboxCleanupFrequencySettingsKey, frequencyToRunDeduplicationDataCleanup);
             return configuration;
         }
 
