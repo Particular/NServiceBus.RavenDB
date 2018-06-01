@@ -51,7 +51,7 @@
 
             protected override void OnStart()
             {
-                var frequencyToRunDeduplicationDataCleanup = Settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
+                frequencyToRunDeduplicationDataCleanup = Settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
                 if (frequencyToRunDeduplicationDataCleanup == Timeout.InfiniteTimeSpan)
                 {
                     return;
@@ -59,7 +59,7 @@
 
                 timeToKeepDeduplicationData = Settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
 
-                cleanupTimer = new Timer(PerformCleanup, null, frequencyToRunDeduplicationDataCleanup, frequencyToRunDeduplicationDataCleanup);
+                cleanupTimer = new Timer(PerformCleanup, null, frequencyToRunDeduplicationDataCleanup, Timeout.InfiniteTimeSpan);
             }
 
             protected override void OnStop()
@@ -79,8 +79,24 @@
 
             void PerformCleanup(object state)
             {
-                Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData);
+                try
+                {
+                    Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData);
+                }
+                finally
+                {
+                    try
+                    {
+                        cleanupTimer.Change(frequencyToRunDeduplicationDataCleanup, Timeout.InfiniteTimeSpan);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // Ignore, can happen during graceful shutdown.
+                    }
+                }
             }
+
+            TimeSpan frequencyToRunDeduplicationDataCleanup;
         }
     }
 }
