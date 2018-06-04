@@ -43,9 +43,14 @@
 
             protected override Task OnStart(IMessageSession session)
             {
-                timeToKeepDeduplicationData = settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
-
                 frequencyToRunDeduplicationDataCleanup = settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
+
+                if (frequencyToRunDeduplicationDataCleanup == Timeout.InfiniteTimeSpan)
+                {
+                    return TaskEx.CompletedTask;
+                }
+
+                timeToKeepDeduplicationData = settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
 
                 cancellationTokenSource = new CancellationTokenSource();
                 cancellationToken = cancellationTokenSource.Token;
@@ -58,6 +63,11 @@
             protected override async Task OnStop(IMessageSession session)
             {
                 cancellationTokenSource.Cancel();
+
+                if (cleanupTask == null)
+                {
+                    return;
+                }
 
                 // ReSharper disable once MethodSupportsCancellation
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30));
