@@ -51,15 +51,24 @@
 
             protected override void OnStart()
             {
+                frequencyToRunDeduplicationDataCleanup = Settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
+                if (frequencyToRunDeduplicationDataCleanup == Timeout.InfiniteTimeSpan)
+                {
+                    return;
+                }
+
                 timeToKeepDeduplicationData = Settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
 
-                var frequencyToRunDeduplicationDataCleanup = Settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
-
-                cleanupTimer = new Timer(PerformCleanup, null, TimeSpan.FromMinutes(1), frequencyToRunDeduplicationDataCleanup);
+                cleanupTimer = new Timer(PerformCleanup, null, frequencyToRunDeduplicationDataCleanup, Timeout.InfiniteTimeSpan);
             }
 
             protected override void OnStop()
             {
+                if (cleanupTimer == null)
+                {
+                    return;
+                }
+
                 using (var waitHandle = new ManualResetEvent(false))
                 {
                     cleanupTimer.Dispose(waitHandle);
@@ -70,8 +79,24 @@
 
             void PerformCleanup(object state)
             {
-                Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData);
+                try
+                {
+                    Cleaner.RemoveEntriesOlderThan(DateTime.UtcNow - timeToKeepDeduplicationData);
+                }
+                finally
+                {
+                    try
+                    {
+                        cleanupTimer.Change(frequencyToRunDeduplicationDataCleanup, Timeout.InfiniteTimeSpan);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // Ignore, can happen during graceful shutdown.
+                    }
+                }
             }
+
+            TimeSpan frequencyToRunDeduplicationDataCleanup;
         }
     }
 }
