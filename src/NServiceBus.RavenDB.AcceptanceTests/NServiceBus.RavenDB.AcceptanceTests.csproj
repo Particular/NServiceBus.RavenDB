@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net452;netcoreapp2.1</TargetFrameworks>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
@@ -12,8 +12,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.*" />
     <PackageReference Include="NServiceBus.Gateway.AcceptanceTests.Sources" Version="3.0.0" />
-    <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="7.0.0" />
-    <PackageReference Include="NUnit" Version="3.7.*" />
+    <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="7.1.0" />
+    <PackageReference Include="NUnit" Version="3.10.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.8.0-alpha1" />
     <PackageReference Include="RavenDB.Client" Version="3.5.6" />
   </ItemGroup>
