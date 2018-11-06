@@ -15,7 +15,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
 
     class TimeoutPersister : IPersistTimeouts, IPersistTimeoutsV2
     {
-        DateTime lastCleanupTime = DateTime.MinValue;
+        //DateTime lastCleanupTime = DateTime.MinValue;
 
         public TimeoutPersister()
         {
@@ -40,14 +40,14 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
             // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
             // added after startSlice have been set to a later timeout and we might have missed them
             // because of stale indexes.
-            if (lastCleanupTime == DateTime.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) < now)
-            {
-                results = GetCleanupChunk(startSlice).ToList();
-            }
-            else
-            {
+            //if (lastCleanupTime == DateTime.MinValue || lastCleanupTime.Add(TriggerCleanupEvery) < now)
+            //{
+            //    results = GetCleanupChunk(startSlice).ToList();
+            //}
+            //else
+            //{
                 results = new List<Tuple<string, DateTime>>();
-            }
+            //}
 
             // default return value for when no results are found
             nextTimeoutToExpire = now.AddMinutes(10);
@@ -159,7 +159,7 @@ namespace NServiceBus.TimeoutPersisters.RavenDB
                     .ToList()
                     .Select(arg => new Tuple<string, DateTime>(arg.Id, arg.Time));
 
-                lastCleanupTime = DateTime.UtcNow;
+                //lastCleanupTime = DateTime.UtcNow;
 
                 return chunk;
             }
