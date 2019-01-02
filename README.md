@@ -8,7 +8,7 @@ If you are interested in contributing, please follow the instructions [here.](ht
 
 ## Running the tests
 
-You need RavenDB 3.0 running on port 8083 on your local machine in order to run the tests in the RavenDB.Tests and RavenDB.AcceptanceTests project.
+You need RavenDB 3.0 running on port 8084 on your local machine in order to run the tests in the RavenDB.Tests and RavenDB.AcceptanceTests project.
 
 ## Maintainers
 The following team is responsible for this repository: @Particular/ravendb-persistence-maintainers
