@@ -16,7 +16,7 @@
     <tags>nservicebus servicebus msmq cqrs publish subscribe ravendb</tags>
     <dependencies>
       <dependency id="NServiceBus" version="[5.2.8, 6.0.0)" />
-      <dependency id="RavenDB.Client" version="[3.5.3, 3.6.0)" />
+      <dependency id="RavenDB.Client" version="[3.5.8, 3.6.0)" />
     </dependencies>
   </metadata>
   <files>
