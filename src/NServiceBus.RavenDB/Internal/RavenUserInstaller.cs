@@ -144,6 +144,7 @@ namespace NServiceBus.RavenDB.Persistence
         {
             public string Name;
 #pragma warning disable 414
+            // ReSharper disable once NotAccessedField.Local
             public bool Enabled;
 #pragma warning restore 414
             public List<ResourceAccess> Databases = new List<ResourceAccess>();
