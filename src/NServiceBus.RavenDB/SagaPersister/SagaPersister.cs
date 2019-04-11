@@ -41,7 +41,8 @@ namespace NServiceBus.Persistence.RavenDB
             where T : class, IContainSagaData
         {
             var documentSession = session.RavenSession();
-            return documentSession.LoadAsync<T>(sagaId);
+            // TODO: Check previous string expression of SagaId guid
+            return documentSession.LoadAsync<T>(sagaId.ToString("D"));
         }
 
         public async Task<T> Get<T>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context)

@@ -11,30 +11,27 @@
     {
         public static void SupportOlderClrTypes(IDocumentStore documentStore)
         {
-            documentStore.Conventions.FindClrType = (id, doc, metadata) =>
+            documentStore.Conventions.FindClrType = (id, doc) =>
             {
-                var clrtype = metadata.Value<string>(Constants.RavenClrType);
-
-                // The CLR type cannot be assumed to be always there
-                if (clrtype == null)
+                if (!doc.TryGet(Constants.Documents.Metadata.RavenClrType, out string clrType))
                 {
                     return null;
                 }
 
-                if (clrtype.EndsWith(".Subscription, NServiceBus.Core"))
+                if (clrType.EndsWith(".Subscription, NServiceBus.Core"))
                 {
-                    clrtype = ReflectionUtil.GetFullNameWithoutVersionInformation(typeof(Subscription));
+                    clrType = $"{typeof(Subscription).FullName}, NServiceBus.RavenDB";
                 }
-                else if (clrtype.EndsWith(".GatewayMessage, NServiceBus.Core"))
+                else if (clrType.EndsWith(".GatewayMessage, NServiceBus.Core"))
                 {
-                    clrtype = ReflectionUtil.GetFullNameWithoutVersionInformation(typeof(GatewayMessage));
+                    clrType = $"{typeof(GatewayMessage).FullName}, NServiceBus.RavenDB";
                 }
-                else if (clrtype.EndsWith(".Core.TimeoutData, NServiceBus.Core"))
+                else if (clrType.EndsWith(".Core.TimeoutData, NServiceBus.Core"))
                 {
-                    clrtype = ReflectionUtil.GetFullNameWithoutVersionInformation(typeof(TimeoutData));
+                    clrType = $"{typeof(TimeoutData).FullName}, NServiceBus.RavenDB";
                 }
 
-                return clrtype;
+                return clrType;
             };
         }
 

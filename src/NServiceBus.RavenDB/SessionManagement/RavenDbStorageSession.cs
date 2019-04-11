@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
     using NServiceBus.Features;
-    using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     class RavenDbStorageSession : Feature
     {

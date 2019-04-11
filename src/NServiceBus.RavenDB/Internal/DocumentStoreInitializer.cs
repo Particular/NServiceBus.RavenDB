@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
+    using System.Linq;
     using NServiceBus.ConsistencyGuarantees;
     using NServiceBus.Features;
     using NServiceBus.Settings;
@@ -18,7 +19,8 @@
             storeCreator = readOnlySettings => store;
         }
 
-        public string Url => docStore?.Url;
+        // TODO: Single URL doesn't really work anymore
+        public string Url => docStore?.Urls.First();
 
         public string Identifier => docStore?.Identifier;
 
