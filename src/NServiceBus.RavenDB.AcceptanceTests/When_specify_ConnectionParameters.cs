@@ -6,7 +6,7 @@
     using AcceptanceTesting;
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
-    using Raven.Client.Document;
+    using Raven.Client.Documents;
 
     public class When_specify_ConnectionParameters : NServiceBusAcceptanceTest
     {

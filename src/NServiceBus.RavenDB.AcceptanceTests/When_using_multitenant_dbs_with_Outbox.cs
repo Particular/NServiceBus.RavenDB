@@ -10,7 +10,8 @@
     using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.Pipeline;
     using NUnit.Framework;
-    using Raven.Client.Document;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
 
     public class When_using_multitenant_dbs_with_Outbox : NServiceBusAcceptanceTest
     {

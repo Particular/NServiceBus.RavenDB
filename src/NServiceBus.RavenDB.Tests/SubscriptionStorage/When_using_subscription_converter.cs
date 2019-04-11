@@ -7,13 +7,11 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions;
     using NUnit.Framework;
-    using Raven.Abstractions.Data;
-    using Raven.Json.Linq;
     using System.Collections.Generic;
-    using System.Linq;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using NServiceBus.Extensibility;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-    using Raven.Imports.Newtonsoft.Json;
 
     public class When_using_subscription_converter : RavenDBPersistenceTestBase
     {
@@ -153,8 +151,8 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
 
         Task StoreAsType(string documentId, Type storeAsType, object document)
         {
-            var docJson = RavenJObject.FromObject(document);
-            var metadata = new RavenJObject();
+            var docJson = JObject.FromObject(document);
+            var metadata = new JObject();
             metadata["Raven-Entity-Name"] = storeAsType.Name;
             metadata["Raven-Clr-Type"] = storeAsType.AssemblyQualifiedName;
 

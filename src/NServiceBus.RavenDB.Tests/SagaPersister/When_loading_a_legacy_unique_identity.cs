@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Abstractions.Data;
 using Raven.Client;
-using Raven.Client.Document;
-using Raven.Json.Linq;
+using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBase
@@ -71,8 +71,8 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
     static void DirectStore(IDocumentStore store, string id, object document, string entityName, string typeName, string uniqueValue = null)
     {
-        var jsonDoc = RavenJObject.FromObject(document);
-        var metadata = new RavenJObject();
+        var jsonDoc = JObject.FromObject(document);
+        var metadata = new JObject();
         metadata[Constants.RavenEntityName] = entityName;
         metadata[Constants.RavenClrType] = typeName;
         if (uniqueValue != null)

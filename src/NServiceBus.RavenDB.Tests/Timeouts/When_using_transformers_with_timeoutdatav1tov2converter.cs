@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
-    using Raven.Client.Indexes;
 
     [TestFixture]
     public class When_using_transformers_with_timeoutdatav1tov2converter : RavenDBPersistenceTestBase

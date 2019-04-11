@@ -6,8 +6,6 @@
     using System.Threading.Tasks;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NUnit.Framework;
-    using Raven.Abstractions.Data;
-    using Raven.Json.Linq;
 
     public class RavenSerializerAssumptions
     {
@@ -27,10 +25,10 @@
                 var likeV4 = new LikeV4Subscriptions();
                 likeV4.Clients = new List<LegacyAddress> { new LegacyAddress("A", "B") };
                 likeV4.Subscriptions = new List<SubscriptionClient> { new SubscriptionClient { Endpoint = "C", TransportAddress = "D" } };
-                var docJson = RavenJObject.FromObject(likeV4);
+                var docJson = JObject.FromObject(likeV4);
 
                 // Create metadata to make it look like an older version
-                var docMetadata = new RavenJObject();
+                var docMetadata = new JObject();
                 var fakeDocType = typeof(LikeV3Subscriptions);
                 docMetadata["Raven-Entity-Name"] = fakeDocType.Name;
                 // Doesn't appear to matter, but $"{fakeDocType.FullName}, {fakeDocType.Assembly.GetName().Name}" may be more accurate
@@ -50,20 +48,20 @@
                 var resultDoc = await store.AsyncDatabaseCommands.GetAsync("TestDocument/1");
                 var resultJson = resultDoc.DataAsJson;
 
-                var clients = resultJson["Clients"] as RavenJArray;
-                var subscriptions = resultJson["Subscriptions"] as RavenJArray;
+                var clients = resultJson["Clients"] as JArray;
+                var subscriptions = resultJson["Subscriptions"] as JArray;
 
                 Assert.IsNotNull(clients);
                 Assert.IsNotNull(subscriptions);
                 Assert.AreEqual(1, subscriptions.Length);
                 Assert.AreEqual(2, clients.Length);
 
-                var sub = (RavenJObject)subscriptions[0];
+                var sub = (JObject)subscriptions[0];
                 Assert.AreEqual("C", sub["Endpoint"].Value<string>());
                 Assert.AreEqual("D", sub["TransportAddress"].Value<string>());
 
-                var client0 = (RavenJObject)clients[0];
-                var client1 = (RavenJObject)clients[1];
+                var client0 = (JObject)clients[0];
+                var client1 = (JObject)clients[1];
                 Assert.AreEqual("A", client0["Queue"].Value<string>());
                 Assert.AreEqual("B", client0["Machine"].Value<string>());
                 Assert.AreEqual("E", client1["Queue"].Value<string>());

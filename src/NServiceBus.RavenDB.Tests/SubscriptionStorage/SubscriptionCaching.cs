@@ -9,7 +9,6 @@
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using NUnit.Framework;
-    using Raven.Client.Connection.Profiling;
 
     [TestFixture]
     public class SubscriptionCaching : RavenDBPersistenceTestBase

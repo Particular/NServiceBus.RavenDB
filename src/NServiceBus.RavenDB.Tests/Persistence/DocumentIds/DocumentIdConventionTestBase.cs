@@ -2,11 +2,9 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Newtonsoft.Json.Linq;
     using NServiceBus.Persistence.RavenDB;
-    using Raven.Abstractions.Data;
-    using Raven.Client;
     using Raven.Client.Documents;
-    using Raven.Json.Linq;
 
     public abstract class DocumentIdConventionTestBase
     {
@@ -14,8 +12,8 @@
 
         protected Task DirectStore(IDocumentStore store, string id, object document, string entityName)
         {
-            var jsonDoc = RavenJObject.FromObject(document);
-            var metadata = new RavenJObject();
+            var jsonDoc = JObject.FromObject(document);
+            var metadata = new JObject();
             metadata["Raven-Entity-Name"] = entityName;
             var type = document.GetType();
             metadata["Raven-Clr-Type"] = $"{type.FullName}, {type.Assembly.GetName().Name}";
@@ -27,9 +25,9 @@
         protected Task StoreHiLo(IDocumentStore store, string entityName)
         {
             var hiloId = $"Raven/Hilo/{entityName}";
-            var document = new RavenJObject();
+            var document = new JObject();
             document["Max"] = 32;
-            var metadata = new RavenJObject();
+            var metadata = new JObject();
 
             Console.WriteLine($"Creating {hiloId}");
             return store.AsyncDatabaseCommands.PutAsync(hiloId, null, document, metadata);

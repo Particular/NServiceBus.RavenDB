@@ -10,6 +10,8 @@
     using NUnit.Framework;
     using Raven.Abstractions.Data;
     using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Queries;
 
     [TestFixture]
     public class InconsistentSagaIdConventions : DocumentIdConventionTestBase

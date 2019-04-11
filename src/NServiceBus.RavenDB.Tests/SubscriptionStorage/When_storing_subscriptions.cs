@@ -10,9 +10,8 @@
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using NUnit.Framework;
     using System;
-    using Raven.Imports.Newtonsoft.Json;
-    using Raven.Json.Linq;
-    using Raven.Abstractions.Data;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
     [TestFixture]
     public class When_storing_subscriptions : RavenDBPersistenceTestBase
@@ -81,8 +80,8 @@
 
         Task StoreAsType(string documentId, Type storeAsType, object document)
         {
-            var docJson = RavenJObject.FromObject(document);
-            var metadata = new RavenJObject();
+            var docJson = JObject.FromObject(document);
+            var metadata = new JObject();
             metadata["Raven-Entity-Name"] = storeAsType.Name;
             metadata["Raven-Clr-Type"] = storeAsType.AssemblyQualifiedName;
 

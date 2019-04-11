@@ -6,6 +6,7 @@
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
     using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     public class When_accessing_raven_session_from_handler_with_saga : NServiceBusAcceptanceTest
     {

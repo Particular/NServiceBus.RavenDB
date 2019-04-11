@@ -2,9 +2,7 @@
 {
     using System;
     using System.Threading;
-    using Raven.Client;
-    using Raven.Client.Document;
-    using Raven.Client.Indexes;
+    using Raven.Client.Documents;
 
     class ReusableDB : IDisposable
     {

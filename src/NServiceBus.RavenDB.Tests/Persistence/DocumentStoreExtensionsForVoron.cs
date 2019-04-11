@@ -3,8 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Raven.Abstractions.Data;
-    using Raven.Client.Document;
+    using Raven.Client.Documents;
 
     internal static class DocumentStoreExtensionsForVoron
     {

@@ -9,9 +9,9 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
-    using Raven.Abstractions.Exceptions;
-    using Raven.Client;
+    using Raven.Client.Documents;
     using Raven.Client.Exceptions;
+    using Raven.Client.Exceptions.Documents.Session;
 
     [TestFixture]
     public class When_adding_outbox_messages : RavenDBPersistenceTestBase

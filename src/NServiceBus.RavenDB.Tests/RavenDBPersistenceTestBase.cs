@@ -6,6 +6,8 @@
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
     using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
 
     public class RavenDBPersistenceTestBase
     {

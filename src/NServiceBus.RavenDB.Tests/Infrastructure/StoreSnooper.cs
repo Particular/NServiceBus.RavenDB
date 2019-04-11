@@ -1,10 +1,8 @@
 ﻿namespace NServiceBus.RavenDB.Tests
 {
     using System.Collections.Generic;
-    using System.Linq;
-    using Raven.Client;
-    using Raven.Client.Listeners;
-    using Raven.Json.Linq;
+    using Newtonsoft.Json.Linq;
+    using Raven.Client.Documents;
 
     class StoreSnooper : IDocumentStoreListener
     {
@@ -15,12 +13,12 @@
         {
         }
 
-        public bool BeforeStore(string key, object entityInstance, RavenJObject metadata, RavenJObject original)
+        public bool BeforeStore(string key, object entityInstance, JObject metadata, JObject original)
         {
             return true;
         }
 
-        public void AfterStore(string key, object entityInstance, RavenJObject metadata)
+        public void AfterStore(string key, object entityInstance, JObject metadata)
         {
             keysStored.Add(key);
         }

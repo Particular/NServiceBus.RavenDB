@@ -5,8 +5,8 @@
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
-    using Raven.Client;
-    using Raven.Client.Document;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
 
     public class When_raven_session_is_provided : NServiceBusAcceptanceTest
     {

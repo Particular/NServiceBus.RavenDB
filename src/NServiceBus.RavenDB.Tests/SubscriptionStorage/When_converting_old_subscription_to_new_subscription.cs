@@ -3,6 +3,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
@@ -10,9 +12,6 @@
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using NUnit.Framework;
-    using Raven.Client.Listeners;
-    using Raven.Imports.Newtonsoft.Json;
-    using Raven.Json.Linq;
     using LegacyAddress = NServiceBus.RavenDB.Tests.LegacyAddress;
 
     [TestFixture]
@@ -155,7 +154,7 @@
             await persister.Subscribe(mytestendpointSubscriber, MessageTypes.MessageA, null);
 
             await Catch(async () => { subscriptions = (await persister.GetSubscriberAddressesForMessage(new[] { MessageTypes.MessageA }, new ContextBag())).ToList(); });
-            
+
             Assert.AreEqual(timeoutsSubscriber.TransportAddress, subscriptions[0].TransportAddress);
             Assert.AreEqual(timeoutsSubscriber.Endpoint, subscriptions[0].Endpoint);
 
@@ -167,20 +166,20 @@
 
         class FakeSubscriptionClrType : IDocumentConversionListener
         {
-            public void BeforeConversionToDocument(string key, object entity, RavenJObject metadata)
+            public void BeforeConversionToDocument(string key, object entity, JObject metadata)
             {
             }
 
-            public void AfterConversionToDocument(string key, object entity, RavenJObject document, RavenJObject metadata)
+            public void AfterConversionToDocument(string key, object entity, JObject document, JObject metadata)
             {
                 metadata["Raven-Clr-Type"] = "NServiceBus.RavenDB.Persistence.SubscriptionStorage.Subscription, NServiceBus.RavenDB";
             }
 
-            public void BeforeConversionToEntity(string key, RavenJObject document, RavenJObject metadata)
+            public void BeforeConversionToEntity(string key, JObject document, JObject metadata)
             {
             }
 
-            public void AfterConversionToEntity(string key, RavenJObject document, RavenJObject metadata, object entity)
+            public void AfterConversionToEntity(string key, JObject document, JObject metadata, object entity)
             {
             }
         }
