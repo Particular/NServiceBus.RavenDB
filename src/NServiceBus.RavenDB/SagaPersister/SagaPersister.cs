@@ -2,7 +2,6 @@ namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using System.Threading.Tasks;
-    using Newtonsoft.Json.Linq;
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.Sagas;
@@ -75,22 +74,19 @@ namespace NServiceBus.Persistence.RavenDB
         public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
-
             documentSession.Delete(sagaData);
 
-            string uniqueDocumentId;
-            JToken uniqueDocumentIdMetadata;
-            var metadata = await documentSession.Advanced.GetMetadataForAsync(sagaData).ConfigureAwait(false);
-            if (metadata.TryGetValue(UniqueDocIdKey, out uniqueDocumentIdMetadata))
-            {
-                uniqueDocumentId = uniqueDocumentIdMetadata.Value<string>();
-            }
-            else
+            var metadata = documentSession.Advanced.GetMetadataFor(sagaData);
+            if (!metadata.TryGetValue(UniqueDocIdKey, out var uniqueDocumentId))
             {
                 context.TryGet(UniqueDocIdKey, out uniqueDocumentId);
             }
 
-            if (string.IsNullOrEmpty(uniqueDocumentId))
+            if (!string.IsNullOrEmpty(uniqueDocumentId))
+            {
+                documentSession.Advanced.Defer(new DeleteCommandData(uniqueDocumentId, null));
+            }
+            else
             {
                 var uniqueDoc = await documentSession.Query<SagaUniqueIdentity>()
                     .SingleOrDefaultAsync(d => d.SagaId == sagaData.Id)
@@ -101,18 +97,13 @@ namespace NServiceBus.Persistence.RavenDB
                     documentSession.Delete(uniqueDoc);
                 }
             }
-            else
-            {
-                documentSession.Advanced.Defer(new DeleteCommandData
-                {
-                    Key = uniqueDocumentId
-                });
-            }
         }
 
         static async Task CreateSagaUniqueIdentity(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, IAsyncDocumentSession documentSession)
         {
-            var sagaDocId = documentSession.Advanced.DocumentStore.Conventions.FindFullDocumentKeyFromNonStringIdentifier(sagaData.Id, sagaData.GetType(), false);
+            var conventions = documentSession.Advanced.DocumentStore.Conventions;
+            var collectionName = conventions.FindCollectionName(sagaData.GetType());
+            var sagaDocId = $"{collectionName}/{sagaData.Id}";
             var sagaUniqueIdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value);
 
             await documentSession.StoreAsync(new SagaUniqueIdentity
@@ -121,9 +112,9 @@ namespace NServiceBus.Persistence.RavenDB
                 SagaId = sagaData.Id,
                 UniqueValue = correlationProperty.Value,
                 SagaDocId = sagaDocId
-            }, id: sagaUniqueIdentityDocId, etag: Etag.Empty).ConfigureAwait(false);
+            }, changeVector: string.Empty, id: sagaUniqueIdentityDocId).ConfigureAwait(false);
 
-            var metadata = await documentSession.Advanced.GetMetadataForAsync(sagaData).ConfigureAwait(false);
+            var metadata = documentSession.Advanced.GetMetadataFor(sagaData);
             metadata[UniqueDocIdKey] = sagaUniqueIdentityDocId;
         }
 
