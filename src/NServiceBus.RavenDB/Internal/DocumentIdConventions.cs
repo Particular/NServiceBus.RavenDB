@@ -7,6 +7,12 @@
     using System.Text;
     using Newtonsoft.Json.Linq;
     using Raven.Client.Documents;
+    using Raven.Client.Documents.Commands;
+    using Raven.Client.Documents.Conventions;
+    using Raven.Client.Documents.Operations.Indexes;
+    using Sparrow.Json;
+    using Sparrow.Json.Parsing;
+    using Sparrow.Threading;
 
     class DocumentIdConventions
     {
@@ -58,45 +64,52 @@
 
                 var collectionData = new CollectionData();
 
-                var jsonDoc = store.DatabaseCommands.Get(collectionNamesDocId);
-                if (jsonDoc != null)
+                using (var jsonContext = new JsonOperationContext(4096, 4096, SharedMultipleUseFlag.None))
                 {
-                    var collectionNames = jsonDoc.DataAsJson["Collections"] as JArray;
-                    foreach (JValue value in collectionNames)
-                    {
-                        collectionData.Collections.Add(value.Value as string);
-                    }
-                }
+                    var executor = store.GetRequestExecutor();
+                    var getCommand = new GetDocumentsCommand(collectionNamesDocId, null, false);
+                    executor.Execute(getCommand, jsonContext);
 
-                if (timeoutsEnabled)
-                {
-                    MapTypeToCollectionName(typeof(TimeoutPersisters.RavenDB.TimeoutData), collectionData);
-                }
-                if (sagasEnabled)
-                {
-                    foreach (var sagaType in types.Where(IsSagaEntity))
+                    var jsonDoc = getCommand.Result.Results.FirstOrDefault() as BlittableJsonReaderObject;
+                    if (jsonDoc != null)
                     {
-                        MapTypeToCollectionName(sagaType, collectionData);
+                        var collectionNames = jsonDoc["Collections"] as BlittableJsonReaderArray;
+                        foreach (string value in collectionNames.Items)
+                        {
+                            collectionData.Collections.Add(value);
+                        }
                     }
-                }
 
-                if (collectionData.Changed)
-                {
-                    var newDoc = new JObject();
-                    var list = new JArray();
-                    foreach (var name in collectionData.Collections)
+                    if (timeoutsEnabled)
                     {
-                        list.Add(new JValue(name));
+                        MapTypeToCollectionName(typeof(TimeoutPersisters.RavenDB.TimeoutData), collectionData);
                     }
-                    newDoc["EndpointName"] = endpointName;
-                    newDoc["EndpointName"] = endpointName;
-                    newDoc["Collections"] = list;
-                    var metadata = new JObject();
-                    store.DatabaseCommands.Put(collectionNamesDocId, null, newDoc, metadata);
-                }
 
-                // Completes initialization
-                mappedTypes = collectionData.Mappings;
+                    if (sagasEnabled)
+                    {
+                        foreach (var sagaType in types.Where(IsSagaEntity))
+                        {
+                            MapTypeToCollectionName(sagaType, collectionData);
+                        }
+                    }
+
+                    if (collectionData.Changed)
+                    {
+                        var document = new
+                        {
+                            EndpointName = endpointName,
+                            Collections = collectionData.Collections.ToList()
+                        };
+
+                        using (var session = store.OpenSession())
+                        {
+                            session.Store(document, collectionNamesDocId);
+                        }
+                    }
+
+                    // Completes initialization
+                    mappedTypes = collectionData.Mappings;
+                }
             }
         }
 
@@ -105,20 +118,26 @@
         private HashSet<string> GetTerms()
         {
             const string DocsByEntityNameIndex = "Raven/DocumentsByEntityName";
-            var index = store.DatabaseCommands.GetIndex(DocsByEntityNameIndex);
+            var getIndexOp = new GetIndexOperation(DocsByEntityNameIndex);
+
+            var index = store.Maintenance.Send(getIndexOp);
+
             if (index == null)
             {
                 throw new InvalidOperationException("The Raven/DocumentsByEntityName index must exist in order to determine the document ID strategy. This index is created by RavenDB automatically. Check in Raven Studio to make sure it exists.");
             }
 
-            var terms = store.DatabaseCommands.GetTerms(DocsByEntityNameIndex, "Tag", null, 1024);
+            var getTermsOp = new GetTermsOperation(DocsByEntityNameIndex, "Tag", null, 1024);
+
+            var terms = store.Maintenance.Send(getTermsOp);
             return new HashSet<string>(terms);
         }
 
         private void MapTypeToCollectionName(Type type, CollectionData collectionData)
         {
             var byUserConvention = userSuppliedConventions(type);
-            var ravenDefault = Raven.Client.Document.DocumentConvention.DefaultTypeTagName(type);
+            var defaultConventions = new DocumentConventions();
+            var ravenDefault = defaultConventions.FindCollectionName(type);
             var byLegacy = LegacyFindTypeTagName(type);
 
             var mappingsInPriorityOrder = new[]

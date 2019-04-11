@@ -3,7 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using NServiceBus.Pipeline;
-    using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     class OpenAsyncSessionBehavior : Behavior<IIncomingPhysicalMessageContext>
     {
@@ -14,8 +14,7 @@
 
         public override async Task Invoke(IIncomingPhysicalMessageContext context, Func<Task> next)
         {
-            IAsyncDocumentSession session;
-            if (context.Extensions.TryGet(out session))
+            if (context.Extensions.TryGet(out IAsyncDocumentSession session))
             {
                 // Already an active session, just proceed
                 await next().ConfigureAwait(false);
@@ -30,7 +29,7 @@
                 }
             }
         }
-        
+
         readonly IOpenRavenSessionsInPipeline sessionCreator;
     }
 }
