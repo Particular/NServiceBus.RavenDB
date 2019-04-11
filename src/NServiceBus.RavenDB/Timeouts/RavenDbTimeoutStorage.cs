@@ -15,7 +15,8 @@
         {
             var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings);
 
-            store.Listeners.RegisterListener(new TimeoutDataV1toV2Converter());
+            //TODO: No listeners?
+            //store.Listeners.RegisterListener(new TimeoutDataV1toV2Converter());
 
             Helpers.SafelyCreateIndex(store, new TimeoutsIndex());
 

@@ -17,7 +17,8 @@
         {
             var store = DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(context.Settings);
 
-            store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
+            // TODO: No converters?
+            //store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
 
             var persister = new SubscriptionPersister(store);
 
