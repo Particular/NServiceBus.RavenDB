@@ -5,7 +5,10 @@
     using Newtonsoft.Json.Linq;
     using NServiceBus.Logging;
     using Raven.Client.Documents;
+    using Raven.Client.Documents.Commands;
     using Raven.Client.Documents.Indexes;
+    using Raven.Client.Documents.Operations.Indexes;
+    using Sparrow.Json;
 
     class Helpers
     {
@@ -30,8 +33,12 @@ Original exception: {exception}";
         {
             try
             {
-                documentStore.DatabaseCommands.Put("nsb/ravendb/testdocument", null, new JObject(), new JObject());
-                documentStore.DatabaseCommands.Delete("nsb/ravendb/testdocument", null);
+                using (var session = documentStore.OpenSession())
+                {
+                    session.Store(new object(), null, "nsb/ravendb/testdocument");
+                    session.Delete("nsb/ravendb/testdocument");
+                    session.SaveChanges();
+                }
             }
             catch (Exception e)
             {
@@ -55,7 +62,9 @@ Original exception: {exception}";
             }
             catch (Exception) // Apparently ArgumentException can be thrown as well as a WebException; not taking any chances
             {
-                var existingIndex = store.DatabaseCommands.GetIndex(index.IndexName);
+                var getIndexOp = new GetIndexOperation(index.IndexName);
+
+                var existingIndex = store.Maintenance.Send(getIndexOp);
                 if (existingIndex == null || !index.CreateIndexDefinition().Equals(existingIndex))
                     throw;
             }
