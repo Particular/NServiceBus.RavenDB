@@ -29,11 +29,11 @@
             this.timeoutsEnabled = timeoutsEnabled;
 
             collectionNamesDocId = $"NServiceBus/DocumentCollectionNames/{SHA1Hash(endpointName)}";
-            userSuppliedConventions = store.Conventions.FindTypeTagName;
+            userSuppliedConventions = store.Conventions.FindCollectionName;
             padlock = new object();
         }
 
-        public string FindTypeTagName(Type type)
+        public string FindCollectionName(Type type)
         {
             Initialize();
 

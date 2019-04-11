@@ -5,6 +5,7 @@
     using NServiceBus.Persistence.RavenDB;
     using Raven.Abstractions.Data;
     using Raven.Client;
+    using Raven.Client.Documents;
     using Raven.Json.Linq;
 
     public abstract class DocumentIdConventionTestBase
@@ -52,7 +53,7 @@
 
             var sagaTypes = new[] { typeof(TestSagaData) };
             var conventions = new DocumentIdConventions(store, sagaTypes, EndpointName);
-            store.Conventions.FindTypeTagName = conventions.FindTypeTagName;
+            store.Conventions.FindCollectionName = conventions.FindCollectionName;
         }
 
         private void ApplyConventionsInternal(IDocumentStore store, ConventionType type, bool forPrefill)
@@ -65,11 +66,11 @@
                 case ConventionType.NSBDefault:
                     if (forPrefill)
                     {
-                        store.Conventions.FindTypeTagName = LegacyFindTypeTagName;
+                        store.Conventions.FindCollectionName = LegacyFindTypeTagName;
                     }
                     break;
                 case ConventionType.Customer:
-                    store.Conventions.FindTypeTagName = FakeCustomerFindTypeTagName;
+                    store.Conventions.FindCollectionName = FakeCustomerFindTypeTagName;
                     break;
             }
         }

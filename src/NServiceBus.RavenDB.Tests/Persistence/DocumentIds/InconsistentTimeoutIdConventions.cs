@@ -90,7 +90,7 @@
 
                     db.WaitForIndexing(store);
 
-                    var exception = Assert.Throws<InvalidOperationException>(() => store.Conventions.FindTypeTagName(typeof(TimeoutPersisters.RavenDB.TimeoutData)));
+                    var exception = Assert.Throws<InvalidOperationException>(() => store.Conventions.FindCollectionName(typeof(TimeoutPersisters.RavenDB.TimeoutData)));
                     Console.WriteLine($"Got expected exception: {exception.Message}");
                 }
             }
@@ -119,7 +119,7 @@
                     CreateTimeoutIndex(store);
 
                     var persister = new TimeoutPersister(store);
-                    
+
                     for (var i = 1; i <= 10; i++)
                     {
                         await persister.Add(new TimeoutData
