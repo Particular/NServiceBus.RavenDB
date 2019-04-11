@@ -173,7 +173,8 @@ namespace NServiceBus.Persistence.RavenDB
 
         IRavenQueryable<TimeoutData> GetChunkQuery(IAsyncDocumentSession session)
         {
-            session.Advanced.AllowNonAuthoritativeInformation = true;
+            // TODO: Ensure AllowNonAuthoritativeInformation = false not needed
+            //session.Advanced.AllowNonAuthoritativeInformation = false;
             return session.Query<TimeoutData, TimeoutsIndex>()
                 .OrderBy(t => t.Time)
                 .Where(

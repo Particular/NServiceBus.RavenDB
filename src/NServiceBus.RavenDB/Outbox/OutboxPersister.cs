@@ -25,7 +25,8 @@
             OutboxRecord result;
             using (var session = GetSession(options))
             {
-                session.Advanced.AllowNonAuthoritativeInformation = false;
+                // TODO: Ensure AllowNonAuthoritativeInformation = false not needed
+                //session.Advanced.AllowNonAuthoritativeInformation = false;
 
                 // We use Load operation and not queries to avoid stale results
                 var possibleIds = GetPossibleOutboxDocumentIds(messageId);
@@ -98,7 +99,9 @@
             using (var session = GetSession(options))
             {
                 session.Advanced.UseOptimisticConcurrency = true;
-                session.Advanced.AllowNonAuthoritativeInformation = false;
+                // TODO: Ensure AllowNonAuthoritativeInformation = false not needed
+                //session.Advanced.AllowNonAuthoritativeInformation = false;
+
 
                 var docs = await session.LoadAsync<OutboxRecord>(GetPossibleOutboxDocumentIds(messageId)).ConfigureAwait(false);
                 var outboxMessage = docs.Values.FirstOrDefault(o => o != null);
