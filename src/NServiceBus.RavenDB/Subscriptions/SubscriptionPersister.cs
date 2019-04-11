@@ -119,7 +119,7 @@ namespace NServiceBus.Persistence.RavenDB
                     {
                         var subscriptions = await session.LoadAsync<Subscription>(ids).ConfigureAwait(false);
 
-                        subscribers = subscriptions.Where(s => s != null)
+                        subscribers = subscriptions.Values.Where(s => s != null)
                             .SelectMany(s => s.Subscribers)
                             .Distinct()
                             .Select(c => new Subscriber(c.TransportAddress, c.Endpoint))

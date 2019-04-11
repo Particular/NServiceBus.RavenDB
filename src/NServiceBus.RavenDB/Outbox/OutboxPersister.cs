@@ -31,7 +31,7 @@
                 // We use Load operation and not queries to avoid stale results
                 var possibleIds = GetPossibleOutboxDocumentIds(messageId);
                 var docs = await session.LoadAsync<OutboxRecord>(possibleIds).ConfigureAwait(false);
-                result = docs.FirstOrDefault(o => o != null);
+                result = docs.Values.FirstOrDefault(o => o != null);
             }
 
             if (result == null)
