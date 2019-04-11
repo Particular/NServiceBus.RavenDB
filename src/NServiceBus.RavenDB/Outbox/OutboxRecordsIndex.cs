@@ -14,8 +14,6 @@
                     doc.Dispatched,
                     doc.DispatchedAt
                 };
-
-            DisableInMemoryIndexing = true;
         }
     }
 }

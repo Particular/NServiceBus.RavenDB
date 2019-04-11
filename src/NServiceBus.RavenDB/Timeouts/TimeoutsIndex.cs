@@ -15,8 +15,6 @@
                     doc.SagaId,
                     doc.OwningTimeoutManager
                 };
-
-            DisableInMemoryIndexing = true;
         }
     }
 }
