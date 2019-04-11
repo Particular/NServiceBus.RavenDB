@@ -7,10 +7,9 @@ namespace NServiceBus.Persistence.RavenDB
     using System.Threading.Tasks;
     using NServiceBus.Logging;
     using NServiceBus.Timeout.Core;
-    using Raven.Abstractions.Data;
-    using Raven.Abstractions.Extensions;
-    using Raven.Client;
-    using Raven.Client.Linq;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Linq;
+    using Raven.Client.Documents.Session;
     using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
     class QueryTimeouts : IQueryTimeouts
@@ -193,7 +192,7 @@ namespace NServiceBus.Persistence.RavenDB
         IDocumentStore documentStore;
 
         /// <summary>
-        /// RavenDB server default maximum page size 
+        /// RavenDB server default maximum page size
         /// </summary>
         int maximumPageSize = 1024;
         CancellationTokenSource shutdownTokenSource;

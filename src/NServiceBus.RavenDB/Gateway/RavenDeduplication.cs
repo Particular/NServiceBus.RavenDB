@@ -4,8 +4,8 @@
     using System.Threading.Tasks;
     using Extensibility;
     using NServiceBus.Gateway.Deduplication;
-    using Raven.Abstractions.Exceptions;
-    using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Exceptions;
 
     class RavenDeduplication : IDeduplicateMessages
     {

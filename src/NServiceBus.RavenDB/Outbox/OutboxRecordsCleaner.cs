@@ -3,8 +3,8 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Raven.Abstractions.Data;
-    using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Queries;
 
     class OutboxRecordsCleaner
     {

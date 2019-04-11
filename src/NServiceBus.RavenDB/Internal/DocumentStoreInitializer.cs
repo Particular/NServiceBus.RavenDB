@@ -4,8 +4,7 @@
     using NServiceBus.ConsistencyGuarantees;
     using NServiceBus.Features;
     using NServiceBus.Settings;
-    using Raven.Client;
-    using Raven.Client.Document;
+    using Raven.Client.Documents;
 
     class DocumentStoreInitializer
     {

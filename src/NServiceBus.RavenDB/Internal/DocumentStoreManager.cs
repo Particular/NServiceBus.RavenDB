@@ -4,8 +4,7 @@
     using System.Collections.Generic;
     using NServiceBus.Logging;
     using NServiceBus.Settings;
-    using Raven.Client;
-    using Raven.Client.Document;
+    using Raven.Client.Documents;
 
     static class DocumentStoreManager
     {
@@ -115,10 +114,11 @@
             {
                 var storeByParams = new DocumentStore
                 {
-                    Url = p.Url,
-                    DefaultDatabase = p.DatabaseName ?? settings.EndpointName(),
-                    ApiKey = p.ApiKey,
-                    Credentials = p.Credentials
+                    Urls = new [] { p.Url },
+                    Database = p.DatabaseName ?? settings.EndpointName(),
+                    // TODO: Now only uses X.509 certificate-based authorization
+                    //ApiKey = p.ApiKey,
+                    //Credentials = p.Credentials
                 };
 
                 return new DocumentStoreInitializer(storeByParams);
@@ -131,12 +131,12 @@
         {
             var docStore = new DocumentStore
             {
-                Url = url
+                Urls = new[] { url }
             };
 
-            if (docStore.DefaultDatabase == null)
+            if (docStore.Database == null)
             {
-                docStore.DefaultDatabase = settings.EndpointName();
+                docStore.Database = settings.EndpointName();
             }
 
             return new DocumentStoreInitializer(docStore);

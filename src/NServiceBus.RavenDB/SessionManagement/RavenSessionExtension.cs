@@ -4,7 +4,7 @@
     using NServiceBus.Persistence;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Testing;
-    using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     /// <summary>
     /// Extensions to manage RavenDB session.

@@ -2,13 +2,13 @@ namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using System.Threading.Tasks;
+    using Newtonsoft.Json.Linq;
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.Sagas;
-    using Raven.Abstractions.Commands;
-    using Raven.Abstractions.Data;
-    using Raven.Client;
-    using Raven.Json.Linq;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Commands.Batches;
+    using Raven.Client.Documents.Session;
 
     class SagaPersister : ISagaPersister
     {
@@ -78,7 +78,7 @@ namespace NServiceBus.Persistence.RavenDB
             documentSession.Delete(sagaData);
 
             string uniqueDocumentId;
-            RavenJToken uniqueDocumentIdMetadata;
+            JToken uniqueDocumentIdMetadata;
             var metadata = await documentSession.Advanced.GetMetadataForAsync(sagaData).ConfigureAwait(false);
             if (metadata.TryGetValue(UniqueDocIdKey, out uniqueDocumentIdMetadata))
             {

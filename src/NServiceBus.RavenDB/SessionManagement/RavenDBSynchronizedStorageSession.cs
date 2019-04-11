@@ -2,7 +2,7 @@ namespace NServiceBus.Persistence.RavenDB
 {
     using System.Threading.Tasks;
     using NServiceBus.Persistence;
-    using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     /// <summary>
     /// Synchronized storage session for wrapping RavenDB transactions

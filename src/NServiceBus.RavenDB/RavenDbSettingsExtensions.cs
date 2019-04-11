@@ -5,7 +5,8 @@
     using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
-    using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
 
     /// <summary>
     ///     Provides configurations methods for the Raven storages

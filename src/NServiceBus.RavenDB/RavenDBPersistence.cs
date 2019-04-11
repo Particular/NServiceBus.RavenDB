@@ -3,7 +3,6 @@
     using NServiceBus.Features;
     using NServiceBus.Persistence;
     using NServiceBus.Persistence.RavenDB;
-    using RavenLogManager = Raven.Abstractions.Logging.LogManager;
 
     /// <summary>
     ///     Specifies the capabilities of the ravendb suite of storages
@@ -18,8 +17,6 @@
         {
             Defaults(s =>
             {
-                RavenLogManager.CurrentLogManager = new NoOpLogManager();
-
                 s.EnableFeatureByDefault<RavenDbStorageSession>();
                 s.EnableFeatureByDefault<SharedDocumentStore>();
             });

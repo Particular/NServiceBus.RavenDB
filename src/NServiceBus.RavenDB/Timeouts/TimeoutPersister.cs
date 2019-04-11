@@ -4,9 +4,9 @@ namespace NServiceBus.Persistence.RavenDB
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Timeout.Core;
-    using Raven.Abstractions.Data;
-    using Raven.Abstractions.Exceptions;
-    using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Queries;
+    using Raven.Client.Exceptions;
     using CoreTimeoutData = NServiceBus.Timeout.Core.TimeoutData;
     using Timeout = NServiceBus.TimeoutPersisters.RavenDB.TimeoutData;
 

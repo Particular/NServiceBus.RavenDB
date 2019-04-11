@@ -4,9 +4,8 @@
     using NServiceBus.Gateway.Deduplication;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.TimeoutPersisters.RavenDB;
-    using Raven.Abstractions.Data;
     using Raven.Client;
-    using Raven.Client.Document;
+    using Raven.Client.Documents;
 
     static class BackwardsCompatibilityHelper
     {

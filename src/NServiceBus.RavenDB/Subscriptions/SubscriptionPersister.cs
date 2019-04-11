@@ -9,8 +9,9 @@ namespace NServiceBus.Persistence.RavenDB
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-    using Raven.Abstractions.Exceptions;
-    using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
+    using Raven.Client.Exceptions;
 
     class SubscriptionPersister : ISubscriptionStorage
     {

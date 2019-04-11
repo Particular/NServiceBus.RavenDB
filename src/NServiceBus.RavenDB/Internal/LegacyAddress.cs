@@ -2,9 +2,8 @@ namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using System.Collections.Generic;
+    using Newtonsoft.Json.Linq;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
-    using Raven.Imports.Newtonsoft.Json.Linq;
-    using Raven.Json.Linq;
 
     class LegacyAddress
     {
@@ -45,7 +44,7 @@ namespace NServiceBus.Persistence.RavenDB
             };
         }
 
-        public static string ParseToString(Func<RavenJToken> tokenSelector)
+        public static string ParseToString(Func<JToken> tokenSelector)
         {
             var token = tokenSelector();
 

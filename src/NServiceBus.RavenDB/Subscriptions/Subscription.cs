@@ -2,8 +2,8 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
 {
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Unicast.Subscriptions;
-    using Raven.Imports.Newtonsoft.Json;
     using System.Collections.Generic;
+    using Newtonsoft.Json;
 
     class Subscription
     {

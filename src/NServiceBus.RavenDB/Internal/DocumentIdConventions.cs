@@ -5,8 +5,8 @@
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
-    using Raven.Client;
-    using Raven.Json.Linq;
+    using Newtonsoft.Json.Linq;
+    using Raven.Client.Documents;
 
     class DocumentIdConventions
     {
@@ -61,8 +61,8 @@
                 var jsonDoc = store.DatabaseCommands.Get(collectionNamesDocId);
                 if (jsonDoc != null)
                 {
-                    var collectionNames = jsonDoc.DataAsJson["Collections"] as RavenJArray;
-                    foreach (RavenJValue value in collectionNames)
+                    var collectionNames = jsonDoc.DataAsJson["Collections"] as JArray;
+                    foreach (JValue value in collectionNames)
                     {
                         collectionData.Collections.Add(value.Value as string);
                     }
@@ -82,16 +82,16 @@
 
                 if (collectionData.Changed)
                 {
-                    var newDoc = new RavenJObject();
-                    var list = new RavenJArray();
+                    var newDoc = new JObject();
+                    var list = new JArray();
                     foreach (var name in collectionData.Collections)
                     {
-                        list.Add(new RavenJValue(name));
+                        list.Add(new JValue(name));
                     }
                     newDoc["EndpointName"] = endpointName;
                     newDoc["EndpointName"] = endpointName;
                     newDoc["Collections"] = list;
-                    var metadata = new RavenJObject();
+                    var metadata = new JObject();
                     store.DatabaseCommands.Put(collectionNamesDocId, null, newDoc, metadata);
                 }
 

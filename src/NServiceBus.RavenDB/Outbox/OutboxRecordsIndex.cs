@@ -2,7 +2,7 @@
 {
     using System.Linq;
     using NServiceBus.RavenDB.Outbox;
-    using Raven.Client.Indexes;
+    using Raven.Client.Documents.Indexes;
 
     class OutboxRecordsIndex : AbstractIndexCreationTask<OutboxRecord>
     {

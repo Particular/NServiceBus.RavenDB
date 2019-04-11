@@ -2,7 +2,7 @@
 {
     using System.Threading.Tasks;
     using NServiceBus.Outbox;
-    using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     class RavenDBOutboxTransaction : OutboxTransaction
     {
