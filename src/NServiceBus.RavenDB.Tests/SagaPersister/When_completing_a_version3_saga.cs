@@ -5,7 +5,8 @@ using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client;
+using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_completing_a_version3_saga : RavenDBPersistenceTestBase

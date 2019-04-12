@@ -12,6 +12,7 @@
     using System;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using Raven.Client.Documents;
 
     [TestFixture]
     public class When_storing_subscriptions : RavenDBPersistenceTestBase
@@ -20,7 +21,7 @@
         {
             base.SetUp();
 
-            store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
+            SubscriptionV1toV2Converter.Register((DocumentStore)store);
 
             persister = new SubscriptionPersister(store);
             msgType = new MessageType(typeof(MessageA));

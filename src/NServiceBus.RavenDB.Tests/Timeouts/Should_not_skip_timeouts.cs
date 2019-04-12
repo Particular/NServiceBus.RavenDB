@@ -22,9 +22,8 @@
             var db = Guid.NewGuid().ToString();
             using (var documentStore = new DocumentStore
             {
-                Url = TestConstants.RavenUrl,
-                DefaultDatabase = db,
-                ApiKey = TestConstants.RavenApiKey
+                Urls = TestConstants.RavenUrls,
+                Database = db
             }.Initialize())
             {
                 new TimeoutsIndex().Execute(documentStore);
@@ -119,9 +118,8 @@
             var db = Guid.NewGuid().ToString();
             using (var documentStore = new DocumentStore
             {
-                Url = TestConstants.RavenUrl,
-                DefaultDatabase = db,
-                ApiKey = TestConstants.RavenApiKey
+                Urls = TestConstants.RavenUrls,
+                Database = db
             }.Initialize())
             {
                 new TimeoutsIndex().Execute(documentStore);
@@ -167,9 +165,8 @@
                 {
                     using (var store = new DocumentStore
                     {
-                        Url = TestConstants.RavenUrl,
-                        DefaultDatabase = db,
-                        ApiKey = TestConstants.RavenApiKey
+                        Urls = TestConstants.RavenUrls,
+                        Database = db
                     }.Initialize())
                     {
                         var persister2 = new TimeoutPersister(store);

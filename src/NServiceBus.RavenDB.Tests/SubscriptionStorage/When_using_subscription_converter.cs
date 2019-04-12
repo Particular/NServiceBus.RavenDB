@@ -8,10 +8,12 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
     using NServiceBus.Unicast.Subscriptions;
     using NUnit.Framework;
     using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using NServiceBus.Extensibility;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
+    using Raven.Client.Documents;
 
     public class When_using_subscription_converter : RavenDBPersistenceTestBase
     {
@@ -23,8 +25,7 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
         {
             base.SetUp();
 
-            //store.Listeners.RegisterListener(new FakeSubscriptionClrType());
-            store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
+            SubscriptionV1toV2Converter.Register((DocumentStore) store);
 
             persister = new SubscriptionPersister(store);
             msgType = new MessageType(typeof(MessageA));

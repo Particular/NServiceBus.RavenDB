@@ -4,7 +4,7 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestBase
