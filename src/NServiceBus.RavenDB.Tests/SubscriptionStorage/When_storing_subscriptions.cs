@@ -46,7 +46,7 @@
 
             await persister.Subscribe(new Subscriber("QueueB", "QueueB"), msgType, new ContextBag());
 
-            using (store.DatabaseCommands.DisableAllCaching())
+            using (store.DisableAggressiveCaching())
             {
                 using (var session = store.OpenAsyncSession())
                 {
@@ -81,12 +81,13 @@
 
         Task StoreAsType(string documentId, Type storeAsType, object document)
         {
-            var docJson = JObject.FromObject(document);
-            var metadata = new JObject();
-            metadata["Raven-Entity-Name"] = storeAsType.Name;
-            metadata["Raven-Clr-Type"] = storeAsType.AssemblyQualifiedName;
+            throw new Exception("Need to figure out how to do low-level stores");
+            //var docJson = JObject.FromObject(document);
+            //var metadata = new JObject();
+            //metadata["Raven-Entity-Name"] = storeAsType.Name;
+            //metadata["Raven-Clr-Type"] = storeAsType.AssemblyQualifiedName;
 
-            return store.AsyncDatabaseCommands.PutAsync(documentId, Etag.Empty, docJson, metadata);
+            //return store.AsyncDatabaseCommands.PutAsync(documentId, Etag.Empty, docJson, metadata);
         }
     }
 }

@@ -7,6 +7,7 @@ using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 using NUnit.Framework;
 using Raven.Client;
+using Raven.Client.Documents;
 
 [TestFixture]
 public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase

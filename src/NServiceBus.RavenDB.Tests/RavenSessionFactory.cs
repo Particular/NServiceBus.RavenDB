@@ -21,7 +21,6 @@
         IAsyncDocumentSession OpenAsyncSession()
         {
             var documentSession = store.OpenAsyncSession();
-            documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
             return documentSession;
         }

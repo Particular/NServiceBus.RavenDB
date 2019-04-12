@@ -10,7 +10,6 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
     using System.Collections.Generic;
     using System.Linq;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using NServiceBus.Extensibility;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using Raven.Client.Documents;
@@ -50,7 +49,7 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
 
             await persister.Subscribe(new Subscriber("QueueC@MachineC", "QueueC"), msgType, new ContextBag());
 
-            using (store.DatabaseCommands.DisableAllCaching())
+            using (store.DisableAggressiveCaching())
             {
                 using (var session = store.OpenAsyncSession())
                 {
@@ -91,7 +90,7 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
 
             await persister.Subscribe(new Subscriber("QueueB@MachineB", "QueueB"), msgType, new ContextBag());
 
-            using (store.DatabaseCommands.DisableAllCaching())
+            using (store.DisableAggressiveCaching())
             {
                 using (var session = store.OpenAsyncSession())
                 {
@@ -119,7 +118,7 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
             await persister.Subscribe(new Subscriber("QueueB@MachineB", "QueueB"), msgType, new ContextBag());
             await persister.Subscribe(new Subscriber("QueueC@MachineC", "QueueC"), msgType, new ContextBag());
 
-            using (store.DatabaseCommands.DisableAllCaching())
+            using (store.DisableAggressiveCaching())
             {
                 using (var session = store.OpenAsyncSession())
                 {
@@ -152,12 +151,13 @@ namespace NServiceBus.RavenDB.Tests.SubscriptionStorage
 
         Task StoreAsType(string documentId, Type storeAsType, object document)
         {
-            var docJson = JObject.FromObject(document);
-            var metadata = new JObject();
-            metadata["Raven-Entity-Name"] = storeAsType.Name;
-            metadata["Raven-Clr-Type"] = storeAsType.AssemblyQualifiedName;
+            throw new Exception("Need to figure out how to do low-level stores");
+            //var docJson = JObject.FromObject(document);
+            //var metadata = new JObject();
+            //metadata["Raven-Entity-Name"] = storeAsType.Name;
+            //metadata["Raven-Clr-Type"] = storeAsType.AssemblyQualifiedName;
 
-            return store.AsyncDatabaseCommands.PutAsync(documentId, Etag.Empty, docJson, metadata);
+            //return store.AsyncDatabaseCommands.PutAsync(documentId, Etag.Empty, docJson, metadata);
         }
     }
 }

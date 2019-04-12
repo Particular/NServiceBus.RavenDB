@@ -158,8 +158,6 @@ namespace NServiceBus.Persistence.RavenDB
         IAsyncDocumentSession OpenAsyncSession()
         {
             var session = documentStore.OpenAsyncSession();
-            // TODO: Ensure AllowNonAuthoritativeInformation = false not needed
-            //session.Advanced.AllowNonAuthoritativeInformation = false;
             session.Advanced.UseOptimisticConcurrency = true;
             return session;
         }

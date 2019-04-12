@@ -5,6 +5,7 @@
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
+    using Raven.Client.Documents.Operations.Indexes;
     using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
     [TestFixture]
@@ -28,7 +29,7 @@
                         {
                             // On every iteration after the first, remove the index so that operations
                             // will throw if the mapping document does not exist.
-                            store.DatabaseCommands.DeleteIndex("Raven/DocumentsByEntityName");
+                            store.Maintenance.Send(new DeleteIndexOperation("Raven/DocumentsByEntityName"));
                         }
 
                         var persister = new TimeoutPersister(store);
@@ -59,10 +60,10 @@
                     store.Initialize();
 
                     // Remove the index to make sure the conventions will throw
-                    store.DatabaseCommands.DeleteIndex("Raven/DocumentsByEntityName");
+                    store.Maintenance.Send(new DeleteIndexOperation("Raven/DocumentsByEntityName"));
 
                     var persister = new TimeoutPersister(store);
-                   
+
                     var exception = Assert.Throws<AggregateException>(() =>
                     {
                         persister.Add(new TimeoutData

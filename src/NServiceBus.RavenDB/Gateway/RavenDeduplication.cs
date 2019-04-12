@@ -19,8 +19,6 @@
             using (var session = documentStore.OpenAsyncSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
-                // TODO: Ensure AllowNonAuthoritativeInformation = false not needed
-                //session.Advanced.AllowNonAuthoritativeInformation = false;
 
                 await session.StoreAsync(new GatewayMessage
                 {

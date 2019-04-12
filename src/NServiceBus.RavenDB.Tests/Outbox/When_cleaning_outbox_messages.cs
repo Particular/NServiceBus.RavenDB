@@ -9,6 +9,7 @@
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
     using Raven.Client;
+    using Raven.Client.Documents;
 
     [TestFixture]
     public class When_cleaning_outbox_messages : RavenDBPersistenceTestBase

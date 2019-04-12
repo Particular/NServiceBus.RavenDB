@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Newtonsoft.Json.Linq;
     using NServiceBus.Persistence.RavenDB;
     using Raven.Client.Documents;
 
@@ -12,25 +11,27 @@
 
         protected Task DirectStore(IDocumentStore store, string id, object document, string entityName)
         {
-            var jsonDoc = JObject.FromObject(document);
-            var metadata = new JObject();
-            metadata["Raven-Entity-Name"] = entityName;
-            var type = document.GetType();
-            metadata["Raven-Clr-Type"] = $"{type.FullName}, {type.Assembly.GetName().Name}";
+            throw new Exception("Don't know how to do low-level stores yet.");
+            //var jsonDoc = JObject.FromObject(document);
+            //var metadata = new JObject();
+            //metadata["Raven-Entity-Name"] = entityName;
+            //var type = document.GetType();
+            //metadata["Raven-Clr-Type"] = $"{type.FullName}, {type.Assembly.GetName().Name}";
 
-            Console.WriteLine($"Creating {entityName}: {id}");
-            return store.AsyncDatabaseCommands.PutAsync(id, Etag.Empty, jsonDoc, metadata);
+            //Console.WriteLine($"Creating {entityName}: {id}");
+            //return store.AsyncDatabaseCommands.PutAsync(id, Etag.Empty, jsonDoc, metadata);
         }
 
         protected Task StoreHiLo(IDocumentStore store, string entityName)
         {
-            var hiloId = $"Raven/Hilo/{entityName}";
-            var document = new JObject();
-            document["Max"] = 32;
-            var metadata = new JObject();
+            throw new Exception("Don't know how to do low-level stores yet.");
+            //var hiloId = $"Raven/Hilo/{entityName}";
+            //var document = new JObject();
+            //document["Max"] = 32;
+            //var metadata = new JObject();
 
-            Console.WriteLine($"Creating {hiloId}");
-            return store.AsyncDatabaseCommands.PutAsync(hiloId, null, document, metadata);
+            //Console.WriteLine($"Creating {hiloId}");
+            //return store.AsyncDatabaseCommands.PutAsync(hiloId, null, document, metadata);
         }
 
         public enum ConventionType

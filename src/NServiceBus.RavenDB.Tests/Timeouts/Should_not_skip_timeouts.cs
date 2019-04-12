@@ -10,6 +10,7 @@
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
     using Raven.Client.Documents;
+    using Raven.Client.Documents.Operations;
     using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
     [TestFixture]
@@ -241,12 +242,12 @@
 
         static void WaitForIndexing(IDocumentStore store, string db = null, TimeSpan? timeout = null)
         {
-            var databaseCommands = store.DatabaseCommands;
+            var maintenanceExecutor = store.Maintenance;
             if (db != null)
             {
-                databaseCommands = databaseCommands.ForDatabase(db);
+                maintenanceExecutor = maintenanceExecutor.ForDatabase(db);
             }
-            var spinUntil = SpinWait.SpinUntil(() => databaseCommands.GetStatistics().StaleIndexes.Length == 0, timeout ?? TimeSpan.FromSeconds(20));
+            var spinUntil = SpinWait.SpinUntil(() => maintenanceExecutor.Send(new GetStatisticsOperation()).StaleIndexes.Length != 0, timeout ?? TimeSpan.FromSeconds(20));
             Assert.True(spinUntil);
         }
 

@@ -22,8 +22,6 @@
                 ? documentStoreWrapper.DocumentStore.OpenAsyncSession()
                 : documentStoreWrapper.DocumentStore.OpenAsyncSession(databaseName);
 
-            // TODO: Ensure AllowNonAuthoritativeInformation = false not needed
-            //documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
 
             return documentSession;

@@ -9,6 +9,8 @@
     using NServiceBus.Sagas;
     using NUnit.Framework;
     using Raven.Client.Documents;
+    using Raven.Client.Documents.Commands;
+    using Raven.Client.Documents.Operations.Indexes;
     using Raven.Client.Documents.Queries;
 
     [TestFixture]
@@ -180,21 +182,25 @@
                     db.WaitForIndexing(store);
 
                     // Ensure terms are still the saga type and unique identity type
-                    var terms = store.DatabaseCommands.GetTerms("Raven/DocumentsByEntityName", "Tag", null, 1024).ToList();
-                    Assert.AreEqual(2, terms.Count);
+                    var getTermsOp = new GetTermsOperation("Raven/DocumentsByEntityName", "Tag", null, 1024);
+                    var terms = store.Maintenance.Send(getTermsOp);
 
-                    foreach (var term in terms)
-                    {
-                        var query = new IndexQuery
-                        {
-                            Query = "Tag:" + term,
-                            PageSize = 0
-                        };
+                    Assert.AreEqual(2, terms.Length);
 
-                        // Ensure there are none left
-                        var queryResult = store.DatabaseCommands.Query("Raven/DocumentsByEntityName", query);
-                        Assert.AreEqual(0, queryResult.TotalResults);
-                    }
+                    //foreach (var term in terms)
+                    //{
+                    //    var query = new IndexQuery
+                    //    {
+                    //        Query = "Tag:" + term,
+                    //        PageSize = 0
+                    //    };
+
+                    //    // Ensure there are none left
+                    //    var queryResult = store.DatabaseCommands.Query("Raven/DocumentsByEntityName", query);
+                    //    Assert.AreEqual(0, queryResult.TotalResults);
+                    //}
+
+                    Assert.IsTrue(false, "Need to debug-code through the commented out portion of this test.");
                 }
             }
         }
