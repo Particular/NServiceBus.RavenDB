@@ -1,10 +1,9 @@
 ﻿namespace NServiceBus.RavenDB.Tests
 {
     using System.Collections.Generic;
-    using Newtonsoft.Json.Linq;
     using Raven.Client.Documents;
 
-    class StoreSnooper : IDocumentStoreListener
+    class StoreSnooper
     {
         public IEnumerable<string> KeysStored => keysStored;
         public int KeyCount => keysStored.Count;
@@ -13,30 +12,20 @@
         {
         }
 
-        public bool BeforeStore(string key, object entityInstance, JObject metadata, JObject original)
-        {
-            return true;
-        }
-
-        public void AfterStore(string key, object entityInstance, JObject metadata)
-        {
-            keysStored.Add(key);
-        }
-
         public void Clear()
         {
             keysStored.Clear();
         }
 
-        public static StoreSnooper Install(IDocumentStore store)
+        public static StoreSnooper Install(DocumentStore store)
         {
             var snooper = new StoreSnooper();
-            var currentListeners = store.Listeners.StoreListeners.ToList();
-            currentListeners.Add(snooper);
-            store.Listeners.StoreListeners = currentListeners.ToArray();
+
+            store.OnBeforeStore += (sender, args) => snooper.keysStored.Add(args.DocumentId);
+
             return snooper;
         }
 
-        private List<string> keysStored = new List<string>(); 
+        private List<string> keysStored = new List<string>();
     }
 }

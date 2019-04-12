@@ -1,10 +1,10 @@
 ﻿namespace NServiceBus.RavenDB.Tests.Timeouts
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
+    using Raven.Client.Documents;
 
     [TestFixture]
     public class When_using_transformers_with_timeoutdatav1tov2converter : RavenDBPersistenceTestBase
@@ -15,8 +15,8 @@
 
             new DummyDataTransfomer().Execute(store);
 
-            store.Listeners.RegisterListener(new FakeLegacyTimoutDataClrTypeConversionListener());
-            store.Listeners.RegisterListener(new TimeoutDataV1toV2Converter());
+            FakeLegacyTimoutDataClrTypeConversionListener.Install(store);
+            TimeoutDataV1toV2Converter.Register((DocumentStore)store);
         }
 
         [Test]

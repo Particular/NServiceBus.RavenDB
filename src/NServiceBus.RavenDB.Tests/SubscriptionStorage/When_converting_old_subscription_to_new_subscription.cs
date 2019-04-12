@@ -4,7 +4,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
@@ -12,6 +11,7 @@
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using NUnit.Framework;
+    using Raven.Client.Documents;
     using LegacyAddress = NServiceBus.RavenDB.Tests.LegacyAddress;
 
     [TestFixture]
@@ -21,8 +21,12 @@
         {
             base.SetUp();
 
-            store.Listeners.RegisterListener(new FakeSubscriptionClrType());
-            store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
+            var concreteStore = (DocumentStore) store;
+
+            SubscriptionV1toV2Converter.Register(concreteStore);
+
+            // TODO: This was converted from an AfterConversionToDocument listener (FakeSubscriptionClrType) setting Raven-Clr-Type to the string below. Needs testing.
+            concreteStore.OnBeforeStore += (s,e) => e.DocumentMetadata["@collection"] = "NServiceBus.RavenDB.Persistence.SubscriptionStorage.Subscription, NServiceBus.RavenDB";
 
             persister = new SubscriptionPersister(store);
         }
@@ -163,26 +167,6 @@
         }
 
         SubscriptionPersister persister;
-
-        class FakeSubscriptionClrType : IDocumentConversionListener
-        {
-            public void BeforeConversionToDocument(string key, object entity, JObject metadata)
-            {
-            }
-
-            public void AfterConversionToDocument(string key, object entity, JObject document, JObject metadata)
-            {
-                metadata["Raven-Clr-Type"] = "NServiceBus.RavenDB.Persistence.SubscriptionStorage.Subscription, NServiceBus.RavenDB";
-            }
-
-            public void BeforeConversionToEntity(string key, JObject document, JObject metadata)
-            {
-            }
-
-            public void AfterConversionToEntity(string key, JObject document, JObject metadata, object entity)
-            {
-            }
-        }
 
         class OldSubscription
         {

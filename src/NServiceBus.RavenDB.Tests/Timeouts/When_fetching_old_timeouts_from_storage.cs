@@ -18,7 +18,7 @@
         {
             base.SetUp();
 
-            store.Listeners.RegisterListener(new FakeLegacyTimoutDataClrTypeConversionListener());
+            FakeLegacyTimoutDataClrTypeConversionListener.Install(store);
             // for querying we don't need TimeoutDataV1toV2Converter
 
             new TimeoutsIndex().Execute(store);

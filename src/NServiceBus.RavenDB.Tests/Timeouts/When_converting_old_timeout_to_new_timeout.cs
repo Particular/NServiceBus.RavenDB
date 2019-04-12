@@ -7,6 +7,7 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Support;
     using NUnit.Framework;
+    using Raven.Client.Documents;
     using LegacyAddress = NServiceBus.RavenDB.Tests.LegacyAddress;
     using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
@@ -17,8 +18,8 @@ namespace NServiceBus.RavenDB.Tests.Timeouts
         {
             base.SetUp();
 
-            store.Listeners.RegisterListener(new FakeLegacyTimoutDataClrTypeConversionListener());
-            store.Listeners.RegisterListener(new TimeoutDataV1toV2Converter());
+            FakeLegacyTimoutDataClrTypeConversionListener.Install(store);
+            TimeoutDataV1toV2Converter.Register((DocumentStore)store);
 
             persister = new TimeoutPersister(store);
         }

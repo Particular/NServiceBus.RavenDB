@@ -203,7 +203,7 @@
 
         private async Task<List<TestSagaData>> Prefill(IDocumentStore store, ConventionType seedType)
         {
-            var snooper = StoreSnooper.Install(store);
+            var snooper = StoreSnooper.Install((DocumentStore)store);
 
             Console.WriteLine($"Filling database with saga data, using {seedType} conventions");
 

@@ -1,26 +1,20 @@
 namespace NServiceBus.RavenDB.Tests.Timeouts
 {
-    using Newtonsoft.Json.Linq;
     using Raven.Client;
+    using Raven.Client.Documents;
 
-    class FakeLegacyTimoutDataClrTypeConversionListener : IDocumentConversionListener
+    static class FakeLegacyTimoutDataClrTypeConversionListener
     {
-        public void BeforeConversionToDocument(string key, object entity, JObject metadata)
+        public static void Install(IDocumentStore store)
         {
-        }
-
-        public void AfterConversionToDocument(string key, object entity, JObject document, JObject metadata)
-        {
-            metadata[Constants.RavenClrType] = "NServiceBus.TimeoutPersisters.RavenDB.TimeoutData, NServiceBus.RavenDB";
-            metadata[Constants.RavenEntityName] = "TimeoutDatas";
-        }
-
-        public void BeforeConversionToEntity(string key, JObject document, JObject metadata)
-        {
-        }
-
-        public void AfterConversionToEntity(string key, JObject document, JObject metadata, object entity)
-        {
+            store.OnBeforeStore += (sender, args) =>
+            {
+                // TODO: Converted from AfterConversionToDocument listener with these commented out statements below, needs testing:
+                //metadata[Constants.RavenClrType] = "NServiceBus.TimeoutPersisters.RavenDB.TimeoutData, NServiceBus.RavenDB";
+                //metadata[Constants.RavenEntityName] = "TimeoutDatas";
+                args.DocumentMetadata[Constants.Documents.Metadata.RavenClrType] = "NServiceBus.TimeoutPersisters.RavenDB.TimeoutData, NServiceBus.RavenDB";
+                args.DocumentMetadata[Constants.Documents.Metadata.Collection] = "TimeoutDatas";
+            };
         }
     }
 }

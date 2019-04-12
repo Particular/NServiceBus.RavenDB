@@ -9,7 +9,7 @@
     using NServiceBus.Persistence;
     using NServiceBus.Sagas;
     using NUnit.Framework;
-    
+
     public class When_using_a_sagafinder : NServiceBusAcceptanceTest
     {
         [Test]
@@ -52,7 +52,7 @@
                         return Task.FromResult(default(SagaFinderSagaData));
                     }
 
-                    return session.RavenSession().LoadAsync<SagaFinderSagaData>(Context.SagaId);
+                    return session.RavenSession().LoadAsync<SagaFinderSagaData>(Context.SagaId.ToString());
                 }
             }
 
