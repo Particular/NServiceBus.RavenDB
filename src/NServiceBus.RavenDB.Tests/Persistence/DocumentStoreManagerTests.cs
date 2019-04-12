@@ -36,27 +36,5 @@
                 Assert.AreEqual("Timeouts", DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(readOnly).Identifier);
             }
         }
-
-        [Test]
-        public void Should_create_default_connection()
-        {
-            var settings = DefaultSettings();
-
-            var storeInitializer = DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Timeouts>(settings);
-
-            storeInitializer.EnsureDocStoreCreated(settings);
-            Assert.AreEqual("http://localhost:8080", storeInitializer.Url);
-            Assert.AreEqual("http://localhost:8080 (DB: FakeEndpoint)", storeInitializer.Identifier);
-        }
-
-        private SettingsHolder DefaultSettings()
-        {
-            var settings = new SettingsHolder();
-            settings.Set("NServiceBus.LocalAddress", "FakeAddress");
-            settings.Set("EndpointVersion", "FakeVersion");
-            settings.Set("NServiceBus.Routing.EndpointName", "FakeEndpoint");
-
-            return settings;
-        }
     }
 }
