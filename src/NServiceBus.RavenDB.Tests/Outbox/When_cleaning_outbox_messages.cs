@@ -8,7 +8,6 @@
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
-    using Raven.Client;
     using Raven.Client.Documents;
 
     [TestFixture]

@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
-    using Raven.Client;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Session;
 

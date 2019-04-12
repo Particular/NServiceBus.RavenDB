@@ -2,13 +2,10 @@
 {
     using System;
     using System.Linq;
-    using Newtonsoft.Json.Linq;
     using NServiceBus.Logging;
     using Raven.Client.Documents;
-    using Raven.Client.Documents.Commands;
     using Raven.Client.Documents.Indexes;
     using Raven.Client.Documents.Operations.Indexes;
-    using Sparrow.Json;
 
     class Helpers
     {

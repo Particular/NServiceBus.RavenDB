@@ -9,9 +9,7 @@
     using NServiceBus.Sagas;
     using NUnit.Framework;
     using Raven.Client.Documents;
-    using Raven.Client.Documents.Commands;
     using Raven.Client.Documents.Operations.Indexes;
-    using Raven.Client.Documents.Queries;
 
     [TestFixture]
     public class InconsistentSagaIdConventions : DocumentIdConventionTestBase

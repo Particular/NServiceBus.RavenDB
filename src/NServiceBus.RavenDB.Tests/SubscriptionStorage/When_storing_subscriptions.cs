@@ -11,7 +11,6 @@
     using NUnit.Framework;
     using System;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using Raven.Client.Documents;
 
     [TestFixture]

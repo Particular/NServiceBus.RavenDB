@@ -6,7 +6,6 @@ using NServiceBus.RavenDB.Tests;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 using NUnit.Framework;
-using Raven.Client;
 using Raven.Client.Documents;
 
 [TestFixture]

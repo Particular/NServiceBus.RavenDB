@@ -5,13 +5,11 @@
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
-    using Newtonsoft.Json.Linq;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Commands;
     using Raven.Client.Documents.Conventions;
     using Raven.Client.Documents.Operations.Indexes;
     using Sparrow.Json;
-    using Sparrow.Json.Parsing;
     using Sparrow.Threading;
 
     class DocumentIdConventions
