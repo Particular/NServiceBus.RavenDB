@@ -13,7 +13,6 @@
     /// </summary>
     public static class RavenDbSettingsExtensions
     {
-        internal const string DefaultConnectionParameters = "RavenDbConnectionParameters";
         internal const string SharedAsyncSessionSettingsKey = "RavenDbSharedAsyncSession";
 
         /// <summary>
@@ -46,15 +45,13 @@
         /// <param name="cfg"></param>
         /// <param name="connectionParameters">Connection details</param>
         /// <returns></returns>
+        [ObsoleteEx(
+            Message = "ConnectionParameters is no longer supported. Use an alternate overload and supply the fully configured IDocumentStore.",
+            RemoveInVersion = "7.0.0",
+            TreatAsErrorFromVersion = "6.0.0")]
         public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, ConnectionParameters connectionParameters)
         {
-            if (connectionParameters == null)
-            {
-                throw new ArgumentNullException(nameof(connectionParameters));
-            }
-            cfg.GetSettings().Set(DefaultConnectionParameters, connectionParameters);
-            // This will be registered with RavenUserInstaller once we initialize the document store object internally
-            return cfg;
+            throw new NotImplementedException();
         }
 
         /// <summary>

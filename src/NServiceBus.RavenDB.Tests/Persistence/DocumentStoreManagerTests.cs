@@ -38,26 +38,6 @@
         }
 
         [Test]
-        public void Should_construct_store_based_on_connection_params()
-        {
-            var connectionParams = new ConnectionParameters
-            {
-                Url = TestConstants.RavenUrl,
-                DatabaseName = "TestConnectionParams",
-                ApiKey = TestConstants.RavenApiKey
-            };
-
-            var settings = DefaultSettings();
-            settings.Set(RavenDbSettingsExtensions.DefaultConnectionParameters, connectionParams);
-
-            var storeInitializer = DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Sagas>(settings);
-
-            storeInitializer.EnsureDocStoreCreated(settings);
-            Assert.AreEqual(TestConstants.RavenUrl, storeInitializer.Url);
-            Assert.AreEqual($"{TestConstants.RavenUrl} (DB: TestConnectionParams)", storeInitializer.Identifier);
-        }
-
-        [Test]
         public void Should_create_default_connection()
         {
             var settings = DefaultSettings();

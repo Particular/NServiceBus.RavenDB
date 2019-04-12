@@ -5,6 +5,11 @@
     /// <summary>
     ///     Connection parameters to be used when connecting to RavenDB
     /// </summary>
+    // TODO: Better obsolete message that points to method to use
+    [ObsoleteEx(
+        Message="ConnectionParameters is no longer supported, the fully configured IDocumentStore must be provided to the endpoint.",
+        RemoveInVersion="7.0.0",
+        TreatAsErrorFromVersion = "6.0.0")]
     public class ConnectionParameters
     {
         /// <summary>

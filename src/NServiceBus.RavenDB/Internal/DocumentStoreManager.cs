@@ -109,21 +109,6 @@
 
         private static DocumentStoreInitializer CreateDefaultDocumentStore(ReadOnlySettings settings)
         {
-            var p = settings.GetOrDefault<ConnectionParameters>(RavenDbSettingsExtensions.DefaultConnectionParameters);
-            if (p != null)
-            {
-                var storeByParams = new DocumentStore
-                {
-                    Urls = new [] { p.Url },
-                    Database = p.DatabaseName ?? settings.EndpointName(),
-                    // TODO: Now only uses X.509 certificate-based authorization
-                    //ApiKey = p.ApiKey,
-                    //Credentials = p.Credentials
-                };
-
-                return new DocumentStoreInitializer(storeByParams);
-            }
-
             return CreateStoreByUrl(settings, "http://localhost:8080");
         }
 

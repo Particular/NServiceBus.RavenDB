@@ -20,7 +20,7 @@
         {
             await RunTest(cfg =>
             {
-                cfg.PersistenceExtensions.SetMessageToDatabaseMappingConvention(headers => headers.TryGetValue("RavenDatabaseName", out var dbName) ? dbName : cfg.DefaultStore.DefaultDatabase);
+                cfg.PersistenceExtensions.SetMessageToDatabaseMappingConvention(headers => headers.TryGetValue("RavenDatabaseName", out var dbName) ? dbName : cfg.DefaultStore.Database);
             });
         }
 
@@ -51,7 +51,7 @@
                         var settings = cfg.GetSettings();
 
                         var defaultStore = ConfigureEndpointRavenDBPersistence.GetDefaultDocumentStore(settings);
-                        c.DefaultDb = defaultStore.DefaultDatabase;
+                        c.DefaultDb = defaultStore.Database;
                         c.DbConfig.DefaultStore = defaultStore;
 
                         ConfigureEndpointRavenDBPersistence.GetInitializedDocumentStore(c.Db1);

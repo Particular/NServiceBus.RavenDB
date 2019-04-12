@@ -4,8 +4,13 @@
 
     class TestConstants
     {
-        public static string RavenUrl => Environment.GetEnvironmentVariable("RavenDbUrl") ?? "http://localhost:8084";
-
-        public static string RavenApiKey => Environment.GetEnvironmentVariable("RavenDbApiKey");
+        public static string[] RavenUrls
+        {
+            get
+            {
+                var ravenUrl = Environment.GetEnvironmentVariable("RavenDbUrl") ?? "http://localhost:8084";
+                return new[] {ravenUrl};
+            }
+        }
     }
 }
