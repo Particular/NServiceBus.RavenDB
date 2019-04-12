@@ -4,6 +4,7 @@
     using System.Threading;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Operations;
+    using Raven.Client.ServerWide;
     using Raven.Client.ServerWide.Operations;
 
     class ReusableDB : IDisposable
@@ -22,6 +23,10 @@
             using (var initStore = CreateStore())
             {
                 initStore.Initialize();
+
+                var dbRecord = new DatabaseRecord(databaseName);
+                initStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
+
                 // TODO: This index is probably renamed involving the word "Collection" or something - look in source
                 //new RavenDocumentsByEntityName().Execute(initStore);
             }
