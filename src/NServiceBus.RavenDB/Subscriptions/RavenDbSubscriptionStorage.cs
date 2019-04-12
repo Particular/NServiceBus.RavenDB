@@ -5,6 +5,7 @@
     using NServiceBus.Logging;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+    using Raven.Client.Documents;
 
     class RavenDbSubscriptionStorage : Feature
     {
@@ -17,8 +18,7 @@
         {
             var store = DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(context.Settings);
 
-            // TODO: No converters?
-            //store.Listeners.RegisterListener(new SubscriptionV1toV2Converter());
+            SubscriptionV1toV2Converter.Register(store as DocumentStore);
 
             var persister = new SubscriptionPersister(store);
 

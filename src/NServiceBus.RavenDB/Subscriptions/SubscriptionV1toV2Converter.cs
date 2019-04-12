@@ -1,57 +1,46 @@
-// TODO: No IDocumentConversionListener?
+namespace NServiceBus.Persistence.RavenDB
+{
+    using System.Linq;
+    using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
 
-//namespace NServiceBus.Persistence.RavenDB
-//{
-//    using System.Linq;
-//    using Newtonsoft.Json.Linq;
-//    using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+    static class SubscriptionV1toV2Converter
+    {
+        public static void Register(DocumentStore store)
+        {
+            store.OnBeforeConversionToDocument += OnBeforeConversionToDocument;
+            store.OnAfterConversionToEntity += OnAfterConversionToEntity;
+        }
 
-//    class SubscriptionV1toV2Converter : IDocumentConversionListener
-//    {
-//        public void BeforeConversionToDocument(string key, object entity, JObject metadata)
-//        {
-//            var subscription = entity as Subscription;
+        static void OnBeforeConversionToDocument(object sender, BeforeConversionToDocumentEventArgs args)
+        {
+            if (args.Entity is Subscription subscription)
+            {
+                var converted = LegacyAddress.ConvertMultipleToLegacyAddress(subscription.Subscribers);
+                subscription.LegacySubscriptions.Clear();
+                subscription.LegacySubscriptions.AddRange(converted);
+            }
+        }
 
-//            if (subscription == null)
-//            {
-//                return;
-//            }
+        static void OnAfterConversionToEntity(object sender, AfterConversionToEntityEventArgs args)
+        {
+            if (args.Entity is Subscription subscription)
+            {
+                var clients = args.Document["Clients"];
 
-//            var converted = LegacyAddress.ConvertMultipleToLegacyAddress(subscription.Subscribers);
-//            subscription.LegacySubscriptions.Clear();
-//            subscription.LegacySubscriptions.AddRange(converted);
-//        }
+                if (clients != null)
+                {
+                    // TODO: Ensure when Clients are in the document that it's being cast correctly and enters here
+                    var converted = LegacyAddress.ParseMultipleToSubscriptionClient(subscription.LegacySubscriptions);
 
-//        public void AfterConversionToDocument(string key, object entity, JObject document, JObject metadata)
-//        {
-
-//        }
-
-//        public void BeforeConversionToEntity(string key, JObject document, JObject metadata)
-//        {
-//        }
-
-//        public void AfterConversionToEntity(string key, JObject document, JObject metadata, object entity)
-//        {
-//            var subscription = entity as Subscription;
-
-//            if (subscription == null)
-//            {
-//                return;
-//            }
-
-//            var clients = document["Clients"];
-
-//            if (clients != null)
-//            {
-//                var converted = LegacyAddress.ParseMultipleToSubscriptionClient(subscription.LegacySubscriptions);
-
-//                var legacySubscriptions = converted.Except(subscription.Subscribers).ToArray();
-//                foreach (var legacySubscription in legacySubscriptions)
-//                {
-//                    subscription.Subscribers.Add(legacySubscription);
-//                }
-//            }
-//        }
-//    }
-//}
+                    var legacySubscriptions = converted.Except(subscription.Subscribers).ToArray();
+                    foreach (var legacySubscription in legacySubscriptions)
+                    {
+                        subscription.Subscribers.Add(legacySubscription);
+                    }
+                }
+            }
+        }
+    }
+}
