@@ -40,7 +40,7 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
     {
         public Task Handle(StartMessage message, IMessageHandlerContext context)
         {
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
 
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)

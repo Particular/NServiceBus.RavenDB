@@ -45,7 +45,7 @@ public class When_persisting_a_saga_entity_with_a_concrete_class_property : Rave
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 

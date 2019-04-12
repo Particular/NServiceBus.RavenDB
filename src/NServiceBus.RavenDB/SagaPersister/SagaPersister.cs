@@ -33,7 +33,7 @@ namespace NServiceBus.Persistence.RavenDB
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             //no-op since the dirty tracking will handle the update for us
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
 
         public Task<T> Get<T>(Guid sagaId, SynchronizedStorageSession session, ContextBag context)

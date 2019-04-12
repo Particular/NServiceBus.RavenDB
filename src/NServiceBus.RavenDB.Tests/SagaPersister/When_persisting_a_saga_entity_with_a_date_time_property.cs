@@ -39,7 +39,7 @@ public class When_persisting_a_saga_entity_with_a_DateTime_property : RavenDBPer
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 

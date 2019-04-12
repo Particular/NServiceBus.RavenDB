@@ -41,7 +41,7 @@ public class When_persisting_a_saga_entity_with_an_Enum_property : RavenDBPersis
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 
