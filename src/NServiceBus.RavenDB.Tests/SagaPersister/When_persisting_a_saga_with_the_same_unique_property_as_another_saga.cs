@@ -4,8 +4,8 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Abstractions.Exceptions;
-using Raven.Client;
+using Raven.Client.Documents.Session;
+using Raven.Client.Exceptions;
 
 [TestFixture]
 public class When_persisting_a_saga_with_the_same_unique_property_as_another_saga : RavenDBPersistenceTestBase

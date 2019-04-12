@@ -8,8 +8,6 @@
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Sagas;
     using NUnit.Framework;
-    using Raven.Abstractions.Data;
-    using Raven.Client;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Queries;
 
