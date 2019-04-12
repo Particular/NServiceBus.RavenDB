@@ -2,13 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
-    using NServiceBus.Logging;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
 
     static class DocumentStoreManager
     {
-        static readonly ILog Logger = LogManager.GetLogger(typeof(DocumentStoreManager));
         const string defaultDocStoreSettingsKey = "RavenDbDocumentStore";
         static Dictionary<Type, string> featureSettingsKeys;
 
@@ -86,45 +84,12 @@
                 docStoreInitializer = settings.GetOrDefault<DocumentStoreInitializer>(defaultDocStoreSettingsKey);
             }
 
-            // Otherwise, we need to create it ourselves, but do so only once.
             if (docStoreInitializer == null)
             {
-                // The holder is known to be non-null since we set it in SharedDocumentStore feature ctor
-                var holder = settings.Get<SingleSharedDocumentStore>();
-                if (holder.Initializer == null)
-                {
-                    holder.Initializer = CreateDefaultDocumentStore(settings);
-                }
-
-                docStoreInitializer = holder.Initializer;
-            }
-
-            if (docStoreInitializer == null)
-            {
-                throw new Exception($"RavenDB is configured as persistence for {typeof(TStorageType).Name} and no DocumentStore instance could be found.");
+                throw new Exception($"In order to use RavenDB as persistence for {typeof(TStorageType).Name}, a DocumentStore instance or builder must be set using persistence.{nameof(RavenDbSettingsExtensions.SetDefaultDocumentStore)}(...).");
             }
 
             return docStoreInitializer;
-        }
-
-        private static DocumentStoreInitializer CreateDefaultDocumentStore(ReadOnlySettings settings)
-        {
-            return CreateStoreByUrl(settings, "http://localhost:8080");
-        }
-
-        static DocumentStoreInitializer CreateStoreByUrl(ReadOnlySettings settings, string url)
-        {
-            var docStore = new DocumentStore
-            {
-                Urls = new[] { url }
-            };
-
-            if (docStore.Database == null)
-            {
-                docStore.Database = settings.EndpointName();
-            }
-
-            return new DocumentStoreInitializer(docStore);
         }
     }
 }

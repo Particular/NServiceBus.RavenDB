@@ -11,7 +11,6 @@
     {
         RavenDbSubscriptionStorage()
         {
-            DependsOn<SharedDocumentStore>();
         }
 
         protected override void Setup(FeatureConfigurationContext context)

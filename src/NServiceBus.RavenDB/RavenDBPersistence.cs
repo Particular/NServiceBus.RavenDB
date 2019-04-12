@@ -18,7 +18,6 @@
             Defaults(s =>
             {
                 s.EnableFeatureByDefault<RavenDbStorageSession>();
-                s.EnableFeatureByDefault<SharedDocumentStore>();
             });
 
             Supports<StorageType.GatewayDeduplication>(s => s.EnableFeatureByDefault<RavenDbGatewayDeduplication>());

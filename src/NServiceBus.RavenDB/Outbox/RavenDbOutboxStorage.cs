@@ -12,7 +12,6 @@
         public RavenDbOutboxStorage()
         {
             DependsOn<Outbox>();
-            DependsOn<SharedDocumentStore>();
         }
 
         protected override void Setup(FeatureConfigurationContext context)
@@ -48,7 +47,7 @@
                 {
                     return TaskEx.CompletedTask;
                 }
-                
+
                 timeToKeepDeduplicationData = settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
 
                 cancellationTokenSource = new CancellationTokenSource();
