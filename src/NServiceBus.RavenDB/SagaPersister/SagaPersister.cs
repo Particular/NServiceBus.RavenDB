@@ -20,14 +20,31 @@ namespace NServiceBus.Persistence.RavenDB
                 return;
             }
 
-            await documentSession.StoreAsync(sagaData).ConfigureAwait(false);
+            var container = new SagaDataContainer
+            {
+                Id = DocumentIdForSagaData(documentSession, sagaData),
+                Data = sagaData
+            };
 
             if (correlationProperty == null)
             {
                 return;
             }
 
-            await CreateSagaUniqueIdentity(sagaData, correlationProperty, documentSession).ConfigureAwait(false);
+            container.IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value);
+
+            await documentSession.StoreAsync(container).ConfigureAwait(false);
+            await documentSession.StoreAsync(new SagaUniqueIdentity
+            {
+                Id = container.IdentityDocId,
+                SagaId = sagaData.Id,
+                UniqueValue = correlationProperty.Value,
+                SagaDocId = container.Id
+            }, changeVector: string.Empty, id: container.IdentityDocId).ConfigureAwait(false);
+
+            // TODO: The process that converts old bare SagaData to SagaData in a container instances needs to relocate the UniqueDocIdKey metadata too
+            //var metadata = documentSession.Advanced.GetMetadataFor(container);
+            //metadata[UniqueDocIdKey] = sagaUniqueIdentityDocId;
         }
 
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
@@ -36,12 +53,21 @@ namespace NServiceBus.Persistence.RavenDB
             return Task.CompletedTask;
         }
 
-        public Task<T> Get<T>(Guid sagaId, SynchronizedStorageSession session, ContextBag context)
+        public async Task<T> Get<T>(Guid sagaId, SynchronizedStorageSession session, ContextBag context)
             where T : class, IContainSagaData
         {
             var documentSession = session.RavenSession();
-            // TODO: Check previous string expression of SagaId guid
-            return documentSession.LoadAsync<T>(sagaId.ToString("D"));
+            var docId = DocumentIdForSagaData(documentSession, typeof(T), sagaId);
+            var container = await documentSession.LoadAsync<SagaDataContainer>(docId).ConfigureAwait(false);
+
+            if (container == null)
+            {
+                return default(T);
+            }
+
+            context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
+
+            return container.Data as T;
         }
 
         public async Task<T> Get<T>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context)
@@ -50,9 +76,6 @@ namespace NServiceBus.Persistence.RavenDB
             var documentSession = session.RavenSession();
 
             var lookupId = SagaUniqueIdentity.FormatId(typeof(T), propertyName, propertyValue);
-
-            //store it in the context to be able to optimize deletes for legacy sagas that don't have the id in metadata
-            context.Set(UniqueDocIdKey, lookupId);
 
             var lookup = await documentSession
                 .Include("SagaDocId") //tell raven to pull the saga doc as well to save us a round-trip
@@ -63,9 +86,21 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 documentSession.Advanced.Evict(lookup);
 
-                return lookup.SagaDocId != null
-                    ? await documentSession.LoadAsync<T>(lookup.SagaDocId).ConfigureAwait(false) //if we have a saga id we can just load it
-                    : await Get<T>(lookup.SagaId, session, context).ConfigureAwait(false); //if not this is a saga that was created pre 3.0.4 so we fallback to a get instead
+                if (lookup.SagaDocId != null)
+                {
+                    // If we have a saga id we can just load it, should have been included in the round-trip already
+                    var container = await documentSession.LoadAsync<SagaDataContainer>(lookup.SagaDocId).ConfigureAwait(false);
+
+                    context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
+
+                    return container.Data as T;
+                }
+                else
+                {
+                    // TODO: I (David) don't get this...
+                    //if not this is a saga that was created pre 3.0.4 so we fallback to a get instead
+                    return await Get<T>(lookup.SagaId, session, context).ConfigureAwait(false);
+                }
             }
 
             return default(T);
@@ -74,20 +109,15 @@ namespace NServiceBus.Persistence.RavenDB
         public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
-            documentSession.Delete(sagaData);
-
-            var metadata = documentSession.Advanced.GetMetadataFor(sagaData);
-            if (!metadata.TryGetValue(UniqueDocIdKey, out var uniqueDocumentId))
+            var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
+            documentSession.Delete(container.Id);
+            if (container.IdentityDocId != null)
             {
-                context.TryGet(UniqueDocIdKey, out uniqueDocumentId);
-            }
-
-            if (!string.IsNullOrEmpty(uniqueDocumentId))
-            {
-                documentSession.Advanced.Defer(new DeleteCommandData(uniqueDocumentId, null));
+                documentSession.Advanced.Defer(new DeleteCommandData(container.IdentityDocId, null));
             }
             else
             {
+                // TODO: Really?
                 var uniqueDoc = await documentSession.Query<SagaUniqueIdentity>()
                     .SingleOrDefaultAsync(d => d.SagaId == sagaData.Id)
                     .ConfigureAwait(false);
@@ -99,25 +129,18 @@ namespace NServiceBus.Persistence.RavenDB
             }
         }
 
-        static async Task CreateSagaUniqueIdentity(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, IAsyncDocumentSession documentSession)
+        static string DocumentIdForSagaData(IAsyncDocumentSession documentSession, IContainSagaData sagaData)
         {
-            var conventions = documentSession.Advanced.DocumentStore.Conventions;
-            var collectionName = conventions.FindCollectionName(sagaData.GetType());
-            var sagaDocId = $"{collectionName}/{sagaData.Id}";
-            var sagaUniqueIdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value);
-
-            await documentSession.StoreAsync(new SagaUniqueIdentity
-            {
-                Id = sagaUniqueIdentityDocId,
-                SagaId = sagaData.Id,
-                UniqueValue = correlationProperty.Value,
-                SagaDocId = sagaDocId
-            }, changeVector: string.Empty, id: sagaUniqueIdentityDocId).ConfigureAwait(false);
-
-            var metadata = documentSession.Advanced.GetMetadataFor(sagaData);
-            metadata[UniqueDocIdKey] = sagaUniqueIdentityDocId;
+            return DocumentIdForSagaData(documentSession, sagaData.GetType(), sagaData.Id);
         }
 
-        const string UniqueDocIdKey = "NServiceBus-UniqueDocId";
+        static string DocumentIdForSagaData(IAsyncDocumentSession documentSession, Type sagaDataType, Guid sagaId)
+        {
+            var conventions = documentSession.Advanced.DocumentStore.Conventions;
+            var collectionName = conventions.FindCollectionName(sagaDataType);
+            return $"{collectionName}{conventions.IdentityPartsSeparator}{sagaId}";
+        }
+
+        const string SagaContainerContextKeyPrefix = "SagaDataContainer:";
     }
 }
