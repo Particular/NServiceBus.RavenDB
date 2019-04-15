@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
+using Raven.Client;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Commands;
 using Raven.Client.Documents.Session;
+using Raven.Client.Json;
 
 [TestFixture]
 class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBase
@@ -71,14 +75,27 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
     static void DirectStore(IDocumentStore store, string id, object document, string entityName, string typeName, string uniqueValue = null)
     {
-        // TODO: Need to debug my way through this
-        //var jsonDoc = JObject.FromObject(document);
-        //var metadata = new JObject();
-        //metadata[Constants.RavenEntityName] = entityName;
-        //metadata[Constants.RavenClrType] = typeName;
-        //if (uniqueValue != null)
-        //    metadata["NServiceBus-UniqueValue"] = uniqueValue;
-        //Console.WriteLine($"Creating {entityName}: {id}");
-        //store.DatabaseCommands.Put(id, Etag.Empty, jsonDoc, metadata);
+        var documentInfo = new DocumentInfo
+        {
+            Collection = entityName,
+            MetadataInstance = new MetadataAsDictionary()
+        };
+
+        documentInfo.MetadataInstance[Constants.Documents.Metadata.RavenClrType] = typeName;
+        if (uniqueValue != null)
+        {
+            documentInfo.MetadataInstance["NServiceBus-UniqueValue"] = uniqueValue;
+        }
+
+        Console.WriteLine($"Creating {entityName}: {id}");
+        using (var session = store.OpenSession())
+        {
+            var blittableDoc = session.Advanced.EntityToBlittable.ConvertEntityToBlittable(document, documentInfo);
+            var command = new PutDocumentCommand(id, string.Empty, blittableDoc);
+            session.Advanced.RequestExecutor.Execute(command, session.Advanced.Context);
+            session.SaveChanges();
+        }
+
+
     }
 }
