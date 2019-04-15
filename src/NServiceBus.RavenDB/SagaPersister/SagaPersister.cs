@@ -91,9 +91,15 @@ namespace NServiceBus.Persistence.RavenDB
                     // If we have a saga id we can just load it, should have been included in the round-trip already
                     var container = await documentSession.LoadAsync<SagaDataContainer>(lookup.SagaDocId).ConfigureAwait(false);
 
-                    context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
-
-                    return container.Data as T;
+                    if (container != null)
+                    {
+                        if (container.IdentityDocId == null)
+                        {
+                            container.IdentityDocId = lookupId;
+                        }
+                        context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
+                        return container.Data as T;
+                    }
                 }
                 else
                 {
@@ -110,7 +116,7 @@ namespace NServiceBus.Persistence.RavenDB
         {
             var documentSession = session.RavenSession();
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
-            documentSession.Delete(container.Id);
+            documentSession.Delete(container);
             if (container.IdentityDocId != null)
             {
                 documentSession.Advanced.Defer(new DeleteCommandData(container.IdentityDocId, null));

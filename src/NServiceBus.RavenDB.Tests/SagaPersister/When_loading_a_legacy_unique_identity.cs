@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Persistence.SagaPersister;
@@ -16,6 +15,11 @@ using Raven.Client.Json;
 [TestFixture]
 class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBase
 {
+    protected override void CustomizeDocumentStore(IDocumentStore store)
+    {
+        UnwrappedSagaListener.Register(store as DocumentStore);
+    }
+
     [Test]
     public async Task It_should_load_successfully()
     {

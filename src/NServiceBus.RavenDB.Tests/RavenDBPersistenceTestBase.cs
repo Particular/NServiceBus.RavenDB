@@ -14,7 +14,14 @@
         public virtual void SetUp()
         {
             db = new ReusableDB();
-            store = db.NewStore().Initialize();
+            var docStore = db.NewStore();
+            CustomizeDocumentStore(docStore);
+            docStore.Initialize();
+            this.store = docStore;
+        }
+
+        protected virtual void CustomizeDocumentStore(IDocumentStore docStore)
+        {
         }
 
         [TearDown]
