@@ -14,7 +14,6 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
         public MessageType MessageType { get; set; }
 
         List<SubscriptionClient> subscribers;
-        List<LegacyAddress> legacySubscriptions;
 
         public List<SubscriptionClient> Subscribers
         {
@@ -27,19 +26,6 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
                 return subscribers;
             }
             set { subscribers = value; }
-        }
-
-        [JsonProperty("Clients")]
-        public List<LegacyAddress> LegacySubscriptions
-        {
-            get
-            {
-                if (legacySubscriptions == null)
-                {
-                    legacySubscriptions = new List<LegacyAddress>();
-                }
-                return legacySubscriptions;
-            }
         }
     }
 }
