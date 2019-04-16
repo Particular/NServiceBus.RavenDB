@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using NServiceBus.Configuration.AdvancedExtensibility;
 using Raven.Client.Documents;
+using Raven.Client.ServerWide;
 using Raven.Client.ServerWide.Operations;
 
 public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecution
@@ -41,6 +42,9 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
         var dbName = Guid.NewGuid().ToString();
 
         var documentStore = GetInitializedDocumentStore(dbName);
+
+        var dbRecord = new DatabaseRecord(dbName);
+        documentStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
 
         return documentStore;
     }
