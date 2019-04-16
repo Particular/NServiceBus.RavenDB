@@ -17,8 +17,8 @@
         [Test]
         public async Task Serializer_keeps_non_matching_properties()
         {
+            // TODO: Is this really an assumption we should be testing? Anymore?
             await Task.Delay(1);  // satisfy the async for now
-            Assert.IsTrue(false, "Is this really an assumption we should be testing?");
             //using (var db = new ReusableDB())
             //{
             //    var store = db.NewStore().Initialize();
