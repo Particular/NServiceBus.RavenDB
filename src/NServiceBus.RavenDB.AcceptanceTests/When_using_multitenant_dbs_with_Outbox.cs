@@ -54,8 +54,8 @@
                         c.DefaultDb = defaultStore.Database;
                         c.DbConfig.DefaultStore = defaultStore;
 
-                        ConfigureEndpointRavenDBPersistence.GetInitializedDocumentStore(c.Db1);
-                        ConfigureEndpointRavenDBPersistence.GetInitializedDocumentStore(c.Db2);
+                        ConfigureEndpointRavenDBPersistence.CreateDatabase(defaultStore, c.Db1);
+                        ConfigureEndpointRavenDBPersistence.CreateDatabase(defaultStore, c.Db2);
 
                         c.DbConfig.PersistenceExtensions = ConfigureEndpointRavenDBPersistence.GetDefaultPersistenceExtensions(settings);
                         configureMultiTenant(c.DbConfig);

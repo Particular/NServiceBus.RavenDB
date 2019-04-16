@@ -22,6 +22,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
         configuration.GetSettings().Set(DefaultDocumentStoreKey, documentStore);
 
         var persistenceExtensions = configuration.UsePersistence<RavenDBPersistence>()
+            .DoNotCacheSubscriptions()
             .DoNotSetupDatabasePermissions()
             .SetDefaultDocumentStore(documentStore);
 
@@ -43,8 +44,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
         var documentStore = GetInitializedDocumentStore(dbName);
 
-        var dbRecord = new DatabaseRecord(dbName);
-        documentStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
+        CreateDatabase(documentStore, dbName);
 
         return documentStore;
     }
@@ -66,6 +66,12 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
         documentStore.Initialize();
 
         return documentStore;
+    }
+
+    public static void CreateDatabase(IDocumentStore defaultStore, string dbName)
+    {
+        var dbRecord = new DatabaseRecord(dbName);
+        defaultStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
     }
 
     public static async Task DeleteDatabase(string dbName)
