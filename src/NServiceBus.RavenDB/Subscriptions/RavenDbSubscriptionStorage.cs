@@ -4,7 +4,6 @@
     using NServiceBus.Features;
     using NServiceBus.Logging;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-    using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 
     class RavenDbSubscriptionStorage : Feature
     {
@@ -21,21 +20,6 @@
             if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DoNotAggressivelyCacheSubscriptionsSettingsKey))
             {
                 persister.DisableAggressiveCaching = true;
-            }
-
-            if (!context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.LegacySubscriptionVersioningKey, out bool useLegacy))
-            {
-                throw new Exception("RavenDB subscription storage requires using either `persistence.DisableSubscriptionVersioning()` or `persistence.UseLegacyVersionedSubscriptions()` to determine whether legacy versioned subscriptions should be used.");
-            }
-
-            if (useLegacy)
-            {
-                // This is the default in the persister class, to facilitate tests verifying legacy behavior
-                Log.Warn("RavenDB Persistence is using legacy versioned subscription storage. This capability will be removed in NServiceBus.RavenDB 6.0.0. Subscription documents need to be converted to the new unversioned format, after which `persistence.DisableSubscriptionVersioning()` should be used.");
-            }
-            else
-            {
-                persister.SubscriptionIdFormatter = new NonVersionedSubscriptionIdFormatter();
             }
 
             if (context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.AggressiveCacheDurationSettingsKey, out TimeSpan aggressiveCacheDuration))

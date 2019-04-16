@@ -13,7 +13,6 @@
     {
         internal const string DoNotAggressivelyCacheSubscriptionsSettingsKey = "RavenDB.DoNotAggressivelyCacheSubscriptions";
         internal const string AggressiveCacheDurationSettingsKey = "RavenDB.AggressiveCacheDuration";
-        internal const string LegacySubscriptionVersioningKey = "RavenDB.LegacySubscriptionVersioning";
 
         /// <summary>
         ///     Configures the given document store to be used when storing subscriptions
@@ -70,10 +69,13 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <returns></returns>
+        [ObsoleteEx(
+            Message = "Subscriptions must be converted to the new format.",
+            TreatAsErrorFromVersion = "6.0.0",
+            RemoveInVersion = "7.0.0")]
         public static PersistenceExtensions<RavenDBPersistence> DisableSubscriptionVersioning(this PersistenceExtensions<RavenDBPersistence> cfg)
         {
-            SetLegacyVersionedSubscriptions(cfg, false);
-            return cfg;
+            throw new NotImplementedException("Subscriptions must be converted to the new format.");
         }
 
         /// <summary>
@@ -84,22 +86,13 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <returns></returns>
-        [ObsoleteEx(Message = "Subscriptions should be converted to the new format, after which the DisableSubscriptionVersioning() option should be used instead.",
-            TreatAsErrorFromVersion = "6.0.0", RemoveInVersion = "7.0.0")]
+        [ObsoleteEx(
+            Message = "Subscriptions must be converted to the new format.",
+            TreatAsErrorFromVersion = "6.0.0",
+            RemoveInVersion = "7.0.0")]
         public static PersistenceExtensions<RavenDBPersistence> UseLegacyVersionedSubscriptions(this PersistenceExtensions<RavenDBPersistence> cfg)
         {
-            SetLegacyVersionedSubscriptions(cfg, true);
-            return cfg;
-        }
-
-        static void SetLegacyVersionedSubscriptions(PersistenceExtensions<RavenDBPersistence> cfg, bool value)
-        {
-            var settings = cfg.GetSettings();
-            if(settings.TryGet(LegacySubscriptionVersioningKey, out bool existingSetting) && existingSetting != value)
-            {
-                throw new Exception("RavenDB Persistence options `persistence.DisableSubscriptionVersioning()` and `persistence.UseLegacyVersionedSubscriptions()` can't be used simultaneously.");
-            }
-            settings.Set(LegacySubscriptionVersioningKey, value);
+            throw new NotImplementedException("Subscriptions must be converted to the new format.");
         }
     }
 }

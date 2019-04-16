@@ -57,13 +57,14 @@ namespace NServiceBus
     public class static RavenDbSubscriptionSettingsExtensions
     {
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> CacheSubscriptionsFor(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.TimeSpan aggressiveCacheDuration) { }
+        [System.ObsoleteAttribute("Subscriptions must be converted to the new format. Will be removed in version 7.0" +
+            ".0.", true)]
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> DisableSubscriptionVersioning(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> DoNotCacheSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.Documents.IDocumentStore documentStore) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
-        [System.ObsoleteAttribute("Subscriptions should be converted to the new format, after which the DisableSubsc" +
-            "riptionVersioning() option should be used instead. Will be removed in version 7." +
-            "0.0.", true)]
+        [System.ObsoleteAttribute("Subscriptions must be converted to the new format. Will be removed in version 7.0" +
+            ".0.", true)]
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseLegacyVersionedSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
     }
     public class static RavenDbTimeoutSettingsExtensions
