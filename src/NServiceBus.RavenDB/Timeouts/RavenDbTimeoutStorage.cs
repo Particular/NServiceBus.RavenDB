@@ -2,7 +2,6 @@
 {
     using System.Threading.Tasks;
     using NServiceBus.Features;
-    using Raven.Client.Documents;
 
     class RavenDbTimeoutStorage : Feature
     {
@@ -14,8 +13,6 @@
         protected override void Setup(FeatureConfigurationContext context)
         {
             var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings);
-
-            TimeoutDataV1toV2Converter.Register(store as DocumentStore);
 
             Helpers.SafelyCreateIndex(store, new TimeoutsIndex());
 
