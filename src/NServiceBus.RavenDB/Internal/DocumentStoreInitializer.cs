@@ -3,7 +3,6 @@
     using System;
     using System.Linq;
     using NServiceBus.ConsistencyGuarantees;
-    using NServiceBus.Features;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
 
@@ -30,7 +29,6 @@
             {
                 EnsureDocStoreCreated(settings);
                 ApplyConventions(settings);
-                BackwardsCompatibilityHelper.SupportOlderClrTypes(docStore);
 
                 docStore.Initialize();
             }
@@ -48,14 +46,6 @@
 
         void ApplyConventions(ReadOnlySettings settings)
         {
-            if (DocumentIdConventionsExtensions.NeedToApplyDocumentIdConventionsToDocumentStore(settings))
-            {
-                var sagasEnabled = settings.IsFeatureActive(typeof(Sagas));
-                var timeoutsEnabled = settings.IsFeatureActive(typeof(TimeoutManager));
-                var idConventions = new DocumentIdConventions(docStore, settings.GetAvailableTypes(), settings.EndpointName(), sagasEnabled, timeoutsEnabled);
-                docStore.Conventions.FindCollectionName = idConventions.FindCollectionName;
-            }
-
             var store = docStore as DocumentStore;
             if (store == null)
             {
@@ -68,7 +58,7 @@
                 var usingDtc = settings.GetRequiredTransactionModeForReceives() == TransportTransactionMode.TransactionScope;
                 if (usingDtc)
                 {
-                    throw new Exception("RavenDB Persistence does not support Distributed Transaction Coordinator (DTC) transactions. You must change the TransportTransactionMode in order to continue. See the RavenDB Persistence documentation for more details.");
+                    throw new Exception("RavenDB does not support Distributed Transaction Coordinator (DTC) transactions. You must change the TransportTransactionMode in order to continue. See the RavenDB Persistence documentation for more details.");
                 }
             }
         }
