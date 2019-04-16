@@ -8,8 +8,13 @@
         {
             get
             {
-                var ravenUrl = Environment.GetEnvironmentVariable("RavenDbUrl") ?? "http://localhost:8084";
-                return new[] {ravenUrl};
+                var urls = Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls");
+                if (urls == null)
+                {
+                    throw new Exception("RavenDB cluster URLs must be specified in an environment variable named CommaSeparatedRavenClusterUrls.");
+                }
+
+                return urls.Split(',');
             }
         }
     }
