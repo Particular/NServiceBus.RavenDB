@@ -33,7 +33,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             container.IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value);
 
-            await documentSession.StoreAsync(container).ConfigureAwait(false);
+            await documentSession.StoreAsync(container, string.Empty, container.Id).ConfigureAwait(false);
             await documentSession.StoreAsync(new SagaUniqueIdentity
             {
                 Id = container.IdentityDocId,
