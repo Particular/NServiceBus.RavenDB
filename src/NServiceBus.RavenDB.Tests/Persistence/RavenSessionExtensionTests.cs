@@ -14,7 +14,7 @@
                 var store = db.NewStore().Initialize();
                 var session = store.OpenAsyncSession();
 
-                var storageSession = new RavenDBSynchronizedStorageSession(session, true);
+                var storageSession = new RavenDBSynchronizedStorageSession(session);
 
                 var session2 = storageSession.RavenSession();
 

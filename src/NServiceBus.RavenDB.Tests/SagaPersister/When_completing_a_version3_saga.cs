@@ -25,7 +25,7 @@ public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
             Id = sagaId,
             SomeId = Guid.NewGuid()
         };
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         await persister.Save(sagaEntity, this.CreateMetadata<SomeSaga>(sagaEntity), synchronizedSession, options);
 

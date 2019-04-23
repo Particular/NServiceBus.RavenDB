@@ -31,7 +31,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
 
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         var saga = await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options);
 

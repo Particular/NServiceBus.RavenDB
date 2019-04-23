@@ -25,7 +25,7 @@ public class When_updating_a_saga_without_unique_properties : RavenDBPersistence
             NonUniqueString = "notUnique"
         };
 
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), synchronizedSession, options);
         await session.SaveChangesAsync().ConfigureAwait(false);

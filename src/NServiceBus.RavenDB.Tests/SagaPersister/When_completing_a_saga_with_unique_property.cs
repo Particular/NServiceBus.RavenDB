@@ -23,7 +23,7 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
         {
             Id = sagaId
         };
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
         await session.SaveChangesAsync().ConfigureAwait(false);

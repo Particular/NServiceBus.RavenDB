@@ -22,7 +22,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
             UniqueString = uniqueString
         };
 
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), synchronizedSession, options);
         await session.SaveChangesAsync().ConfigureAwait(false);
@@ -30,7 +30,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
         session.Dispose();
 
         options = this.CreateContextWithAsyncSessionPresent(out session);
-        synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         var saga = await persister.Get<SagaData>(saga1.Id, synchronizedSession, options);
 
@@ -40,7 +40,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
         session.Dispose();
 
         options = this.CreateContextWithAsyncSessionPresent(out session);
-        synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         var saga2 = new SagaData
         {

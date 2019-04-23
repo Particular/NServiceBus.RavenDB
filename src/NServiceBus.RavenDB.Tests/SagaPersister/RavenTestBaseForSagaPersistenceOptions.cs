@@ -15,7 +15,7 @@ static class RavenTestBaseForSagaPersistenceOptions
     public static RavenDBSynchronizedStorageSession CreateSynchronizedStorageSession(this RavenDBPersistenceTestBase testBase)
     {
         var session = testBase.OpenAsyncSession();
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
         return synchronizedSession;
     }
 }
