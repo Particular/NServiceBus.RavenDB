@@ -15,7 +15,11 @@
 
         public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
         {
-            return getAsyncSessionUsingHeaders(messageHeaders);
+            var session = getAsyncSessionUsingHeaders(messageHeaders);
+
+            session.Advanced.UseOptimisticConcurrency = true;
+
+            return session;
         }
     }
 }
