@@ -13,16 +13,19 @@
     public class When_using_a_sagafinder : NServiceBusAcceptanceTest
     {
         [Test]
-        public async Task Should_be_able_to_access_session()
+        public void Should_be_able_to_access_session()
         {
-            var context = await Scenario.Define<Context>()
-                .WithEndpoint<SagaFinderEndpoint>(b => b
-                    .When(bus => bus.SendLocal(new StartSagaMessage()))
-                    .When(c => c.SagaId != Guid.Empty, bus => bus.SendLocal(new StartSagaMessage())))
-                .Done(c => c.SecondMessageProcessed)
-                .Run();
+            var exception = Assert.ThrowsAsync<Exception>(async () =>
+            {
+               await Scenario.Define<Context>()
+                    .WithEndpoint<SagaFinderEndpoint>(b => b
+                        .When(bus => bus.SendLocal(new StartSagaMessage()))
+                        .When(c => c.SagaId != Guid.Empty, bus => bus.SendLocal(new StartSagaMessage())))
+                    .Done(c => c.SecondMessageProcessed)
+                    .Run();
+            });
 
-            Assert.True(context.SameSagaInstanceFound, "If the finder is used the same sagas instance should be found");
+            Assert.IsTrue(exception.Message.Contains("does not support custom saga finders"), "Exception message did not contain expected phrase");
         }
 
         public class Context : ScenarioContext
