@@ -16,7 +16,8 @@
         {
             if (context.Extensions.TryGet(out IAsyncDocumentSession session))
             {
-                // Already an active session, just proceed
+                // Already an active session from the Outbox, just proceed
+                // SaveChangesAsync is called by RavenDBOutboxTransaction
                 await next().ConfigureAwait(false);
             }
             else

@@ -13,7 +13,7 @@
 
         public void Dispose()
         {
-            AsyncSession.Dispose();
+            AsyncSession?.Dispose();
             AsyncSession = null;
         }
 
