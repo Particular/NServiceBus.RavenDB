@@ -41,10 +41,6 @@ namespace NServiceBus.Persistence.RavenDB
                 UniqueValue = correlationProperty.Value,
                 SagaDocId = container.Id
             }, changeVector: string.Empty, id: container.IdentityDocId).ConfigureAwait(false);
-
-            // TODO: The process that converts old bare SagaData to SagaData in a container instances needs to relocate the UniqueDocIdKey metadata too
-            //var metadata = documentSession.Advanced.GetMetadataFor(container);
-            //metadata[UniqueDocIdKey] = sagaUniqueIdentityDocId;
         }
 
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
