@@ -57,6 +57,8 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
             throw new Exception("RavenDB cluster URLs must be specified in an environment variable named CommaSeparatedRavenClusterUrls.");
         }
 
+        Console.WriteLine("Connecting to broker on the following url: '{0}'", urls.Split(','));
+
         var documentStore = new DocumentStore
         {
             Urls = urls.Split(','),
