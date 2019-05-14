@@ -2,9 +2,10 @@
 {
     using System;
     using System.Threading;
-    using Raven.Client;
-    using Raven.Client.Document;
-    using Raven.Client.Indexes;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Operations;
+    using Raven.Client.ServerWide;
+    using Raven.Client.ServerWide.Operations;
 
     class ReusableDB : IDisposable
     {
@@ -22,7 +23,9 @@
             using (var initStore = CreateStore())
             {
                 initStore.Initialize();
-                new RavenDocumentsByEntityName().Execute(initStore);
+
+                var dbRecord = new DatabaseRecord(databaseName);
+                initStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
             }
 
             Console.WriteLine($"Provisioned new Raven database name {databaseName}");
@@ -46,18 +49,14 @@
         {
             return new DocumentStore
             {
-                Url = TestConstants.RavenUrl,
-                DefaultDatabase = databaseName,
-                ApiKey = TestConstants.RavenApiKey,
-#if NET452
-                EnlistInDistributedTransactions = false
-#endif
+                Urls = TestConstants.RavenUrls,
+                Database = databaseName
             };
         }
 
         public void WaitForIndexing(IDocumentStore store)
         {
-            while (store.DatabaseCommands.GetStatistics().StaleIndexes.Length != 0)
+            while(store.Maintenance.Send(new GetStatisticsOperation()).StaleIndexes.Length != 0)
             {
                 Thread.Sleep(250);
             }
@@ -74,8 +73,7 @@
 
             var docStore = new DocumentStore
             {
-                Url = TestConstants.RavenUrl,
-                ApiKey = TestConstants.RavenApiKey
+                Urls = TestConstants.RavenUrls
             };
 
             docStore.Initialize();
@@ -84,7 +82,7 @@
             {
                 try
                 {
-                    docStore.DatabaseCommands.GlobalAdmin.DeleteDatabase(databaseName, hardDelete: true);
+                    docStore.Maintenance.Server.Send(new DeleteDatabasesOperation(databaseName, hardDelete: true));
                     return;
                 }
                 catch (Exception)
@@ -94,7 +92,7 @@
                 }
             }
 
-            docStore.DatabaseCommands.GlobalAdmin.DeleteDatabase(databaseName, hardDelete: true);
+            docStore.Maintenance.Server.Send(new DeleteDatabasesOperation(databaseName, hardDelete: true));
         }
     }
 }

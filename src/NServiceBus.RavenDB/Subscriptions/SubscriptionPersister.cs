@@ -3,26 +3,27 @@ namespace NServiceBus.Persistence.RavenDB
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Security.Cryptography;
+    using System.Text;
     using System.Threading.Tasks;
     using System.Transactions;
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-    using Raven.Abstractions.Exceptions;
-    using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
+    using Raven.Client.Exceptions;
 
     class SubscriptionPersister : ISubscriptionStorage
     {
         public SubscriptionPersister(IDocumentStore store)
         {
             documentStore = store;
-            SubscriptionIdFormatter = new VersionedSubscriptionIdFormatter();
         }
 
         public TimeSpan AggressiveCacheDuration { get; set; } = TimeSpan.FromMinutes(1);
         public bool DisableAggressiveCaching { get; set; }
-        public ISubscriptionIdFormatter SubscriptionIdFormatter { get; set; }
 
         public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
@@ -40,7 +41,7 @@ namespace NServiceBus.Persistence.RavenDB
                 {
                     using (var session = OpenAsyncSession())
                     {
-                        var subscriptionDocId = SubscriptionIdFormatter.FormatId(messageType);
+                        var subscriptionDocId = GetDocumentIdForMessageType(messageType);
 
                         var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
 
@@ -87,7 +88,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             using (var session = OpenAsyncSession())
             {
-                var subscriptionDocId = SubscriptionIdFormatter.FormatId(messageType);
+                var subscriptionDocId = GetDocumentIdForMessageType(messageType);
 
                 var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
 
@@ -107,7 +108,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
-            var ids = messageTypes.Select(messageType => SubscriptionIdFormatter.FormatId(messageType)).ToList();
+            var ids = messageTypes.Select(GetDocumentIdForMessageType).ToList();
 
             using (var suppressTransaction = new TransactionScope(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -118,7 +119,7 @@ namespace NServiceBus.Persistence.RavenDB
                     {
                         var subscriptions = await session.LoadAsync<Subscription>(ids).ConfigureAwait(false);
 
-                        subscribers = subscriptions.Where(s => s != null)
+                        subscribers = subscriptions.Values.Where(s => s != null)
                             .SelectMany(s => s.Subscribers)
                             .Distinct()
                             .Select(c => new Subscriber(c.TransportAddress, c.Endpoint))
@@ -128,6 +129,27 @@ namespace NServiceBus.Persistence.RavenDB
 
                 suppressTransaction.Complete();
                 return subscribers;
+            }
+        }
+
+        string GetDocumentIdForMessageType(MessageType messageType)
+        {
+            using (var provider = new SHA1CryptoServiceProvider())
+            {
+                var inputBytes = Encoding.UTF8.GetBytes(messageType.TypeName);
+                var hashBytes = provider.ComputeHash(inputBytes);
+
+                // 54ch for perf - "Subscriptions/" (14ch) + 40ch hash
+                var idBuilder = new StringBuilder(54);
+
+                idBuilder.Append("Subscriptions/");
+
+                for (var i = 0; i < hashBytes.Length; i++)
+                {
+                    idBuilder.Append(hashBytes[i].ToString("x2"));
+                }
+
+                return idBuilder.ToString();
             }
         }
 
@@ -157,7 +179,6 @@ namespace NServiceBus.Persistence.RavenDB
         IAsyncDocumentSession OpenAsyncSession()
         {
             var session = documentStore.OpenAsyncSession();
-            session.Advanced.AllowNonAuthoritativeInformation = false;
             session.Advanced.UseOptimisticConcurrency = true;
             return session;
         }

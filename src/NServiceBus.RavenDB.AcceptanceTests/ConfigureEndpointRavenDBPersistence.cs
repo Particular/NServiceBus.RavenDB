@@ -1,10 +1,12 @@
 ﻿using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
 using NServiceBus.Settings;
-using Raven.Client.Document;
 using System;
 using System.Threading.Tasks;
 using NServiceBus.Configuration.AdvancedExtensibility;
+using Raven.Client.Documents;
+using Raven.Client.ServerWide;
+using Raven.Client.ServerWide.Operations;
 
 public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecution
 {
@@ -15,18 +17,18 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
     {
         var documentStore = GetDocumentStore();
 
-        databaseName = documentStore.DefaultDatabase;
+        databaseName = documentStore.Database;
 
         configuration.GetSettings().Set(DefaultDocumentStoreKey, documentStore);
 
         var persistenceExtensions = configuration.UsePersistence<RavenDBPersistence>()
+            .DoNotCacheSubscriptions()
             .DoNotSetupDatabasePermissions()
-            .SetDefaultDocumentStore(documentStore)
-            .DisableSubscriptionVersioning();
+            .SetDefaultDocumentStore(documentStore);
 
         configuration.GetSettings().Set(DefaultPersistenceExtensionsKey, persistenceExtensions);
 
-        Console.WriteLine("Created '{0}' database", documentStore.DefaultDatabase);
+        Console.WriteLine("Created '{0}' database", documentStore.Database);
 
         return Task.FromResult(0);
     }
@@ -42,26 +44,34 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
         var documentStore = GetInitializedDocumentStore(dbName);
 
+        CreateDatabase(documentStore, dbName);
+
         return documentStore;
     }
 
     internal static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
     {
-        var ravenUrl = Environment.GetEnvironmentVariable("RavenDbUrl") ?? "http://localhost:8084";
-        var apiKey = Environment.GetEnvironmentVariable("RavenDbApiKey");
+        var urls = Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls");
+        if (urls == null)
+        {
+            throw new Exception("RavenDB cluster URLs must be specified in an environment variable named CommaSeparatedRavenClusterUrls.");
+        }
+
         var documentStore = new DocumentStore
         {
-            Url = ravenUrl,
-            DefaultDatabase = defaultDatabase,
-            ApiKey = apiKey,
-#if NET452
-            EnlistInDistributedTransactions = false
-#endif
+            Urls = urls.Split(','),
+            Database = defaultDatabase
         };
 
         documentStore.Initialize();
 
         return documentStore;
+    }
+
+    public static void CreateDatabase(IDocumentStore defaultStore, string dbName)
+    {
+        var dbRecord = new DatabaseRecord(dbName);
+        defaultStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
     }
 
     public static async Task DeleteDatabase(string dbName)
@@ -77,7 +87,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
                 // We are using a new store because the global one is disposed of before cleanup
                 using (var storeForDeletion = GetInitializedDocumentStore(dbName))
                 {
-                    await storeForDeletion.AsyncDatabaseCommands.GlobalAdmin.DeleteDatabaseAsync(dbName, true);
+                    storeForDeletion.Maintenance.Server.Send(new DeleteDatabasesOperation(storeForDeletion.Database, hardDelete: true));
                     break;
                 }
             }
@@ -118,8 +128,8 @@ public static class TestConfigurationExtensions
         settings.Set("RavenDbDocumentStore", null);
         dbInfo = new TestDatabaseInfo
         {
-            Url = docStore.Url,
-            DatabaseName = docStore.DefaultDatabase
+            Urls = docStore.Urls,
+            Database = docStore.Database
         };
         return cfg;
     }
@@ -127,6 +137,6 @@ public static class TestConfigurationExtensions
 
 public class TestDatabaseInfo
 {
-    public string Url { get; set; }
-    public string DatabaseName { get; set; }
+    public string[] Urls { get; set; }
+    public string Database { get; set; }
 }

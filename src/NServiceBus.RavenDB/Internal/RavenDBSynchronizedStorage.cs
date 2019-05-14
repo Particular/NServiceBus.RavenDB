@@ -9,8 +9,8 @@
         public Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag)
         {
             var session = contextBag.GetAsyncSession();
-            var synchronizedStorageSession = new RavenDBSynchronizedStorageSession(session, true);
-            return Task.FromResult((CompletableSynchronizedStorageSession) synchronizedStorageSession);
+            var synchronizedStorageSession = new RavenDBSynchronizedStorageSession(session);
+            return Task.FromResult((CompletableSynchronizedStorageSession)synchronizedStorageSession);
         }
     }
 }

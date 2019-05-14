@@ -1,8 +1,8 @@
 namespace NServiceBus.Persistence.RavenDB
 {
     using System;
+    using Newtonsoft.Json;
     using NServiceBus.Unicast.Subscriptions;
-    using Raven.Imports.Newtonsoft.Json;
 
     class MessageTypeConverter : JsonConverter
     {

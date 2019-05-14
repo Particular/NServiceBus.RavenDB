@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     class OpenRavenSessionByDatabaseName : IOpenRavenSessionsInPipeline
     {
@@ -22,7 +22,6 @@
                 ? documentStoreWrapper.DocumentStore.OpenAsyncSession()
                 : documentStoreWrapper.DocumentStore.OpenAsyncSession(databaseName);
 
-            documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
 
             return documentSession;

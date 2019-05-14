@@ -5,7 +5,8 @@ using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client;
+using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTestBase
@@ -22,7 +23,7 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
         {
             Id = sagaId
         };
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
         await session.SaveChangesAsync().ConfigureAwait(false);
@@ -39,7 +40,7 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
     {
         public Task Handle(StartMessage message, IMessageHandlerContext context)
         {
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
 
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)

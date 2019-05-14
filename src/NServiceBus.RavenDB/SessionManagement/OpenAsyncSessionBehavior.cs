@@ -3,7 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using NServiceBus.Pipeline;
-    using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     class OpenAsyncSessionBehavior : Behavior<IIncomingPhysicalMessageContext>
     {
@@ -14,10 +14,10 @@
 
         public override async Task Invoke(IIncomingPhysicalMessageContext context, Func<Task> next)
         {
-            IAsyncDocumentSession session;
-            if (context.Extensions.TryGet(out session))
+            if (context.Extensions.TryGet(out IAsyncDocumentSession session))
             {
-                // Already an active session, just proceed
+                // Already an active session from the Outbox, just proceed
+                // SaveChangesAsync is called by RavenDBOutboxTransaction
                 await next().ConfigureAwait(false);
             }
             else
@@ -30,7 +30,7 @@
                 }
             }
         }
-        
+
         readonly IOpenRavenSessionsInPipeline sessionCreator;
     }
 }

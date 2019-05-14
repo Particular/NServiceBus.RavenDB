@@ -8,14 +8,11 @@
         RavenDbTimeoutStorage()
         {
             DependsOn<TimeoutManager>();
-            DependsOn<SharedDocumentStore>();
         }
 
         protected override void Setup(FeatureConfigurationContext context)
         {
             var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings);
-
-            store.Listeners.RegisterListener(new TimeoutDataV1toV2Converter());
 
             Helpers.SafelyCreateIndex(store, new TimeoutsIndex());
 
@@ -35,13 +32,13 @@
 
             protected override Task OnStart(IMessageSession session)
             {
-                return TaskEx.CompletedTask;
+                return Task.CompletedTask;
             }
 
             protected override Task OnStop(IMessageSession session)
             {
                 queryTimeouts.Shutdown();
-                return TaskEx.CompletedTask;
+                return Task.CompletedTask;
             }
 
             QueryTimeouts queryTimeouts;

@@ -9,8 +9,8 @@
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
-    using Raven.Client;
-    using Raven.Client.Document;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Operations;
     using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
     [TestFixture]
@@ -23,9 +23,8 @@
             var db = Guid.NewGuid().ToString();
             using (var documentStore = new DocumentStore
             {
-                Url = TestConstants.RavenUrl,
-                DefaultDatabase = db,
-                ApiKey = TestConstants.RavenApiKey
+                Urls = TestConstants.RavenUrls,
+                Database = db
             }.Initialize())
             {
                 new TimeoutsIndex().Execute(documentStore);
@@ -120,9 +119,8 @@
             var db = Guid.NewGuid().ToString();
             using (var documentStore = new DocumentStore
             {
-                Url = TestConstants.RavenUrl,
-                DefaultDatabase = db,
-                ApiKey = TestConstants.RavenApiKey
+                Urls = TestConstants.RavenUrls,
+                Database = db
             }.Initialize())
             {
                 new TimeoutsIndex().Execute(documentStore);
@@ -168,9 +166,8 @@
                 {
                     using (var store = new DocumentStore
                     {
-                        Url = TestConstants.RavenUrl,
-                        DefaultDatabase = db,
-                        ApiKey = TestConstants.RavenApiKey
+                        Urls = TestConstants.RavenUrls,
+                        Database = db
                     }.Initialize())
                     {
                         var persister2 = new TimeoutPersister(store);
@@ -245,12 +242,12 @@
 
         static void WaitForIndexing(IDocumentStore store, string db = null, TimeSpan? timeout = null)
         {
-            var databaseCommands = store.DatabaseCommands;
+            var maintenanceExecutor = store.Maintenance;
             if (db != null)
             {
-                databaseCommands = databaseCommands.ForDatabase(db);
+                maintenanceExecutor = maintenanceExecutor.ForDatabase(db);
             }
-            var spinUntil = SpinWait.SpinUntil(() => databaseCommands.GetStatistics().StaleIndexes.Length == 0, timeout ?? TimeSpan.FromSeconds(20));
+            var spinUntil = SpinWait.SpinUntil(() => maintenanceExecutor.Send(new GetStatisticsOperation()).StaleIndexes.Length != 0, timeout ?? TimeSpan.FromSeconds(20));
             Assert.True(spinUntil);
         }
 

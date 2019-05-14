@@ -1,6 +1,6 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
-    using Raven.Client;
+    using Raven.Client.Documents;
 
     interface IDocumentStoreWrapper
     {

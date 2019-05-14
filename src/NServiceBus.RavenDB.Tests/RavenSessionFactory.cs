@@ -1,7 +1,8 @@
 ﻿namespace NServiceBus.RavenDB.Tests
 {
     using NServiceBus.Persistence.RavenDB;
-    using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
 
     class RavenAsyncSessionFactory : IAsyncSessionProvider
     {
@@ -19,7 +20,6 @@
         IAsyncDocumentSession OpenAsyncSession()
         {
             var documentSession = store.OpenAsyncSession();
-            documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
             return documentSession;
         }

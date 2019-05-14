@@ -4,7 +4,7 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_persisting_a_saga_entity_with_a_DateTime_property : RavenDBPersistenceTestBase
@@ -22,7 +22,7 @@ public class When_persisting_a_saga_entity_with_a_DateTime_property : RavenDBPer
         IAsyncDocumentSession session;
         var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
         await session.SaveChangesAsync().ConfigureAwait(false);
@@ -39,7 +39,7 @@ public class When_persisting_a_saga_entity_with_a_DateTime_property : RavenDBPer
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 

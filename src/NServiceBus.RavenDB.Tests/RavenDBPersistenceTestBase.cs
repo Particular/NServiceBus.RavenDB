@@ -5,7 +5,8 @@
     using System.Threading.Tasks;
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
-    using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
 
     public class RavenDBPersistenceTestBase
     {
@@ -13,7 +14,14 @@
         public virtual void SetUp()
         {
             db = new ReusableDB();
-            store = db.NewStore().Initialize();
+            var docStore = db.NewStore();
+            CustomizeDocumentStore(docStore);
+            docStore.Initialize();
+            this.store = docStore;
+        }
+
+        protected virtual void CustomizeDocumentStore(IDocumentStore docStore)
+        {
         }
 
         [TearDown]
@@ -28,7 +36,6 @@
         protected internal IAsyncDocumentSession OpenAsyncSession()
         {
             var documentSession = store.OpenAsyncSession();
-            documentSession.Advanced.AllowNonAuthoritativeInformation = false;
             documentSession.Advanced.UseOptimisticConcurrency = true;
             sessions.Add(documentSession);
             return documentSession;

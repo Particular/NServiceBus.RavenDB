@@ -36,48 +36,5 @@
                 Assert.AreEqual("Timeouts", DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(readOnly).Identifier);
             }
         }
-
-        [Test]
-        public void Should_construct_store_based_on_connection_params()
-        {
-            var connectionParams = new ConnectionParameters
-            {
-                Url = TestConstants.RavenUrl,
-                DatabaseName = "TestConnectionParams",
-                ApiKey = TestConstants.RavenApiKey
-            };
-
-            var settings = DefaultSettings();
-            settings.Set(RavenDbSettingsExtensions.DefaultConnectionParameters, connectionParams);
-
-            var storeInitializer = DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Sagas>(settings);
-
-            storeInitializer.EnsureDocStoreCreated(settings);
-            Assert.AreEqual(TestConstants.RavenUrl, storeInitializer.Url);
-            Assert.AreEqual($"{TestConstants.RavenUrl} (DB: TestConnectionParams)", storeInitializer.Identifier);
-        }
-
-        [Test]
-        public void Should_create_default_connection()
-        {
-            var settings = DefaultSettings();
-
-            var storeInitializer = DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Timeouts>(settings);
-
-            storeInitializer.EnsureDocStoreCreated(settings);
-            Assert.AreEqual("http://localhost:8080", storeInitializer.Url);
-            Assert.AreEqual("http://localhost:8080 (DB: FakeEndpoint)", storeInitializer.Identifier);
-        }
-
-        private SettingsHolder DefaultSettings()
-        {
-            var settings = new SettingsHolder();
-            settings.Set("NServiceBus.LocalAddress", "FakeAddress");
-            settings.Set("EndpointVersion", "FakeVersion");
-            settings.Set("NServiceBus.Routing.EndpointName", "FakeEndpoint");
-            settings.Set(new SingleSharedDocumentStore());
-
-            return settings;
-        }
     }
 }

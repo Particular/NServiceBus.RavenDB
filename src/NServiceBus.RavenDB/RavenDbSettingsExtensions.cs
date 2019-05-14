@@ -5,14 +5,14 @@
     using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
-    using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
 
     /// <summary>
     ///     Provides configurations methods for the Raven storages
     /// </summary>
     public static class RavenDbSettingsExtensions
     {
-        internal const string DefaultConnectionParameters = "RavenDbConnectionParameters";
         internal const string SharedAsyncSessionSettingsKey = "RavenDbSharedAsyncSession";
 
         /// <summary>
@@ -45,34 +45,13 @@
         /// <param name="cfg"></param>
         /// <param name="connectionParameters">Connection details</param>
         /// <returns></returns>
+        [ObsoleteEx(
+            Message = "ConnectionParameters is no longer supported. Use an alternate overload and supply the fully configured IDocumentStore.",
+            RemoveInVersion = "7.0.0",
+            TreatAsErrorFromVersion = "6.0.0")]
         public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, ConnectionParameters connectionParameters)
         {
-            if (connectionParameters == null)
-            {
-                throw new ArgumentNullException(nameof(connectionParameters));
-            }
-            cfg.GetSettings().Set(DefaultConnectionParameters, connectionParameters);
-            // This will be registered with RavenUserInstaller once we initialize the document store object internally
-            return cfg;
-        }
-
-        /// <summary>
-        ///     Specifies the async session that the shared persisters (saga + outbox) that should be used. The lifecycle is controlled by
-        ///     me
-        /// </summary>
-        /// <param name="cfg"></param>
-        /// <param name="getAsyncSessionFunc">A func returning the async session to be used</param>
-        /// <returns></returns>
-        [ObsoleteEx(Message = "This overload doesn't provide enough information to the Func to do anything useful. Use the overload that supplies the message headers as an input instead.",
-            TreatAsErrorFromVersion = "5.0.0", RemoveInVersion = "6.0.0")]
-        public static PersistenceExtensions<RavenDBPersistence> UseSharedAsyncSession(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IAsyncDocumentSession> getAsyncSessionFunc)
-        {
-            if (getAsyncSessionFunc == null)
-            {
-                throw new ArgumentNullException(nameof(getAsyncSessionFunc));
-            }
-            cfg.GetSettings().Set(SharedAsyncSessionSettingsKey + ".Obsolete", getAsyncSessionFunc);
-            return cfg;
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -117,15 +96,6 @@
         {
             cfg.GetSettings().Set("RavenDB.DoNotSetupPermissions", true);
             return cfg;
-        }
-
-        /// <summary>RavenDB Persistence no longer supports distributed transactions.</summary>
-        /// <param name="cfg"></param>
-        /// <returns></returns>
-        [ObsoleteEx(Message = "RavenDB Persistence no longer supports distributed transactions.", TreatAsErrorFromVersion = "5.0", RemoveInVersion = "6.0")]
-        public static PersistenceExtensions<RavenDBPersistence> IConfirmToUseAStorageEngineWhichDoesntSupportDtcWhilstLeavingDistributedTransactionSupportEnabled(this PersistenceExtensions<RavenDBPersistence> cfg)
-        {
-            throw new NotImplementedException();
         }
     }
 }

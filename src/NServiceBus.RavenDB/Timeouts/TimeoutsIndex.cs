@@ -2,7 +2,7 @@
 {
     using System.Linq;
     using NServiceBus.TimeoutPersisters.RavenDB;
-    using Raven.Client.Indexes;
+    using Raven.Client.Documents.Indexes;
 
     class TimeoutsIndex : AbstractIndexCreationTask<TimeoutData>
     {
@@ -15,8 +15,6 @@
                     doc.SagaId,
                     doc.OwningTimeoutManager
                 };
-
-            DisableInMemoryIndexing = true;
         }
     }
 }

@@ -4,7 +4,7 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestBase
@@ -21,7 +21,7 @@ public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestB
                 Id = Guid.NewGuid(),
                 UniqueString = uniqueString
             };
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         await persister.Save(saga, this.CreateMetadata<SomeSaga>(saga), synchronizedSession, options);
         await session.SaveChangesAsync().ConfigureAwait(false);
@@ -36,7 +36,7 @@ public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestB
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 

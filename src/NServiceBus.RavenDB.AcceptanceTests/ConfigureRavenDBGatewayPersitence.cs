@@ -10,7 +10,7 @@
         {
             var documentStore = ConfigureEndpointRavenDBPersistence.GetDocumentStore();
 
-            databaseName = documentStore.DefaultDatabase;
+            databaseName = documentStore.Database;
 
 
             configuration.UsePersistence<RavenDBPersistence, StorageType.GatewayDeduplication>()
