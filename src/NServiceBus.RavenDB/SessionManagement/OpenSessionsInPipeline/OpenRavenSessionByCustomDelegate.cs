@@ -17,7 +17,8 @@
         {
             var session = getAsyncSessionUsingHeaders(messageHeaders);
 
-            session.Advanced.UseOptimisticConcurrency = true;
+            //session.Advanced.UseOptimisticConcurrency = true;
+            session.Advanced.SetTransactionMode(TransactionMode.ClusterWide);
 
             return session;
         }

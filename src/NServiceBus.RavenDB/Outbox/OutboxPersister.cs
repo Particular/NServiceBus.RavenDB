@@ -57,7 +57,7 @@
         {
             var session = GetSession(context);
 
-            session.Advanced.UseOptimisticConcurrency = true;
+            //session.Advanced.UseOptimisticConcurrency = true;
 
             context.Set(session);
             var transaction = new RavenDBOutboxTransaction(session);
@@ -95,7 +95,7 @@
         {
             using (var session = GetSession(options))
             {
-                session.Advanced.UseOptimisticConcurrency = true;
+                //session.Advanced.UseOptimisticConcurrency = true;
 
                 var docs = await session.LoadAsync<OutboxRecord>(GetPossibleOutboxDocumentIds(messageId)).ConfigureAwait(false);
                 var outboxMessage = docs.Values.FirstOrDefault(o => o != null);
