@@ -13,7 +13,7 @@
     public class When_using_a_sagafinder : NServiceBusAcceptanceTest
     {
         [Test]
-        public void Should_be_able_to_access_session()
+        public void Should_throw()
         {
             var exception = Assert.ThrowsAsync<Exception>(async () =>
             {
