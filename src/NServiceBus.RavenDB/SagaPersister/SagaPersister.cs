@@ -33,14 +33,21 @@ namespace NServiceBus.Persistence.RavenDB
 
             container.IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value);
 
-            await documentSession.StoreAsync(container, string.Empty, container.Id).ConfigureAwait(false);
+            var changeVector = string.Empty;
+            if (documentSession.IsClusterWideTransaction())
+            {
+                changeVector = null;
+                documentSession.Advanced.ClusterTransaction.CreateCompareExchangeValue(container.IdentityDocId, container.Id);
+            }
+
+            await documentSession.StoreAsync(container, changeVector, container.Id).ConfigureAwait(false);
             await documentSession.StoreAsync(new SagaUniqueIdentity
             {
                 Id = container.IdentityDocId,
                 SagaId = sagaData.Id,
                 UniqueValue = correlationProperty.Value,
                 SagaDocId = container.Id
-            }, changeVector: string.Empty, id: container.IdentityDocId).ConfigureAwait(false);
+            }, changeVector, id: container.IdentityDocId).ConfigureAwait(false);
         }
 
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
@@ -113,9 +120,20 @@ namespace NServiceBus.Persistence.RavenDB
             var documentSession = session.RavenSession();
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
             documentSession.Delete(container);
+
             if (container.IdentityDocId != null)
             {
-                documentSession.Advanced.Defer(new DeleteCommandData(container.IdentityDocId, null));
+                documentSession.Delete(container.IdentityDocId);
+
+                if (documentSession.IsClusterWideTransaction())
+                {
+                    // TODO: Delete CompareExchange without getting? Need a long something?
+                    var compareExchangeValue = await documentSession.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>(container.IdentityDocId).ConfigureAwait(false);
+                    if (compareExchangeValue != null)
+                    {
+                        documentSession.Advanced.ClusterTransaction.DeleteCompareExchangeValue(compareExchangeValue);
+                    }
+                }
             }
             else
             {

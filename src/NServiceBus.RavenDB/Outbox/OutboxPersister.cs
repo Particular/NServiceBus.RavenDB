@@ -83,12 +83,21 @@
                 index++;
             }
 
+            var outboxRecordId = GetOutboxRecordId(message.MessageId);
+            var changeVector = string.Empty;
+
+            if (session.IsClusterWideTransaction())
+            {
+                changeVector = null;
+                session.Advanced.ClusterTransaction.CreateCompareExchangeValue(outboxRecordId, message.MessageId);
+            }
+
             return session.StoreAsync(new OutboxRecord
             {
                 MessageId = message.MessageId,
                 Dispatched = false,
                 TransportOperations = operations
-            }, GetOutboxRecordId(message.MessageId));
+            }, changeVector, outboxRecordId);
         }
 
         public async Task SetAsDispatched(string messageId, ContextBag options)
@@ -123,6 +132,7 @@
             return documentStore.OpenAsyncSession();
         }
 
+        // TODO: Should get rid of this as part of the 6.0 breaking changes
         string[] GetPossibleOutboxDocumentIds(string messageId)
         {
             return new[]
