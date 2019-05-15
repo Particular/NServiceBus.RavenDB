@@ -6,7 +6,6 @@ namespace NServiceBus.Persistence.RavenDB
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.Sagas;
     using Raven.Client.Documents;
-    using Raven.Client.Documents.Commands.Batches;
     using Raven.Client.Documents.Session;
 
     class SagaPersister : ISagaPersister
