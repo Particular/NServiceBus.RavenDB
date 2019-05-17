@@ -32,6 +32,7 @@
                 ApplyConventions(settings);
 
                 docStore.Initialize();
+                EnsureClusterConfiguration(docStore);
             }
             isInitialized = true;
             return docStore;
@@ -42,8 +43,6 @@
             if (docStore == null)
             {
                 docStore = storeCreator(settings);
-
-                EnsureClusterConfiguration(docStore);
             }
         }
 
