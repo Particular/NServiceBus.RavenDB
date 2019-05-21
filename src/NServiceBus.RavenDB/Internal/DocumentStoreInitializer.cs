@@ -34,7 +34,7 @@
             return docStore;
         }
 
-        internal void EnsureDocStoreCreated(ReadOnlySettings settings)
+        void EnsureDocStoreCreated(ReadOnlySettings settings)
         {
             if (docStore == null)
             {
