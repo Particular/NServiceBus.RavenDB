@@ -5,7 +5,6 @@ namespace NServiceBus.Persistence.RavenDB
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.Sagas;
-    using Raven.Client.Documents;
     using Raven.Client.Documents.Commands.Batches;
     using Raven.Client.Documents.Session;
 
@@ -108,7 +107,7 @@ namespace NServiceBus.Persistence.RavenDB
             return default(T);
         }
 
-        public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
+        public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
@@ -117,18 +116,7 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 documentSession.Advanced.Defer(new DeleteCommandData(container.IdentityDocId, null));
             }
-            else
-            {
-                // TODO: Really?
-                var uniqueDoc = await documentSession.Query<SagaUniqueIdentity>()
-                    .SingleOrDefaultAsync(d => d.SagaId == sagaData.Id)
-                    .ConfigureAwait(false);
-
-                if (uniqueDoc != null)
-                {
-                    documentSession.Delete(uniqueDoc);
-                }
-            }
+            return Task.CompletedTask;
         }
 
         static string DocumentIdForSagaData(IAsyncDocumentSession documentSession, IContainSagaData sagaData)
