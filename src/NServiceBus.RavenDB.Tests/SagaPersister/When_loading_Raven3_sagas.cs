@@ -112,7 +112,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         public string Name { get; set; }
     }
 
-    static void StoreSaga(IDocumentStore store, string id, object document, string entityName, string typeName, string uniqueValue)
+    static void StoreSaga(IDocumentStore store, string id, object document, string entityName, string typeName, string uniqueDocId)
     {
         var documentInfo = new DocumentInfo
         {
@@ -121,7 +121,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         };
 
         documentInfo.MetadataInstance[Constants.Documents.Metadata.RavenClrType] = typeName;
-        documentInfo.MetadataInstance["NServiceBus-UniqueValue"] = uniqueValue;
+        documentInfo.MetadataInstance["NServiceBus-UniqueDocId"] = uniqueDocId;
 
         Console.WriteLine($"Creating {entityName}: {id}");
         using (var session = store.OpenSession())
