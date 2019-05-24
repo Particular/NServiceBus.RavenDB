@@ -21,9 +21,51 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     }
 
     [Test]
-    public async Task CanLoad()
+    public Task CanLoadAndRemoveByCorrelation()
     {
+        return RunTestUsing((persister, sagaId, syncSession, context) => persister.Get<CountingSagaData>("Name", "Alpha", syncSession, context));
+    }
 
+    [Test]
+    public Task CanLoadAndRemoveById()
+    {
+        return RunTestUsing((persister, sagaId, syncSession, context) => persister.Get<CountingSagaData>(sagaId, syncSession, context));
+    }
+
+    private async Task RunTestUsing(GetSagaDelegate getSaga)
+    {
+        var sagaId = StoreSagaDocuments();
+
+        using (var session = this.OpenAsyncSession())
+        {
+            var persister = new SagaPersister();
+            var context = new ContextBag();
+            context.Set(session);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var sagaData = await getSaga(persister, sagaId, synchronizedSession, context);
+
+            Assert.IsNotNull(sagaData);
+            Assert.AreEqual(42, sagaData.Counter);
+            Assert.AreEqual("Alpha", sagaData.Name);
+
+            await persister.Complete(sagaData, synchronizedSession, context);
+            await session.SaveChangesAsync();
+        }
+
+        using (var session = this.OpenAsyncSession())
+        {
+            var dataDocs = await session.Advanced.LoadStartingWithAsync<SagaDataContainer>("CountingSagaDatas/");
+            var uniqueDocs = await session.Advanced.LoadStartingWithAsync<SagaUniqueIdentity>("Raven3Sagas-");
+
+            Assert.IsEmpty(dataDocs);
+            Assert.IsEmpty(uniqueDocs);
+        }
+    }
+
+    delegate Task<CountingSagaData> GetSagaDelegate(SagaPersister persister, Guid sagaId, RavenDBSynchronizedStorageSession syncSession, ContextBag context);
+
+    Guid StoreSagaDocuments()
+    {
         var sagaId = Guid.NewGuid();
         var sagaDocId = $"CountingSagaDatas/{sagaId}";
         var uniqueDocId = "Raven3Sagas-CountingSagaData/Name/5f293261-55cf-fb70-8b0a-944ef322a598"; // Guid is hash of "Alpha"
@@ -48,18 +90,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
 
         StoreSaga(store, sagaDocId, oldData, "CountingSagaDatas", typeName, uniqueDocId);
         StoreUniqueDoc(store, uniqueDocId, uniqueDoc);
-
-        var dataByCorrelation = await GetSagaDataByProperty();
-        var dataById = await GetSagaDataById(sagaId);
-
-        Assert.IsNotNull(dataByCorrelation);
-        Assert.IsNotNull(dataById);
-
-        Assert.AreEqual(42, dataByCorrelation.Counter);
-        Assert.AreEqual("Alpha", dataByCorrelation.Name);
-        Assert.AreEqual(42, dataById.Counter);
-        Assert.AreEqual("Alpha", dataById.Name);
-
+        return sagaId;
     }
 
     Task<CountingSagaData> GetSagaDataByProperty()
@@ -116,12 +147,12 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     {
         var documentInfo = new DocumentInfo
         {
-            Collection = entityName,
             MetadataInstance = new MetadataAsDictionary()
         };
 
         documentInfo.MetadataInstance[Constants.Documents.Metadata.RavenClrType] = typeName;
         documentInfo.MetadataInstance["NServiceBus-UniqueDocId"] = uniqueDocId;
+        documentInfo.MetadataInstance[Constants.Documents.Metadata.Collection] = entityName;
 
         Console.WriteLine($"Creating {entityName}: {id}");
         using (var session = store.OpenSession())
@@ -137,11 +168,11 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     {
         var documentInfo = new DocumentInfo
         {
-            Collection = "SagaUniqueIdentities",
             MetadataInstance = new MetadataAsDictionary()
         };
 
         documentInfo.MetadataInstance[Constants.Documents.Metadata.RavenClrType] = "NServiceBus.RavenDB.Persistence.SagaPersister.SagaUniqueIdentity, NServiceBus.RavenDB";
+        documentInfo.MetadataInstance[Constants.Documents.Metadata.Collection] = "SagaUniqueIdentities";
 
         Console.WriteLine($"Creating unique identity: {id}");
         using (var session = store.OpenSession())
