@@ -3,7 +3,8 @@
 namespace NServiceBus.Persistence.RavenDB
 {
     [System.ObsoleteAttribute("ConnectionParameters is no longer supported, the fully configured IDocumentStore " +
-        "must be provided to the endpoint. Will be removed in version 7.0.0.", true)]
+        "must be provided using persistence.SetDefaultDocumentStore(documentStore). Will " +
+        "be removed in version 7.0.0.", true)]
     public class ConnectionParameters
     {
         public ConnectionParameters() { }

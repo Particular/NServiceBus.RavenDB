@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
@@ -26,9 +25,8 @@
             using (var session = GetSession(options))
             {
                 // We use Load operation and not queries to avoid stale results
-                var possibleIds = GetPossibleOutboxDocumentIds(messageId);
-                var docs = await session.LoadAsync<OutboxRecord>(possibleIds).ConfigureAwait(false);
-                result = docs.Values.FirstOrDefault(o => o != null);
+                var outboxDocId = GetOutboxRecordId(messageId);
+                result = await session.LoadAsync<OutboxRecord>(outboxDocId).ConfigureAwait(false);
             }
 
             if (result == null)
@@ -97,8 +95,7 @@
             {
                 session.Advanced.UseOptimisticConcurrency = true;
 
-                var docs = await session.LoadAsync<OutboxRecord>(GetPossibleOutboxDocumentIds(messageId)).ConfigureAwait(false);
-                var outboxMessage = docs.Values.FirstOrDefault(o => o != null);
+                var outboxMessage = await session.LoadAsync<OutboxRecord>(GetOutboxRecordId(messageId)).ConfigureAwait(false);
                 if (outboxMessage == null || outboxMessage.Dispatched)
                 {
                     return;
@@ -121,17 +118,6 @@
             }
 
             return documentStore.OpenAsyncSession();
-        }
-
-        string[] GetPossibleOutboxDocumentIds(string messageId)
-        {
-            return new[]
-            {
-                // Current format, already replaces \ with _
-                GetOutboxRecordId(messageId),
-                // Legacy format without endpoint id
-                $"Outbox/{messageId.Replace('\\', '_')}"
-            };
         }
 
         string GetOutboxRecordId(string messageId) => $"Outbox/{endpointName}/{messageId.Replace('\\', '_')}";
