@@ -5,6 +5,7 @@
     using Raven.Client.Documents;
     using Raven.Client.Documents.Session;
     using Sparrow.Json;
+    using Sparrow.Json.Parsing;
 
     static class UnwrappedSagaListener
     {
@@ -12,19 +13,6 @@
 
         public static void Register(DocumentStore store)
         {
-            var normalFindIdentityProperty = store.Conventions.FindIdentityProperty;
-
-            // TODO: Not cool that we MUST do this before Initialize(). Need to have a test for that, and perhaps a method that will make our modifications to the store before the host app calls Initialize
-            store.Conventions.FindIdentityProperty = memberInfo =>
-            {
-                if (typeof(IContainSagaData).IsAssignableFrom(memberInfo.DeclaringType))
-                {
-                    return false;
-                }
-
-                return normalFindIdentityProperty(memberInfo);
-            };
-
             store.OnBeforeConversionToEntity += OnBeforeConversionToEntity;
         }
 
@@ -40,28 +28,36 @@
 
                 if (args.Document.TryGetMember("@metadata", out var metadataObj))
                 {
-                    if (metadataObj is BlittableJsonReaderObject metadata && metadata.TryGetMember(Constants.Documents.Metadata.RavenClrType, out var lazyClrType) && metadata.TryGetMember(Constants.Documents.Metadata.Id, out var lazyId))
+                    if (metadataObj is BlittableJsonReaderObject metadata && metadata.TryGetMember(Constants.Documents.Metadata.RavenClrType, out var lazyClrType))
                     {
-                        if (lazyClrType is LazyStringValue clrType && lazyId is LazyStringValue)
+                        if (lazyClrType is LazyStringValue clrType)
                         {
                             if (clrType.ToString() != ContainerTypeName)
                             {
-                                var id = lazyId.ToString();
                                 var sagaType = Type.GetType(clrType.ToString());
 
-                                var sagaData = args.Session.DocumentStore.Conventions.DeserializeEntityFromBlittable(sagaType, args.Document) as IContainSagaData;
+                                var original = args.Document;
 
-                                var container = new SagaDataContainer
+                                var sagaData = new DynamicJsonValue(sagaType);
+                                foreach (var key in original.GetPropertyNames())
                                 {
-                                    Id = id,
-                                    IdentityDocId = null,
-                                    Data = sagaData
-                                };
+                                    if (key != "@metadata")
+                                    {
+                                        sagaData[key] = original[key];
+                                    }
+                                }
 
-                                var documentInfo = new DocumentInfo();
-                                documentInfo.Metadata = metadata;
+                                var document = new DynamicJsonValue();
+                                document["Id"] = args.Id;
+                                if (metadata.TryGetWithoutThrowingOnError("NServiceBus-UniqueDocId", out string identityDocId))
+                                {
+                                    document["IdentityDocId"] = identityDocId;
+                                }
+                                document["Data"] = sagaData;
 
-                                args.Document = args.Session.EntityToBlittable.ConvertEntityToBlittable(container, documentInfo);
+
+
+                                args.Document = args.Session.Context.ReadObject(document, args.Id);
                             }
                         }
                     }
