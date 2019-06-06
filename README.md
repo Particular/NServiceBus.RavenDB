@@ -8,7 +8,4 @@ If you are interested in contributing, please follow the instructions [here.](ht
 
 ## Running the tests
 
-You need RavenDB 3.0 running on port 8084 on your local machine in order to run the tests in the RavenDB.Tests and RavenDB.AcceptanceTests project.
-
-## Maintainers
-The following team is responsible for this repository: @Particular/ravendb-persistence-maintainers
+Running the tests requires RavenDB 4.2 and an environment variable named `CommaSeparatedRavenClusterUrls` containing the connection URLs, separated by commas if testing a cluster. The tests can be run with a RavenDB server hosted on a Docker container.
