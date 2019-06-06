@@ -80,7 +80,6 @@
         ///     message.
         /// </param>
         /// <returns>The configuration object.</returns>
-     //todo: obsolete
         public static PersistenceExtensions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IDictionary<string,string>, string> convention)
         {
             cfg.GetSettings().Set("RavenDB.SetMessageToDatabaseMappingConvention", convention);
