@@ -81,26 +81,17 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 documentSession.Advanced.Evict(lookup);
 
-                if (lookup.SagaDocId != null)
-                {
-                    // If we have a saga id we can just load it, should have been included in the round-trip already
-                    var container = await documentSession.LoadAsync<SagaDataContainer>(lookup.SagaDocId).ConfigureAwait(false);
+                // If we have a saga id we can just load it, should have been included in the round-trip already
+                var container = await documentSession.LoadAsync<SagaDataContainer>(lookup.SagaDocId).ConfigureAwait(false);
 
-                    if (container != null)
-                    {
-                        if (container.IdentityDocId == null)
-                        {
-                            container.IdentityDocId = lookupId;
-                        }
-                        context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
-                        return container.Data as T;
-                    }
-                }
-                else
+                if (container != null)
                 {
-                    // TODO: I (David) don't get this...
-                    //if not this is a saga that was created pre 3.0.4 so we fallback to a get instead
-                    return await Get<T>(lookup.SagaId, session, context).ConfigureAwait(false);
+                    if (container.IdentityDocId == null)
+                    {
+                        container.IdentityDocId = lookupId;
+                    }
+                    context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
+                    return container.Data as T;
                 }
             }
 
