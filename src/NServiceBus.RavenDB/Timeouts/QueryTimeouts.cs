@@ -91,8 +91,10 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 // This part is all an unexecuted Raven query expression - not sent to server until StreamAsync below.
                 var query = GetChunkQuery(session)
+                    .Statistics(out var stats)
                     .Where(t => t.Time > startSlice && t.Time <= now)
                     .Select(to => new { to.Id, to.Time }); // Must be anonymous type so Raven server can understand
+
 
                 using (var enumerator = await session.Advanced.StreamAsync(query, shutdownTokenSource.Token).ConfigureAwait(false))
                 {
@@ -128,13 +130,12 @@ namespace NServiceBus.Persistence.RavenDB
                     // We know when the next timeout will occur, so use that time. (Although Core will query again in 1 minute max)
                     nextTimeoutToExpire = nextTimeout.Time;
                 }
-                //TODO: Without QueryHeaderInformation in StreamAsync method above, how do we determine if results are stale?
-                //else if (qhi.Value.IsStale && results.Count == 0)
-                //{
-                //    // We know we got zero results and that the index is stale. We don't want to query in a tight loop,
-                //    // so just delay a few seconds to ease load on the server.
-                //    nextTimeoutToExpire = now.AddSeconds(10);
-                //}
+                else if (stats.IsStale && stats.TotalResults == 0)
+                {
+                    // We know we got zero results and that the index is stale. We don't want to query in a tight loop,
+                    // so just delay a few seconds to ease load on the server.
+                    nextTimeoutToExpire = now.AddSeconds(10);
+                }
             }
 
             logger.DebugFormat("Returning {0} timeouts, next due at {1:O}", results.Count, nextTimeoutToExpire);
