@@ -13,7 +13,7 @@ using Raven.Client.Documents.Session;
 using Raven.Client.Json;
 
 [TestFixture]
-class Raven3Sagas : RavenDBPersistenceTestBase
+class When_loading_Raven3_sagas : RavenDBPersistenceTestBase
 {
     protected override void CustomizeDocumentStore(IDocumentStore docStore)
     {
