@@ -91,7 +91,7 @@ namespace NServiceBus.Persistence.RavenDB
                         container.IdentityDocId = lookupId;
                     }
                     context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
-                    return container.Data as T;
+                    return (T)container.Data;
                 }
             }
 
