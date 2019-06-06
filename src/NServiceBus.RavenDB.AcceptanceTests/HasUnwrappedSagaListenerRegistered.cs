@@ -62,7 +62,6 @@
             // It's a bit of a hack to do this by reflection, but there's just no other way (other than complicated smoke test) to ensure that this behavior is inserted
             static bool ListenerIsRegistered(IDocumentStore store)
             {
-                var eventInfo = typeof(DocumentStore).GetEvent("OnBeforeConversionToEntity");
                 var eventField = typeof(DocumentStoreBase).GetField("OnBeforeConversionToEntity", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetField);
 
                 var eventDelegate = eventField.GetValue(store) as EventHandler<BeforeConversionToEntityEventArgs>;

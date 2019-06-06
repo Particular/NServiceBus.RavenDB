@@ -13,7 +13,8 @@ using Raven.Client.Documents.Session;
 using Raven.Client.Json;
 
 [TestFixture]
-class When_loading_Raven3_sagas : RavenDBPersistenceTestBase
+// This class name is important - it's simple to make it easier to insert fake Raven3.x-like saga data
+class Raven3Sagas : RavenDBPersistenceTestBase
 {
     protected override void CustomizeDocumentStore(IDocumentStore docStore)
     {
