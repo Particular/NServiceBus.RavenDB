@@ -50,6 +50,8 @@
                 return;
             }
 
+            UnwrappedSagaListener.Register(store);
+
             var isSendOnly = settings.GetOrDefault<bool>("Endpoint.SendOnly");
             if (!isSendOnly)
             {
