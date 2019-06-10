@@ -1,18 +1,25 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Abstractions.Data;
 using Raven.Client;
-using Raven.Client.Document;
-using Raven.Json.Linq;
+using Raven.Client.Documents;
+using Raven.Client.Documents.Commands;
+using Raven.Client.Documents.Session;
+using Raven.Client.Json;
 
 [TestFixture]
 class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBase
 {
+    protected override void CustomizeDocumentStore(IDocumentStore store)
+    {
+        UnwrappedSagaListener.Register(store as DocumentStore);
+    }
+
     [Test]
     public async Task It_should_load_successfully()
     {
@@ -24,7 +31,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         var options = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
 
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         var saga = await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options);
 
@@ -55,8 +62,9 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         };
 
         var sagaDocId = $"SagaWithUniqueProperty/{sagaId}";
+        var typeName = Regex.Replace(typeof(SagaWithUniqueProperty).AssemblyQualifiedName, ", Version=.*", "");
 
-        DirectStore(store, sagaDocId, saga, "SagaWithUniqueProperty", ReflectionUtil.GetFullNameWithoutVersionInformation(typeof(SagaWithUniqueProperty)), unique);
+        DirectStore(store, sagaDocId, saga, "SagaWithUniqueProperty", typeName, unique);
 
         var uniqueIdentity = new SagaUniqueIdentity
         {
@@ -71,13 +79,27 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
     static void DirectStore(IDocumentStore store, string id, object document, string entityName, string typeName, string uniqueValue = null)
     {
-        var jsonDoc = RavenJObject.FromObject(document);
-        var metadata = new RavenJObject();
-        metadata[Constants.RavenEntityName] = entityName;
-        metadata[Constants.RavenClrType] = typeName;
+        var documentInfo = new DocumentInfo
+        {
+            Collection = entityName,
+            MetadataInstance = new MetadataAsDictionary()
+        };
+
+        documentInfo.MetadataInstance[Constants.Documents.Metadata.RavenClrType] = typeName;
         if (uniqueValue != null)
-            metadata["NServiceBus-UniqueValue"] = uniqueValue;
+        {
+            documentInfo.MetadataInstance["NServiceBus-UniqueValue"] = uniqueValue;
+        }
+
         Console.WriteLine($"Creating {entityName}: {id}");
-        store.DatabaseCommands.Put(id, Etag.Empty, jsonDoc, metadata);
+        using (var session = store.OpenSession())
+        {
+            var blittableDoc = session.Advanced.EntityToBlittable.ConvertEntityToBlittable(document, documentInfo);
+            var command = new PutDocumentCommand(id, string.Empty, blittableDoc);
+            session.Advanced.RequestExecutor.Execute(command, session.Advanced.Context);
+            session.SaveChanges();
+        }
+
+
     }
 }

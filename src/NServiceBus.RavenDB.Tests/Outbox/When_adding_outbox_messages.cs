@@ -9,9 +9,9 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
-    using Raven.Abstractions.Exceptions;
-    using Raven.Client;
+    using Raven.Client.Documents;
     using Raven.Client.Exceptions;
+    using Raven.Client.Exceptions.Documents.Session;
 
     [TestFixture]
     public class When_adding_outbox_messages : RavenDBPersistenceTestBase
@@ -123,9 +123,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [TestCase("Outbox/")]
-        [TestCase("Outbox/TestEndpoint/")]
-        public async Task Should_get_messages_with_old_and_new_recordId_format(string outboxRecordIdPrefix)
+        [Test]
+        public async Task Should_get_messages()
         {
             var persister = new OutboxPersister(store, testEndpointName, CreateTestSessionOpener());
 
@@ -149,21 +148,20 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                         }
                     }
                 };
-                var fullDocumentId = outboxRecordIdPrefix + messageId;
+                var fullDocumentId = "Outbox/TestEndpoint/" + messageId;
                 await session.StoreAsync(newRecord, fullDocumentId);
 
                 await session.SaveChangesAsync();
             }
-            
+
             var result = await persister.Get(messageId, new ContextBag());
 
             Assert.NotNull(result);
             Assert.AreEqual(messageId, result.MessageId);
         }
 
-        [TestCase("Outbox/")]
-        [TestCase("Outbox/TestEndpoint/")]
-        public async Task Should_set_messages_as_dispatched_with_old_and_new_recordId_format(string outboxRecordIdPrefix)
+        [Test]
+        public async Task Should_set_messages_as_dispatched()
         {
             var persister = new OutboxPersister(store, testEndpointName, CreateTestSessionOpener());
 
@@ -186,7 +184,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                             Options = new Dictionary<string, string>()
                         }
                     }
-                }, outboxRecordIdPrefix + messageId);
+                }, "Outbox/TestEndpoint/" + messageId);
 
                 await session.SaveChangesAsync();
             }
@@ -195,12 +193,11 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             using (var session = OpenAsyncSession())
             {
-                var result = await session.LoadAsync<OutboxRecord>(outboxRecordIdPrefix + messageId);
+                var result = await session.LoadAsync<OutboxRecord>("Outbox/TestEndpoint/" + messageId);
 
                 Assert.NotNull(result);
                 Assert.True(result.Dispatched);
             }
-            
         }
 
         [Test]

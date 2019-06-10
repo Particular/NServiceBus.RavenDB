@@ -6,7 +6,6 @@ using NServiceBus.RavenDB.Tests;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 using NUnit.Framework;
-using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 
 [TestFixture]
 public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestBase
@@ -21,14 +20,12 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
         var subscriber_v1 = new Subscriber(subscriberAddress_v1, "some_endpoint_name");
         var subscriber_v2 = new Subscriber(subscriberAddress_v2, "another_endpoint_name");
 
-        var storage = new SubscriptionPersister(store)
-        {
-            SubscriptionIdFormatter = new NonVersionedSubscriptionIdFormatter()
-        };
+        var storage = new SubscriptionPersister(store);
+        storage.DisableAggressiveCaching = true;
 
         await storage.Subscribe(subscriber_v1, messageType_v1, new ContextBag());
         await storage.Subscribe(subscriber_v2, messageType_v2, new ContextBag());
- 
+
         var subscribers_looked_up_by_v1 = (await storage.GetSubscriberAddressesForMessage(new[]
         {
             messageType_v1
@@ -53,10 +50,8 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
         var subscriber_v1 = new Subscriber(subscriberAddress, endpointName);
         var subscriber_v2 = new Subscriber(subscriberAddress, endpointName);
 
-        var storage = new SubscriptionPersister(store)
-        {
-            SubscriptionIdFormatter = new NonVersionedSubscriptionIdFormatter()
-        };
+        var storage = new SubscriptionPersister(store);
+        storage.DisableAggressiveCaching = true;
 
         await storage.Subscribe(subscriber_v1, messageType_v1, new ContextBag());
 

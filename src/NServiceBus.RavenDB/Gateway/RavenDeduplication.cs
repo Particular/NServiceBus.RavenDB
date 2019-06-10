@@ -4,8 +4,8 @@
     using System.Threading.Tasks;
     using Extensibility;
     using NServiceBus.Gateway.Deduplication;
-    using Raven.Abstractions.Exceptions;
-    using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Exceptions;
 
     class RavenDeduplication : IDeduplicateMessages
     {
@@ -19,7 +19,6 @@
             using (var session = documentStore.OpenAsyncSession())
             {
                 session.Advanced.UseOptimisticConcurrency = true;
-                session.Advanced.AllowNonAuthoritativeInformation = false;
 
                 await session.StoreAsync(new GatewayMessage
                 {

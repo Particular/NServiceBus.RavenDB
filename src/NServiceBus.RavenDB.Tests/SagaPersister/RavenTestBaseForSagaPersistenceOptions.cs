@@ -1,7 +1,7 @@
 ﻿using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
-using Raven.Client;
+using Raven.Client.Documents.Session;
 
 static class RavenTestBaseForSagaPersistenceOptions
 {
@@ -15,7 +15,7 @@ static class RavenTestBaseForSagaPersistenceOptions
     public static RavenDBSynchronizedStorageSession CreateSynchronizedStorageSession(this RavenDBPersistenceTestBase testBase)
     {
         var session = testBase.OpenAsyncSession();
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
         return synchronizedSession;
     }
 }

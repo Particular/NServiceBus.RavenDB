@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System.Threading.Tasks;
-    using System.Transactions;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.Persistence;
@@ -13,25 +12,15 @@
 
         public Task<CompletableSynchronizedStorageSession> TryAdapt(OutboxTransaction transaction, ContextBag context)
         {
-            var ravenTransaction = transaction as RavenDBOutboxTransaction;
-            if (ravenTransaction != null)
-            {
-                CompletableSynchronizedStorageSession session = new RavenDBSynchronizedStorageSession(ravenTransaction.AsyncSession, false);
-                return Task.FromResult(session);
-            }
+            // Since RavenDB doesn't support System.Transactions (or have transactions), there's no way to adapt anything out of the Outbox transaction.
+            // Everything about the Raven session is controlled by OpenAsyncSessionBehavior.
             return EmptyResult;
         }
 
         public Task<CompletableSynchronizedStorageSession> TryAdapt(TransportTransaction transportTransaction, ContextBag context)
         {
-            // ReSharper disable once NotAccessedVariable - No way to just check for existence otherwise
-            Transaction ambientTransaction;
-            if (transportTransaction.TryGet(out ambientTransaction))
-            {
-                var session = context.GetAsyncSession();
-                CompletableSynchronizedStorageSession completableSynchronizedStorageSession = new RavenDBSynchronizedStorageSession(session, true);
-                return Task.FromResult(completableSynchronizedStorageSession);
-            }
+            // Since RavenDB doesn't support System.Transactions (or have transactions), there's no way to adapt anything out of the transport transaction.
+            // Everything about the Raven session is controlled by OpenAsyncSessionBehavior.
             return EmptyResult;
         }
     }

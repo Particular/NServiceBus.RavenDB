@@ -4,7 +4,7 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPersistenceTestBase
@@ -24,7 +24,7 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
                 SomeInt = 9
             }
         };
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
         await session.SaveChangesAsync().ConfigureAwait(false);
@@ -44,7 +44,7 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 

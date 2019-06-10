@@ -4,8 +4,18 @@
 
     class TestConstants
     {
-        public static string RavenUrl => Environment.GetEnvironmentVariable("RavenDbUrl") ?? "http://localhost:8084";
+        public static string[] RavenUrls
+        {
+            get
+            {
+                var urls = Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls");
+                if (urls == null)
+                {
+                    throw new Exception("RavenDB cluster URLs must be specified in an environment variable named CommaSeparatedRavenClusterUrls.");
+                }
 
-        public static string RavenApiKey => Environment.GetEnvironmentVariable("RavenDbApiKey");
+                return urls.Split(',');
+            }
+        }
     }
 }

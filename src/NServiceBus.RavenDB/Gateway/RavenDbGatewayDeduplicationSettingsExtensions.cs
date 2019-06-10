@@ -4,7 +4,7 @@
     using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
-    using Raven.Client;
+    using Raven.Client.Documents;
 
     /// <summary>
     ///     Configuration settings specific to the timeout storage

@@ -2,9 +2,9 @@
 {
     using System;
     using NServiceBus.Logging;
-    using Raven.Client;
-    using Raven.Client.Indexes;
-    using Raven.Json.Linq;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Indexes;
+    using Raven.Client.Documents.Operations.Indexes;
 
     class Helpers
     {
@@ -12,12 +12,7 @@
 
         static void LogRavenConnectionFailure(Exception exception, IDocumentStore store)
         {
-            var error = $@"RavenDB could not be contacted. We tried to access Raven using the following url: {store.Url}.
-Ensure that you can open the Raven Studio by navigating to {store.Url}.
-To configure NServiceBus to use a different Raven connection string add a connection string named ""NServiceBus.Persistence"" in the config file, example:
-<connectionStrings>
-    <add name=""NServiceBus.Persistence"" connectionString=""http://localhost:9090"" />
-</connectionStrings>
+            var error = $@"RavenDB could not be contacted. Check your DocumentStore configuration.
 Original exception: {exception}";
             Logger.Warn(error);
         }
@@ -26,8 +21,12 @@ Original exception: {exception}";
         {
             try
             {
-                documentStore.DatabaseCommands.Put("nsb/ravendb/testdocument", null, new RavenJObject(), new RavenJObject());
-                documentStore.DatabaseCommands.Delete("nsb/ravendb/testdocument", null);
+                using (var session = documentStore.OpenSession())
+                {
+                    session.Store(new object(), null, "nsb/ravendb/testdocument");
+                    session.Delete("nsb/ravendb/testdocument");
+                    session.SaveChanges();
+                }
             }
             catch (Exception e)
             {
@@ -51,7 +50,9 @@ Original exception: {exception}";
             }
             catch (Exception) // Apparently ArgumentException can be thrown as well as a WebException; not taking any chances
             {
-                var existingIndex = store.DatabaseCommands.GetIndex(index.IndexName);
+                var getIndexOp = new GetIndexOperation(index.IndexName);
+
+                var existingIndex = store.Maintenance.Send(getIndexOp);
                 if (existingIndex == null || !index.CreateIndexDefinition().Equals(existingIndex))
                     throw;
             }

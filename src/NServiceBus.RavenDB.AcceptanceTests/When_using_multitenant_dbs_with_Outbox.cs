@@ -10,7 +10,8 @@
     using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.Pipeline;
     using NUnit.Framework;
-    using Raven.Client.Document;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
 
     public class When_using_multitenant_dbs_with_Outbox : NServiceBusAcceptanceTest
     {
@@ -19,7 +20,7 @@
         {
             await RunTest(cfg =>
             {
-                cfg.PersistenceExtensions.SetMessageToDatabaseMappingConvention(headers => headers.TryGetValue("RavenDatabaseName", out var dbName) ? dbName : cfg.DefaultStore.DefaultDatabase);
+                cfg.PersistenceExtensions.SetMessageToDatabaseMappingConvention(headers => headers.TryGetValue("RavenDatabaseName", out var dbName) ? dbName : cfg.DefaultStore.Database);
             });
         }
 
@@ -50,11 +51,11 @@
                         var settings = cfg.GetSettings();
 
                         var defaultStore = ConfigureEndpointRavenDBPersistence.GetDefaultDocumentStore(settings);
-                        c.DefaultDb = defaultStore.DefaultDatabase;
+                        c.DefaultDb = defaultStore.Database;
                         c.DbConfig.DefaultStore = defaultStore;
 
-                        ConfigureEndpointRavenDBPersistence.GetInitializedDocumentStore(c.Db1);
-                        ConfigureEndpointRavenDBPersistence.GetInitializedDocumentStore(c.Db2);
+                        ConfigureEndpointRavenDBPersistence.CreateDatabase(defaultStore, c.Db1);
+                        ConfigureEndpointRavenDBPersistence.CreateDatabase(defaultStore, c.Db2);
 
                         c.DbConfig.PersistenceExtensions = ConfigureEndpointRavenDBPersistence.GetDefaultPersistenceExtensions(settings);
                         configureMultiTenant(c.DbConfig);

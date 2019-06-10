@@ -2,7 +2,7 @@
 {
     using System;
     using NServiceBus.Extensibility;
-    using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     static class ContextBagExtensions
     {

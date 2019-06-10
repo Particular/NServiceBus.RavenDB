@@ -7,10 +7,9 @@ namespace NServiceBus.Persistence.RavenDB
     using System.Threading.Tasks;
     using NServiceBus.Logging;
     using NServiceBus.Timeout.Core;
-    using Raven.Abstractions.Data;
-    using Raven.Abstractions.Extensions;
-    using Raven.Client;
-    using Raven.Client.Linq;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Linq;
+    using Raven.Client.Documents.Session;
     using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
     class QueryTimeouts : IQueryTimeouts
@@ -92,19 +91,15 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 // This part is all an unexecuted Raven query expression - not sent to server until StreamAsync below.
                 var query = GetChunkQuery(session)
+                    .Statistics(out var stats)
                     .Where(t => t.Time > startSlice && t.Time <= now)
                     .Select(to => new { to.Id, to.Time }); // Must be anonymous type so Raven server can understand
 
-                var qhi = new Reference<QueryHeaderInformation>();
-                using (var enumerator = await session.Advanced.StreamAsync(query, qhi).ConfigureAwait(false))
+
+                using (var enumerator = await session.Advanced.StreamAsync(query, shutdownTokenSource.Token).ConfigureAwait(false))
                 {
                     while (await enumerator.MoveNextAsync().ConfigureAwait(false))
                     {
-                        if (CancellationRequested())
-                        {
-                            return new TimeoutsChunk(EmptyTimeouts, nextTimeoutToExpire);
-                        }
-
                         var timeoutId = enumerator.Current.Document.Id;
                         var time = enumerator.Current.Document.Time;
 
@@ -116,6 +111,11 @@ namespace NServiceBus.Persistence.RavenDB
 
                         results.Add(new TimeoutsChunk.Timeout(timeoutId, time));
                     }
+                }
+
+                if (CancellationRequested())
+                {
+                    return new TimeoutsChunk(EmptyTimeouts, nextTimeoutToExpire);
                 }
 
                 var nextTimeout = await GetChunkQuery(session)
@@ -130,7 +130,7 @@ namespace NServiceBus.Persistence.RavenDB
                     // We know when the next timeout will occur, so use that time. (Although Core will query again in 1 minute max)
                     nextTimeoutToExpire = nextTimeout.Time;
                 }
-                else if (qhi.Value.IsStale && results.Count == 0)
+                else if (stats.IsStale && stats.TotalResults == 0)
                 {
                     // We know we got zero results and that the index is stale. We don't want to query in a tight loop,
                     // so just delay a few seconds to ease load on the server.
@@ -174,7 +174,6 @@ namespace NServiceBus.Persistence.RavenDB
 
         IRavenQueryable<TimeoutData> GetChunkQuery(IAsyncDocumentSession session)
         {
-            session.Advanced.AllowNonAuthoritativeInformation = true;
             return session.Query<TimeoutData, TimeoutsIndex>()
                 .OrderBy(t => t.Time)
                 .Where(
@@ -193,7 +192,7 @@ namespace NServiceBus.Persistence.RavenDB
         IDocumentStore documentStore;
 
         /// <summary>
-        /// RavenDB server default maximum page size 
+        /// RavenDB server default maximum page size
         /// </summary>
         int maximumPageSize = 1024;
         CancellationTokenSource shutdownTokenSource;

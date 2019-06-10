@@ -1,7 +1,7 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System.Collections.Generic;
-    using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     interface IOpenRavenSessionsInPipeline
     {

@@ -4,7 +4,7 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_persisting_a_saga_entity_with_an_Enum_property : RavenDBPersistenceTestBase
@@ -23,7 +23,7 @@ public class When_persisting_a_saga_entity_with_an_Enum_property : RavenDBPersis
 
         var context = this.CreateContextWithAsyncSessionPresent(out session);
         var persister = new SagaPersister();
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, context);
         await session.SaveChangesAsync().ConfigureAwait(false);
@@ -41,7 +41,7 @@ public class When_persisting_a_saga_entity_with_an_Enum_property : RavenDBPersis
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 

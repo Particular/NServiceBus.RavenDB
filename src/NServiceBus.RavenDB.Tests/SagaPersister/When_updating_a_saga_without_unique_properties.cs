@@ -4,7 +4,7 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_updating_a_saga_without_unique_properties : RavenDBPersistenceTestBase
@@ -25,7 +25,7 @@ public class When_updating_a_saga_without_unique_properties : RavenDBPersistence
             NonUniqueString = "notUnique"
         };
 
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, true);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
         await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), synchronizedSession, options);
         await session.SaveChangesAsync().ConfigureAwait(false);
@@ -46,7 +46,7 @@ public class When_updating_a_saga_without_unique_properties : RavenDBPersistence
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 

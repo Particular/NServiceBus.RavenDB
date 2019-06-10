@@ -1,13 +1,13 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Outbox;
     using NServiceBus.Transport;
-    using Raven.Client;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
     using TransportOperation = NServiceBus.Outbox.TransportOperation;
 
     class OutboxPersister : IOutboxStorage
@@ -24,12 +24,9 @@
             OutboxRecord result;
             using (var session = GetSession(options))
             {
-                session.Advanced.AllowNonAuthoritativeInformation = false;
-
                 // We use Load operation and not queries to avoid stale results
-                var possibleIds = GetPossibleOutboxDocumentIds(messageId);
-                var docs = await session.LoadAsync<OutboxRecord>(possibleIds).ConfigureAwait(false);
-                result = docs.FirstOrDefault(o => o != null);
+                var outboxDocId = GetOutboxRecordId(messageId);
+                result = await session.LoadAsync<OutboxRecord>(outboxDocId).ConfigureAwait(false);
             }
 
             if (result == null)
@@ -97,10 +94,8 @@
             using (var session = GetSession(options))
             {
                 session.Advanced.UseOptimisticConcurrency = true;
-                session.Advanced.AllowNonAuthoritativeInformation = false;
 
-                var docs = await session.LoadAsync<OutboxRecord>(GetPossibleOutboxDocumentIds(messageId)).ConfigureAwait(false);
-                var outboxMessage = docs.FirstOrDefault(o => o != null);
+                var outboxMessage = await session.LoadAsync<OutboxRecord>(GetOutboxRecordId(messageId)).ConfigureAwait(false);
                 if (outboxMessage == null || outboxMessage.Dispatched)
                 {
                     return;
@@ -123,17 +118,6 @@
             }
 
             return documentStore.OpenAsyncSession();
-        }
-
-        string[] GetPossibleOutboxDocumentIds(string messageId)
-        {
-            return new[]
-            {
-                // Current format, already replaces \ with _
-                GetOutboxRecordId(messageId),
-                // Legacy format without endpoint id
-                $"Outbox/{messageId.Replace('\\', '_')}"
-            };
         }
 
         string GetOutboxRecordId(string messageId) => $"Outbox/{endpointName}/{messageId.Replace('\\', '_')}";

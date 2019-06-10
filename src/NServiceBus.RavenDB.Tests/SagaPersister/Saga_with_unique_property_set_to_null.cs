@@ -4,7 +4,7 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
@@ -20,7 +20,7 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
 
         IAsyncDocumentSession session;
         var context = this.CreateContextWithAsyncSessionPresent(out session);
-        var ravenSession = new RavenDBSynchronizedStorageSession(session, true);
+        var ravenSession = new RavenDBSynchronizedStorageSession(session);
         var persister = new SagaPersister();
 
         var exception = await Catch<ArgumentNullException>(async () =>
@@ -41,7 +41,7 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 

@@ -1,7 +1,7 @@
 ﻿namespace NServiceBus.Testing
 {
     using Persistence;
-    using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     /// <summary>
     /// A fake implementation for <see cref="SynchronizedStorageSession"/> for testing purposes.

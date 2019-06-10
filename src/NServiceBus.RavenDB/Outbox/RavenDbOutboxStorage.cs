@@ -12,7 +12,6 @@
         public RavenDbOutboxStorage()
         {
             DependsOn<Outbox>();
-            DependsOn<SharedDocumentStore>();
         }
 
         protected override void Setup(FeatureConfigurationContext context)
@@ -46,9 +45,9 @@
 
                 if (frequencyToRunDeduplicationDataCleanup == Timeout.InfiniteTimeSpan)
                 {
-                    return TaskEx.CompletedTask;
+                    return Task.CompletedTask;
                 }
-                
+
                 timeToKeepDeduplicationData = settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
 
                 cancellationTokenSource = new CancellationTokenSource();
@@ -56,7 +55,7 @@
 
                 cleanupTask = Task.Run(() => PerformCleanup(), CancellationToken.None);
 
-                return TaskEx.CompletedTask;
+                return Task.CompletedTask;
             }
 
             protected override async Task OnStop(IMessageSession session)
