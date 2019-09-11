@@ -28,7 +28,7 @@
                 ApplyConventions(settings);
 
                 docStore.Initialize();
-                EnsureClusterConfiguration(docStore);
+                EnsureClusterConfiguration(docStore, settings);
             }
             isInitialized = true;
             return docStore;
@@ -63,8 +63,12 @@
             }
         }
 
-        void EnsureClusterConfiguration(IDocumentStore store)
+        void EnsureClusterConfiguration(IDocumentStore store, ReadOnlySettings settings)
         {
+            var skip = settings.GetOrDefault<bool>("RavenDB.DoNotEnsureClusterConfiguration");
+
+            if (skip) return;
+
             using (var s = store.OpenSession())
             {
                 var getTopologyCmd = new GetClusterTopologyCommand();

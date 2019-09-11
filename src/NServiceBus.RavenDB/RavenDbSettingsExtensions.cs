@@ -96,5 +96,16 @@
             cfg.GetSettings().Set("RavenDB.DoNotSetupPermissions", true);
             return cfg;
         }
+        
+        /// <summary>
+        ///     Tells the persister to not check cluster topology to ensure consistency
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <returns></returns>
+        public static PersistenceExtensions<RavenDBPersistence> DoNotEnsureClusterConfiguration(this PersistenceExtensions<RavenDBPersistence> cfg)
+        {
+            cfg.GetSettings().Set("RavenDB.DoNotEnsureClusterConfiguration", true);
+            return cfg;
+        }
     }
 }
