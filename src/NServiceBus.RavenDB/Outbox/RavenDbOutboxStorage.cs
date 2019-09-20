@@ -60,7 +60,7 @@
 
             protected override async Task OnStop(IMessageSession session)
             {
-                cancellationTokenSource.Cancel();
+                cancellationTokenSource?.Cancel();
 
                 if (cleanupTask == null)
                 {
