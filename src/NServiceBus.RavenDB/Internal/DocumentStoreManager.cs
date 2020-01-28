@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using NServiceBus.ObjectBuilder;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
 
@@ -43,7 +44,7 @@
 
         private static void SetDocumentStoreInternal(SettingsHolder settings, Type storageType, Func<ReadOnlySettings, IDocumentStore> storeCreator)
         {
-            var initContext = new DocumentStoreInitializer(storeCreator);
+            var initContext = new DocumentStoreInitializer((s, _) => storeCreator(s));
             settings.Set(featureSettingsKeys[storageType], initContext);
         }
 
@@ -53,7 +54,7 @@
             {
                 throw new ArgumentNullException(nameof(documentStore));
             }
-            SetDefaultStore(settings, s => documentStore);
+            SetDefaultStore(settings, (ReadOnlySettings s) => documentStore);
         }
 
         public static void SetDefaultStore(SettingsHolder settings, Func<ReadOnlySettings, IDocumentStore> storeCreator)
@@ -62,14 +63,24 @@
             {
                 throw new ArgumentNullException(nameof(storeCreator));
             }
-            var initContext = new DocumentStoreInitializer(storeCreator);
+            var initContext = new DocumentStoreInitializer((s, _) => storeCreator(s));
             settings.Set(defaultDocStoreSettingsKey, initContext);
         }
 
-        public static IDocumentStore GetDocumentStore<TStorageType>(ReadOnlySettings settings)
+        public static void SetDefaultStore(SettingsHolder settings, Func<IBuilder, IDocumentStore> storeCreator)
+        {
+            if (storeCreator == null)
+            {
+                throw new ArgumentNullException(nameof(storeCreator));
+            }
+            var initContext = new DocumentStoreInitializer((_, builder) => storeCreator(builder));
+            settings.Set(defaultDocStoreSettingsKey, initContext);
+        }
+
+        public static IDocumentStore GetDocumentStore<TStorageType>(ReadOnlySettings settings, IBuilder builder)
             where TStorageType : StorageType
         {
-            return GetUninitializedDocumentStore<TStorageType>(settings).Init(settings);
+            return GetUninitializedDocumentStore<TStorageType>(settings).Init(settings, builder);
         }
 
         internal static DocumentStoreInitializer GetUninitializedDocumentStore<TStorageType>(ReadOnlySettings settings)

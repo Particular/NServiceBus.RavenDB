@@ -6,6 +6,7 @@
     using NServiceBus.Features;
     using NServiceBus.Logging;
     using NServiceBus.Settings;
+    using Raven.Client.Documents;
 
     class RavenDbOutboxStorage : Feature
     {
@@ -16,31 +17,43 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings);
             var endpointName = context.Settings.EndpointName();
 
-            Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
+            context.Container.ConfigureComponent(b =>
+            {
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings, b);
+                return new OutboxPersister(store, endpointName, b.Build<IOpenRavenSessionsInPipeline>());
+            }, DependencyLifecycle.InstancePerCall);
 
-            context.Container.ConfigureComponent(b => new OutboxPersister(store, endpointName, b.Build<IOpenRavenSessionsInPipeline>()), DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(b =>
+            {
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings, b);
+                return new OutboxRecordsCleaner(store);
+            }, DependencyLifecycle.InstancePerCall);
 
-            context.Container.ConfigureComponent(b => new OutboxRecordsCleaner(store), DependencyLifecycle.InstancePerCall);
-
-            context.Container.ConfigureComponent<OutboxCleaner>(DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(b =>
+            {
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings, b);
+                return new OutboxCleaner(b.Build<OutboxRecordsCleaner>(), context.Settings, store);
+            }, DependencyLifecycle.InstancePerCall);
 
             context.RegisterStartupTask(builder => builder.Build<OutboxCleaner>());
         }
 
         class OutboxCleaner : FeatureStartupTask
         {
-            public OutboxCleaner(OutboxRecordsCleaner cleaner, ReadOnlySettings settings)
+            public OutboxCleaner(OutboxRecordsCleaner cleaner, ReadOnlySettings settings, IDocumentStore store)
             {
                 this.cleaner = cleaner;
                 this.settings = settings;
+                this.store = store;
                 logger = LogManager.GetLogger<OutboxCleaner>();
             }
 
             protected override Task OnStart(IMessageSession session)
             {
+                Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
+
                 frequencyToRunDeduplicationDataCleanup = settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
 
                 if (frequencyToRunDeduplicationDataCleanup == Timeout.InfiniteTimeSpan)
@@ -113,6 +126,7 @@
             CancellationTokenSource cancellationTokenSource;
             CancellationToken cancellationToken;
             ILog logger;
+            IDocumentStore store;
         }
     }
 }

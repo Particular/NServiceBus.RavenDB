@@ -3,18 +3,21 @@
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using NServiceBus.AcceptanceTests;
+    using NServiceBus.AcceptanceTesting;
     using NUnit.Framework;
     using NServiceBus.AcceptanceTesting.Customization;
+    using NServiceBus.Logging;
     using NServiceBus.ObjectBuilder;
 
-    public class When_providing_a_custom_document_store : NServiceBusAcceptanceTest
+    [TestFixture]
+    public class When_providing_a_custom_document_store
     {
-
         [Test]
-        [Ignore("Just documents the incorrect behaviour for now")]
         public void Should_not_resolve_until_start()
         {
+            // workaround to avoid NRE in the logging due to static caching of the loggers.
+            Scenario.Define<ScenarioContext>().Done(_ => true).Run();
+
             var endpointConfiguration = new EndpointConfiguration("custom-docstore-endpoint");
 
             var typesToInclude = new List<Type> { typeof(MySaga) };
@@ -27,13 +30,12 @@
             endpointConfiguration.EnableOutbox();
 
             endpointConfiguration.UsePersistence<RavenDBPersistence>()
-                    .SetDefaultDocumentStore(_ =>
+                    .SetDefaultDocumentStore((IBuilder builder) =>
                     {
                         Assert.Fail("Document store resolved to early");
 
                         return null;
                     });
-
 
             EndpointWithExternallyManagedContainer.Create(endpointConfiguration, new FakeContainerRegistration());
         }
