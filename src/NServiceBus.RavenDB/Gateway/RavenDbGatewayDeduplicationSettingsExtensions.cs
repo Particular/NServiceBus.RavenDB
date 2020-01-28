@@ -16,6 +16,10 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <param name="documentStore">The document store to use</param>
+        [ObsoleteEx(
+            Message = "RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB dedicated package.",
+            RemoveInVersion = "9.0.0",
+            TreatAsErrorFromVersion = "7.0.0")]
         public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this PersistenceExtensions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
             DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(cfg.GetSettings(), documentStore);
@@ -27,6 +31,10 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
+        [ObsoleteEx(
+            Message = "RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB dedicated package.",
+            RemoveInVersion = "9.0.0",
+            TreatAsErrorFromVersion = "7.0.0")]
         public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IDocumentStore> storeCreator)
         {
             DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(cfg.GetSettings(), storeCreator);
