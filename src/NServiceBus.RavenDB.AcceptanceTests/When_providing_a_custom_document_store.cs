@@ -6,7 +6,6 @@
     using NServiceBus.AcceptanceTesting;
     using NUnit.Framework;
     using NServiceBus.AcceptanceTesting.Customization;
-    using NServiceBus.Logging;
     using NServiceBus.ObjectBuilder;
 
     [TestFixture]
