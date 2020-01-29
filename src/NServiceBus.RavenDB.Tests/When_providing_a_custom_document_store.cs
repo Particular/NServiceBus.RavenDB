@@ -1,11 +1,8 @@
-﻿namespace NServiceBus.RavenDB.AcceptanceTests
+﻿namespace NServiceBus.RavenDB.Tests
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
-    using NServiceBus.AcceptanceTesting;
     using NUnit.Framework;
-    using NServiceBus.AcceptanceTesting.Customization;
     using NServiceBus.ObjectBuilder;
 
     [TestFixture]
@@ -14,18 +11,10 @@
         [Test]
         public void Should_not_resolve_until_start()
         {
-            // workaround to avoid NRE in the logging due to static caching of the loggers.
-            Scenario.Define<ScenarioContext>().Done(_ => true).Run();
-
             var endpointConfiguration = new EndpointConfiguration("custom-docstore-endpoint");
 
-            var typesToInclude = new List<Type> { typeof(MySaga) };
-
-            //need to include the NServiceBus.RavenDB types since the features need to be discovered
-            typesToInclude.AddRange(typeof(RavenDBPersistence).Assembly.GetTypes());
-
-            endpointConfiguration.TypesToIncludeInScan(typesToInclude);
-            endpointConfiguration.UseTransport<AcceptanceTestingTransport>();
+            endpointConfiguration.AssemblyScanner().ExcludeAssemblies("NServiceBus.RavenDB.Tests");
+            endpointConfiguration.UseTransport<LearningTransport>();
             endpointConfiguration.EnableOutbox();
 
             endpointConfiguration.UsePersistence<RavenDBPersistence>()
