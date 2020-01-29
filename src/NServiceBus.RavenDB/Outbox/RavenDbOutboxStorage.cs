@@ -6,7 +6,6 @@
     using NServiceBus.Features;
     using NServiceBus.Logging;
     using NServiceBus.Settings;
-    using Raven.Client.Documents;
 
     class RavenDbOutboxStorage : Feature
     {
@@ -18,6 +17,9 @@
         protected override void Setup(FeatureConfigurationContext context)
         {
             var endpointName = context.Settings.EndpointName();
+
+            DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Outbox>(context.Settings)
+                .SafelyCreateIndex(new OutboxRecordsIndex());
 
             context.Container.ConfigureComponent(b =>
             {
@@ -31,29 +33,22 @@
                 return new OutboxRecordsCleaner(store);
             }, DependencyLifecycle.InstancePerCall);
 
-            context.Container.ConfigureComponent(b =>
-            {
-                var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings, b);
-                return new OutboxCleaner(b.Build<OutboxRecordsCleaner>(), context.Settings, store);
-            }, DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(b => new OutboxCleaner(b.Build<OutboxRecordsCleaner>(), context.Settings), DependencyLifecycle.InstancePerCall);
 
             context.RegisterStartupTask(builder => builder.Build<OutboxCleaner>());
         }
 
         class OutboxCleaner : FeatureStartupTask
         {
-            public OutboxCleaner(OutboxRecordsCleaner cleaner, ReadOnlySettings settings, IDocumentStore store)
+            public OutboxCleaner(OutboxRecordsCleaner cleaner, ReadOnlySettings settings)
             {
                 this.cleaner = cleaner;
                 this.settings = settings;
-                this.store = store;
                 logger = LogManager.GetLogger<OutboxCleaner>();
             }
 
             protected override Task OnStart(IMessageSession session)
             {
-                Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
-
                 frequencyToRunDeduplicationDataCleanup = settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
 
                 if (frequencyToRunDeduplicationDataCleanup == Timeout.InfiniteTimeSpan)
@@ -126,7 +121,6 @@
             CancellationTokenSource cancellationTokenSource;
             CancellationToken cancellationToken;
             ILog logger;
-            IDocumentStore store;
         }
     }
 }

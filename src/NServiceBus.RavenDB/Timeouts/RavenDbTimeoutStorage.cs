@@ -2,7 +2,6 @@
 {
     using System.Threading.Tasks;
     using NServiceBus.Features;
-    using Raven.Client.Documents;
 
     class RavenDbTimeoutStorage : Feature
     {
@@ -14,6 +13,8 @@
         protected override void Setup(FeatureConfigurationContext context)
         {
             //var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings);
+            DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Timeouts>(context.Settings)
+                .SafelyCreateIndex(new TimeoutsIndex());
 
             context.Container.ConfigureComponent(b =>
             {
@@ -27,26 +28,19 @@
                 return new QueryTimeouts(store, context.Settings.EndpointName());
             }, DependencyLifecycle.SingleInstance); // Needs to be SingleInstance because it contains cleanup state
 
-            context.Container.ConfigureComponent(b =>
-            {
-                var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings, b);
-                return new QueryCanceller(b.Build<QueryTimeouts>(), store);
-            },DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(typeof(QueryCanceller), DependencyLifecycle.InstancePerCall);
             context.RegisterStartupTask(b => b.Build<QueryCanceller>());
         }
 
         class QueryCanceller : FeatureStartupTask
         {
-            public QueryCanceller(QueryTimeouts queryTimeouts, IDocumentStore store)
+            public QueryCanceller(QueryTimeouts queryTimeouts)
             {
                 this.queryTimeouts = queryTimeouts;
-                this.store = store;
             }
 
             protected override Task OnStart(IMessageSession session)
             {
-                Helpers.SafelyCreateIndex(store, new TimeoutsIndex());
-
                 return Task.CompletedTask;
             }
 
@@ -57,7 +51,6 @@
             }
 
             QueryTimeouts queryTimeouts;
-            readonly IDocumentStore store;
         }
     }
 }
