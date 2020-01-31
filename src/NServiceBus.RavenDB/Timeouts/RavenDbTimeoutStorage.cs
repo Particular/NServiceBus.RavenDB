@@ -14,7 +14,7 @@
         {
             //var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings);
             DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Timeouts>(context.Settings)
-                .SafelyCreateIndex(new TimeoutsIndex());
+                .CreateIndexOnInitialization(new TimeoutsIndex());
 
             context.Container.ConfigureComponent(b =>
             {

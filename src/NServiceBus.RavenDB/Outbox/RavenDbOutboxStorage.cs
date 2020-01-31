@@ -19,7 +19,7 @@
             var endpointName = context.Settings.EndpointName();
 
             DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Outbox>(context.Settings)
-                .SafelyCreateIndex(new OutboxRecordsIndex());
+                .CreateIndexOnInitialization(new OutboxRecordsIndex());
 
             context.Container.ConfigureComponent(b =>
             {

@@ -29,7 +29,7 @@
         /// and undocumented possibilities of failure.
         /// Will throw iff index registration failed and index doesn't exist or it exists but with a non-current definition.
         /// </summary>
-        internal void SafelyCreateIndex(AbstractIndexCreationTask index)
+        internal void CreateIndexOnInitialization(AbstractIndexCreationTask index)
         {
             indexesToCreate.Add(index);
         }
