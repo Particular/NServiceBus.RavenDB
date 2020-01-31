@@ -15,7 +15,6 @@
         internal const string DoNotAggressivelyCacheSubscriptionsSettingsKey = "RavenDB.DoNotAggressivelyCacheSubscriptions";
         internal const string AggressiveCacheDurationSettingsKey = "RavenDB.AggressiveCacheDuration";
 
-        //TODO fix these too
         /// <summary>
         ///     Configures the given document store to be used when storing subscriptions
         /// </summary>
