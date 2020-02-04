@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Gateway.AcceptanceTests
 {
     using NServiceBus.AcceptanceTesting.Support;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using System.Threading.Tasks;
 
     public partial class GatewayTestSuiteConstraints
@@ -16,7 +17,8 @@
                 .DoNotSetupDatabasePermissions()
                 .SetDefaultDocumentStore(documentStore);
 
-            configuration.Gateway();
+            var gatewaySettings = configuration.Gateway();
+            configuration.GetSettings().Set(gatewaySettings);
 
             return Task.FromResult(false);
         }
