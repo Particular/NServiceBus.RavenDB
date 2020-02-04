@@ -33,7 +33,7 @@
                 return new OutboxRecordsCleaner(store);
             }, DependencyLifecycle.InstancePerCall);
 
-            context.Container.ConfigureComponent(b => new OutboxCleaner(b.Build<OutboxRecordsCleaner>(), context.Settings), DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent<OutboxCleaner>(DependencyLifecycle.InstancePerCall);
 
             context.RegisterStartupTask(builder => builder.Build<OutboxCleaner>());
         }
