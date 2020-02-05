@@ -18,7 +18,7 @@
             endpointConfiguration.EnableOutbox();
 
             endpointConfiguration.UsePersistence<RavenDBPersistence>()
-                    .SetDefaultDocumentStore((IBuilder builder) =>
+                    .SetDefaultDocumentStore((_, __) =>
                     {
                         Assert.Fail("Document store resolved to early");
 

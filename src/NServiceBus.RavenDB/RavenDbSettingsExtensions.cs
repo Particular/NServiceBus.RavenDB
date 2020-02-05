@@ -46,7 +46,7 @@
         /// <param name="cfg"></param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
         /// <returns></returns>
-        public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IBuilder, IDocumentStore> storeCreator)
+        public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator)
         {
             DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), storeCreator);
             return cfg;

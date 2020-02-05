@@ -42,14 +42,14 @@
             SetDocumentStoreInternal(settings, typeof(TStorageType), (s, _) => storeCreator(s));
         }
 
-        public static void SetDocumentStore<TStorageType>(SettingsHolder settings, Func<IBuilder, IDocumentStore> storeCreator)
+        public static void SetDocumentStore<TStorageType>(SettingsHolder settings, Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator)
             where TStorageType : StorageType
         {
             if (storeCreator == null)
             {
                 throw new ArgumentNullException(nameof(storeCreator));
             }
-            SetDocumentStoreInternal(settings, typeof(TStorageType), (_, b) => storeCreator(b));
+            SetDocumentStoreInternal(settings, typeof(TStorageType), storeCreator);
         }
 
         static void SetDocumentStoreInternal(SettingsHolder settings, Type storageType, Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator)
@@ -76,13 +76,13 @@
             SetDefaultStoreInternal(settings, (s, _) => storeCreator(s));
         }
 
-        public static void SetDefaultStore(SettingsHolder settings, Func<IBuilder, IDocumentStore> storeCreator)
+        public static void SetDefaultStore(SettingsHolder settings, Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator)
         {
             if (storeCreator == null)
             {
                 throw new ArgumentNullException(nameof(storeCreator));
             }
-            SetDefaultStoreInternal(settings, (_, b) => storeCreator(b));
+            SetDefaultStoreInternal(settings, storeCreator);
         }
 
         static void SetDefaultStoreInternal(SettingsHolder settings, Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator)
