@@ -2,6 +2,7 @@
 {
     using System;
     using NServiceBus.Configuration.AdvancedExtensibility;
+    using NServiceBus.ObjectBuilder;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
@@ -34,6 +35,16 @@
             DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(cfg.GetSettings(), storeCreator);
             return cfg;
         }
-        
+
+        /// <summary>
+        ///     Configures the given document store to be used when storing sagas
+        /// </summary>
+        /// <param name="cfg">Object to attach to</param>
+        /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
+        public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForSagas(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IBuilder, IDocumentStore> storeCreator)
+        {
+            DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(cfg.GetSettings(), storeCreator);
+            return cfg;
+        }
     }
 }

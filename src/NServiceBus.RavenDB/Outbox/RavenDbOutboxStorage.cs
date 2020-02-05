@@ -16,14 +16,22 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings);
             var endpointName = context.Settings.EndpointName();
 
-            Helpers.SafelyCreateIndex(store, new OutboxRecordsIndex());
+            DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Outbox>(context.Settings)
+                .CreateIndexOnInitialization(new OutboxRecordsIndex());
 
-            context.Container.ConfigureComponent(b => new OutboxPersister(store, endpointName, b.Build<IOpenRavenSessionsInPipeline>()), DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(b =>
+            {
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings, b);
+                return new OutboxPersister(store, endpointName, b.Build<IOpenRavenSessionsInPipeline>());
+            }, DependencyLifecycle.InstancePerCall);
 
-            context.Container.ConfigureComponent(b => new OutboxRecordsCleaner(store), DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(b =>
+            {
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings, b);
+                return new OutboxRecordsCleaner(store);
+            }, DependencyLifecycle.InstancePerCall);
 
             context.Container.ConfigureComponent<OutboxCleaner>(DependencyLifecycle.InstancePerCall);
 

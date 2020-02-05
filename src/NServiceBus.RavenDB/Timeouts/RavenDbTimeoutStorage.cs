@@ -12,14 +12,23 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings);
+            //var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings);
+            DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Timeouts>(context.Settings)
+                .CreateIndexOnInitialization(new TimeoutsIndex());
 
-            Helpers.SafelyCreateIndex(store, new TimeoutsIndex());
+            context.Container.ConfigureComponent(b =>
+            {
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings, b);
+                return new TimeoutPersister(store);
+            }, DependencyLifecycle.InstancePerCall);
 
-            context.Container.ConfigureComponent(() => new TimeoutPersister(store), DependencyLifecycle.InstancePerCall);
-            context.Container.ConfigureComponent(() => new QueryTimeouts(store, context.Settings.EndpointName()), DependencyLifecycle.SingleInstance); // Needs to be SingleInstance because it contains cleanup state
+            context.Container.ConfigureComponent(b =>
+            {
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings, b);
+                return new QueryTimeouts(store, context.Settings.EndpointName());
+            }, DependencyLifecycle.SingleInstance); // Needs to be SingleInstance because it contains cleanup state
 
-            context.Container.ConfigureComponent<QueryCanceller>(DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(typeof(QueryCanceller), DependencyLifecycle.InstancePerCall);
             context.RegisterStartupTask(b => b.Build<QueryCanceller>());
         }
 

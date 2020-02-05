@@ -13,21 +13,24 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            var store = DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(context.Settings);
-
-            var persister = new SubscriptionPersister(store);
-
-            if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DoNotAggressivelyCacheSubscriptionsSettingsKey))
+            context.Container.ConfigureComponent<ISubscriptionStorage>(b =>
             {
-                persister.DisableAggressiveCaching = true;
-            }
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(context.Settings, b);
 
-            if (context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.AggressiveCacheDurationSettingsKey, out TimeSpan aggressiveCacheDuration))
-            {
-                persister.AggressiveCacheDuration = aggressiveCacheDuration;
-            }
+                var persister = new SubscriptionPersister(store);
 
-            context.Container.ConfigureComponent<ISubscriptionStorage>(_ => persister, DependencyLifecycle.SingleInstance);
+                if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DoNotAggressivelyCacheSubscriptionsSettingsKey))
+                {
+                    persister.DisableAggressiveCaching = true;
+                }
+
+                if (context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.AggressiveCacheDurationSettingsKey, out TimeSpan aggressiveCacheDuration))
+                {
+                    persister.AggressiveCacheDuration = aggressiveCacheDuration;
+                }
+
+                return persister;
+            }, DependencyLifecycle.SingleInstance);
         }
 
         static readonly ILog Log = LogManager.GetLogger<RavenDbSubscriptionStorage>();

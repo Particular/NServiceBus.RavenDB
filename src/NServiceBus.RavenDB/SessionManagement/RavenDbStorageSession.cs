@@ -12,26 +12,31 @@
             context.Container.ConfigureComponent<RavenDBSynchronizedStorageAdapter>(DependencyLifecycle.SingleInstance);
             context.Container.ConfigureComponent<RavenDBSynchronizedStorage>(DependencyLifecycle.SingleInstance);
 
-            IOpenRavenSessionsInPipeline sessionCreator;
-
             // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
             var getAsyncSessionFunc = context.Settings.GetOrDefault<Func<IDictionary<string, string>, IAsyncDocumentSession>>(RavenDbSettingsExtensions.SharedAsyncSessionSettingsKey);
 
             if (getAsyncSessionFunc != null)
             {
-                sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc);
+                IOpenRavenSessionsInPipeline sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc);
+                context.Container.RegisterSingleton(sessionCreator);
             }
             else
             {
-                var store = DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(context.Settings);
-                var storeWrapper = new DocumentStoreWrapper(store);
+                context.Container.ConfigureComponent<IOpenRavenSessionsInPipeline>(b =>
+                {
+                    var store = DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(context.Settings, b);
+                    var storeWrapper = new DocumentStoreWrapper(store);
 
-                var dbNameConvention = context.Settings.GetOrDefault<Func<IDictionary<string, string>, string>>("RavenDB.SetMessageToDatabaseMappingConvention");
-                sessionCreator = new OpenRavenSessionByDatabaseName(storeWrapper, dbNameConvention);
+                    var dbNameConvention = context.Settings.GetOrDefault<Func<IDictionary<string, string>, string>>("RavenDB.SetMessageToDatabaseMappingConvention");
+                    return new OpenRavenSessionByDatabaseName(storeWrapper, dbNameConvention);
+                }, DependencyLifecycle.SingleInstance);
             }
 
-            context.Container.RegisterSingleton(sessionCreator);
-            context.Pipeline.Register("OpenRavenDbAsyncSession", new OpenAsyncSessionBehavior(sessionCreator), "Makes sure that there is a RavenDB IAsyncDocumentSession available on the pipeline");
+            context.Pipeline.Register("OpenRavenDbAsyncSession", b =>
+            {
+                var sessionCreator = b.Build<IOpenRavenSessionsInPipeline>();
+                return new OpenAsyncSessionBehavior(sessionCreator);
+            }, "Makes sure that there is a RavenDB IAsyncDocumentSession available on the pipeline");
         }
     }
 }

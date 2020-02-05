@@ -11,9 +11,11 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            var store = DocumentStoreManager.GetDocumentStore<StorageType.GatewayDeduplication>(context.Settings);
-
-            context.Container.ConfigureComponent(b=>new RavenDeduplication(store), DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent(builder =>
+            {
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.GatewayDeduplication>(context.Settings, builder);
+                return new RavenDeduplication(store);
+            }, DependencyLifecycle.SingleInstance);
         }
     }
 }

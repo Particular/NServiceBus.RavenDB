@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using NServiceBus.ObjectBuilder;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
 
@@ -28,7 +29,7 @@
             {
                 throw new ArgumentNullException(nameof(documentStore));
             }
-            SetDocumentStoreInternal(settings, typeof(TStorageType), s => documentStore);
+            SetDocumentStoreInternal(settings, typeof(TStorageType), (_, __) => documentStore);
         }
 
         public static void SetDocumentStore<TStorageType>(SettingsHolder settings, Func<ReadOnlySettings, IDocumentStore> storeCreator)
@@ -38,10 +39,20 @@
             {
                 throw new ArgumentNullException(nameof(storeCreator));
             }
-            SetDocumentStoreInternal(settings, typeof(TStorageType), storeCreator);
+            SetDocumentStoreInternal(settings, typeof(TStorageType), (s, _) => storeCreator(s));
         }
 
-        private static void SetDocumentStoreInternal(SettingsHolder settings, Type storageType, Func<ReadOnlySettings, IDocumentStore> storeCreator)
+        public static void SetDocumentStore<TStorageType>(SettingsHolder settings, Func<IBuilder, IDocumentStore> storeCreator)
+            where TStorageType : StorageType
+        {
+            if (storeCreator == null)
+            {
+                throw new ArgumentNullException(nameof(storeCreator));
+            }
+            SetDocumentStoreInternal(settings, typeof(TStorageType), (_, b) => storeCreator(b));
+        }
+
+        static void SetDocumentStoreInternal(SettingsHolder settings, Type storageType, Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator)
         {
             var initContext = new DocumentStoreInitializer(storeCreator);
             settings.Set(featureSettingsKeys[storageType], initContext);
@@ -53,7 +64,7 @@
             {
                 throw new ArgumentNullException(nameof(documentStore));
             }
-            SetDefaultStore(settings, s => documentStore);
+            SetDefaultStoreInternal(settings, (_, __) => documentStore);
         }
 
         public static void SetDefaultStore(SettingsHolder settings, Func<ReadOnlySettings, IDocumentStore> storeCreator)
@@ -62,14 +73,28 @@
             {
                 throw new ArgumentNullException(nameof(storeCreator));
             }
+            SetDefaultStoreInternal(settings, (s, _) => storeCreator(s));
+        }
+
+        public static void SetDefaultStore(SettingsHolder settings, Func<IBuilder, IDocumentStore> storeCreator)
+        {
+            if (storeCreator == null)
+            {
+                throw new ArgumentNullException(nameof(storeCreator));
+            }
+            SetDefaultStoreInternal(settings, (_, b) => storeCreator(b));
+        }
+
+        static void SetDefaultStoreInternal(SettingsHolder settings, Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator)
+        {
             var initContext = new DocumentStoreInitializer(storeCreator);
             settings.Set(defaultDocStoreSettingsKey, initContext);
         }
 
-        public static IDocumentStore GetDocumentStore<TStorageType>(ReadOnlySettings settings)
+        public static IDocumentStore GetDocumentStore<TStorageType>(ReadOnlySettings settings, IBuilder builder)
             where TStorageType : StorageType
         {
-            return GetUninitializedDocumentStore<TStorageType>(settings).Init(settings);
+            return GetUninitializedDocumentStore<TStorageType>(settings).Init(settings, builder);
         }
 
         internal static DocumentStoreInitializer GetUninitializedDocumentStore<TStorageType>(ReadOnlySettings settings)

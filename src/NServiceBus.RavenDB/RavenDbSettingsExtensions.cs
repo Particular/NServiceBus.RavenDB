@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using NServiceBus.Configuration.AdvancedExtensibility;
+    using NServiceBus.ObjectBuilder;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
@@ -34,6 +35,18 @@
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
         /// <returns></returns>
         public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IDocumentStore> storeCreator)
+        {
+            DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), storeCreator);
+            return cfg;
+        }
+
+        /// <summary>
+        ///     Configures the storages to use the given document store supplied
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
+        /// <returns></returns>
+        public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IBuilder, IDocumentStore> storeCreator)
         {
             DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), storeCreator);
             return cfg;

@@ -29,11 +29,11 @@
 
                 var readOnly = settings as ReadOnlySettings;
 
-                Assert.AreEqual("GatewayDeduplication", DocumentStoreManager.GetDocumentStore<StorageType.GatewayDeduplication>(readOnly).Identifier);
-                Assert.AreEqual("Outbox", DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(readOnly).Identifier);
-                Assert.AreEqual("Sagas", DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(readOnly).Identifier);
-                Assert.AreEqual("Subscriptions", DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(readOnly).Identifier);
-                Assert.AreEqual("Timeouts", DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(readOnly).Identifier);
+                Assert.AreEqual("GatewayDeduplication", DocumentStoreManager.GetDocumentStore<StorageType.GatewayDeduplication>(readOnly, null).Identifier);
+                Assert.AreEqual("Outbox", DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(readOnly, null).Identifier);
+                Assert.AreEqual("Sagas", DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(readOnly, null).Identifier);
+                Assert.AreEqual("Subscriptions", DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(readOnly, null).Identifier);
+                Assert.AreEqual("Timeouts", DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(readOnly, null).Identifier);
             }
         }
     }
