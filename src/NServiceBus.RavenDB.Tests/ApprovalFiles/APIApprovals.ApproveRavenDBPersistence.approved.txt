@@ -25,6 +25,15 @@ namespace NServiceBus.Persistence.RavenDB
 }
 namespace NServiceBus
 {
+    public class static RavenDBOutboxExtensions
+    {
+        public static NServiceBus.EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this NServiceBus.EndpointConfiguration configuration, System.TimeSpan frequencyToRunDeduplicationDataCleanup) { }
+        public static NServiceBus.EndpointConfiguration SetTimeToKeepDeduplicationData(this NServiceBus.EndpointConfiguration configuration, System.TimeSpan timeToKeepDeduplicationData) { }
+    }
+    public class RavenDBPersistence : NServiceBus.Persistence.PersistenceDefinition
+    {
+        public RavenDBPersistence() { }
+    }
     public class static RavenDbGatewayDeduplicationSettingsExtensions
     {
         [System.ObsoleteAttribute("RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB ded" +
@@ -36,15 +45,6 @@ namespace NServiceBus
             "in version 8.0.0.", false)]
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, NServiceBus.ObjectBuilder.IBuilder, Raven.Client.Documents.IDocumentStore> storeCreator) { }
-    }
-    public class static RavenDBOutboxExtensions
-    {
-        public static NServiceBus.EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this NServiceBus.EndpointConfiguration configuration, System.TimeSpan frequencyToRunDeduplicationDataCleanup) { }
-        public static NServiceBus.EndpointConfiguration SetTimeToKeepDeduplicationData(this NServiceBus.EndpointConfiguration configuration, System.TimeSpan timeToKeepDeduplicationData) { }
-    }
-    public class RavenDBPersistence : NServiceBus.Persistence.PersistenceDefinition
-    {
-        public RavenDBPersistence() { }
     }
     public class static RavenDbSagaSettingsExtensions
     {
