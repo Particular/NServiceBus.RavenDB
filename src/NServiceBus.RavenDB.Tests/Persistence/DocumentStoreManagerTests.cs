@@ -75,7 +75,7 @@
             settings.Set("NServiceBus.LocalAddress", "FakeAddress");
             settings.Set("EndpointVersion", "FakeVersion");
             settings.Set("NServiceBus.Routing.EndpointName", "FakeEndpoint");
-            settings.Set<SingleSharedDocumentStore>(new SingleSharedDocumentStore());
+            settings.Set(new SingleSharedDocumentStore());
 
             return settings;
         }
