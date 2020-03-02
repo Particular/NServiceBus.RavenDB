@@ -16,9 +16,9 @@ using Raven.Client.Json;
 // This class name is important - it's simple to make it easier to insert fake Raven3.x-like saga data
 class Raven3Sagas : RavenDBPersistenceTestBase
 {
-    protected override void CustomizeDocumentStore(IDocumentStore docStore)
+    protected override void CustomizeDocumentStore(DocumentStore docStore)
     {
-        UnwrappedSagaListener.Register(docStore as DocumentStore);
+        UnwrappedSagaListener.Register(docStore);
     }
 
     [Test]

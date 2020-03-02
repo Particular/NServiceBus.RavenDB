@@ -15,9 +15,9 @@ using Raven.Client.Json;
 [TestFixture]
 class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBase
 {
-    protected override void CustomizeDocumentStore(IDocumentStore store)
+    protected override void CustomizeDocumentStore(DocumentStore store)
     {
-        UnwrappedSagaListener.Register(store as DocumentStore);
+        UnwrappedSagaListener.Register(store);
     }
 
     [Test]

@@ -31,7 +31,7 @@
             Console.WriteLine($"Provisioned new Raven database name {databaseName}");
         }
 
-        public IDocumentStore NewStore(string identifier = null)
+        public DocumentStore NewStore(string identifier = null)
         {
             Console.WriteLine();
             Console.WriteLine($"Creating new DocumentStore for {databaseName}");
@@ -45,7 +45,7 @@
             return store;
         }
 
-        private IDocumentStore CreateStore()
+        private DocumentStore CreateStore()
         {
             return new DocumentStore
             {

@@ -20,7 +20,7 @@
             this.store = docStore;
         }
 
-        protected virtual void CustomizeDocumentStore(IDocumentStore docStore)
+        protected virtual void CustomizeDocumentStore(DocumentStore docStore)
         {
         }
 
@@ -68,7 +68,7 @@
         }
 
         List<IAsyncDocumentSession> sessions = new List<IAsyncDocumentSession>();
-        protected IDocumentStore store;
+        protected DocumentStore store;
         ReusableDB db;
 
         internal IOpenRavenSessionsInPipeline CreateTestSessionOpener()
