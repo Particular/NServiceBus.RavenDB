@@ -24,7 +24,7 @@
             {
                 using (session = sessionCreator.OpenSession(context.Message.Headers))
                 {
-                    context.Extensions.Set(session);
+                    //context.Extensions.Set(session);
                     await next().ConfigureAwait(false);
                     await session.SaveChangesAsync().ConfigureAwait(false);
                 }

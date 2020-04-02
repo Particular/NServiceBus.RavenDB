@@ -117,12 +117,14 @@
                 return sessionCreator.OpenSession(message.Headers);
             }
 
+            //TODO can this ever happen?
             return documentStore.OpenAsyncSession();
         }
 
         string GetOutboxRecordId(string messageId) => $"Outbox/{endpointName}/{messageId.Replace('\\', '_')}";
 
         string endpointName;
+        //TODO remove, this shouldn't be used?
         IDocumentStore documentStore;
         TransportOperation[] emptyTransportOperations = new TransportOperation[0];
         OutboxRecord.OutboxOperation[] emptyOutboxOperations = new OutboxRecord.OutboxOperation[0];
