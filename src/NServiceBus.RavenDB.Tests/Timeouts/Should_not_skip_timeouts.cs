@@ -17,7 +17,7 @@
     public class Should_not_skip_timeouts
     {
         [TestCase]
-        [Explicit]
+        [Ignore("Run manually")]
         public async Task Never_ever()
         {
             var db = Guid.NewGuid().ToString();
@@ -113,7 +113,7 @@
         }
 
         [TestCase]
-        [Explicit]
+        [Ignore("Run manually")]
         public async Task Should_not_skip_timeouts_also_with_multiple_clients_adding_timeouts()
         {
             var db = Guid.NewGuid().ToString();

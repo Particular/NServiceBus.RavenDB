@@ -3,7 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
+    using NServiceBus.Transport;
     using NUnit.Framework;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Session;
@@ -67,16 +69,27 @@
             }
         }
 
+        protected IncomingMessage SimulateIncomingMessage(ContextBag context, string messageId = null)
+        {
+            messageId = messageId ?? Guid.NewGuid().ToString("N");
+
+            var incomingMessage = new IncomingMessage(messageId, new Dictionary<string, string>(), new byte[0]);
+
+            context.Set(incomingMessage);
+
+            return incomingMessage;
+        }
+
         List<IAsyncDocumentSession> sessions = new List<IAsyncDocumentSession>();
         protected IDocumentStore store;
         ReusableDB db;
 
-        internal IOpenRavenSessionsInPipeline CreateTestSessionOpener()
+        internal IOpenTenantAwareRavenSessions CreateTestSessionOpener()
         {
             return new TestOpenSessionsInPipeline(this.store);
         }
 
-        class TestOpenSessionsInPipeline : IOpenRavenSessionsInPipeline
+        class TestOpenSessionsInPipeline : IOpenTenantAwareRavenSessions
         {
             IDocumentStore store;
 

@@ -7,7 +7,7 @@
 
     class OpenAsyncSessionBehavior : Behavior<IIncomingPhysicalMessageContext>
     {
-        public OpenAsyncSessionBehavior(IOpenRavenSessionsInPipeline sessionCreator)
+        public OpenAsyncSessionBehavior(IOpenTenantAwareRavenSessions sessionCreator)
         {
             this.sessionCreator = sessionCreator;
         }
@@ -31,6 +31,6 @@
             }
         }
 
-        readonly IOpenRavenSessionsInPipeline sessionCreator;
+        readonly IOpenTenantAwareRavenSessions sessionCreator;
     }
 }

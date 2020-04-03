@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using Raven.Client.Documents.Session;
 
-    class OpenRavenSessionByCustomDelegate : IOpenRavenSessionsInPipeline
+    class OpenRavenSessionByCustomDelegate : IOpenTenantAwareRavenSessions
     {
         Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSessionUsingHeaders;
 

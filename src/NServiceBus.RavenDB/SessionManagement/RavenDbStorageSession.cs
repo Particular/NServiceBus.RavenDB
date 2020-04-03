@@ -17,13 +17,13 @@
 
             if (getAsyncSessionFunc != null)
             {
-                IOpenRavenSessionsInPipeline sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc);
+                IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc);
                 context.Container.RegisterSingleton(sessionCreator);
             }
             else
             {
                 //TODO see whether we can remove this one from DI
-                context.Container.ConfigureComponent<IOpenRavenSessionsInPipeline>(b =>
+                context.Container.ConfigureComponent<IOpenTenantAwareRavenSessions>(b =>
                 {
                     var store = DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(context.Settings, b);
                     var storeWrapper = new DocumentStoreWrapper(store);

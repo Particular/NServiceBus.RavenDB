@@ -7,9 +7,9 @@
 
     class RavenDBSynchronizedStorage : ISynchronizedStorage
     {
-        IOpenRavenSessionsInPipeline sessionCreator;
+        IOpenTenantAwareRavenSessions sessionCreator;
 
-        public RavenDBSynchronizedStorage(IOpenRavenSessionsInPipeline sessionCreator)
+        public RavenDBSynchronizedStorage(IOpenTenantAwareRavenSessions sessionCreator)
         {
             this.sessionCreator = sessionCreator;
         }
@@ -19,9 +19,7 @@
             var message = context.Get<IncomingMessage>();
             var session = sessionCreator.OpenSession(message.Headers);
             var synchronizedStorageSession = new RavenDBSynchronizedStorageSession(session);
-            // for backwards compatibility
-            //TODO check whether we can remove that. The adapter class would have to do the same
-            //context.Set(session);
+
             return Task.FromResult((CompletableSynchronizedStorageSession)synchronizedStorageSession);
         }
     }

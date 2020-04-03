@@ -6,15 +6,13 @@
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Outbox;
     using NServiceBus.Transport;
-    using Raven.Client.Documents;
     using Raven.Client.Documents.Session;
-    using TransportOperation = NServiceBus.Outbox.TransportOperation;
+    using TransportOperation = Outbox.TransportOperation;
 
     class OutboxPersister : IOutboxStorage
     {
-        public OutboxPersister(IDocumentStore documentStore, string endpointName, IOpenRavenSessionsInPipeline sessionCreator)
+        public OutboxPersister(string endpointName, IOpenTenantAwareRavenSessions sessionCreator)
         {
-            this.documentStore = documentStore;
             this.endpointName = endpointName;
             this.sessionCreator = sessionCreator;
         }
@@ -111,23 +109,16 @@
 
         IAsyncDocumentSession GetSession(ContextBag context)
         {
-            IncomingMessage message;
-            if (context.TryGet(out message))
-            {
-                return sessionCreator.OpenSession(message.Headers);
-            }
+            var message = context.Get<IncomingMessage>();
 
-            //TODO can this ever happen?
-            return documentStore.OpenAsyncSession();
+            return sessionCreator.OpenSession(message.Headers);
         }
 
         string GetOutboxRecordId(string messageId) => $"Outbox/{endpointName}/{messageId.Replace('\\', '_')}";
 
         string endpointName;
-        //TODO remove, this shouldn't be used?
-        IDocumentStore documentStore;
         TransportOperation[] emptyTransportOperations = new TransportOperation[0];
         OutboxRecord.OutboxOperation[] emptyOutboxOperations = new OutboxRecord.OutboxOperation[0];
-        IOpenRavenSessionsInPipeline sessionCreator;
+        IOpenTenantAwareRavenSessions sessionCreator;
     }
 }

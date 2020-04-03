@@ -23,8 +23,7 @@
 
             context.Container.ConfigureComponent(b =>
             {
-                var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings, b);
-                return new OutboxPersister(store, endpointName, b.Build<IOpenRavenSessionsInPipeline>());
+                return new OutboxPersister(endpointName, b.Build<IOpenTenantAwareRavenSessions>());
             }, DependencyLifecycle.InstancePerCall);
 
             context.Container.ConfigureComponent(b =>
