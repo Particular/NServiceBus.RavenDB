@@ -32,13 +32,6 @@
                     return new OpenRavenSessionByDatabaseName(storeWrapper, dbNameConvention);
                 }, DependencyLifecycle.SingleInstance);
             }
-
-            //TODO do we need to register the behavior for backwards compatibility
-            //context.Pipeline.Register("OpenRavenDbAsyncSession", b =>
-            //{
-            //    var sessionCreator = b.Build<IOpenRavenSessionsInPipeline>();
-            //    return new OpenAsyncSessionBehavior(sessionCreator);
-            //}, "Makes sure that there is a RavenDB IAsyncDocumentSession available on the pipeline");
         }
     }
 }
