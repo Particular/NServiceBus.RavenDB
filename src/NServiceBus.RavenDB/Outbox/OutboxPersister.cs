@@ -55,7 +55,6 @@
 
             session.Advanced.UseOptimisticConcurrency = true;
 
-            context.Set(session);
             var transaction = new RavenDBOutboxTransaction(session);
             return Task.FromResult<OutboxTransaction>(transaction);
         }
