@@ -27,9 +27,13 @@
 
             SagaStorage = new SagaPersister();
             SagaIdGenerator = new DefaultSagaIdGenerator();
-            SynchronizedStorage = new RavenDBSynchronizedStorage(new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(store)));
+            var sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(store));
+            SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator);
             SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter();
+            OutboxStorage = new OutboxPersister("outbox-tests", sessionCreator);
 
+            // Configure incoming message on context required to create tenant-aware document sessions:
+            GetContextBagForOutbox =
             GetContextBagForSagaStorage = () =>
             {
                 var contextBag = new ContextBag();
@@ -39,7 +43,7 @@
         }
 
         public bool SupportsDtc { get; } = true;
-        public bool SupportsOutbox { get; } = false;
+        public bool SupportsOutbox { get; } = true;
         public bool SupportsFinders { get; } = false;
         public bool SupportsSubscriptions { get; } = false;
         public bool SupportsTimeouts { get; } = false;
