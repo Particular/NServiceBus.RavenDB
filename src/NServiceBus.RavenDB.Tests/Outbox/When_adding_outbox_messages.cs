@@ -26,7 +26,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         }
 
         [Test]
-        public async Task Should_throw_if__trying_to_insert_same_messageid_concurrently()
+        public async Task Should_throw_if_trying_to_insert_same_messageid_concurrently()
         {
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
@@ -46,7 +46,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         }
 
         [Test]
-        public async Task Should_throw_if__trying_to_insert_same_messageid()
+        public async Task Should_throw_if_trying_to_insert_same_messageid()
         {
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
