@@ -66,7 +66,7 @@
 
         public bool SupportsDtc { get; } = true;
         public bool SupportsOutbox { get; } = true;
-        public bool SupportsFinders { get; } = false;
+        public bool SupportsFinders { get; } = true;
         public bool SupportsSubscriptions { get; } = true;
         public bool SupportsTimeouts { get; } = true;
         public bool SupportsPessimisticConcurrency { get; } = false;
