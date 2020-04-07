@@ -12,8 +12,12 @@
 
         public Task<CompletableSynchronizedStorageSession> TryAdapt(OutboxTransaction transaction, ContextBag context)
         {
-            // Since RavenDB doesn't support System.Transactions (or have transactions), there's no way to adapt anything out of the Outbox transaction.
-            // Everything about the Raven session is controlled by OpenAsyncSessionBehavior.
+            if (transaction is RavenDBOutboxTransaction outboxTransaction)
+            {
+                return Task.FromResult<CompletableSynchronizedStorageSession>(
+                    new RavenDBSynchronizedStorageSession(outboxTransaction.AsyncSession));
+            }
+
             return EmptyResult;
         }
 
