@@ -12,6 +12,7 @@
     using NServiceBus.Transport;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using Raven.Client.Documents;
+    using Raven.Client.Documents.Operations.Indexes;
 
     public partial class PersistenceTestsConfiguration
     {
@@ -31,6 +32,25 @@
             SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator);
             SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter();
             OutboxStorage = new OutboxPersister("outbox-tests", sessionCreator);
+            TimeoutStorage = new TimeoutPersister(store);
+            //TODO owning timeout property not set when storing timeouts via persister
+            TimeoutQuery = new QueryTimeouts(store, "");
+            // Taken from DocumentStoreInitializer
+            foreach (var index in new[] { new TimeoutsIndex() })
+            {
+                try
+                {
+                    index.Execute(store);
+                }
+                catch (Exception) // Apparently ArgumentException can be thrown as well as a WebException; not taking any chances
+                {
+                    var getIndexOp = new GetIndexOperation(index.IndexName);
+
+                    var existingIndex = store.Maintenance.Send(getIndexOp);
+                    if (existingIndex == null || !index.CreateIndexDefinition().Equals(existingIndex))
+                        throw;
+                }
+            }
 
             // Configure incoming message on context required to create tenant-aware document sessions:
             GetContextBagForOutbox =
@@ -46,7 +66,7 @@
         public bool SupportsOutbox { get; } = true;
         public bool SupportsFinders { get; } = false;
         public bool SupportsSubscriptions { get; } = false;
-        public bool SupportsTimeouts { get; } = false;
+        public bool SupportsTimeouts { get; } = true;
         public bool SupportsPessimisticConcurrency { get; } = false;
         public ISagaIdGenerator SagaIdGenerator { get; }
         public ISagaPersister SagaStorage { get; }
