@@ -52,6 +52,8 @@
                 }
             }
 
+            SubscriptionStorage = new SubscriptionPersister(store);
+
             // Configure incoming message on context required to create tenant-aware document sessions:
             GetContextBagForOutbox =
             GetContextBagForSagaStorage = () =>
@@ -65,7 +67,7 @@
         public bool SupportsDtc { get; } = true;
         public bool SupportsOutbox { get; } = true;
         public bool SupportsFinders { get; } = false;
-        public bool SupportsSubscriptions { get; } = false;
+        public bool SupportsSubscriptions { get; } = true;
         public bool SupportsTimeouts { get; } = true;
         public bool SupportsPessimisticConcurrency { get; } = false;
         public ISagaIdGenerator SagaIdGenerator { get; }
