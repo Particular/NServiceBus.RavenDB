@@ -1,17 +1,17 @@
 namespace NServiceBus.Persistence.RavenDB
 {
     using System.Threading.Tasks;
-    using NServiceBus.Persistence;
     using Raven.Client.Documents.Session;
 
     class RavenDBSynchronizedStorageSession : CompletableSynchronizedStorageSession
     {
-        public IAsyncDocumentSession Session { get; }
-
-        public RavenDBSynchronizedStorageSession(IAsyncDocumentSession session)
+        public RavenDBSynchronizedStorageSession(IAsyncDocumentSession session, bool callSaveChanges = true)
         {
+            this.callSaveChanges = callSaveChanges;
             Session = session;
         }
+
+        public IAsyncDocumentSession Session { get; }
 
         public void Dispose()
         {
@@ -19,7 +19,11 @@ namespace NServiceBus.Persistence.RavenDB
 
         public Task CompleteAsync()
         {
-            return Session.SaveChangesAsync();
+            return callSaveChanges
+                ? Session.SaveChangesAsync()
+                : Task.CompletedTask;
         }
+
+        readonly bool callSaveChanges;
     }
 }

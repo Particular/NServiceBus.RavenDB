@@ -18,7 +18,7 @@
         {
             var message = context.Get<IncomingMessage>();
             var session = sessionCreator.OpenSession(message.Headers);
-            var synchronizedStorageSession = new RavenDBSynchronizedStorageSession(session);
+            var synchronizedStorageSession = new RavenDBSynchronizedStorageSession(session, true);
 
             return Task.FromResult((CompletableSynchronizedStorageSession)synchronizedStorageSession);
         }
