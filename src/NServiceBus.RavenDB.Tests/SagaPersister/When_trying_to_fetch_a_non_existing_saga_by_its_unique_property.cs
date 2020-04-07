@@ -24,17 +24,12 @@ public class When_trying_to_fetch_a_non_existing_saga_by_its_unique_property : R
     {
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
         {
-            mapper.ConfigureMapping<Message>(m => m.UniqueString).ToSaga(s => s.UniqueString);
+            mapper.ConfigureMapping<StartSaga>(m => m.UniqueString).ToSaga(s => s.UniqueString);
         }
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
         {
             return Task.CompletedTask;
-        }
-
-        class Message
-        {
-            public string UniqueString { get; set; }
         }
     }
 
