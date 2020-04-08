@@ -3,13 +3,23 @@
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence;
+    using NServiceBus.Transport;
 
     class RavenDBSynchronizedStorage : ISynchronizedStorage
     {
-        public Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag)
+        IOpenTenantAwareRavenSessions sessionCreator;
+
+        public RavenDBSynchronizedStorage(IOpenTenantAwareRavenSessions sessionCreator)
         {
-            var session = contextBag.GetAsyncSession();
-            var synchronizedStorageSession = new RavenDBSynchronizedStorageSession(session);
+            this.sessionCreator = sessionCreator;
+        }
+
+        public Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag context)
+        {
+            var message = context.Get<IncomingMessage>();
+            var session = sessionCreator.OpenSession(message.Headers);
+            var synchronizedStorageSession = new RavenDBSynchronizedStorageSession(session, true);
+
             return Task.FromResult((CompletableSynchronizedStorageSession)synchronizedStorageSession);
         }
     }

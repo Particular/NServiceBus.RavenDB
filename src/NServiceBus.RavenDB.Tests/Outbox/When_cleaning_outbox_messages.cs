@@ -24,10 +24,10 @@
         [Test]
         public async Task Should_delete_all_OutboxRecords_that_have_been_dispatched()
         {
-            var id = Guid.NewGuid().ToString("N");
             var context = new ContextBag();
+            var incomingMessage = SimulateIncomingMessage(context);
 
-            var persister = new OutboxPersister(store, "TestEndpoint", CreateTestSessionOpener());
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
 
             using (var transaction = await persister.BeginTransaction(context))
             {
@@ -36,9 +36,9 @@
                 await transaction.Commit();
             }
 
-            var outboxMessage = new OutboxMessage(id, new []
+            var outboxMessage = new OutboxMessage(incomingMessage.MessageId, new []
                 {
-                    new TransportOperation(id, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>())
+                    new TransportOperation(incomingMessage.MessageId, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>())
                 });
 
 
@@ -48,8 +48,7 @@
                 await transaction.Commit();
             }
 
-
-            await persister.SetAsDispatched(id, context);
+            await persister.SetAsDispatched(outboxMessage.MessageId, context);
             await Task.Delay(TimeSpan.FromSeconds(1)); //Need to wait for dispatch logic to finish
 
             //WaitForUserToContinueTheTest(store);

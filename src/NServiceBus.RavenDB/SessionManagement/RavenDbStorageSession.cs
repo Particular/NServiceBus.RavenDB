@@ -17,12 +17,12 @@
 
             if (getAsyncSessionFunc != null)
             {
-                IOpenRavenSessionsInPipeline sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc);
+                IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc);
                 context.Container.RegisterSingleton(sessionCreator);
             }
             else
             {
-                context.Container.ConfigureComponent<IOpenRavenSessionsInPipeline>(b =>
+                context.Container.ConfigureComponent<IOpenTenantAwareRavenSessions>(b =>
                 {
                     var store = DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(context.Settings, b);
                     var storeWrapper = new DocumentStoreWrapper(store);
@@ -31,12 +31,6 @@
                     return new OpenRavenSessionByDatabaseName(storeWrapper, dbNameConvention);
                 }, DependencyLifecycle.SingleInstance);
             }
-
-            context.Pipeline.Register("OpenRavenDbAsyncSession", b =>
-            {
-                var sessionCreator = b.Build<IOpenRavenSessionsInPipeline>();
-                return new OpenAsyncSessionBehavior(sessionCreator);
-            }, "Makes sure that there is a RavenDB IAsyncDocumentSession available on the pipeline");
         }
     }
 }

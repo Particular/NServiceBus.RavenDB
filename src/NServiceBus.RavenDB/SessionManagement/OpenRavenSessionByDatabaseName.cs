@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using Raven.Client.Documents.Session;
 
-    class OpenRavenSessionByDatabaseName : IOpenRavenSessionsInPipeline
+    class OpenRavenSessionByDatabaseName : IOpenTenantAwareRavenSessions
     {
         IDocumentStoreWrapper documentStoreWrapper;
         Func<IDictionary<string, string>, string> getDatabaseName;
