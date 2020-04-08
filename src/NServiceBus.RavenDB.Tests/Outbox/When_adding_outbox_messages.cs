@@ -76,7 +76,6 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_save_with_not_dispatched()
         {
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
-
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
 
