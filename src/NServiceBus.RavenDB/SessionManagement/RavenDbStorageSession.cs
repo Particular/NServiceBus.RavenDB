@@ -22,7 +22,6 @@
             }
             else
             {
-                //TODO see whether we can remove this one from DI
                 context.Container.ConfigureComponent<IOpenTenantAwareRavenSessions>(b =>
                 {
                     var store = DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(context.Settings, b);
