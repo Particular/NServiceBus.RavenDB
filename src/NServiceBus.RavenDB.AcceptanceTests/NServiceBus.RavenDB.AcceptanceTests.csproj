@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
     <PackageReference Include="NServiceBus" Version="7.2.4" />
     <PackageReference Include="NServiceBus.Gateway.AcceptanceTests.Sources" Version="3.1.0" />
     <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="7.2.4" />
