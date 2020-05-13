@@ -80,8 +80,7 @@
 
         void ApplyConventions(ReadOnlySettings settings)
         {
-            var store = docStore as DocumentStore;
-            if (store == null)
+            if (!(docStore is DocumentStore store))
             {
                 return;
             }

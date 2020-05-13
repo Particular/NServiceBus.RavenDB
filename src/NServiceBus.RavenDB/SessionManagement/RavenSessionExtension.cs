@@ -18,19 +18,15 @@
         /// <returns></returns>
         public static IAsyncDocumentSession RavenSession(this SynchronizedStorageSession session)
         {
-            var synchronizedStorageSession = session as RavenDBSynchronizedStorageSession;
-            if (synchronizedStorageSession != null)
+            switch (session)
             {
-                return synchronizedStorageSession.Session;
+                case RavenDBSynchronizedStorageSession synchronizedStorageSession:
+                    return synchronizedStorageSession.Session;
+                case TestableRavenStorageSession testableStorageSession:
+                    return testableStorageSession.Session;
+                default:
+                    throw new InvalidOperationException("It was not possible to retrieve a RavenDB session.");
             }
-
-            var testableStorageSession = session as TestableRavenStorageSession;
-            if (testableStorageSession != null)
-            {
-                return testableStorageSession.Session;
-            }
-
-            throw new InvalidOperationException("It was not possible to retrieve a RavenDB session.");
         }
     }
 }
