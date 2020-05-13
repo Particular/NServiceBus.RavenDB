@@ -19,6 +19,13 @@
             {
                 IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc);
                 context.Container.RegisterSingleton(sessionCreator);
+
+                context.Settings.AddStartupDiagnosticsSection(
+                    StartupDiagnosticsSectionName,
+                    new
+                    {
+                        HasSharedAsyncSession = true,
+                    });
             }
             else
             {
@@ -30,7 +37,17 @@
                     var dbNameConvention = context.Settings.GetOrDefault<Func<IDictionary<string, string>, string>>("RavenDB.SetMessageToDatabaseMappingConvention");
                     return new OpenRavenSessionByDatabaseName(storeWrapper, dbNameConvention);
                 }, DependencyLifecycle.SingleInstance);
+
+                context.Settings.AddStartupDiagnosticsSection(
+                    StartupDiagnosticsSectionName,
+                    new
+                    {
+                        HasSharedAsyncSession = false,
+                        HasMessageToDatabaseMappingConvention = context.Settings.HasSetting("RavenDB.SetMessageToDatabaseMappingConvention"),
+                    });
             }
         }
+
+        const string StartupDiagnosticsSectionName = "NServiceBus.Persistence.RavenDB.StorageSession";
     }
 }

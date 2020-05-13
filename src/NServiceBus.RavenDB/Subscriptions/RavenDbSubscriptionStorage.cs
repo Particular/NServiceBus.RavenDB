@@ -13,18 +13,29 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
+            var doNotCacheSubscriptions = context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DoNotAggressivelyCacheSubscriptionsSettingsKey);
+            var gotCacheSubscriptionsFor = context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.AggressiveCacheDurationSettingsKey, out TimeSpan aggressiveCacheDuration);
+
+            context.Settings.AddStartupDiagnosticsSection(
+                "NServiceBus.Persistence.RavenDB.Subscriptions",
+                new
+                {
+                    DoNotCacheSubscriptions = doNotCacheSubscriptions,
+                    CacheSubscriptionsFor = aggressiveCacheDuration,
+                });
+
             context.Container.ConfigureComponent<ISubscriptionStorage>(b =>
             {
                 var store = DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(context.Settings, b);
 
                 var persister = new SubscriptionPersister(store);
 
-                if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DoNotAggressivelyCacheSubscriptionsSettingsKey))
+                if (doNotCacheSubscriptions)
                 {
                     persister.DisableAggressiveCaching = true;
                 }
 
-                if (context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.AggressiveCacheDurationSettingsKey, out TimeSpan aggressiveCacheDuration))
+                if (gotCacheSubscriptionsFor)
                 {
                     persister.AggressiveCacheDuration = aggressiveCacheDuration;
                 }

@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using NServiceBus.Features;
     using NServiceBus.Logging;
-    using NServiceBus.Settings;
 
     class RavenDbOutboxStorage : Feature
     {
@@ -26,36 +25,40 @@
                 return new OutboxPersister(endpointName, b.Build<IOpenTenantAwareRavenSessions>());
             }, DependencyLifecycle.InstancePerCall);
 
-            context.Container.ConfigureComponent(b =>
+            var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
+            var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
+
+            context.RegisterStartupTask(builder =>
             {
-                var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings, b);
-                return new OutboxRecordsCleaner(store);
-            }, DependencyLifecycle.InstancePerCall);
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings, builder);
+                return new OutboxCleaner(new OutboxRecordsCleaner(store), frequencyToRunDeduplicationDataCleanup, timeToKeepDeduplicationData);
+            });
 
-            context.Container.ConfigureComponent<OutboxCleaner>(DependencyLifecycle.InstancePerCall);
-
-            context.RegisterStartupTask(builder => builder.Build<OutboxCleaner>());
+            context.Settings.AddStartupDiagnosticsSection(
+                "NServiceBus.Persistence.RavenDB.Outbox",
+                new
+                {
+                    FrequencyToRunDeduplicationDataCleanup = frequencyToRunDeduplicationDataCleanup,
+                    TimeToKeepDeduplicationData = timeToKeepDeduplicationData,
+                });
         }
 
         class OutboxCleaner : FeatureStartupTask
         {
-            public OutboxCleaner(OutboxRecordsCleaner cleaner, ReadOnlySettings settings)
+            public OutboxCleaner(OutboxRecordsCleaner cleaner, TimeSpan frequencyToRunDeduplicationDataCleanup, TimeSpan timeToKeepDeduplicationData)
             {
                 this.cleaner = cleaner;
-                this.settings = settings;
+                this.frequencyToRunDeduplicationDataCleanup = frequencyToRunDeduplicationDataCleanup;
+                this.timeToKeepDeduplicationData = timeToKeepDeduplicationData;
                 logger = LogManager.GetLogger<OutboxCleaner>();
             }
 
             protected override Task OnStart(IMessageSession session)
             {
-                frequencyToRunDeduplicationDataCleanup = settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
-
                 if (frequencyToRunDeduplicationDataCleanup == Timeout.InfiniteTimeSpan)
                 {
                     return Task.CompletedTask;
                 }
-
-                timeToKeepDeduplicationData = settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
 
                 cancellationTokenSource = new CancellationTokenSource();
                 cancellationToken = cancellationTokenSource.Token;
@@ -114,7 +117,6 @@
 
             Task cleanupTask;
             OutboxRecordsCleaner cleaner;
-            ReadOnlySettings settings;
             TimeSpan timeToKeepDeduplicationData;
             TimeSpan frequencyToRunDeduplicationDataCleanup;
             CancellationTokenSource cancellationTokenSource;
