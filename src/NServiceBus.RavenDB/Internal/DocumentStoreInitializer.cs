@@ -48,7 +48,9 @@
 
                     var existingIndex = store.Maintenance.Send(getIndexOp);
                     if (existingIndex == null || !index.CreateIndexDefinition().Equals(existingIndex))
+                    {
                         throw;
+                    }
                 }
             }
         }
