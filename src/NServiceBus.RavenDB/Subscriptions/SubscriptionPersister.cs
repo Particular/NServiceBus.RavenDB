@@ -132,7 +132,7 @@ namespace NServiceBus.Persistence.RavenDB
             }
         }
 
-        string GetDocumentIdForMessageType(MessageType messageType)
+        static string GetDocumentIdForMessageType(MessageType messageType)
         {
             using (var provider = new SHA1CryptoServiceProvider())
             {

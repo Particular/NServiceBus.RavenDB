@@ -98,7 +98,7 @@
             }
         }
 
-        void EnsureClusterConfiguration(IDocumentStore store)
+        static void EnsureClusterConfiguration(IDocumentStore store)
         {
             using (var s = store.OpenSession())
             {
