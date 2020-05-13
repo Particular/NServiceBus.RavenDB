@@ -28,7 +28,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public TimeSpan CleanupGapFromTimeslice
         {
-            get { return _cleanupGapFromTimeslice; }
+            get => _cleanupGapFromTimeslice;
             set
             {
                 if (value < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(CleanupGapFromTimeslice));
@@ -38,7 +38,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public TimeSpan TriggerCleanupEvery
         {
-            get { return _triggerCleanupEvery; }
+            get => _triggerCleanupEvery;
             set
             {
                 if (value < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(TriggerCleanupEvery));
