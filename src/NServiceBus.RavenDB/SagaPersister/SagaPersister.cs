@@ -77,25 +77,27 @@ namespace NServiceBus.Persistence.RavenDB
                 .LoadAsync<SagaUniqueIdentity>(lookupId)
                 .ConfigureAwait(false);
 
-            if (lookup != null)
+            if (lookup == null)
             {
-                documentSession.Advanced.Evict(lookup);
-
-                // If we have a saga id we can just load it, should have been included in the round-trip already
-                var container = await documentSession.LoadAsync<SagaDataContainer>(lookup.SagaDocId).ConfigureAwait(false);
-
-                if (container != null)
-                {
-                    if (container.IdentityDocId == null)
-                    {
-                        container.IdentityDocId = lookupId;
-                    }
-                    context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
-                    return (T)container.Data;
-                }
+                return default(T);
             }
 
-            return default(T);
+            documentSession.Advanced.Evict(lookup);
+
+            // If we have a saga id we can just load it, should have been included in the round-trip already
+            var container = await documentSession.LoadAsync<SagaDataContainer>(lookup.SagaDocId).ConfigureAwait(false);
+
+            if (container == null)
+            {
+                return default(T);
+            }
+
+            if (container.IdentityDocId == null)
+            {
+                container.IdentityDocId = lookupId;
+            }
+            context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
+            return (T)container.Data;
         }
 
         public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
