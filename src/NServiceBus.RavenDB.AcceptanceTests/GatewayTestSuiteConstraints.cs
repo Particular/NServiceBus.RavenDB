@@ -3,6 +3,7 @@
     using NServiceBus.AcceptanceTesting.Support;
     using NServiceBus.Configuration.AdvancedExtensibility;
     using System.Threading.Tasks;
+    using NServiceBus.RavenDB.AcceptanceTests;
 
     public partial class GatewayTestSuiteConstraints
     {
@@ -23,6 +24,11 @@
             configuration.GetSettings().Set(gatewaySettings);
 
             return Task.FromResult(false);
+        }
+
+        public IConfigureGatewayPersitenceExecution CreatePersistenceConfiguration()
+        {
+            return new ConfigureRavenDBGatewayPersitence();
         }
 
         public Task Cleanup()
