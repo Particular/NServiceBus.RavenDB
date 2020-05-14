@@ -5,7 +5,9 @@
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
+    using Raven.Client.Documents;
     using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
+    using Timeout = NServiceBus.TimeoutPersisters.RavenDB.TimeoutData;
 
     public class When_adding_timeouts : RavenDBPersistenceTestBase
     {
@@ -35,6 +37,30 @@
 
             var result = await persister.Peek(timeoutId, new ContextBag());
             Assert.IsNull(result);
+        }
+
+        [Test]
+        public async Task Add_ShouldStoreSchemaVersion()
+        {
+            var persister = new TimeoutPersister(store);
+
+            var timeoutId = Guid.NewGuid().ToString();
+            var timeout = new TimeoutData { Id = timeoutId };
+
+            await persister.Add(timeout, new ContextBag());
+
+            WaitForIndexing();
+
+            using (var session = store.OpenAsyncSession())
+            {
+                var subscriptions = await session
+                    .Query<TimeoutData>()
+                    .SingleOrDefaultAsync();
+
+                var metadata = session.Advanced.GetMetadataFor(subscriptions);
+
+                Assert.AreEqual(Timeout.SchemaVersion.ToString(3), metadata[SessionVersionExtensions.TimeoutSchemaVersionMetadataKey]);
+            }
         }
     }
 }

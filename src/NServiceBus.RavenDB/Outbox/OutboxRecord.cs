@@ -10,6 +10,8 @@
         public DateTime? DispatchedAt { get; set; }
         public OutboxOperation[] TransportOperations { get; set; }
 
+        internal static readonly Version SchemaVersion = new Version(1, 0, 0);
+
         public class OutboxOperation
         {
             public string MessageId { get; set; }

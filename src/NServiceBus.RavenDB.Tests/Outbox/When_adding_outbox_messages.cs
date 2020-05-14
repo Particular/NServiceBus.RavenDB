@@ -99,6 +99,38 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         }
 
         [Test]
+        public async Task Should_save_schema_version()
+        {
+            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var context = new ContextBag();
+            var incomingMessage = SimulateIncomingMessage(context);
+
+            var message = new OutboxMessage(incomingMessage.MessageId, new[]
+            {
+                new TransportOperation(incomingMessage.MessageId, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>())
+            });
+
+            using (var transaction = await persister.BeginTransaction(context))
+            {
+                await persister.Store(message, transaction, context);
+
+                await transaction.Commit();
+            }
+
+            WaitForIndexing();
+
+            using (var s = store.OpenAsyncSession())
+            {
+                var result = await s.Query<OutboxRecord>()
+                    .SingleOrDefaultAsync(o => o.MessageId == incomingMessage.MessageId);
+
+                var metadata = s.Advanced.GetMetadataFor(result);
+
+                Assert.AreEqual(OutboxRecord.SchemaVersion.ToString(3), metadata[SessionVersionExtensions.OutboxRecordVersionMetadataKey]);
+            }
+        }
+
+        [Test]
         public async Task Should_update_dispatched_flag()
         {
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());

@@ -61,7 +61,7 @@
             return Task.FromResult<OutboxTransaction>(transaction);
         }
 
-        public Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
+        public async Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
         {
             var session = ((RavenDBOutboxTransaction)transaction).AsyncSession;
 
@@ -80,12 +80,14 @@
                 index++;
             }
 
-            return session.StoreAsync(new OutboxRecord
+            var outboxRecord = new OutboxRecord
             {
                 MessageId = message.MessageId,
                 Dispatched = false,
                 TransportOperations = operations
-            }, GetOutboxRecordId(message.MessageId));
+            };
+            await session.StoreAsync(outboxRecord, GetOutboxRecordId(message.MessageId)).ConfigureAwait(false);
+            session.StoreVersionInMetadata(outboxRecord);
         }
 
         public async Task SetAsDispatched(string messageId, ContextBag options)
@@ -99,19 +101,19 @@
                     patch: new PatchRequest
                     {
                         Script =
-@"if(this.Dispatched === true)
+$@"if(this.Dispatched === true)
   return;
 this.Dispatched = true
 this.DispatchedAt = args.DispatchedAt.Now
-this.TransportOperations = []",
+this.TransportOperations = []
+this['@metadata']['{SessionVersionExtensions.OutboxRecordVersionMetadataKey}'] = args.SchemaVersion.Version",
                         Values =
                         {
                             {
-                                "DispatchedAt",
-                                new
-                                {
-                                    Now = DateTime.UtcNow,
-                                }
+                                "DispatchedAt", new { Now = DateTime.UtcNow }
+                            },
+                            {
+                                "SchemaVersion", new { Version = OutboxRecord.SchemaVersion.ToString(3) }
                             }
                         }
                     },
