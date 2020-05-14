@@ -13,7 +13,9 @@
             databaseName = documentStore.Database;
 
 
+#pragma warning disable 618
             configuration.UsePersistence<RavenDBPersistence, StorageType.GatewayDeduplication>()
+#pragma warning restore 618
                 .DoNotSetupDatabasePermissions()
                 .SetDefaultDocumentStore(documentStore);
 
