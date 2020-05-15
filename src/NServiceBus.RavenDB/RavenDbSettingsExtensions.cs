@@ -104,10 +104,13 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <returns></returns>
+        [ObsoleteEx(
+            Message = "Database permissions are no longer set up, so this method has no effect. All calls to this method may be safely removed.",
+            RemoveInVersion = "7.0.0",
+            TreatAsErrorFromVersion = "6.0.0")]
         public static PersistenceExtensions<RavenDBPersistence> DoNotSetupDatabasePermissions(this PersistenceExtensions<RavenDBPersistence> cfg)
         {
-            cfg.GetSettings().Set("RavenDB.DoNotSetupPermissions", true);
-            return cfg;
+            throw new NotImplementedException();
         }
     }
 }
