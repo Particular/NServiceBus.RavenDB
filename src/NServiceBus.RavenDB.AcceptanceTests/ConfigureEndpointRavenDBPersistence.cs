@@ -23,7 +23,6 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
         var persistenceExtensions = configuration.UsePersistence<RavenDBPersistence>()
             .DoNotCacheSubscriptions()
-            .DoNotSetupDatabasePermissions()
             .SetDefaultDocumentStore(documentStore);
 
         configuration.GetSettings().Set(DefaultPersistenceExtensionsKey, persistenceExtensions);

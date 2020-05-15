@@ -54,6 +54,9 @@ namespace NServiceBus
     }
     public class static RavenDbSettingsExtensions
     {
+        [System.ObsoleteAttribute("Database permissions are no longer set up, so this method has no effect. All call" +
+            "s to this method may be safely removed. The member currently throws a NotImpleme" +
+            "ntedException. Will be removed in version 7.0.0.", true)]
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> DoNotSetupDatabasePermissions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.Documents.IDocumentStore documentStore) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
