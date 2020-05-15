@@ -155,12 +155,9 @@ namespace NServiceBus.Persistence.RavenDB
 
         IDisposable ConfigureAggressiveCaching(IAsyncDocumentSession session)
         {
-            if (DisableAggressiveCaching)
-            {
-                return EmptyDisposable.Instance;
-            }
-
-            return session.Advanced.DocumentStore.AggressivelyCacheFor(AggressiveCacheDuration);
+            return DisableAggressiveCaching
+                ? EmptyDisposable.Instance
+                : session.Advanced.DocumentStore.AggressivelyCacheFor(AggressiveCacheDuration);
         }
 
         sealed class EmptyDisposable : IDisposable
