@@ -6,6 +6,8 @@
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Outbox;
     using NServiceBus.Transport;
+    using Raven.Client.Documents.Commands.Batches;
+    using Raven.Client.Documents.Operations;
     using Raven.Client.Documents.Session;
     using TransportOperation = Outbox.TransportOperation;
 
@@ -90,17 +92,30 @@
         {
             using (var session = GetSession(options))
             {
-                session.Advanced.UseOptimisticConcurrency = true;
-
-                var outboxMessage = await session.LoadAsync<OutboxRecord>(GetOutboxRecordId(messageId)).ConfigureAwait(false);
-                if (outboxMessage == null || outboxMessage.Dispatched)
-                {
-                    return;
-                }
-
-                outboxMessage.Dispatched = true;
-                outboxMessage.DispatchedAt = DateTime.UtcNow;
-                outboxMessage.TransportOperations = emptyOutboxOperations;
+                // to avoid loading the whole document we directly patch the document atomically
+                session.Advanced.Defer(new PatchCommandData(
+                    id: GetOutboxRecordId(messageId),
+                    changeVector: null,
+                    patch: new PatchRequest
+                    {
+                        Script =
+@"if(this.Dispatched === true)
+  return;
+this.Dispatched = true
+this.DispatchedAt = args.DispatchedAt.Now
+this.TransportOperations = []",
+                        Values =
+                        {
+                            {
+                                "DispatchedAt",
+                                new
+                                {
+                                    Now = DateTime.UtcNow,
+                                }
+                            }
+                        }
+                    },
+                    patchIfMissing: null));
 
                 await session.SaveChangesAsync().ConfigureAwait(false);
             }
