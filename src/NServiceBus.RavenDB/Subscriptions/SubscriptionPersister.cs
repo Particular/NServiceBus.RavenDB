@@ -23,6 +23,7 @@ namespace NServiceBus.Persistence.RavenDB
         }
 
         public TimeSpan AggressiveCacheDuration { get; set; } = TimeSpan.FromMinutes(1);
+
         public bool DisableAggressiveCaching { get; set; }
 
         public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
@@ -132,7 +133,7 @@ namespace NServiceBus.Persistence.RavenDB
             }
         }
 
-        string GetDocumentIdForMessageType(MessageType messageType)
+        static string GetDocumentIdForMessageType(MessageType messageType)
         {
             using (var provider = new SHA1CryptoServiceProvider())
             {
@@ -155,15 +156,12 @@ namespace NServiceBus.Persistence.RavenDB
 
         IDisposable ConfigureAggressiveCaching(IAsyncDocumentSession session)
         {
-            if (DisableAggressiveCaching)
-            {
-                return EmptyDisposable.Instance;
-            }
-
-            return session.Advanced.DocumentStore.AggressivelyCacheFor(AggressiveCacheDuration);
+            return DisableAggressiveCaching
+                ? EmptyDisposable.Instance
+                : session.Advanced.DocumentStore.AggressivelyCacheFor(AggressiveCacheDuration);
         }
 
-        class EmptyDisposable : IDisposable
+        sealed class EmptyDisposable : IDisposable
         {
             EmptyDisposable()
             {

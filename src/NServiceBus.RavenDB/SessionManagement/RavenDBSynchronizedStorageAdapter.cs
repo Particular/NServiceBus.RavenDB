@@ -8,7 +8,7 @@
 
     class RavenDBSynchronizedStorageAdapter : ISynchronizedStorageAdapter
     {
-        static readonly Task<CompletableSynchronizedStorageSession> EmptyResult = Task.FromResult((CompletableSynchronizedStorageSession) null);
+        static readonly Task<CompletableSynchronizedStorageSession> EmptyResult = Task.FromResult((CompletableSynchronizedStorageSession)null);
 
         public Task<CompletableSynchronizedStorageSession> TryAdapt(OutboxTransaction transaction, ContextBag context)
         {
@@ -24,7 +24,6 @@
         public Task<CompletableSynchronizedStorageSession> TryAdapt(TransportTransaction transportTransaction, ContextBag context)
         {
             // Since RavenDB doesn't support System.Transactions (or have transactions), there's no way to adapt anything out of the transport transaction.
-            // Everything about the Raven session is controlled by OpenAsyncSessionBehavior.
             return EmptyResult;
         }
     }

@@ -20,11 +20,11 @@
                 return true;
             }
 
-            return obj is SubscriptionClient && Equals((SubscriptionClient)obj);
+            return obj is SubscriptionClient client && Equals(client);
         }
-        
-        bool Equals(SubscriptionClient obj) => string.Equals(TransportAddress, obj.TransportAddress, 
-            StringComparison.InvariantCultureIgnoreCase);
+
+        bool Equals(SubscriptionClient obj) =>
+            string.Equals(TransportAddress, obj.TransportAddress, StringComparison.InvariantCultureIgnoreCase);
 
         public override int GetHashCode() => TransportAddress.ToLowerInvariant().GetHashCode();
     }
