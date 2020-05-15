@@ -33,13 +33,17 @@ namespace NServiceBus.Persistence.RavenDB
             container.IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value);
 
             await documentSession.StoreAsync(container, string.Empty, container.Id).ConfigureAwait(false);
-            await documentSession.StoreAsync(new SagaUniqueIdentity
-            {
-                Id = container.IdentityDocId,
-                SagaId = sagaData.Id,
-                UniqueValue = correlationProperty.Value,
-                SagaDocId = container.Id
-            }, changeVector: string.Empty, id: container.IdentityDocId).ConfigureAwait(false);
+            await documentSession.StoreAsync(
+                    new SagaUniqueIdentity
+                    {
+                        Id = container.IdentityDocId,
+                        SagaId = sagaData.Id,
+                        UniqueValue = correlationProperty.Value,
+                        SagaDocId = container.Id
+                    },
+                    changeVector: string.Empty,
+                    id: container.IdentityDocId)
+                .ConfigureAwait(false);
         }
 
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
@@ -96,6 +100,7 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 container.IdentityDocId = lookupId;
             }
+
             context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
             return (T)container.Data;
         }
@@ -109,6 +114,7 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 documentSession.Advanced.Defer(new DeleteCommandData(container.IdentityDocId, null));
             }
+
             return Task.CompletedTask;
         }
 

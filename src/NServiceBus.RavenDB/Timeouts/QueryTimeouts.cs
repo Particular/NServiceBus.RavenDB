@@ -176,10 +176,9 @@ namespace NServiceBus.Persistence.RavenDB
         {
             return session.Query<TimeoutData, TimeoutsIndex>()
                 .OrderBy(t => t.Time)
-                .Where(
-                    t =>
-                        t.OwningTimeoutManager == string.Empty ||
-                        t.OwningTimeoutManager == endpointName);
+                .Where(t =>
+                    t.OwningTimeoutManager == string.Empty ||
+                    t.OwningTimeoutManager == endpointName);
         }
 
         bool CancellationRequested()

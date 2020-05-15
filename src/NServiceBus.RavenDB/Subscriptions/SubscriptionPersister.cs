@@ -23,6 +23,7 @@ namespace NServiceBus.Persistence.RavenDB
         }
 
         public TimeSpan AggressiveCacheDuration { get; set; } = TimeSpan.FromMinutes(1);
+
         public bool DisableAggressiveCaching { get; set; }
 
         public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)

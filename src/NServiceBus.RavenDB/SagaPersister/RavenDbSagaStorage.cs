@@ -35,6 +35,7 @@
             {
                 msg += $"{Environment.NewLine}  * {finder.Type.FullName}";
             }
+
             throw new Exception(msg);
         }
     }

@@ -56,9 +56,8 @@
             {
                 document["IdentityDocId"] = identityDocId;
             }
+
             document["Data"] = sagaData;
-
-
 
             args.Document = args.Session.Context.ReadObject(document, args.Id);
         }
