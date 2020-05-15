@@ -163,7 +163,7 @@ namespace NServiceBus.Persistence.RavenDB
             return session.Advanced.DocumentStore.AggressivelyCacheFor(AggressiveCacheDuration);
         }
 
-        class EmptyDisposable : IDisposable
+        sealed class EmptyDisposable : IDisposable
         {
             EmptyDisposable()
             {
