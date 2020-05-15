@@ -51,8 +51,7 @@
                 }
             }
 
-            var document = new DynamicJsonValue();
-            document["Id"] = args.Id;
+            var document = new DynamicJsonValue { ["Id"] = args.Id };
             if (metadata.TryGetWithoutThrowingOnError("NServiceBus-UniqueDocId", out string identityDocId))
             {
                 document["IdentityDocId"] = identityDocId;
