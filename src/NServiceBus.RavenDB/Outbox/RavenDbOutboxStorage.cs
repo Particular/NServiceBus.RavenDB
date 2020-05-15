@@ -8,7 +8,11 @@
 
     class RavenDbOutboxStorage : Feature
     {
-        public RavenDbOutboxStorage() => DependsOn<Outbox>();
+        public RavenDbOutboxStorage()
+        {
+            Defaults(s => s.EnableFeatureByDefault<RavenDbStorageSession>());
+            DependsOn<Outbox>();
+        }
 
         protected override void Setup(FeatureConfigurationContext context)
         {
