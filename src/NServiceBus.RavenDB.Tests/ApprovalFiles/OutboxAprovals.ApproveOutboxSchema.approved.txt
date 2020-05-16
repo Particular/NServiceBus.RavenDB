@@ -1,0 +1,13 @@
+{
+  "MessageId": "MessageId",
+  "Dispatched": true,
+  "DispatchedAt": "2020-05-06T10:10:10.01",
+  "TransportOperations": [
+    {
+      "MessageId": "MessageId",
+      "Message": "",
+      "Headers": {},
+      "Options": {}
+    }
+  ]
+}
