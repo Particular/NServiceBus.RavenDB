@@ -10,7 +10,7 @@ public class SubscriptionApprovals
     [Test]
     public void ApproveSubscriptionSchema()
     {
-        // if the schema is changed make sure to increase the schema version
+        // if the schema is changed, the schema version must be incremented
         Approver.Verify(new Subscription
         {
             Id = nameof(Subscription.Id),
@@ -20,8 +20,8 @@ public class SubscriptionApprovals
                 new SubscriptionClient
                 {
                     Endpoint = nameof(SubscriptionClient.Endpoint),
-                    TransportAddress = nameof(SubscriptionClient.TransportAddress)
-                }
+                    TransportAddress = nameof(SubscriptionClient.TransportAddress),
+                },
             },
         });
     }

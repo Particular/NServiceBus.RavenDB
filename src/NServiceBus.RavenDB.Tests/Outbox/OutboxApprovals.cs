@@ -10,7 +10,7 @@ public class OutboxAprovals
     [Test]
     public void ApproveOutboxSchema()
     {
-        // if the schema is changed make sure to increase the schema version
+        // if the schema is changed, the schema version must be incremented
         Approver.Verify(new OutboxRecord
         {
             MessageId = nameof(OutboxRecord.MessageId),
@@ -25,7 +25,7 @@ public class OutboxAprovals
                     Headers = new Dictionary<string, string>(),
                     Options = new Dictionary<string, string>(),
                 },
-            }
+            },
         });
     }
 }

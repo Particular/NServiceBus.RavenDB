@@ -10,7 +10,7 @@ public class TimeoutApprovals
     [Test]
     public void ApproveTimeoutSchema()
     {
-        // if the schema is changed make sure to increase the schema version
+        // if the schema is changed, the schema version must be incremented
         Approver.Verify(new Timeout
         {
             Id = nameof(Timeout.Id),
@@ -19,7 +19,7 @@ public class TimeoutApprovals
             State = Array.Empty<byte>(),
             Time = new DateTime(2020, 05, 06, 10, 10, 10, 10),
             OwningTimeoutManager = nameof(Timeout.OwningTimeoutManager),
-            Headers = new Dictionary<string, string>()
+            Headers = new Dictionary<string, string>(),
         });
     }
 }
