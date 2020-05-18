@@ -14,23 +14,24 @@ public class When_storing_subscription : RavenDBPersistenceTestBase
     [Test]
     public async Task Should_store_schema_version()
     {
-        var clientEndpoint = new Subscriber("TestEndpoint", "TestEndpoint");
-
+        // arrange
+        var subscriber = new Subscriber("SomeTransportAddress", "SomeEndpoint");
         var storage = new SubscriptionPersister(store);
 
-        await storage.Subscribe(clientEndpoint, new MessageType("MessageType1", "1.0.0.0"), new ContextBag());
-
+        // act
+        await storage.Subscribe(subscriber, new MessageType("MessageType1", "1.0.0.0"), new ContextBag());
         WaitForIndexing();
 
+        // assert
         using (var session = store.OpenAsyncSession())
         {
-            var subscriptions = await session
+            var subscription = await session
                 .Query<Subscription>()
                 .SingleOrDefaultAsync();
 
-            var metadata = session.Advanced.GetMetadataFor(subscriptions);
+            var metadata = session.Advanced.GetMetadataFor(subscription);
 
-            Assert.AreEqual(Subscription.SchemaVersion.ToString(3), metadata[SessionVersionExtensions.SubscriptionVersionMetadataKey]);
+            Assert.AreEqual(Subscription.SchemaVersion, metadata[SchemaVersionExtensions.SubscriptionSchemaVersionMetadataKey]);
         }
     }
 }

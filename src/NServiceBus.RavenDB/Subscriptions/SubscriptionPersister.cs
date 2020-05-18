@@ -56,7 +56,7 @@ namespace NServiceBus.Persistence.RavenDB
                             };
 
                             await session.StoreAsync(subscription).ConfigureAwait(false);
-                            session.StoreVersionInMetadata(subscription);
+                            session.StoreSchemaVersionInMetadata(subscription);
                         }
 
                         if (!subscription.Subscribers.Contains(subscriptionClient))

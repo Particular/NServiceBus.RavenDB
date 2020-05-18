@@ -86,8 +86,9 @@
                 Dispatched = false,
                 TransportOperations = operations
             };
+
             await session.StoreAsync(outboxRecord, GetOutboxRecordId(message.MessageId)).ConfigureAwait(false);
-            session.StoreVersionInMetadata(outboxRecord);
+            session.StoreSchemaVersionInMetadata(outboxRecord);
         }
 
         public async Task SetAsDispatched(string messageId, ContextBag options)
@@ -106,14 +107,22 @@ $@"if(this.Dispatched === true)
 this.Dispatched = true
 this.DispatchedAt = args.DispatchedAt.Now
 this.TransportOperations = []
-this['@metadata']['{SessionVersionExtensions.OutboxRecordVersionMetadataKey}'] = args.SchemaVersion.Version",
+this['@metadata']['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey}'] = args.SchemaVersion.Version",
                         Values =
                         {
                             {
-                                "DispatchedAt", new { Now = DateTime.UtcNow }
+                                "DispatchedAt",
+                                new
+                                {
+                                    Now = DateTime.UtcNow,
+                                }
                             },
                             {
-                                "SchemaVersion", new { Version = OutboxRecord.SchemaVersion.ToString(3) }
+                                "SchemaVersion",
+                                new
+                                {
+                                    Version = OutboxRecord.SchemaVersion,
+                                }
                             }
                         }
                     },

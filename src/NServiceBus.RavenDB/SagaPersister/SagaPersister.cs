@@ -19,19 +19,22 @@ namespace NServiceBus.Persistence.RavenDB
                 return;
             }
 
+            var container = new SagaDataContainer
+            {
+                Id = DocumentIdForSagaData(documentSession, sagaData),
+                Data = sagaData
+            };
+
             if (correlationProperty == null)
             {
                 return;
             }
 
-            var container = new SagaDataContainer
-            {
-                Id = DocumentIdForSagaData(documentSession, sagaData),
-                Data = sagaData,
-                IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value)
-            };
+            container.IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value);
+
             await documentSession.StoreAsync(container, string.Empty, container.Id).ConfigureAwait(false);
-            documentSession.StoreVersionInMetadata(container);
+            documentSession.StoreSchemaVersionInMetadata(container);
+
             var sagaUniqueIdentity = new SagaUniqueIdentity
             {
                 Id = container.IdentityDocId,
@@ -39,16 +42,23 @@ namespace NServiceBus.Persistence.RavenDB
                 UniqueValue = correlationProperty.Value,
                 SagaDocId = container.Id
             };
-            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: string.Empty, id: container.IdentityDocId).ConfigureAwait(false);
-            documentSession.StoreVersionInMetadata(sagaUniqueIdentity);
+
+            await documentSession.StoreAsync(
+                    sagaUniqueIdentity,
+                    changeVector: string.Empty,
+                    id: container.IdentityDocId)
+                .ConfigureAwait(false);
+
+            documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
         }
 
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
-            // in case we update the saga with a new persister
+            // store the schema version in case it has changed
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
             var documentSession = session.RavenSession();
-            documentSession.StoreVersionInMetadata(container);
+            documentSession.StoreSchemaVersionInMetadata(container);
+           
             // dirty tracking will do the rest for us
             return Task.CompletedTask;
         }

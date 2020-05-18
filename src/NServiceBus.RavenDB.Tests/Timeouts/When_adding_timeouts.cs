@@ -6,8 +6,8 @@
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
     using Raven.Client.Documents;
-    using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
-    using Timeout = NServiceBus.TimeoutPersisters.RavenDB.TimeoutData;
+    using CoreTimeoutData = NServiceBus.Timeout.Core.TimeoutData;
+    using RavenDBTimeoutData = NServiceBus.TimeoutPersisters.RavenDB.TimeoutData;
 
     public class When_adding_timeouts : RavenDBPersistenceTestBase
     {
@@ -15,7 +15,7 @@
         public async Task Add_WhenNoIdProvided_ShouldSetDbGeneratedTimeoutId()
         {
             var persister = new TimeoutPersister(store);
-            var timeout = new TimeoutData { Id = null };
+            var timeout = new CoreTimeoutData { Id = null };
 
             await persister.Add(timeout, new ContextBag());
             Assert.IsNotNull(timeout.Id);
@@ -30,7 +30,7 @@
             var persister = new TimeoutPersister(store);
 
             var timeoutId = Guid.NewGuid().ToString();
-            var timeout = new TimeoutData { Id = timeoutId };
+            var timeout = new CoreTimeoutData { Id = timeoutId };
 
             await persister.Add(timeout, new ContextBag());
             Assert.AreNotEqual(timeoutId, timeout.Id);
@@ -45,7 +45,7 @@
             var persister = new TimeoutPersister(store);
 
             var timeoutId = Guid.NewGuid().ToString();
-            var timeout = new TimeoutData { Id = timeoutId };
+            var timeout = new CoreTimeoutData { Id = timeoutId };
 
             await persister.Add(timeout, new ContextBag());
 
@@ -53,13 +53,13 @@
 
             using (var session = store.OpenAsyncSession())
             {
-                var subscriptions = await session
-                    .Query<TimeoutData>()
+                var ravenDBTimeoutData = await session
+                    .Query<RavenDBTimeoutData>()
                     .SingleOrDefaultAsync();
 
-                var metadata = session.Advanced.GetMetadataFor(subscriptions);
+                var metadata = session.Advanced.GetMetadataFor(ravenDBTimeoutData);
 
-                Assert.AreEqual(Timeout.SchemaVersion.ToString(3), metadata[SessionVersionExtensions.TimeoutSchemaVersionMetadataKey]);
+                Assert.AreEqual(RavenDBTimeoutData.SchemaVersion, metadata[SchemaVersionExtensions.TimeoutDataSchemaVersionMetadataKey]);
             }
         }
     }
