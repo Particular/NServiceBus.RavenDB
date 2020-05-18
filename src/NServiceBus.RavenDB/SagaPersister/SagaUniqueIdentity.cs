@@ -42,5 +42,7 @@ namespace NServiceBus.RavenDB.Persistence.SagaPersister
                 return id;
             }
         }
+
+        internal static readonly string SchemaVersion = "1.0.0";
     }
 }

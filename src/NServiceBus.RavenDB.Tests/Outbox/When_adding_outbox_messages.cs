@@ -99,6 +99,33 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         }
 
         [Test]
+        public async Task Should_save_schema_version()
+        {
+            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var context = new ContextBag();
+            var incomingMessageId = SimulateIncomingMessage(context).MessageId;
+            var outboxMessage = new OutboxMessage(incomingMessageId, new[] { new TransportOperation("foo", default, default, default) });
+
+            using (var transaction = await persister.BeginTransaction(context))
+            {
+                await persister.Store(outboxMessage, transaction, context);
+                await transaction.Commit();
+            }
+
+            WaitForIndexing();
+
+            using (var session = store.OpenAsyncSession())
+            {
+                var result = await session.Query<OutboxRecord>()
+                    .SingleOrDefaultAsync(record => record.MessageId == incomingMessageId);
+
+                var metadata = session.Advanced.GetMetadataFor(result);
+
+                Assert.AreEqual(OutboxRecord.SchemaVersion, metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey]);
+            }
+        }
+
+        [Test]
         public async Task Should_update_dispatched_flag()
         {
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
@@ -120,10 +147,10 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             WaitForIndexing();
 
-            using (var s = store.OpenAsyncSession())
+            using (var session = store.OpenAsyncSession())
             {
-                var result = await s.Query<OutboxRecord>()
-                    .SingleOrDefaultAsync(o => o.MessageId == incomingMessage.MessageId);
+                var result = await session.Query<OutboxRecord>()
+                    .SingleOrDefaultAsync(record => record.MessageId == incomingMessage.MessageId);
 
                 Assert.NotNull(result);
                 Assert.True(result.Dispatched);

@@ -24,6 +24,7 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 var timeoutData = new Timeout(timeout);
                 await session.StoreAsync(timeoutData).ConfigureAwait(false);
+                session.StoreSchemaVersionInMetadata(timeoutData);
                 await session.SaveChangesAsync().ConfigureAwait(false);
                 timeout.Id = timeoutData.Id;
             }

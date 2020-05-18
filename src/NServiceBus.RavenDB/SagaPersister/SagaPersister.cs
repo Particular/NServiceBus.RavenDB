@@ -19,36 +19,41 @@ namespace NServiceBus.Persistence.RavenDB
                 return;
             }
 
-            var container = new SagaDataContainer
-            {
-                Id = DocumentIdForSagaData(documentSession, sagaData),
-                Data = sagaData
-            };
-
             if (correlationProperty == null)
             {
                 return;
             }
 
-            container.IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value);
+            var container = new SagaDataContainer
+            {
+                Id = DocumentIdForSagaData(documentSession, sagaData),
+                Data = sagaData,
+                IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value),
+            };
 
             await documentSession.StoreAsync(container, string.Empty, container.Id).ConfigureAwait(false);
-            await documentSession.StoreAsync(
-                    new SagaUniqueIdentity
-                    {
-                        Id = container.IdentityDocId,
-                        SagaId = sagaData.Id,
-                        UniqueValue = correlationProperty.Value,
-                        SagaDocId = container.Id
-                    },
-                    changeVector: string.Empty,
-                    id: container.IdentityDocId)
-                .ConfigureAwait(false);
+            documentSession.StoreSchemaVersionInMetadata(container);
+
+            var sagaUniqueIdentity = new SagaUniqueIdentity
+            {
+                Id = container.IdentityDocId,
+                SagaId = sagaData.Id,
+                UniqueValue = correlationProperty.Value,
+                SagaDocId = container.Id
+            };
+
+            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: string.Empty, id: container.IdentityDocId).ConfigureAwait(false);
+            documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
         }
 
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
-            //no-op since the dirty tracking will handle the update for us
+            // store the schema version in case it has changed
+            var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
+            var documentSession = session.RavenSession();
+            documentSession.StoreSchemaVersionInMetadata(container);
+
+            // dirty tracking will do the rest for us
             return Task.CompletedTask;
         }
 
@@ -118,7 +123,7 @@ namespace NServiceBus.Persistence.RavenDB
             return Task.CompletedTask;
         }
 
-        static string DocumentIdForSagaData(IAsyncDocumentSession documentSession, IContainSagaData sagaData)
+        internal static string DocumentIdForSagaData(IAsyncDocumentSession documentSession, IContainSagaData sagaData)
         {
             return DocumentIdForSagaData(documentSession, sagaData.GetType(), sagaData.Id);
         }
