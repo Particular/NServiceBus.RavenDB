@@ -111,18 +111,10 @@ this['@metadata']['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey
                         Values =
                         {
                             {
-                                "DispatchedAt",
-                                new
-                                {
-                                    Now = DateTime.UtcNow,
-                                }
+                                "DispatchedAt", new { Now = DateTime.UtcNow }
                             },
                             {
-                                "SchemaVersion",
-                                new
-                                {
-                                    Version = OutboxRecord.SchemaVersion,
-                                }
+                                "SchemaVersion", new { Version = OutboxRecord.SchemaVersion }
                             }
                         }
                     },

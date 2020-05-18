@@ -147,10 +147,10 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             WaitForIndexing();
 
-            using (var s = store.OpenAsyncSession())
+            using (var session = store.OpenAsyncSession())
             {
-                var result = await s.Query<OutboxRecord>()
-                    .SingleOrDefaultAsync(o => o.MessageId == incomingMessage.MessageId);
+                var result = await session.Query<OutboxRecord>()
+                    .SingleOrDefaultAsync(record => record.MessageId == incomingMessage.MessageId);
 
                 Assert.NotNull(result);
                 Assert.True(result.Dispatched);

@@ -19,18 +19,17 @@ namespace NServiceBus.Persistence.RavenDB
                 return;
             }
 
-            var container = new SagaDataContainer
-            {
-                Id = DocumentIdForSagaData(documentSession, sagaData),
-                Data = sagaData
-            };
-
             if (correlationProperty == null)
             {
                 return;
             }
 
-            container.IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value);
+            var container = new SagaDataContainer
+            {
+                Id = DocumentIdForSagaData(documentSession, sagaData),
+                Data = sagaData,
+                IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value),
+            };
 
             await documentSession.StoreAsync(container, string.Empty, container.Id).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(container);
@@ -43,12 +42,7 @@ namespace NServiceBus.Persistence.RavenDB
                 SagaDocId = container.Id
             };
 
-            await documentSession.StoreAsync(
-                    sagaUniqueIdentity,
-                    changeVector: string.Empty,
-                    id: container.IdentityDocId)
-                .ConfigureAwait(false);
-
+            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: string.Empty, id: container.IdentityDocId).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
         }
 
@@ -58,7 +52,7 @@ namespace NServiceBus.Persistence.RavenDB
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
             var documentSession = session.RavenSession();
             documentSession.StoreSchemaVersionInMetadata(container);
-           
+
             // dirty tracking will do the rest for us
             return Task.CompletedTask;
         }
