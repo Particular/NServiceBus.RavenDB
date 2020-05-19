@@ -21,7 +21,9 @@
 
             context.Container.ConfigureComponent(
                 builder => new OutboxPersister(context.Settings.EndpointName(), builder.Build<IOpenTenantAwareRavenSessions>()),
-                DependencyLifecycle.InstancePerCall);
+                // for now needs rebase anyway
+                var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
+                return new OutboxPersister(endpointName, b.Build<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData);
 
             var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? TimeSpan.FromMinutes(1);
             var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? TimeSpan.FromDays(7);
