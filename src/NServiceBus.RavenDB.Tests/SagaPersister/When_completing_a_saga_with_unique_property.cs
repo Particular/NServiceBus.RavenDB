@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using NServiceBus;
+using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
@@ -23,7 +24,7 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
         {
             Id = sagaId
         };
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
 
         await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
         await session.SaveChangesAsync().ConfigureAwait(false);

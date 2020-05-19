@@ -1,11 +1,14 @@
 namespace NServiceBus.Persistence.RavenDB
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.Sagas;
+    using Raven.Client.Documents;
     using Raven.Client.Documents.Commands.Batches;
+    using Raven.Client.Documents.Operations.CompareExchange;
     using Raven.Client.Documents.Session;
 
     class SagaPersister : ISagaPersister
@@ -62,6 +65,20 @@ namespace NServiceBus.Persistence.RavenDB
         {
             var documentSession = session.RavenSession();
             var docId = DocumentIdForSagaData(documentSession, typeof(T), sagaId);
+
+            // TODO: currently always pessimistic
+            var index = await AcquireLease(documentSession.Advanced.DocumentStore, docId).ConfigureAwait(false);
+            if (context.TryGet<SagaDataLeaseHolder>(out var sagaDataLeaseHolder))
+            {
+                sagaDataLeaseHolder.NamesAndIndex.Add(Tuple.Create(docId, index));
+            }
+            else
+            {
+                var holder = new SagaDataLeaseHolder();
+                holder.NamesAndIndex.Add(Tuple.Create(docId, index));
+                context.Set(holder);
+            }
+
             var container = await documentSession.LoadAsync<SagaDataContainer>(docId).ConfigureAwait(false);
 
             if (container == null)
@@ -93,6 +110,19 @@ namespace NServiceBus.Persistence.RavenDB
 
             documentSession.Advanced.Evict(lookup);
 
+            // TODO: currently always pessimistic
+            var index = await AcquireLease(documentSession.Advanced.DocumentStore, lookup.SagaDocId).ConfigureAwait(false);
+            if (context.TryGet<SagaDataLeaseHolder>(out var sagaDataLeaseHolder))
+            {
+                sagaDataLeaseHolder.NamesAndIndex.Add(Tuple.Create(lookup.SagaDocId, index));
+            }
+            else
+            {
+                var holder = new SagaDataLeaseHolder();
+                holder.NamesAndIndex.Add(Tuple.Create(lookup.SagaDocId, index));
+                context.Set(holder);
+            }
+
             // If we have a saga id we can just load it, should have been included in the round-trip already
             var container = await documentSession.LoadAsync<SagaDataContainer>(lookup.SagaDocId).ConfigureAwait(false);
 
@@ -123,6 +153,58 @@ namespace NServiceBus.Persistence.RavenDB
             return Task.CompletedTask;
         }
 
+        async Task<long> AcquireLease(IDocumentStore store, string sagaDataId)
+        {
+            // TODO: configurable
+            var transactionTimeout = TimeSpan.FromSeconds(60);
+            var leaseLockTime = TimeSpan.FromSeconds(60);
+            using (var cancellationTokenSource = new CancellationTokenSource(transactionTimeout))
+            {
+                var token = cancellationTokenSource.Token;
+                while (!token.IsCancellationRequested)
+                {
+                    var resource = new SagaDataLease { ReservedUntil = DateTime.UtcNow.Add(leaseLockTime) };
+
+                    // TODO: check cancellation logic and exception bubbling
+                    var saveResult = await store.Operations.SendAsync(
+                        new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataId, resource, 0), token: CancellationToken.None)
+                        .ConfigureAwait(false);
+
+                    if (saveResult.Successful)
+                    {
+                        // resourceName wasn't present - we managed to reserve
+                        return saveResult.Index;
+                    }
+
+                    // At this point, Put operation failed - someone else owns the lock or lock time expired
+                    if (saveResult.Value.ReservedUntil < DateTime.UtcNow)
+                    {
+                        // Time expired - Update the existing key with the new value
+                        // TODO: check cancellation logic and exception bubbling
+                        var takeLockWithTimeoutResult = await store.Operations.SendAsync(
+                            new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataId, resource, saveResult.Index), token: CancellationToken.None)
+                            .ConfigureAwait(false);
+
+                        if (takeLockWithTimeoutResult.Successful)
+                        {
+                            return takeLockWithTimeoutResult.Index;
+                        }
+                    }
+
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), token).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                }
+
+                throw new TimeoutException($"Unable to acquire exclusive write lock for saga with id '{sagaDataId}'.");
+            }
+        }
+
         internal static string DocumentIdForSagaData(IAsyncDocumentSession documentSession, IContainSagaData sagaData)
         {
             return DocumentIdForSagaData(documentSession, sagaData.GetType(), sagaData.Id);
@@ -136,5 +218,7 @@ namespace NServiceBus.Persistence.RavenDB
         }
 
         const string SagaContainerContextKeyPrefix = "SagaDataContainer:";
+        const string SagaLeaseKeyPrefix = "SagaDataContainerLease:";
+        static Random random = new Random();
     }
 }
