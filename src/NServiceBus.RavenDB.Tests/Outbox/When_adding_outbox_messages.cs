@@ -2,13 +2,16 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
+    using Raven.Client;
     using Raven.Client.Documents;
     using Raven.Client.Exceptions;
     using Raven.Client.Exceptions.Documents.Session;
@@ -28,7 +31,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_throw_if_trying_to_insert_same_messageid_concurrently()
         {
-            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener(), Timeout.InfiniteTimeSpan);
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
 
@@ -48,7 +51,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_throw_if_trying_to_insert_same_messageid()
         {
-            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener(), Timeout.InfiniteTimeSpan);
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
 
@@ -75,7 +78,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_save_with_not_dispatched()
         {
-            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener(), Timeout.InfiniteTimeSpan);
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
 
@@ -101,7 +104,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_save_schema_version()
         {
-            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener(), Timeout.InfiniteTimeSpan);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxMessage = new OutboxMessage(incomingMessageId, new[] { new TransportOperation("foo", default, default, default) });
@@ -128,7 +131,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_update_dispatched_flag()
         {
-            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener(), Timeout.InfiniteTimeSpan);
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
 
@@ -152,15 +155,20 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 var result = await session.Query<OutboxRecord>()
                     .SingleOrDefaultAsync(record => record.MessageId == incomingMessage.MessageId);
 
+                var metadata = session.Advanced.GetMetadataFor(result);
+
                 Assert.NotNull(result);
                 Assert.True(result.Dispatched);
+                Assert.IsEmpty(result.TransportOperations);
+                Assert.AreEqual(OutboxRecord.SchemaVersion, metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey]);
+                Assert.False(metadata.Keys.Contains(Constants.Documents.Metadata.Expires)); // was set to Timeout.InfiniteTimeSpan
             }
         }
 
         [Test]
         public async Task Should_get_messages()
         {
-            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener(), Timeout.InfiniteTimeSpan);
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
 
@@ -197,7 +205,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_set_messages_as_dispatched()
         {
-            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var timeToKeepDeduplicationData = TimeSpan.FromDays(1);
+            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener(), timeToKeepDeduplicationData);
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
 
@@ -228,16 +237,22 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             using (var session = OpenAsyncSession())
             {
                 var result = await session.LoadAsync<OutboxRecord>("Outbox/TestEndpoint/" + incomingMessage.MessageId);
+                var metadata = session.Advanced.GetMetadataFor(result);
 
                 Assert.NotNull(result);
                 Assert.True(result.Dispatched);
+                Assert.IsEmpty(result.TransportOperations);
+                Assert.AreEqual(OutboxRecord.SchemaVersion, metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey]);
+
+                var expiry = DateTime.Parse((string)metadata[Constants.Documents.Metadata.Expires], null, DateTimeStyles.RoundtripKind);
+                Assert.That(expiry, Is.EqualTo(DateTime.UtcNow.Add(timeToKeepDeduplicationData)).Within(TimeSpan.FromHours(1.0)));
             }
         }
 
         [Test]
         public async Task Should_filter_invalid_docid_character()
         {
-            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener(), Timeout.InfiniteTimeSpan);
 
             var guid = Guid.NewGuid();
             var messageId = $@"{guid}\12345";
