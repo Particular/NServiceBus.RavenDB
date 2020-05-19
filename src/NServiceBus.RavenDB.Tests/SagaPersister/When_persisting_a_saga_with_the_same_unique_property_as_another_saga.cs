@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using NServiceBus;
+using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
@@ -23,7 +24,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
                 UniqueString = uniqueString
             };
 
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
 
             await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), synchronizedSession, options);
             await session.SaveChangesAsync().ConfigureAwait(false);
@@ -31,17 +32,15 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
 
         var exception = await Catch<ConcurrencyException>(async () =>
         {
-            using (var session2 = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+            options = this.CreateContextWithAsyncSessionPresent(out session);
+            synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var saga2 = new SagaData
             {
-                var synchronizedSession = new RavenDBSynchronizedStorageSession(session2);
-                var saga2 = new SagaData
-                {
-                    Id = Guid.NewGuid(),
-                    UniqueString = uniqueString
-                };
-                await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), synchronizedSession, options);
-                await session2.SaveChangesAsync().ConfigureAwait(false);
-            }
+                Id = Guid.NewGuid(),
+                UniqueString = uniqueString
+            };
+            await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), synchronizedSession, options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
         });
 
         Assert.IsNotNull(exception);

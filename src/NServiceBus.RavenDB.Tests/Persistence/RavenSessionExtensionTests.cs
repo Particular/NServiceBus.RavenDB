@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.RavenDB.Tests.Persistence
 {
+    using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Testing;
     using NUnit.Framework;
@@ -14,7 +15,7 @@
                 var store = db.NewStore().Initialize();
                 var session = store.OpenAsyncSession();
 
-                var storageSession = new RavenDBSynchronizedStorageSession(session);
+                var storageSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
 
                 var session2 = storageSession.RavenSession();
 

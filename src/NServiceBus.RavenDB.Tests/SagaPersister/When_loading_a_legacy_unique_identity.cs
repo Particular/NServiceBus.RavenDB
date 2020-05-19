@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NServiceBus;
+using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
@@ -31,7 +32,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         {
             var persister = new SagaPersister();
 
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
 
             var saga = await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options);
 

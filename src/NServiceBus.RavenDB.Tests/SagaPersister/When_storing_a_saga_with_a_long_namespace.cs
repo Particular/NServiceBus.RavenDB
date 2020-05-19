@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using NServiceBus;
+using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
@@ -20,7 +21,7 @@ public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestB
                 Id = Guid.NewGuid(),
                 UniqueString = uniqueString
             };
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
 
             await persister.Save(saga, this.CreateMetadata<SomeSaga>(saga), synchronizedSession, options);
             await session.SaveChangesAsync().ConfigureAwait(false);

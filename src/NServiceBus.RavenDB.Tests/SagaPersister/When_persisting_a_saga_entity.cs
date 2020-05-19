@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using NServiceBus;
+using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
@@ -22,7 +23,7 @@ public class When_persisting_a_saga_entity : RavenDBPersistenceTestBase
         var persister = new SagaPersister();
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var context))
         {
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
 
             // act
             await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, context);
