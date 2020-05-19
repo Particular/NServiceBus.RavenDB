@@ -2,6 +2,7 @@
 {
     using System;
     using NServiceBus.Configuration.AdvancedExtensibility;
+    using NServiceBus.Outbox;
     using NServiceBus.Persistence.RavenDB;
 
     /// <summary>
@@ -16,7 +17,7 @@
         /// <param name="timeToKeepDeduplicationData">The time to keep the deduplication data.
         /// The cleanup process removes entries older than the specified time to keep deduplication data, therefore the time span cannot be negative</param>
         /// <returns>The configuration</returns>
-        public static EndpointConfiguration SetTimeToKeepDeduplicationData(this EndpointConfiguration configuration, TimeSpan timeToKeepDeduplicationData)
+        public static void SetTimeToKeepDeduplicationData(this OutboxSettings configuration, TimeSpan timeToKeepDeduplicationData)
         {
             var now = DateTime.UtcNow;
             if (now - timeToKeepDeduplicationData >= now)
@@ -25,16 +26,15 @@
             }
 
             configuration.GetSettings().Set(RavenDbOutboxStorage.TimeToKeepDeduplicationData, timeToKeepDeduplicationData);
-            return configuration;
         }
 
         /// <summary>
         /// Sets the frequency to run the deduplication data cleanup task.
         /// </summary>
         /// <param name="configuration">The configuration being extended</param>
-        /// <param name="frequencyToRunDeduplicationDataCleanup">The frequency to run the deduplication data cleanup task. By specifying <code>System.Threading.Timeout.InfiniteTimeSpan</code> (-1 milliseconds) the cleanup task will never run.</param>
+        /// <param name="frequencyToRunDeduplicationDataCleanup">The frequency to run the deduplication data cleanup task. By specifying <code>System.Threading.Timeout.InfiniteTimeSpan</code> (-1 milliseconds) the cleanup task will never run. The default cleanup interval is 60 seconds.</param>
         /// <returns>The configuration</returns>
-        public static EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this EndpointConfiguration configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
+        public static void SetFrequencyToRunDeduplicationDataCleanup(this OutboxSettings configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
         {
             if (frequencyToRunDeduplicationDataCleanup <= TimeSpan.Zero && frequencyToRunDeduplicationDataCleanup != System.Threading.Timeout.InfiniteTimeSpan)
             {
@@ -42,7 +42,47 @@
             }
 
             configuration.GetSettings().Set(RavenDbOutboxStorage.FrequencyToRunDeduplicationDataCleanup, frequencyToRunDeduplicationDataCleanup);
-            return configuration;
+        }
+
+        /// <summary>
+        /// Enables document expiration on the database managed by the document store. The expiration cleanup interval can be set by using <see cref="SetFrequencyToRunDeduplicationDataCleanup(OutboxSettings, TimeSpan)"/>.
+        /// </summary>
+        /// <param name="configuration">The configuration being extended</param>
+        /// <returns>The configuration</returns>
+        public static void EnableDocumentExpiration(this OutboxSettings configuration)
+        {
+            configuration.GetSettings().Set(RavenDbOutboxStorage.EnableDocumentationExpiration, true);
+        }
+
+        /// <summary>
+        /// Sets the time to keep the deduplication data to the specified time span.
+        /// </summary>
+        /// <param name="configuration">The configuration being extended</param>
+        /// <param name="timeToKeepDeduplicationData">The time to keep the deduplication data.
+        /// The cleanup process removes entries older than the specified time to keep deduplication data, therefore the time span cannot be negative</param>
+        /// <returns>The configuration</returns>
+        [ObsoleteEx(
+            Message = "Use `SetTimeToKeepDeduplicationData` available on the `OutboxSettings` instead.",
+            TreatAsErrorFromVersion = "6.0.0",
+            RemoveInVersion = "7.0.0")]
+        public static EndpointConfiguration SetTimeToKeepDeduplicationData(this EndpointConfiguration configuration, TimeSpan timeToKeepDeduplicationData)
+        {
+            throw new NotImplementedException("Use `SetTimeToKeepDeduplicationData` available on the `OutboxSettings` instead.");
+        }
+
+        /// <summary>
+        /// Sets the frequency to run the deduplication data cleanup task.
+        /// </summary>
+        /// <param name="configuration">The configuration being extended</param>
+        /// <param name="frequencyToRunDeduplicationDataCleanup">The frequency to run the deduplication data cleanup task. By specifying <code>System.Threading.Timeout.InfiniteTimeSpan</code> (-1 milliseconds) the cleanup task will never run. The default cleanup interval is 60 seconds.</param>
+        /// <returns>The configuration</returns>
+        [ObsoleteEx(
+            Message = "Use `SetFrequencyToRunDeduplicationDataCleanup` available on the `OutboxSettings` instead.",
+            TreatAsErrorFromVersion = "6.0.0",
+            RemoveInVersion = "7.0.0")]
+        public static EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this EndpointConfiguration configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
+        {
+            throw new NotImplementedException("Use `SetFrequencyToRunDeduplicationDataCleanup` available on the `OutboxSettings` instead.");
         }
     }
 }

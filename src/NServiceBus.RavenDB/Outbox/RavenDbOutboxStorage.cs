@@ -43,6 +43,8 @@
 
         internal const string TimeToKeepDeduplicationData = "Outbox.TimeToKeepDeduplicationData";
         internal const string FrequencyToRunDeduplicationDataCleanup = "Outbox.FrequencyToRunDeduplicationDataCleanup";
+        internal const string EnableDocumentationExpiration = "Outbox.EnableDocumentationExpiration";
+
 
         class OutboxCleaner : FeatureStartupTask
         {
