@@ -27,16 +27,11 @@
                 {
                     var store = DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(context.Settings, builder);
 
-                    var persister = new SubscriptionPersister(store);
-
-                    if (doNotCacheSubscriptions)
+                    return new SubscriptionPersister(store)
                     {
-                        persister.DisableAggressiveCaching = true;
-                    }
-
-                    persister.AggressiveCacheDuration = cacheSubscriptionsFor;
-
-                    return persister;
+                        DisableAggressiveCaching = doNotCacheSubscriptions,
+                        AggressiveCacheDuration = cacheSubscriptionsFor,
+                    };
                 },
                 DependencyLifecycle.SingleInstance);
         }
