@@ -91,7 +91,9 @@ namespace NServiceBus.Persistence.RavenDB
             var lookupId = SagaUniqueIdentity.FormatId(typeof(T), propertyName, propertyValue);
 
             var lookup = await documentSession
-                .Include("SagaDocId") //tell raven to pull the saga doc as well to save us a round-trip
+                // when doing pessimistic locking we can include the saga data
+                // TODO: This code needs to be changed so that we can opt in to loading documents
+                //.Include("SagaDocId") //tell raven to pull the saga doc as well to save us a round-trip
                 .LoadAsync<SagaUniqueIdentity>(lookupId)
                 .ConfigureAwait(false);
 

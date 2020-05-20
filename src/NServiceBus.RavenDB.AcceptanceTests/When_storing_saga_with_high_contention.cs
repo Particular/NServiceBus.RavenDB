@@ -38,7 +38,7 @@ using System;
 
             public TimeSpan Elapsed => Watch.Elapsed;
 
-            public int NumberOfMessages { get; } = 4;
+            public int NumberOfMessages { get; } = 20;
 
             public long NumberOfRetries => Interlocked.Read(ref numberOfRetries);
 
