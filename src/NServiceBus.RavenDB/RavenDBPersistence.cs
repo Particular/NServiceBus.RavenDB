@@ -15,11 +15,6 @@
         /// </summary>
         public RavenDBPersistence()
         {
-            Defaults(s =>
-            {
-                s.EnableFeatureByDefault<RavenDbStorageSession>();
-            });
-
             Supports<StorageType.GatewayDeduplication>(s => s.EnableFeatureByDefault<RavenDbGatewayDeduplication>());
             Supports<StorageType.Timeouts>(s => s.EnableFeatureByDefault<RavenDbTimeoutStorage>());
             Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<RavenDbSagaStorage>());
