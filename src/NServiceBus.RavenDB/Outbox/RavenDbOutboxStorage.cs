@@ -19,14 +19,11 @@
             DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Outbox>(context.Settings)
                 .CreateIndexOnInitialization(new OutboxRecordsIndex());
 
-            context.Container.ConfigureComponent(
-                builder => new OutboxPersister(context.Settings.EndpointName(), builder.Build<IOpenTenantAwareRavenSessions>()),
-                // for now needs rebase anyway
-                var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
-                return new OutboxPersister(endpointName, b.Build<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData);
-
             var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? TimeSpan.FromMinutes(1);
             var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? TimeSpan.FromDays(7);
+
+            context.Container.ConfigureComponent(builder =>
+                new OutboxPersister(context.Settings.EndpointName(), builder.Build<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData), DependencyLifecycle.InstancePerCall);
 
             context.RegisterStartupTask(builder =>
             {
@@ -46,7 +43,6 @@
         internal const string TimeToKeepDeduplicationData = "Outbox.TimeToKeepDeduplicationData";
         internal const string FrequencyToRunDeduplicationDataCleanup = "Outbox.FrequencyToRunDeduplicationDataCleanup";
         internal const string EnableDocumentationExpiration = "Outbox.EnableDocumentationExpiration";
-
 
         class OutboxCleaner : FeatureStartupTask
         {
@@ -119,13 +115,14 @@
                 }
             }
 
-            static readonly ILog logger = LogManager.GetLogger<OutboxCleaner>();
             readonly OutboxRecordsCleaner cleaner;
             Task cleanupTask;
             TimeSpan timeToKeepDeduplicationData;
             TimeSpan frequencyToRunDeduplicationDataCleanup;
             CancellationTokenSource cancellationTokenSource;
             CancellationToken cancellationToken;
+
+            static readonly ILog logger = LogManager.GetLogger<OutboxCleaner>();
         }
     }
 }
