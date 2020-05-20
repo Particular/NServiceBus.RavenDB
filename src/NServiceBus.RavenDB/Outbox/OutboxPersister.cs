@@ -1,11 +1,13 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.RavenDB.Outbox;
     using NServiceBus.Transport;
+    using Raven.Client;
     using Raven.Client.Documents.Commands.Batches;
     using Raven.Client.Documents.Operations;
     using Raven.Client.Documents.Session;
@@ -13,10 +15,11 @@
 
     class OutboxPersister : IOutboxStorage
     {
-        public OutboxPersister(string endpointName, IOpenTenantAwareRavenSessions sessionCreator)
+        public OutboxPersister(string endpointName, IOpenTenantAwareRavenSessions sessionCreator, TimeSpan timeToKeepDeduplicationData)
         {
             this.endpointName = endpointName;
             this.sessionCreator = sessionCreator;
+            this.timeToKeepDeduplicationData = timeToKeepDeduplicationData;
         }
 
         public async Task<OutboxMessage> Get(string messageId, ContextBag options)
@@ -107,7 +110,10 @@ $@"if(this.Dispatched === true)
 this.Dispatched = true
 this.DispatchedAt = args.DispatchedAt.Now
 this.TransportOperations = []
-this['@metadata']['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey}'] = args.SchemaVersion.Version",
+this['@metadata']['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey}'] = args.SchemaVersion.Version
+if(args.Expire.Should === false)
+  return;
+this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
                         Values =
                         {
                             {
@@ -115,6 +121,9 @@ this['@metadata']['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey
                             },
                             {
                                 "SchemaVersion", new { Version = OutboxRecord.SchemaVersion }
+                            },
+                            {
+                                "Expire", new { Should =  timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) }
                             }
                         }
                     },
@@ -137,5 +146,6 @@ this['@metadata']['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey
         TransportOperation[] emptyTransportOperations = new TransportOperation[0];
         OutboxRecord.OutboxOperation[] emptyOutboxOperations = new OutboxRecord.OutboxOperation[0];
         IOpenTenantAwareRavenSessions sessionCreator;
+        TimeSpan timeToKeepDeduplicationData;
     }
 }

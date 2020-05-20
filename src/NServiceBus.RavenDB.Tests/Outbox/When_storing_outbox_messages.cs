@@ -26,7 +26,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id_in_the_same_transaction()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxMessage1 = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
@@ -51,7 +51,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxMessage1 = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
@@ -81,7 +81,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_store_outbox_record_as_not_dispatched()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outgoingMessageId = "outgoingMessageId";
@@ -111,7 +111,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_store_schema_version_in_metadata()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxMessage = new OutboxMessage(incomingMessageId, new[] { new TransportOperation("foo", default, default, default) });
@@ -139,7 +139,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_filter_invalid_docid_character()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
             var context = new ContextBag();
             var incomingMessageId = $@"{Guid.NewGuid()}\12345";
 

@@ -21,7 +21,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_get_the_message()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxOperation = new OutboxRecord.OutboxOperation
