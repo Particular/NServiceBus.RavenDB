@@ -44,7 +44,8 @@
                 {
                     b.CustomConfig((cfg, c) =>
                     {
-                        cfg.EnableOutbox();
+                        var outbox = cfg.EnableOutbox();
+                        outbox.EnableDocumentExpiration();
                         cfg.LimitMessageProcessingConcurrencyTo(1);
                         cfg.Pipeline.Register(new MessageCountingBehavior(c), "Counts all messages processed");
 
