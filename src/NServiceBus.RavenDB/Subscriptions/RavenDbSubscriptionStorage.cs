@@ -13,8 +13,8 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            var doNotCacheSubscriptions = context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DoNotAggressivelyCacheSubscriptionsSettingsKey);
-            var gotCacheSubscriptionsFor = context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.AggressiveCacheDurationSettingsKey, out TimeSpan aggressiveCacheDuration);
+            var doNotCacheSubscriptions = context.Settings.GetOrDefault<bool>(DoNotCacheSubscriptions);
+            var gotCacheSubscriptionsFor = context.Settings.TryGet(CacheSubscriptionsFor, out TimeSpan aggressiveCacheDuration);
 
             context.Settings.AddStartupDiagnosticsSection(
                 "NServiceBus.Persistence.RavenDB.Subscriptions",
@@ -44,6 +44,8 @@
             }, DependencyLifecycle.SingleInstance);
         }
 
+        internal const string DoNotCacheSubscriptions = "RavenDB.DoNotAggressivelyCacheSubscriptions";
+        internal const string CacheSubscriptionsFor = "RavenDB.AggressiveCacheDuration";
         static readonly ILog Log = LogManager.GetLogger<RavenDbSubscriptionStorage>();
     }
 }

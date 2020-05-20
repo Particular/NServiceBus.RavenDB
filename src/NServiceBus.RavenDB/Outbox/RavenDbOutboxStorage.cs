@@ -25,8 +25,8 @@
                 return new OutboxPersister(endpointName, b.Build<IOpenTenantAwareRavenSessions>());
             }, DependencyLifecycle.InstancePerCall);
 
-            var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>("Outbox.FrequencyToRunDeduplicationDataCleanup") ?? TimeSpan.FromMinutes(1);
-            var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>("Outbox.TimeToKeepDeduplicationData") ?? TimeSpan.FromDays(7);
+            var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? TimeSpan.FromMinutes(1);
+            var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? TimeSpan.FromDays(7);
 
             context.RegisterStartupTask(builder =>
             {
@@ -42,6 +42,9 @@
                     TimeToKeepDeduplicationData = timeToKeepDeduplicationData,
                 });
         }
+
+        internal const string TimeToKeepDeduplicationData = "Outbox.TimeToKeepDeduplicationData";
+        internal const string FrequencyToRunDeduplicationDataCleanup = "Outbox.FrequencyToRunDeduplicationDataCleanup";
 
         class OutboxCleaner : FeatureStartupTask
         {
