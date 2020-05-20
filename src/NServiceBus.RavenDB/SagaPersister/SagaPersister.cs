@@ -68,16 +68,8 @@ namespace NServiceBus.Persistence.RavenDB
 
             // TODO: currently always pessimistic
             var index = await AcquireLease(documentSession.Advanced.DocumentStore, docId).ConfigureAwait(false);
-            if (context.TryGet<SagaDataLeaseHolder>(out var sagaDataLeaseHolder))
-            {
-                sagaDataLeaseHolder.NamesAndIndex.Add(Tuple.Create(docId, index));
-            }
-            else
-            {
-                var holder = new SagaDataLeaseHolder();
-                holder.NamesAndIndex.Add(Tuple.Create(docId, index));
-                context.Set(holder);
-            }
+            // only true if we always have synchronized storage session around which is a valid assumption
+            context.Get<SagaDataLeaseHolder>().NamesAndIndex.Add(Tuple.Create(docId, index));
 
             var container = await documentSession.LoadAsync<SagaDataContainer>(docId).ConfigureAwait(false);
 
@@ -112,16 +104,8 @@ namespace NServiceBus.Persistence.RavenDB
 
             // TODO: currently always pessimistic
             var index = await AcquireLease(documentSession.Advanced.DocumentStore, lookup.SagaDocId).ConfigureAwait(false);
-            if (context.TryGet<SagaDataLeaseHolder>(out var sagaDataLeaseHolder))
-            {
-                sagaDataLeaseHolder.NamesAndIndex.Add(Tuple.Create(lookup.SagaDocId, index));
-            }
-            else
-            {
-                var holder = new SagaDataLeaseHolder();
-                holder.NamesAndIndex.Add(Tuple.Create(lookup.SagaDocId, index));
-                context.Set(holder);
-            }
+            // only true if we always have synchronized storage session around which is a valid assumption
+            context.Get<SagaDataLeaseHolder>().NamesAndIndex.Add(Tuple.Create(lookup.SagaDocId, index));
 
             // If we have a saga id we can just load it, should have been included in the round-trip already
             var container = await documentSession.LoadAsync<SagaDataContainer>(lookup.SagaDocId).ConfigureAwait(false);
@@ -163,7 +147,7 @@ namespace NServiceBus.Persistence.RavenDB
                 var token = cancellationTokenSource.Token;
                 while (!token.IsCancellationRequested)
                 {
-                    var resource = new SagaDataLease { ReservedUntil = DateTime.UtcNow.Add(leaseLockTime) };
+                    var resource = new SagaDataLease { ReservedUntil = DateTime.UtcNow.Add(leaseLockTime), LeaseId = sagaDataId};
 
                     // TODO: check cancellation logic and exception bubbling
                     var saveResult = await store.Operations.SendAsync(
@@ -191,6 +175,7 @@ namespace NServiceBus.Persistence.RavenDB
                         }
                     }
 
+                    // TODO: This logic here has some flaws that need to be ironed out
                     try
                     {
                         await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), token).ConfigureAwait(false);

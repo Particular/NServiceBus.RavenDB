@@ -19,7 +19,7 @@
                 ? documentStoreWrapper.DocumentStore.OpenAsyncSession()
                 : documentStoreWrapper.DocumentStore.OpenAsyncSession(databaseName);
 
-            documentSession.Advanced.UseOptimisticConcurrency = true;
+            //documentSession.Advanced.UseOptimisticConcurrency = true;
 
             return documentSession;
         }
