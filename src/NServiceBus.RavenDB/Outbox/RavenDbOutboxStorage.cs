@@ -8,22 +8,16 @@
 
     class RavenDbOutboxStorage : Feature
     {
-        public RavenDbOutboxStorage()
-        {
-            DependsOn<Outbox>();
-        }
+        public RavenDbOutboxStorage() => DependsOn<Outbox>();
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            var endpointName = context.Settings.EndpointName();
-
             DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Outbox>(context.Settings)
                 .CreateIndexOnInitialization(new OutboxRecordsIndex());
 
-            context.Container.ConfigureComponent(b =>
-            {
-                return new OutboxPersister(endpointName, b.Build<IOpenTenantAwareRavenSessions>());
-            }, DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(
+                builder => new OutboxPersister(context.Settings.EndpointName(), builder.Build<IOpenTenantAwareRavenSessions>()),
+                DependencyLifecycle.InstancePerCall);
 
             var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? TimeSpan.FromMinutes(1);
             var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? TimeSpan.FromDays(7);
@@ -53,7 +47,6 @@
                 this.cleaner = cleaner;
                 this.frequencyToRunDeduplicationDataCleanup = frequencyToRunDeduplicationDataCleanup;
                 this.timeToKeepDeduplicationData = timeToKeepDeduplicationData;
-                logger = LogManager.GetLogger<OutboxCleaner>();
             }
 
             protected override Task OnStart(IMessageSession session)
@@ -118,13 +111,13 @@
                 }
             }
 
+            static readonly ILog logger = LogManager.GetLogger<OutboxCleaner>();
+            readonly OutboxRecordsCleaner cleaner;
             Task cleanupTask;
-            OutboxRecordsCleaner cleaner;
             TimeSpan timeToKeepDeduplicationData;
             TimeSpan frequencyToRunDeduplicationDataCleanup;
             CancellationTokenSource cancellationTokenSource;
             CancellationToken cancellationToken;
-            ILog logger;
         }
     }
 }

@@ -29,14 +29,15 @@
             }
             else
             {
-                context.Container.ConfigureComponent<IOpenTenantAwareRavenSessions>(b =>
-                {
-                    var store = DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(context.Settings, b);
-                    var storeWrapper = new DocumentStoreWrapper(store);
-
-                    var dbNameConvention = context.Settings.GetOrDefault<Func<IDictionary<string, string>, string>>(MessageToDatabaseMappingConvention);
-                    return new OpenRavenSessionByDatabaseName(storeWrapper, dbNameConvention);
-                }, DependencyLifecycle.SingleInstance);
+                context.Container.ConfigureComponent<IOpenTenantAwareRavenSessions>(
+                    builder =>
+                    {
+                        var store = DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(context.Settings, builder);
+                        var storeWrapper = new DocumentStoreWrapper(store);
+                        var dbNameConvention = context.Settings.GetOrDefault<Func<IDictionary<string, string>, string>>(MessageToDatabaseMappingConvention);
+                        return new OpenRavenSessionByDatabaseName(storeWrapper, dbNameConvention);
+                    },
+                    DependencyLifecycle.SingleInstance);
 
                 context.Settings.AddStartupDiagnosticsSection(
                     StartupDiagnosticsSectionName,
