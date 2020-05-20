@@ -149,7 +149,7 @@ namespace NServiceBus.Persistence.RavenDB
                 var token = cancellationTokenSource.Token;
                 while (!token.IsCancellationRequested)
                 {
-                    var resource = new SagaDataLease { ReservedUntil = DateTime.UtcNow.Add(leaseLockTime), LeaseId = sagaDataId};
+                    var resource = new SagaDataLease { ReservedUntil = DateTime.UtcNow.Add(leaseLockTime)};
 
                     // TODO: check cancellation logic and exception bubbling
                     var saveResult = await store.Operations.SendAsync(
