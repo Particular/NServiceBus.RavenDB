@@ -45,13 +45,14 @@
         }
 
         /// <summary>
-        /// Enables document expiration on the database managed by the document store. The expiration cleanup interval can be set by using <see cref="SetFrequencyToRunDeduplicationDataCleanup(OutboxSettings, TimeSpan)"/>.
+        /// Enables document expiration on the database managed by the document store.
         /// </summary>
         /// <param name="configuration">The configuration being extended</param>
+        /// <param name="frequencyToRunExpiry">The frequency to run the data expiry in the database on the server. The default is every 60 seconds.</param>
         /// <returns>The configuration</returns>
-        public static void EnableDocumentExpiration(this OutboxSettings configuration)
+        public static void EnableDocumentExpiration(this OutboxSettings configuration, TimeSpan? frequencyToRunExpiry = null)
         {
-            configuration.GetSettings().Set(RavenDbOutboxStorage.EnableDocumentationExpiration, true);
+            configuration.GetSettings().Set(RavenDbOutboxStorage.DocumentationExpirationFrequency, frequencyToRunExpiry ?? TimeSpan.FromMinutes(1));
         }
 
         /// <summary>

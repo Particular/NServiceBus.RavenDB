@@ -27,7 +27,7 @@ namespace NServiceBus
 {
     public class static RavenDBOutboxExtensions
     {
-        public static void EnableDocumentExpiration(this NServiceBus.Outbox.OutboxSettings configuration) { }
+        public static void EnableDocumentExpiration(this NServiceBus.Outbox.OutboxSettings configuration, System.Nullable<System.TimeSpan> frequencyToRunExpiry = null) { }
         public static void SetFrequencyToRunDeduplicationDataCleanup(this NServiceBus.Outbox.OutboxSettings configuration, System.TimeSpan frequencyToRunDeduplicationDataCleanup) { }
         [System.ObsoleteAttribute("Use `SetFrequencyToRunDeduplicationDataCleanup` available on the `OutboxSettings`" +
             " instead. Will be removed in version 7.0.0.", true)]

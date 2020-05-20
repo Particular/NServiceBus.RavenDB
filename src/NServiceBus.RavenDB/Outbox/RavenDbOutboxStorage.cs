@@ -5,6 +5,8 @@
     using System.Threading.Tasks;
     using NServiceBus.Features;
     using NServiceBus.Logging;
+    using Raven.Client.Documents;
+    using Raven.Client.Documents.Operations.Expiration;
 
     class RavenDbOutboxStorage : Feature
     {
@@ -21,10 +23,17 @@
 
             var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? TimeSpan.FromMinutes(1);
             var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? TimeSpan.FromDays(7);
+            var expirationEnabled = context.Settings.HasSetting(DocumentationExpirationFrequency);
+            var expirationFrequency = context.Settings.GetOrDefault<TimeSpan?>(DocumentationExpirationFrequency);
 
             context.Container.ConfigureComponent(builder =>
                 new OutboxPersister(context.Settings.EndpointName(), builder.Build<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData), DependencyLifecycle.InstancePerCall);
 
+            context.RegisterStartupTask(builder =>
+            {
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings, builder);
+                return new Expiration(store, expirationEnabled, expirationFrequency);
+            });
             context.RegisterStartupTask(builder =>
             {
                 var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings, builder);
@@ -35,6 +44,8 @@
                 "NServiceBus.Persistence.RavenDB.Outbox",
                 new
                 {
+                    ExpirationEnabled = expirationEnabled,
+                    ExpirationFrequencySetForDatabase = expirationFrequency,
                     FrequencyToRunDeduplicationDataCleanup = frequencyToRunDeduplicationDataCleanup,
                     TimeToKeepDeduplicationData = timeToKeepDeduplicationData,
                 });
@@ -42,7 +53,50 @@
 
         internal const string TimeToKeepDeduplicationData = "Outbox.TimeToKeepDeduplicationData";
         internal const string FrequencyToRunDeduplicationDataCleanup = "Outbox.FrequencyToRunDeduplicationDataCleanup";
-        internal const string EnableDocumentationExpiration = "Outbox.EnableDocumentationExpiration";
+        internal const string DocumentationExpirationFrequency = "Outbox.DocumentationExpirationFrequency";
+
+        class Expiration : FeatureStartupTask
+        {
+            public Expiration(IDocumentStore store, bool expirationEnabled, TimeSpan? expirationFrequency)
+            {
+                this.expirationEnabled = expirationEnabled;
+                this.expirationFrequency = expirationFrequency;
+                this.store = store;
+            }
+
+            protected override async Task OnStart(IMessageSession session)
+            {
+                if (!expirationEnabled)
+                {
+                    return;
+                }
+
+                try
+                {
+                    await store.Maintenance.SendAsync(new ConfigureExpirationOperation(new ExpirationConfiguration
+                    {
+                        Disabled = false,
+                        DeleteFrequencyInSec = Convert.ToInt64(expirationFrequency.Value.TotalSeconds)
+                    })).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    logger.Warn(
+                        $"Unable to set the expiration frequency to '{expirationFrequency}'. Potentially lacking permissions to execute the required maintenance operation. Make sure to set the expiration frequency on the server in the database directly.", e);
+                }
+            }
+
+            protected override Task OnStop(IMessageSession session)
+            {
+                return Task.CompletedTask;
+            }
+
+            IDocumentStore store;
+            TimeSpan? expirationFrequency;
+            bool expirationEnabled;
+
+            static readonly ILog logger = LogManager.GetLogger<OutboxCleaner>();
+        }
 
         class OutboxCleaner : FeatureStartupTask
         {
@@ -64,7 +118,6 @@
                 cancellationToken = cancellationTokenSource.Token;
 
                 cleanupTask = Task.Run(() => PerformCleanup(), CancellationToken.None);
-
                 return Task.CompletedTask;
             }
 
