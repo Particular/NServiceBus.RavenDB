@@ -2,6 +2,7 @@
 {
     using System;
     using NServiceBus.Configuration.AdvancedExtensibility;
+    using NServiceBus.Persistence.RavenDB;
 
     /// <summary>
     /// Contains extensions methods which allow to configure RavenDB outbox specific configuration
@@ -23,7 +24,7 @@
                 throw new ArgumentOutOfRangeException(nameof(timeToKeepDeduplicationData), "Specify a non-negative TimeSpan. The cleanup process removes entries older than the specified time to keep deduplication data, therefore the time span cannot be negative.");
             }
 
-            configuration.GetSettings().Set("Outbox.TimeToKeepDeduplicationData", timeToKeepDeduplicationData);
+            configuration.GetSettings().Set(RavenDbOutboxStorage.TimeToKeepDeduplicationData, timeToKeepDeduplicationData);
             return configuration;
         }
 
@@ -40,7 +41,7 @@
                 throw new ArgumentOutOfRangeException(nameof(frequencyToRunDeduplicationDataCleanup), "Provide a non-negative TimeSpan to specify cleanup task execution frequency or specify System.Threading.Timeout.InfiniteTimeSpan to disable cleanup.");
             }
 
-            configuration.GetSettings().Set("Outbox.FrequencyToRunDeduplicationDataCleanup", frequencyToRunDeduplicationDataCleanup);
+            configuration.GetSettings().Set(RavenDbOutboxStorage.FrequencyToRunDeduplicationDataCleanup, frequencyToRunDeduplicationDataCleanup);
             return configuration;
         }
     }

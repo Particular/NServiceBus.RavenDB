@@ -12,9 +12,6 @@
     /// </summary>
     public static class RavenDbSubscriptionSettingsExtensions
     {
-        internal const string DoNotAggressivelyCacheSubscriptionsSettingsKey = "RavenDB.DoNotAggressivelyCacheSubscriptions";
-        internal const string AggressiveCacheDurationSettingsKey = "RavenDB.AggressiveCacheDuration";
-
         /// <summary>
         ///     Configures the given document store to be used when storing subscriptions
         /// </summary>
@@ -55,7 +52,7 @@
         /// </summary>
         public static PersistenceExtensions<RavenDBPersistence> DoNotCacheSubscriptions(this PersistenceExtensions<RavenDBPersistence> cfg)
         {
-            cfg.GetSettings().Set(DoNotAggressivelyCacheSubscriptionsSettingsKey, true);
+            cfg.GetSettings().Set(RavenDbSubscriptionStorage.DoNotCacheSubscriptions, true);
             return cfg;
         }
 
@@ -69,7 +66,7 @@
         /// <returns></returns>
         public static PersistenceExtensions<RavenDBPersistence> CacheSubscriptionsFor(this PersistenceExtensions<RavenDBPersistence> cfg, TimeSpan aggressiveCacheDuration)
         {
-            cfg.GetSettings().Set(AggressiveCacheDurationSettingsKey, aggressiveCacheDuration);
+            cfg.GetSettings().Set(RavenDbSubscriptionStorage.CacheSubscriptionsFor, aggressiveCacheDuration);
             return cfg;
         }
 

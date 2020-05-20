@@ -2,7 +2,6 @@
 {
     using System;
     using NServiceBus.Features;
-    using NServiceBus.Logging;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
     class RavenDbSubscriptionStorage : Feature
@@ -13,26 +12,31 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            context.Container.ConfigureComponent<ISubscriptionStorage>(b =>
-            {
-                var store = DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(context.Settings, b);
+            var doNotCacheSubscriptions = context.Settings.GetOrDefault<bool>(DoNotCacheSubscriptions);
+            var cacheSubscriptionsFor = context.Settings.GetOrDefault<TimeSpan?>(CacheSubscriptionsFor) ?? TimeSpan.FromMinutes(1);
 
-                var persister = new SubscriptionPersister(store);
-
-                if (context.Settings.GetOrDefault<bool>(RavenDbSubscriptionSettingsExtensions.DoNotAggressivelyCacheSubscriptionsSettingsKey))
+            context.Settings.AddStartupDiagnosticsSection(
+                "NServiceBus.Persistence.RavenDB.Subscriptions",
+                new
                 {
-                    persister.DisableAggressiveCaching = true;
-                }
+                    DoNotCacheSubscriptions = doNotCacheSubscriptions,
+                    CacheSubscriptionsFor = cacheSubscriptionsFor,
+                });
 
-                if (context.Settings.TryGet(RavenDbSubscriptionSettingsExtensions.AggressiveCacheDurationSettingsKey, out TimeSpan aggressiveCacheDuration))
+            context.Container.ConfigureComponent<ISubscriptionStorage>(builder =>
                 {
-                    persister.AggressiveCacheDuration = aggressiveCacheDuration;
-                }
+                    var store = DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(context.Settings, builder);
 
-                return persister;
-            }, DependencyLifecycle.SingleInstance);
+                    return new SubscriptionPersister(store)
+                    {
+                        DisableAggressiveCaching = doNotCacheSubscriptions,
+                        AggressiveCacheDuration = cacheSubscriptionsFor,
+                    };
+                },
+                DependencyLifecycle.SingleInstance);
         }
 
-        static readonly ILog Log = LogManager.GetLogger<RavenDbSubscriptionStorage>();
+        internal const string DoNotCacheSubscriptions = "RavenDB.DoNotAggressivelyCacheSubscriptions";
+        internal const string CacheSubscriptionsFor = "RavenDB.AggressiveCacheDuration";
     }
 }

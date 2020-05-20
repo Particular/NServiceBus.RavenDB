@@ -14,8 +14,6 @@
     /// </summary>
     public static class RavenDbSettingsExtensions
     {
-        internal const string SharedAsyncSessionSettingsKey = "RavenDbSharedAsyncSession";
-
         /// <summary>
         ///     Configures the storages to use the given document store supplied
         /// </summary>
@@ -80,7 +78,7 @@
             {
                 throw new ArgumentNullException(nameof(getAsyncSessionFunc));
             }
-            cfg.GetSettings().Set(SharedAsyncSessionSettingsKey, getAsyncSessionFunc);
+            cfg.GetSettings().Set(RavenDbStorageSession.SharedAsyncSession, getAsyncSessionFunc);
             return cfg;
         }
 
@@ -95,7 +93,7 @@
         /// <returns>The configuration object.</returns>
         public static PersistenceExtensions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IDictionary<string,string>, string> convention)
         {
-            cfg.GetSettings().Set("RavenDB.SetMessageToDatabaseMappingConvention", convention);
+            cfg.GetSettings().Set(RavenDbStorageSession.MessageToDatabaseMappingConvention, convention);
             return cfg;
         }
 
