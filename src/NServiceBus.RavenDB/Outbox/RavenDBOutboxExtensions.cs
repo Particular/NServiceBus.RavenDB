@@ -14,9 +14,8 @@
         /// Sets the time to keep the deduplication data to the specified time span.
         /// </summary>
         /// <param name="configuration">The configuration being extended</param>
-        /// <param name="timeToKeepDeduplicationData">The time to keep the deduplication data.
+        /// <param name="timeToKeepDeduplicationData">The time to keep the deduplication data. The default time to keep the deduplication data is 7 days.
         /// The cleanup process removes entries older than the specified time to keep deduplication data, therefore the time span cannot be negative</param>
-        /// <returns>The configuration</returns>
         public static void SetTimeToKeepDeduplicationData(this OutboxSettings configuration, TimeSpan timeToKeepDeduplicationData)
         {
             var now = DateTime.UtcNow;
@@ -33,7 +32,7 @@
         /// </summary>
         /// <param name="configuration">The configuration being extended</param>
         /// <param name="frequencyToRunDeduplicationDataCleanup">The frequency to run the deduplication data cleanup task. By specifying <code>System.Threading.Timeout.InfiniteTimeSpan</code> (-1 milliseconds) the cleanup task will never run. The default cleanup interval is 60 seconds.</param>
-        /// <returns>The configuration</returns>
+        /// <remarks>When the document expiration is enabled by using <see cref="EnableDocumentExpiration"/> or by enabling it on the database it is encourage to disable the cleanup task.</remarks>
         public static void SetFrequencyToRunDeduplicationDataCleanup(this OutboxSettings configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
         {
             if (frequencyToRunDeduplicationDataCleanup <= TimeSpan.Zero && frequencyToRunDeduplicationDataCleanup != System.Threading.Timeout.InfiniteTimeSpan)
@@ -49,7 +48,6 @@
         /// </summary>
         /// <param name="configuration">The configuration being extended</param>
         /// <param name="frequencyToRunExpiry">The frequency to run the data expiry in the database on the server. The default is every 60 seconds.</param>
-        /// <returns>The configuration</returns>
         public static void EnableDocumentExpiration(this OutboxSettings configuration, TimeSpan? frequencyToRunExpiry = null)
         {
             configuration.GetSettings().Set(RavenDbOutboxStorage.DocumentationExpirationFrequency, frequencyToRunExpiry ?? TimeSpan.FromMinutes(1));
