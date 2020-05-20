@@ -13,7 +13,7 @@
         protected override void Setup(FeatureConfigurationContext context)
         {
             var doNotCacheSubscriptions = context.Settings.GetOrDefault<bool>(DoNotCacheSubscriptions);
-            var gotCacheSubscriptionsFor = context.Settings.TryGet(CacheSubscriptionsFor, out TimeSpan cacheSubscriptionsFor);
+            var cacheSubscriptionsFor = context.Settings.GetOrDefault<TimeSpan?>(CacheSubscriptionsFor) ?? TimeSpan.FromMinutes(1);
 
             context.Settings.AddStartupDiagnosticsSection(
                 "NServiceBus.Persistence.RavenDB.Subscriptions",
@@ -34,10 +34,7 @@
                         persister.DisableAggressiveCaching = true;
                     }
 
-                    if (gotCacheSubscriptionsFor)
-                    {
-                        persister.AggressiveCacheDuration = cacheSubscriptionsFor;
-                    }
+                    persister.AggressiveCacheDuration = cacheSubscriptionsFor;
 
                     return persister;
                 },

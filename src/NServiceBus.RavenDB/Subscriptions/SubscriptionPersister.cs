@@ -22,7 +22,7 @@ namespace NServiceBus.Persistence.RavenDB
             documentStore = store;
         }
 
-        public TimeSpan AggressiveCacheDuration { get; set; } = TimeSpan.FromMinutes(1);
+        public TimeSpan AggressiveCacheDuration { get; set; }
 
         public bool DisableAggressiveCaching { get; set; }
 
