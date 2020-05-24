@@ -9,8 +9,6 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     [TestFixture]
     public class When_getting_an_outbox_message : RavenDBPersistenceTestBase
     {
-        string testEndpointName = "TestEndpoint";
-
         [SetUp]
         public override void SetUp()
         {
@@ -22,7 +20,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_get_messages()
         {
             // arrange
-            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
 

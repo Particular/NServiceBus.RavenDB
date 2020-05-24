@@ -11,8 +11,6 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     [TestFixture]
     public class When_setting_as_dispatched : RavenDBPersistenceTestBase
     {
-        string testEndpointName = "TestEndpoint";
-
         [SetUp]
         public override void SetUp()
         {
@@ -24,7 +22,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_update_dispatched_flag()
         {
             // arrange
-            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxMessage = new OutboxMessage(incomingMessageId, new[] { new TransportOperation(incomingMessageId, default, default, default) });
@@ -53,7 +51,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_set_messages_as_dispatched()
         {
             // arrange
-            var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
 
