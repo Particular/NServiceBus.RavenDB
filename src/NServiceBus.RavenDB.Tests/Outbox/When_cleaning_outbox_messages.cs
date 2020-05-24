@@ -20,7 +20,7 @@
         }
 
         [Test]
-        public async Task Should_delete_all_OutboxRecords_that_have_been_dispatched()
+        public async Task Should_delete_all_dispatched_outbox_records()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());

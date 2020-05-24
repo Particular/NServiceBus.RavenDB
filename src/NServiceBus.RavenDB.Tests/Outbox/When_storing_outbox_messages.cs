@@ -23,7 +23,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         }
 
         [Test]
-        public async Task Should_throw_if_trying_to_insert_same_messageid_concurrently()
+        public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id_in_the_same_transaction()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
@@ -48,7 +48,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         }
 
         [Test]
-        public async Task Should_throw_if_trying_to_insert_same_messageid()
+        public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
@@ -108,7 +108,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         }
 
         [Test]
-        public async Task Should_save_schema_version()
+        public async Task Should_store_schema_version_in_metadata()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
