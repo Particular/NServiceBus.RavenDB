@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.RavenDB.Tests.Outbox
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
@@ -36,7 +35,7 @@
 
             var outboxMessage = new OutboxMessage(
                 incomingMessage.MessageId,
-                new[] { new TransportOperation(incomingMessage.MessageId, new Dictionary<string, string>(), new byte[1024 * 5], new Dictionary<string, string>()) });
+                new TransportOperation[0]);
 
             using (var transaction = await persister.BeginTransaction(context))
             {

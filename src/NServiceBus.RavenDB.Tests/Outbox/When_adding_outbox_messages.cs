@@ -1,7 +1,6 @@
 namespace NServiceBus.RavenDB.Tests.Outbox
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
@@ -86,7 +85,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             var message = new OutboxMessage(
                 incomingMessage.MessageId,
-                new[] { new TransportOperation(incomingMessage.MessageId, new Dictionary<string, string>(), new byte[1024 * 5], new Dictionary<string, string>()) });
+                new[] { new TransportOperation(incomingMessage.MessageId, default, default, default) });
 
             // act
             using (var transaction = await persister.BeginTransaction(context))
@@ -140,7 +139,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             var message = new OutboxMessage(
                 incomingMessage.MessageId,
-                new[] { new TransportOperation(incomingMessage.MessageId, new Dictionary<string, string>(), new byte[1024 * 5], new Dictionary<string, string>()) });
+                new[] { new TransportOperation(incomingMessage.MessageId, default, default, default) });
 
             using (var transaction = await persister.BeginTransaction(context))
             {
@@ -181,10 +180,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                     {
                         new OutboxRecord.OutboxOperation
                         {
-                            Message = new byte[1024*5],
-                            Headers = new Dictionary<string, string>(),
                             MessageId = incomingMessage.MessageId,
-                            Options = new Dictionary<string, string>()
                         }
                     }
                 };
@@ -223,10 +219,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                         {
                             new OutboxRecord.OutboxOperation
                             {
-                                Message = new byte[1024*5],
-                                Headers = new Dictionary<string, string>(),
                                 MessageId = incomingMessage.MessageId,
-                                Options = new Dictionary<string, string>()
                             }
                         }
                     },
@@ -261,7 +254,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             using (var transaction = await persister.BeginTransaction(context))
             {
-                var transportOperations = new[] { new TransportOperation("test", new Dictionary<string, string>(), new byte[0], new Dictionary<string, string>()) };
+                var transportOperations = new[] { new TransportOperation("test", default, default, default) };
 
                 // act
                 await persister.Store(new OutboxMessage(messageId, transportOperations), transaction, context);
