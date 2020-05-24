@@ -53,12 +53,12 @@
             await cleaner.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));
 
             // assert
-            using (var s = store.OpenAsyncSession())
+            using (var session = store.OpenAsyncSession())
             {
-                var result = await s.Query<OutboxRecord>().ToListAsync();
+                var outboxRecords = await session.Query<OutboxRecord>().ToListAsync();
 
-                Assert.AreEqual(1, result.Count);
-                Assert.AreEqual("NotDispatched", result[0].MessageId);
+                Assert.AreEqual(1, outboxRecords.Count);
+                Assert.AreEqual("NotDispatched", outboxRecords[0].MessageId);
             }
         }
     }

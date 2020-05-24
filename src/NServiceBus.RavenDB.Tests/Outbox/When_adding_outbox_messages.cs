@@ -82,20 +82,20 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
-            var message = new OutboxMessage(incomingMessage.MessageId, new[] { new TransportOperation(incomingMessage.MessageId, default, default, default) });
+            var outboxMessage = new OutboxMessage(incomingMessage.MessageId, new[] { new TransportOperation(incomingMessage.MessageId, default, default, default) });
 
             // act
             using (var transaction = await persister.BeginTransaction(context))
             {
-                await persister.Store(message, transaction, context);
+                await persister.Store(outboxMessage, transaction, context);
                 await transaction.Commit();
             }
 
             // assert
-            var result = await persister.Get(incomingMessage.MessageId, context);
-            var operation = result.TransportOperations.Single();
+            var storedOutboxMessage = await persister.Get(incomingMessage.MessageId, context);
+            var storedOutgoingMessage = storedOutboxMessage.TransportOperations.Single();
 
-            Assert.AreEqual(incomingMessage.MessageId, operation.MessageId);
+            Assert.AreEqual(incomingMessage.MessageId, storedOutgoingMessage.MessageId);
         }
 
         [Test]
@@ -119,8 +119,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             // assert
             using (var session = store.OpenAsyncSession())
             {
-                var result = await session.Query<OutboxRecord>().SingleOrDefaultAsync(record => record.MessageId == incomingMessageId);
-                var metadata = session.Advanced.GetMetadataFor(result);
+                var outboxRecord = await session.Query<OutboxRecord>().SingleOrDefaultAsync(record => record.MessageId == incomingMessageId);
+                var metadata = session.Advanced.GetMetadataFor(outboxRecord);
 
                 Assert.AreEqual(OutboxRecord.SchemaVersion, metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey]);
             }
@@ -133,11 +133,11 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
-            var message = new OutboxMessage(incomingMessage.MessageId, new[] { new TransportOperation(incomingMessage.MessageId, default, default, default) });
+            var outboxMessage = new OutboxMessage(incomingMessage.MessageId, new[] { new TransportOperation(incomingMessage.MessageId, default, default, default) });
 
             using (var transaction = await persister.BeginTransaction(context))
             {
-                await persister.Store(message, transaction, context);
+                await persister.Store(outboxMessage, transaction, context);
                 await transaction.Commit();
             }
 
@@ -148,10 +148,10 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             // assert
             using (var session = store.OpenAsyncSession())
             {
-                var result = await session.Query<OutboxRecord>().SingleOrDefaultAsync(record => record.MessageId == incomingMessage.MessageId);
+                var outboxRecord = await session.Query<OutboxRecord>().SingleOrDefaultAsync(record => record.MessageId == incomingMessage.MessageId);
 
-                Assert.NotNull(result);
-                Assert.True(result.Dispatched);
+                Assert.NotNull(outboxRecord);
+                Assert.True(outboxRecord.Dispatched);
             }
         }
 
@@ -166,25 +166,25 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             //manually store an OutboxRecord to control the OutboxRecordId format
             using (var session = OpenAsyncSession())
             {
-                var newRecord = new OutboxRecord
+                var outboxRecord = new OutboxRecord
                 {
                     MessageId = incomingMessage.MessageId,
                     Dispatched = false,
                     TransportOperations = new[] { new OutboxRecord.OutboxOperation { MessageId = incomingMessage.MessageId, } }
                 };
 
-                var fullDocumentId = "Outbox/TestEndpoint/" + incomingMessage.MessageId;
+                var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessage.MessageId;
 
-                await session.StoreAsync(newRecord, fullDocumentId);
+                await session.StoreAsync(outboxRecord, outboxRecordId);
                 await session.SaveChangesAsync();
             }
 
             // act
-            var result = await persister.Get(incomingMessage.MessageId, context);
+            var outboxMessage = await persister.Get(incomingMessage.MessageId, context);
 
             // assert
-            Assert.NotNull(result);
-            Assert.AreEqual(incomingMessage.MessageId, result.MessageId);
+            Assert.NotNull(outboxMessage);
+            Assert.AreEqual(incomingMessage.MessageId, outboxMessage.MessageId);
         }
 
         [Test]
@@ -216,10 +216,10 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             // assert
             using (var session = OpenAsyncSession())
             {
-                var result = await session.LoadAsync<OutboxRecord>("Outbox/TestEndpoint/" + incomingMessage.MessageId);
+                var outboxRecord = await session.LoadAsync<OutboxRecord>("Outbox/TestEndpoint/" + incomingMessage.MessageId);
 
-                Assert.NotNull(result);
-                Assert.True(result.Dispatched);
+                Assert.NotNull(outboxRecord);
+                Assert.True(outboxRecord.Dispatched);
             }
         }
 
@@ -229,24 +229,24 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             // arrange
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var guid = Guid.NewGuid();
-            var messageId = $@"{guid}\12345";
+            var incomingMessageId = $@"{guid}\12345";
             var context = new ContextBag();
 
-            SimulateIncomingMessage(context, messageId);
+            SimulateIncomingMessage(context, incomingMessageId);
 
             using (var transaction = await persister.BeginTransaction(context))
             {
                 var transportOperations = new[] { new TransportOperation("test", default, default, default) };
 
                 // act
-                await persister.Store(new OutboxMessage(messageId, transportOperations), transaction, context);
+                await persister.Store(new OutboxMessage(incomingMessageId, transportOperations), transaction, context);
                 await transaction.Commit();
             }
 
             // assert
-            var outboxMessage = await persister.Get(messageId, context);
+            var outboxMessage = await persister.Get(incomingMessageId, context);
 
-            Assert.AreEqual(messageId, outboxMessage.MessageId);
+            Assert.AreEqual(incomingMessageId, outboxMessage.MessageId);
             Assert.AreEqual(1, outboxMessage.TransportOperations.Length);
             Assert.AreEqual("test", outboxMessage.TransportOperations[0].MessageId);
         }
