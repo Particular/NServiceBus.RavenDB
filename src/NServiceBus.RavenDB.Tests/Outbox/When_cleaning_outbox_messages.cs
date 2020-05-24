@@ -33,9 +33,7 @@
                 await transaction.Commit();
             }
 
-            var outboxMessage = new OutboxMessage(
-                incomingMessage.MessageId,
-                new TransportOperation[0]);
+            var outboxMessage = new OutboxMessage(incomingMessage.MessageId, new TransportOperation[0]);
 
             using (var transaction = await persister.BeginTransaction(context))
             {

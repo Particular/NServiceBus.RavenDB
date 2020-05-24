@@ -82,10 +82,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
-
-            var message = new OutboxMessage(
-                incomingMessage.MessageId,
-                new[] { new TransportOperation(incomingMessage.MessageId, default, default, default) });
+            var message = new OutboxMessage(incomingMessage.MessageId, new[] { new TransportOperation(incomingMessage.MessageId, default, default, default) });
 
             // act
             using (var transaction = await persister.BeginTransaction(context))
@@ -136,10 +133,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
-
-            var message = new OutboxMessage(
-                incomingMessage.MessageId,
-                new[] { new TransportOperation(incomingMessage.MessageId, default, default, default) });
+            var message = new OutboxMessage(incomingMessage.MessageId, new[] { new TransportOperation(incomingMessage.MessageId, default, default, default) });
 
             using (var transaction = await persister.BeginTransaction(context))
             {
@@ -176,13 +170,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 {
                     MessageId = incomingMessage.MessageId,
                     Dispatched = false,
-                    TransportOperations = new[]
-                    {
-                        new OutboxRecord.OutboxOperation
-                        {
-                            MessageId = incomingMessage.MessageId,
-                        }
-                    }
+                    TransportOperations = new[] { new OutboxRecord.OutboxOperation { MessageId = incomingMessage.MessageId, } }
                 };
 
                 var fullDocumentId = "Outbox/TestEndpoint/" + incomingMessage.MessageId;
@@ -215,13 +203,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                     {
                         MessageId = incomingMessage.MessageId,
                         Dispatched = false,
-                        TransportOperations = new[]
-                        {
-                            new OutboxRecord.OutboxOperation
-                            {
-                                MessageId = incomingMessage.MessageId,
-                            }
-                        }
+                        TransportOperations = new[] { new OutboxRecord.OutboxOperation { MessageId = incomingMessage.MessageId, } }
                     },
                     "Outbox/TestEndpoint/" + incomingMessage.MessageId);
 
