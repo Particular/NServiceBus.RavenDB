@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.RavenDB.Tests.Outbox
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
@@ -31,20 +32,14 @@
 
             using (var transaction = await persister.BeginTransaction(context))
             {
+                await persister.Store(dispatchedOutboxMessage, transaction, context);
                 await persister.Store(notDispatchedOutgoingMessage, transaction, context);
                 await transaction.Commit();
             }
 
-            using (var transaction = await persister.BeginTransaction(context))
-            {
-                await persister.Store(dispatchedOutboxMessage, transaction, context);
-                await transaction.Commit();
-            }
-
             await persister.SetAsDispatched(dispatchedOutboxMessage.MessageId, context);
-            await Task.Delay(TimeSpan.FromSeconds(1)); //Need to wait for dispatch logic to finish
+            await Task.Delay(TimeSpan.FromSeconds(1)); // wait for dispatch logic to finish
 
-            //WaitForUserToContinueTheTest(store);
             WaitForIndexing();
 
             var cleaner = new OutboxRecordsCleaner(store);
@@ -58,7 +53,7 @@
                 var outboxRecords = await session.Query<OutboxRecord>().ToListAsync();
 
                 Assert.AreEqual(1, outboxRecords.Count);
-                Assert.AreEqual("NotDispatched", outboxRecords[0].MessageId);
+                Assert.AreEqual(notDispatchedOutgoingMessage.MessageId, outboxRecords.Single().MessageId);
             }
         }
     }
