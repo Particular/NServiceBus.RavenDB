@@ -78,7 +78,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         }
 
         [Test]
-        public async Task Should_save_with_not_dispatched()
+        public async Task Should_store_outbox_record_as_not_dispatched()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
@@ -95,10 +95,16 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
 
             // assert
-            var storedOutboxMessage = await persister.Get(incomingMessageId, context);
-            var storedOutgoingMessage = storedOutboxMessage.TransportOperations.Single();
+            using (var session = OpenAsyncSession())
+            {
+                var outboxRecord = await session.Query<OutboxRecord>().SingleAsync(record => record.MessageId == incomingMessageId);
 
-            Assert.AreEqual(outgoingMessageId, storedOutgoingMessage.MessageId);
+                Assert.NotNull(outboxRecord);
+                Assert.False(outboxRecord.Dispatched);
+                Assert.Null(outboxRecord.DispatchedAt);
+                Assert.AreEqual(1, outboxRecord.TransportOperations.Length);
+                Assert.AreEqual(outgoingMessageId, outboxRecord.TransportOperations.Single().MessageId);
+            }
         }
 
         [Test]
@@ -122,7 +128,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             // assert
             using (var session = store.OpenAsyncSession())
             {
-                var outboxRecord = await session.Query<OutboxRecord>().SingleOrDefaultAsync(record => record.MessageId == incomingMessageId);
+                var outboxRecord = await session.Query<OutboxRecord>().SingleAsync(record => record.MessageId == incomingMessageId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
 
                 Assert.AreEqual(OutboxRecord.SchemaVersion, metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey]);
