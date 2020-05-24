@@ -28,10 +28,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_throw_if_trying_to_insert_same_messageid_concurrently()
         {
+            // arrange
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
 
+            // act
             var exception = await Catch<NonUniqueObjectException>(async () =>
             {
                 using (var transaction = await persister.BeginTransaction(context))
@@ -42,12 +44,14 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 }
             });
 
+            // asssert
             Assert.NotNull(exception);
         }
 
         [Test]
         public async Task Should_throw_if_trying_to_insert_same_messageid()
         {
+            // arrange
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
@@ -59,6 +63,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 await transaction.Commit();
             }
 
+            // act
             var exception = await Catch<ConcurrencyException>(async () =>
             {
                 using (var transaction = await persister.BeginTransaction(context))
@@ -69,12 +74,14 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 }
             });
 
+            // assert
             Assert.NotNull(exception);
         }
 
         [Test]
         public async Task Should_save_with_not_dispatched()
         {
+            // arrange
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
@@ -84,6 +91,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 new TransportOperation(incomingMessage.MessageId, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>())
             });
 
+            // act
             using (var transaction = await persister.BeginTransaction(context))
             {
                 await persister.Store(message, transaction, context);
@@ -91,6 +99,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 await transaction.Commit();
             }
 
+            // assert
             var result = await persister.Get(incomingMessage.MessageId, context);
 
             var operation = result.TransportOperations.Single();
@@ -101,11 +110,13 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_save_schema_version()
         {
+            // arrange
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxMessage = new OutboxMessage(incomingMessageId, new[] { new TransportOperation("foo", default, default, default) });
 
+            // act
             using (var transaction = await persister.BeginTransaction(context))
             {
                 await persister.Store(outboxMessage, transaction, context);
@@ -114,6 +125,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             WaitForIndexing();
 
+            // assert
             using (var session = store.OpenAsyncSession())
             {
                 var result = await session.Query<OutboxRecord>()
@@ -128,6 +140,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_update_dispatched_flag()
         {
+            // arrange
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
@@ -143,10 +156,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
                 await transaction.Commit();
             }
+            // act
             await persister.SetAsDispatched(incomingMessage.MessageId, context);
 
             WaitForIndexing();
 
+            // assert
             using (var session = store.OpenAsyncSession())
             {
                 var result = await session.Query<OutboxRecord>()
@@ -160,6 +175,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_get_messages()
         {
+            // arrange
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
@@ -188,8 +204,10 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 await session.SaveChangesAsync();
             }
 
+            // act
             var result = await persister.Get(incomingMessage.MessageId, context);
 
+            // assert
             Assert.NotNull(result);
             Assert.AreEqual(incomingMessage.MessageId, result.MessageId);
         }
@@ -197,6 +215,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_set_messages_as_dispatched()
         {
+            // arrange
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
@@ -223,8 +242,10 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 await session.SaveChangesAsync();
             }
 
+            // act
             await persister.SetAsDispatched(incomingMessage.MessageId, context);
 
+            // assert
             using (var session = OpenAsyncSession())
             {
                 var result = await session.LoadAsync<OutboxRecord>("Outbox/TestEndpoint/" + incomingMessage.MessageId);
@@ -237,6 +258,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         [Test]
         public async Task Should_filter_invalid_docid_character()
         {
+            // arrange
             var persister = new OutboxPersister(testEndpointName, CreateTestSessionOpener());
 
             var guid = Guid.NewGuid();
@@ -252,10 +274,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                     new TransportOperation("test", new Dictionary<string, string>(), new byte[0], new Dictionary<string, string>())
                 };
 
+                // act
                 await persister.Store(new OutboxMessage(messageId, transportOperations), transaction, context);
                 await transaction.Commit();
             }
 
+            // assert
             var outboxMessage = await persister.Get(messageId, context);
 
             Assert.AreEqual(messageId, outboxMessage.MessageId);

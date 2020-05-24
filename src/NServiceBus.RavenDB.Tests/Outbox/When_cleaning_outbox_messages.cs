@@ -24,6 +24,7 @@
         [Test]
         public async Task Should_delete_all_OutboxRecords_that_have_been_dispatched()
         {
+            // arrange
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
 
@@ -56,8 +57,10 @@
 
             var cleaner = new OutboxRecordsCleaner(store);
 
+            // act
             await cleaner.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));
 
+            // assert
             using (var s = store.OpenAsyncSession())
             {
                 var result = await s.Query<OutboxRecord>().ToListAsync();
