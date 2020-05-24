@@ -23,25 +23,25 @@
         public async Task Should_delete_all_OutboxRecords_that_have_been_dispatched()
         {
             // arrange
-            var context = new ContextBag();
-            var incomingMessage = SimulateIncomingMessage(context);
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
+            var context = new ContextBag();
+            var incomingMessageId = SimulateIncomingMessage(context).MessageId;
+            var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
+            var notDispatchedOutgoingMessage = new OutboxMessage("NotDispatched", new TransportOperation[0]);
 
             using (var transaction = await persister.BeginTransaction(context))
             {
-                await persister.Store(new OutboxMessage("NotDispatched", new TransportOperation[0]), transaction, context);
+                await persister.Store(notDispatchedOutgoingMessage, transaction, context);
                 await transaction.Commit();
             }
-
-            var outboxMessage = new OutboxMessage(incomingMessage.MessageId, new TransportOperation[0]);
 
             using (var transaction = await persister.BeginTransaction(context))
             {
-                await persister.Store(outboxMessage, transaction, context);
+                await persister.Store(dispatchedOutboxMessage, transaction, context);
                 await transaction.Commit();
             }
 
-            await persister.SetAsDispatched(outboxMessage.MessageId, context);
+            await persister.SetAsDispatched(dispatchedOutboxMessage.MessageId, context);
             await Task.Delay(TimeSpan.FromSeconds(1)); //Need to wait for dispatch logic to finish
 
             //WaitForUserToContinueTheTest(store);
