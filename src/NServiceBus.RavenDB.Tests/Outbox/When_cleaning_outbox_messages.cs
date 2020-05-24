@@ -17,7 +17,6 @@
         public override void SetUp()
         {
             base.SetUp();
-
             new OutboxRecordsIndex().Execute(store);
         }
 
@@ -27,21 +26,17 @@
             // arrange
             var context = new ContextBag();
             var incomingMessage = SimulateIncomingMessage(context);
-
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
 
             using (var transaction = await persister.BeginTransaction(context))
             {
                 await persister.Store(new OutboxMessage("NotDispatched", new TransportOperation[0]), transaction, context);
-
                 await transaction.Commit();
             }
 
-            var outboxMessage = new OutboxMessage(incomingMessage.MessageId, new []
-                {
-                    new TransportOperation(incomingMessage.MessageId, new Dictionary<string, string>(), new byte[1024*5], new Dictionary<string, string>())
-                });
-
+            var outboxMessage = new OutboxMessage(
+                incomingMessage.MessageId,
+                new[] { new TransportOperation(incomingMessage.MessageId, new Dictionary<string, string>(), new byte[1024 * 5], new Dictionary<string, string>()) });
 
             using (var transaction = await persister.BeginTransaction(context))
             {
