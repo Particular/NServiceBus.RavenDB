@@ -84,7 +84,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
-            var outboxMessage = new OutboxMessage(incomingMessageId, new[] { new TransportOperation(incomingMessageId, default, default, default) });
+            var outgoingMessageId = "outgoingMessageId";
+            var outboxMessage = new OutboxMessage(incomingMessageId, new[] { new TransportOperation(outgoingMessageId, default, default, default) });
 
             // act
             using (var transaction = await persister.BeginTransaction(context))
@@ -97,7 +98,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var storedOutboxMessage = await persister.Get(incomingMessageId, context);
             var storedOutgoingMessage = storedOutboxMessage.TransportOperations.Single();
 
-            Assert.AreEqual(incomingMessageId, storedOutgoingMessage.MessageId);
+            Assert.AreEqual(outgoingMessageId, storedOutgoingMessage.MessageId);
         }
 
         [Test]

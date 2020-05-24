@@ -25,7 +25,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener());
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
-            var outboxMessage = new OutboxMessage(incomingMessageId, new[] { new TransportOperation(incomingMessageId, default, default, default) });
+            var outboxMessage = new OutboxMessage(incomingMessageId, new[] { new TransportOperation("foo", default, default, default) });
 
             using (var transaction = await persister.BeginTransaction(context))
             {
@@ -63,7 +63,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                     {
                         MessageId = incomingMessageId,
                         Dispatched = false,
-                        TransportOperations = new[] { new OutboxRecord.OutboxOperation { MessageId = incomingMessageId, } }
+                        TransportOperations = new[] { new OutboxRecord.OutboxOperation { MessageId = "foo", } }
                     },
                     "Outbox/TestEndpoint/" + incomingMessageId);
 

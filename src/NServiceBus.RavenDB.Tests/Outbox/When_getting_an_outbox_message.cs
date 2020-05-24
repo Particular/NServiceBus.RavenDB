@@ -31,7 +31,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 {
                     MessageId = incomingMessageId,
                     Dispatched = false,
-                    TransportOperations = new[] { new OutboxRecord.OutboxOperation { MessageId = incomingMessageId, } }
+                    TransportOperations = new[] { new OutboxRecord.OutboxOperation { MessageId = "foo", } }
                 };
 
                 var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
