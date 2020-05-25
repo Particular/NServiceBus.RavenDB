@@ -26,7 +26,7 @@
         {
             await store.Maintenance.SendAsync(
                 new ConfigureExpirationOperation(
-                    new ExpirationConfiguration {Disabled = false, DeleteFrequencyInSec = 1,}));
+                    new ExpirationConfiguration { Disabled = false, DeleteFrequencyInSec = 1, }));
 
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), TimeSpan.FromSeconds(1));

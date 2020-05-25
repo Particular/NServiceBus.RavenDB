@@ -6,8 +6,8 @@
     /// Connection parameters to be used when connecting to RavenDB
     /// </summary>
     [ObsoleteEx(
-        Message= "ConnectionParameters is no longer supported, the fully configured IDocumentStore must be provided using persistence.SetDefaultDocumentStore(documentStore).",
-        RemoveInVersion="7.0.0",
+        Message = "ConnectionParameters is no longer supported, the fully configured IDocumentStore must be provided using persistence.SetDefaultDocumentStore(documentStore).",
+        RemoveInVersion = "7.0.0",
         TreatAsErrorFromVersion = "6.0.0")]
     public class ConnectionParameters
     {

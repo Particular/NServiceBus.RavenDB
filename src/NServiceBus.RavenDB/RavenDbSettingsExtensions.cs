@@ -91,7 +91,7 @@
         /// The method referenced by a Func delegate for finding the database name for the specified message.
         /// </param>
         /// <returns>The configuration object.</returns>
-        public static PersistenceExtensions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IDictionary<string,string>, string> convention)
+        public static PersistenceExtensions<RavenDBPersistence> SetMessageToDatabaseMappingConvention(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IDictionary<string, string>, string> convention)
         {
             cfg.GetSettings().Set(RavenDbStorageSession.MessageToDatabaseMappingConvention, convention);
             return cfg;

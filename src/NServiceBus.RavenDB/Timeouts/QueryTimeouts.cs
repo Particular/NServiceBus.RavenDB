@@ -116,11 +116,11 @@ namespace NServiceBus.Persistence.RavenDB
                 }
 
                 var nextTimeout = await GetChunkQuery(session)
-                        .Where(t => t.Time > now)
-                        .Take(1)
-                        .Select(to => new { to.Time }) // Must be anonymous type so Raven server can understand
-                        .FirstOrDefaultAsync()
-                        .ConfigureAwait(false);
+                    .Where(t => t.Time > now)
+                    .Take(1)
+                    .Select(to => new { to.Time }) // Must be anonymous type so Raven server can understand
+                    .FirstOrDefaultAsync()
+                    .ConfigureAwait(false);
 
                 if (nextTimeout != null)
                 {

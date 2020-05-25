@@ -123,7 +123,7 @@ this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
                                 "SchemaVersion", new { Version = OutboxRecord.SchemaVersion }
                             },
                             {
-                                "Expire", new { Should =  timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) }
+                                "Expire", new { Should = timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) }
                             }
                         }
                     },
