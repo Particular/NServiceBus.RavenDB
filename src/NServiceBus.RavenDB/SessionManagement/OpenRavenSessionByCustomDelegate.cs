@@ -6,11 +6,9 @@
 
     class OpenRavenSessionByCustomDelegate : IOpenTenantAwareRavenSessions
     {
-        Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSessionUsingHeaders;
-
         public OpenRavenSessionByCustomDelegate(Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSession)
         {
-            this.getAsyncSessionUsingHeaders = getAsyncSession;
+            getAsyncSessionUsingHeaders = getAsyncSession;
         }
 
         public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
@@ -21,5 +19,7 @@
 
             return session;
         }
+
+        Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSessionUsingHeaders;
     }
 }

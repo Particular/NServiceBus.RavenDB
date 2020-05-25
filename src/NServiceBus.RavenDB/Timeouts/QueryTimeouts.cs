@@ -10,12 +10,9 @@ namespace NServiceBus.Persistence.RavenDB
     using Raven.Client.Documents;
     using Raven.Client.Documents.Linq;
     using Raven.Client.Documents.Session;
-    using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
     class QueryTimeouts : IQueryTimeouts
     {
-        static TimeoutsChunk.Timeout[] EmptyTimeouts = new TimeoutsChunk.Timeout[0];
-
         public QueryTimeouts(IDocumentStore documentStore, string endpointName)
         {
             this.documentStore = documentStore;
@@ -119,11 +116,11 @@ namespace NServiceBus.Persistence.RavenDB
                 }
 
                 var nextTimeout = await GetChunkQuery(session)
-                        .Where(t => t.Time > now)
-                        .Take(1)
-                        .Select(to => new { to.Time }) // Must be anonymous type so Raven server can understand
-                        .FirstOrDefaultAsync()
-                        .ConfigureAwait(false);
+                    .Where(t => t.Time > now)
+                    .Take(1)
+                    .Select(to => new { to.Time }) // Must be anonymous type so Raven server can understand
+                    .FirstOrDefaultAsync()
+                    .ConfigureAwait(false);
 
                 if (nextTimeout != null)
                 {
@@ -194,9 +191,11 @@ namespace NServiceBus.Persistence.RavenDB
         /// RavenDB server default maximum page size
         /// </summary>
         int maximumPageSize = 1024;
+
         CancellationTokenSource shutdownTokenSource;
         ILog logger;
         TimeSpan _triggerCleanupEvery;
         TimeSpan _cleanupGapFromTimeslice;
+        static TimeoutsChunk.Timeout[] EmptyTimeouts = new TimeoutsChunk.Timeout[0];
     }
 }

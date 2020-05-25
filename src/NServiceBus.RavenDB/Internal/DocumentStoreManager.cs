@@ -8,9 +8,6 @@
 
     static class DocumentStoreManager
     {
-        const string defaultDocStoreSettingsKey = "RavenDbDocumentStore";
-        static Dictionary<Type, string> featureSettingsKeys;
-
         static DocumentStoreManager()
         {
             featureSettingsKeys = new Dictionary<Type, string>
@@ -29,6 +26,7 @@
             {
                 throw new ArgumentNullException(nameof(documentStore));
             }
+
             SetDocumentStoreInternal(settings, typeof(TStorageType), (_, __) => documentStore);
         }
 
@@ -39,6 +37,7 @@
             {
                 throw new ArgumentNullException(nameof(storeCreator));
             }
+
             SetDocumentStoreInternal(settings, typeof(TStorageType), (s, _) => storeCreator(s));
         }
 
@@ -49,6 +48,7 @@
             {
                 throw new ArgumentNullException(nameof(storeCreator));
             }
+
             SetDocumentStoreInternal(settings, typeof(TStorageType), storeCreator);
         }
 
@@ -64,6 +64,7 @@
             {
                 throw new ArgumentNullException(nameof(documentStore));
             }
+
             SetDefaultStoreInternal(settings, (_, __) => documentStore);
         }
 
@@ -73,6 +74,7 @@
             {
                 throw new ArgumentNullException(nameof(storeCreator));
             }
+
             SetDefaultStoreInternal(settings, (s, _) => storeCreator(s));
         }
 
@@ -82,6 +84,7 @@
             {
                 throw new ArgumentNullException(nameof(storeCreator));
             }
+
             SetDefaultStoreInternal(settings, storeCreator);
         }
 
@@ -116,5 +119,8 @@
 
             return docStoreInitializer;
         }
+
+        const string defaultDocStoreSettingsKey = "RavenDbDocumentStore";
+        static Dictionary<Type, string> featureSettingsKeys;
     }
 }

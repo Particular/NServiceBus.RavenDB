@@ -2,13 +2,10 @@
 {
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
-    using NServiceBus.Persistence;
     using NServiceBus.Transport;
 
     class RavenDBSynchronizedStorage : ISynchronizedStorage
     {
-        IOpenTenantAwareRavenSessions sessionCreator;
-
         public RavenDBSynchronizedStorage(IOpenTenantAwareRavenSessions sessionCreator)
         {
             this.sessionCreator = sessionCreator;
@@ -22,5 +19,7 @@
 
             return Task.FromResult((CompletableSynchronizedStorageSession)synchronizedStorageSession);
         }
+
+        IOpenTenantAwareRavenSessions sessionCreator;
     }
 }

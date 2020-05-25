@@ -1,15 +1,16 @@
 ﻿namespace NServiceBus.Testing
 {
-    using Persistence;
+    using NServiceBus.Persistence;
     using Raven.Client.Documents.Session;
 
     /// <summary>
-    /// A fake implementation for <see cref="SynchronizedStorageSession"/> for testing purposes.
+    /// A fake implementation for <see cref="SynchronizedStorageSession" /> for testing purposes.
     /// </summary>
     public class TestableRavenStorageSession : SynchronizedStorageSession
     {
         /// <summary>
-        /// Creates a new instance of <see cref="TestableRavenStorageSession"/> using the provided <see cref="IAsyncDocumentSession"/>.
+        /// Creates a new instance of <see cref="TestableRavenStorageSession" />
+        /// using the provided <see cref="IAsyncDocumentSession" />.
         /// </summary>
         /// <param name="session"></param>
         public TestableRavenStorageSession(IAsyncDocumentSession session)
@@ -18,7 +19,7 @@
         }
 
         /// <summary>
-        /// The document session which is retrieved by calling <see cref="RavenSessionExtension.RavenSession"/>.
+        /// The document session which is retrieved by calling <see cref="RavenSessionExtension.RavenSession" />.
         /// </summary>
         public IAsyncDocumentSession Session { get; }
     }

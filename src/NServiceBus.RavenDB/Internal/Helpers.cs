@@ -6,8 +6,6 @@
 
     class Helpers
     {
-        static readonly ILog Logger = LogManager.GetLogger(typeof(RavenDBPersistence));
-
         static void LogRavenConnectionFailure(Exception exception, IDocumentStore store)
         {
             var error = $@"RavenDB could not be contacted. Check your DocumentStore configuration.
@@ -32,5 +30,7 @@ Original exception: {exception}";
                 throw;
             }
         }
+
+        static readonly ILog Logger = LogManager.GetLogger(typeof(RavenDBPersistence));
     }
 }

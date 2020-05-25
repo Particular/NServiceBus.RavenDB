@@ -15,7 +15,7 @@
             this.documentStore = documentStore;
         }
 
-        public async Task RemoveEntriesOlderThan(DateTime dateTime, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task RemoveEntriesOlderThan(DateTime dateTime, CancellationToken cancellationToken = default)
         {
             var options = new QueryOperationOptions { AllowStale = true };
             var deleteOp = new DeleteByQueryOperation<OutboxRecord, OutboxRecordsIndex>(record => record.Dispatched && record.DispatchedAt <= dateTime, options);

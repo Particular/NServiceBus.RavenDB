@@ -39,7 +39,7 @@ namespace NServiceBus.Persistence.RavenDB
                 var timeout = await session.LoadAsync<Timeout>(timeoutId).ConfigureAwait(false);
                 if (timeout == null)
                 {
-                     return false;
+                    return false;
                 }
 
                 //deletes are performed on SaveChanges so this call is sync
@@ -64,7 +64,7 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 var timeoutData = await session.LoadAsync<Timeout>(timeoutId).ConfigureAwait(false);
 
-                return  timeoutData?.ToCoreTimeoutData();
+                return timeoutData?.ToCoreTimeoutData();
             }
         }
 

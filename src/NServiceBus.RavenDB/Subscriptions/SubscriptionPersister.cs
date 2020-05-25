@@ -162,6 +162,15 @@ namespace NServiceBus.Persistence.RavenDB
                 : session.Advanced.DocumentStore.AggressivelyCacheFor(AggressiveCacheDuration);
         }
 
+        IAsyncDocumentSession OpenAsyncSession()
+        {
+            var session = documentStore.OpenAsyncSession();
+            session.Advanced.UseOptimisticConcurrency = true;
+            return session;
+        }
+
+        IDocumentStore documentStore;
+
         sealed class EmptyDisposable : IDisposable
         {
             EmptyDisposable()
@@ -174,14 +183,5 @@ namespace NServiceBus.Persistence.RavenDB
 
             public static readonly EmptyDisposable Instance = new EmptyDisposable();
         }
-
-        IAsyncDocumentSession OpenAsyncSession()
-        {
-            var session = documentStore.OpenAsyncSession();
-            session.Advanced.UseOptimisticConcurrency = true;
-            return session;
-        }
-
-        IDocumentStore documentStore;
     }
 }

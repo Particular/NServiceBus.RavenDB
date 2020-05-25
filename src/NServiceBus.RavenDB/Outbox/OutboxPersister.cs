@@ -11,7 +11,7 @@
     using Raven.Client.Documents.Commands.Batches;
     using Raven.Client.Documents.Operations;
     using Raven.Client.Documents.Session;
-    using TransportOperation = Outbox.TransportOperation;
+    using TransportOperation = NServiceBus.Outbox.TransportOperation;
 
     class OutboxPersister : IOutboxStorage
     {
@@ -34,7 +34,7 @@
 
             if (result == null)
             {
-                return default(OutboxMessage);
+                return default;
             }
 
             if (result.Dispatched || result.TransportOperations.Length == 0)
@@ -123,7 +123,7 @@ this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
                                 "SchemaVersion", new { Version = OutboxRecord.SchemaVersion }
                             },
                             {
-                                "Expire", new { Should =  timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) }
+                                "Expire", new { Should = timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) }
                             }
                         }
                     },

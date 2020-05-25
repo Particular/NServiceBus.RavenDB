@@ -116,13 +116,14 @@
                 }
             }
 
-            static readonly ILog logger = LogManager.GetLogger<OutboxCleaner>();
             readonly OutboxRecordsCleaner cleaner;
             Task cleanupTask;
             TimeSpan timeToKeepDeduplicationData;
             TimeSpan frequencyToRunDeduplicationDataCleanup;
             CancellationTokenSource cancellationTokenSource;
             CancellationToken cancellationToken;
+
+            static readonly ILog logger = LogManager.GetLogger<OutboxCleaner>();
         }
     }
 }

@@ -8,14 +8,12 @@
     using Raven.Client.Documents;
 
     /// <summary>
-    ///     Provides configuration options
+    /// Provides configuration options
     /// </summary>
     public static class RavenDbSagaSettingsExtensions
     {
-        internal const string AllowStaleSagaReadsKey = "RavenDB.AllowStaleSagaReads";
-
         /// <summary>
-        ///     Configures the given document store to be used when storing sagas
+        /// Configures the given document store to be used when storing sagas
         /// </summary>
         /// <param name="cfg">Object to attach to</param>
         /// <param name="documentStore">The document store to be used</param>
@@ -26,7 +24,7 @@
         }
 
         /// <summary>
-        ///     Configures the given document store to be used when storing sagas
+        /// Configures the given document store to be used when storing sagas
         /// </summary>
         /// <param name="cfg">Object to attach to</param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
@@ -37,7 +35,7 @@
         }
 
         /// <summary>
-        ///     Configures the given document store to be used when storing sagas
+        /// Configures the given document store to be used when storing sagas
         /// </summary>
         /// <param name="cfg">Object to attach to</param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
@@ -46,5 +44,7 @@
             DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(cfg.GetSettings(), storeCreator);
             return cfg;
         }
+
+        internal const string AllowStaleSagaReadsKey = "RavenDB.AllowStaleSagaReads";
     }
 }
