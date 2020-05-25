@@ -66,7 +66,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             if (container == null)
             {
-                return default(T);
+                return default;
             }
 
             context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
@@ -88,7 +88,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             if (lookup == null)
             {
-                return default(T);
+                return default;
             }
 
             documentSession.Advanced.Evict(lookup);
@@ -98,7 +98,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             if (container == null)
             {
-                return default(T);
+                return default;
             }
 
             if (container.IdentityDocId == null)

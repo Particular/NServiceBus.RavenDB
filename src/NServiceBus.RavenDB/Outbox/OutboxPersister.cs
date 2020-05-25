@@ -34,7 +34,7 @@
 
             if (result == null)
             {
-                return default(OutboxMessage);
+                return default;
             }
 
             if (result.Dispatched || result.TransportOperations.Length == 0)
