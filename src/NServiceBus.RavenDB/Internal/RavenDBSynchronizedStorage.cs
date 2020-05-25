@@ -6,8 +6,6 @@
 
     class RavenDBSynchronizedStorage : ISynchronizedStorage
     {
-        IOpenTenantAwareRavenSessions sessionCreator;
-
         public RavenDBSynchronizedStorage(IOpenTenantAwareRavenSessions sessionCreator)
         {
             this.sessionCreator = sessionCreator;
@@ -21,5 +19,7 @@
 
             return Task.FromResult((CompletableSynchronizedStorageSession)synchronizedStorageSession);
         }
+
+        IOpenTenantAwareRavenSessions sessionCreator;
     }
 }

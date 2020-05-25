@@ -6,9 +6,6 @@
 
     class OpenRavenSessionByDatabaseName : IOpenTenantAwareRavenSessions
     {
-        IDocumentStoreWrapper documentStoreWrapper;
-        Func<IDictionary<string, string>, string> getDatabaseName;
-
         public OpenRavenSessionByDatabaseName(IDocumentStoreWrapper documentStoreWrapper, Func<IDictionary<string, string>, string> getDatabaseName = null)
         {
             this.documentStoreWrapper = documentStoreWrapper;
@@ -26,5 +23,8 @@
 
             return documentSession;
         }
+
+        IDocumentStoreWrapper documentStoreWrapper;
+        Func<IDictionary<string, string>, string> getDatabaseName;
     }
 }

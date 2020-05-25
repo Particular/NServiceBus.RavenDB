@@ -11,6 +11,8 @@
             AsyncSession = session;
         }
 
+        public IAsyncDocumentSession AsyncSession { get; private set; }
+
         public void Dispose()
         {
             AsyncSession?.Dispose();
@@ -21,7 +23,5 @@
         {
             return AsyncSession.SaveChangesAsync();
         }
-
-        public IAsyncDocumentSession AsyncSession { get; private set; }
     }
 }

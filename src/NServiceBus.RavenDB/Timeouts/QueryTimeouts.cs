@@ -13,8 +13,6 @@ namespace NServiceBus.Persistence.RavenDB
 
     class QueryTimeouts : IQueryTimeouts
     {
-        static TimeoutsChunk.Timeout[] EmptyTimeouts = new TimeoutsChunk.Timeout[0];
-
         public QueryTimeouts(IDocumentStore documentStore, string endpointName)
         {
             this.documentStore = documentStore;
@@ -198,5 +196,6 @@ namespace NServiceBus.Persistence.RavenDB
         ILog logger;
         TimeSpan _triggerCleanupEvery;
         TimeSpan _cleanupGapFromTimeslice;
+        static TimeoutsChunk.Timeout[] EmptyTimeouts = new TimeoutsChunk.Timeout[0];
     }
 }

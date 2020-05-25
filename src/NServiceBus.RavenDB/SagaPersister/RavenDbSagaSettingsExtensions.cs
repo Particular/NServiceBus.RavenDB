@@ -12,8 +12,6 @@
     /// </summary>
     public static class RavenDbSagaSettingsExtensions
     {
-        internal const string AllowStaleSagaReadsKey = "RavenDB.AllowStaleSagaReads";
-
         /// <summary>
         /// Configures the given document store to be used when storing sagas
         /// </summary>
@@ -46,5 +44,7 @@
             DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(cfg.GetSettings(), storeCreator);
             return cfg;
         }
+
+        internal const string AllowStaleSagaReadsKey = "RavenDB.AllowStaleSagaReads";
     }
 }

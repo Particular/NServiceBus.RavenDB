@@ -9,8 +9,6 @@
 
     static class UnwrappedSagaListener
     {
-        static readonly string ContainerTypeName = typeof(SagaDataContainer).FullName + ", NServiceBus.RavenDB";
-
         public static void Register(DocumentStore store)
         {
             store.OnBeforeConversionToEntity += OnBeforeConversionToEntity;
@@ -61,5 +59,7 @@
 
             args.Document = args.Session.Context.ReadObject(document, args.Id);
         }
+
+        static readonly string ContainerTypeName = typeof(SagaDataContainer).FullName + ", NServiceBus.RavenDB";
     }
 }

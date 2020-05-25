@@ -8,9 +8,6 @@
 
     static class DocumentStoreManager
     {
-        const string defaultDocStoreSettingsKey = "RavenDbDocumentStore";
-        static Dictionary<Type, string> featureSettingsKeys;
-
         static DocumentStoreManager()
         {
             featureSettingsKeys = new Dictionary<Type, string>
@@ -122,5 +119,8 @@
 
             return docStoreInitializer;
         }
+
+        const string defaultDocStoreSettingsKey = "RavenDbDocumentStore";
+        static Dictionary<Type, string> featureSettingsKeys;
     }
 }
