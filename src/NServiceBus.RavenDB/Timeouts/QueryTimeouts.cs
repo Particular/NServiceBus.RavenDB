@@ -194,6 +194,7 @@ namespace NServiceBus.Persistence.RavenDB
         /// RavenDB server default maximum page size
         /// </summary>
         int maximumPageSize = 1024;
+
         CancellationTokenSource shutdownTokenSource;
         ILog logger;
         TimeSpan _triggerCleanupEvery;

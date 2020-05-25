@@ -78,6 +78,7 @@
             {
                 throw new ArgumentNullException(nameof(getAsyncSessionFunc));
             }
+
             cfg.GetSettings().Set(RavenDbStorageSession.SharedAsyncSession, getAsyncSessionFunc);
             return cfg;
         }
