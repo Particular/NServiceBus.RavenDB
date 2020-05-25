@@ -2,7 +2,6 @@
 {
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
-    using NServiceBus.Persistence;
     using NServiceBus.Transport;
 
     class RavenDBSynchronizedStorage : ISynchronizedStorage

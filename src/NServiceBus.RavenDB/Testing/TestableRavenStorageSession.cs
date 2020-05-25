@@ -1,6 +1,6 @@
 ﻿namespace NServiceBus.Testing
 {
-    using Persistence;
+    using NServiceBus.Persistence;
     using Raven.Client.Documents.Session;
 
     /// <summary>

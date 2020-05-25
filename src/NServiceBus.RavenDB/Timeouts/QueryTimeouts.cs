@@ -10,7 +10,6 @@ namespace NServiceBus.Persistence.RavenDB
     using Raven.Client.Documents;
     using Raven.Client.Documents.Linq;
     using Raven.Client.Documents.Session;
-    using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
 
     class QueryTimeouts : IQueryTimeouts
     {

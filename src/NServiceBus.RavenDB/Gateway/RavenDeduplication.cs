@@ -2,7 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Extensibility;
+    using NServiceBus.Extensibility;
     using NServiceBus.Gateway.Deduplication;
     using Raven.Client.Documents;
     using Raven.Client.Exceptions;

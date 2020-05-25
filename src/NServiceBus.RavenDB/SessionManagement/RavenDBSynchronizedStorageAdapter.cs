@@ -3,7 +3,6 @@
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
-    using NServiceBus.Persistence;
     using NServiceBus.Transport;
 
     class RavenDBSynchronizedStorageAdapter : ISynchronizedStorageAdapter
