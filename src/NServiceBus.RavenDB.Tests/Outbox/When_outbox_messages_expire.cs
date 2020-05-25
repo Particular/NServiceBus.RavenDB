@@ -26,45 +26,36 @@
         {
             await store.Maintenance.SendAsync(
                 new ConfigureExpirationOperation(
-                    new ExpirationConfiguration { Disabled = false, DeleteFrequencyInSec = 1, }));
+                    new ExpirationConfiguration {Disabled = false, DeleteFrequencyInSec = 1,}));
 
-            try
+            // arrange
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), TimeSpan.FromSeconds(1));
+            var context = new ContextBag();
+            var incomingMessageId = SimulateIncomingMessage(context).MessageId;
+            var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
+            var notDispatchedOutboxMessage = new OutboxMessage("NotDispatched", new TransportOperation[0]);
+
+            using (var transaction = await persister.BeginTransaction(context))
             {
-                // arrange
-                var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), TimeSpan.FromSeconds(1));
-                var context = new ContextBag();
-                var incomingMessageId = SimulateIncomingMessage(context).MessageId;
-                var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
-                var notDispatchedOutboxMessage = new OutboxMessage("NotDispatched", new TransportOperation[0]);
-
-                using (var transaction = await persister.BeginTransaction(context))
-                {
-                    await persister.Store(dispatchedOutboxMessage, transaction, context);
-                    await persister.Store(notDispatchedOutboxMessage, transaction, context);
-                    await transaction.Commit();
-                }
-
-                await persister.SetAsDispatched(dispatchedOutboxMessage.MessageId, context);
-
-                // act
-                // wait for dispatch logic and expiry to finish, not ideal but polling on BASE index is also not great
-                await Task.Delay(TimeSpan.FromSeconds(3));
-                WaitForIndexing();
-
-                // assert
-                using (var session = store.OpenAsyncSession())
-                {
-                    var outboxRecords = await session.Query<OutboxRecord>().ToListAsync();
-
-                    Assert.AreEqual(1, outboxRecords.Count);
-                    Assert.AreEqual(notDispatchedOutboxMessage.MessageId, outboxRecords.Single().MessageId);
-                }
+                await persister.Store(dispatchedOutboxMessage, transaction, context);
+                await persister.Store(notDispatchedOutboxMessage, transaction, context);
+                await transaction.Commit();
             }
-            finally
+
+            await persister.SetAsDispatched(dispatchedOutboxMessage.MessageId, context);
+
+            // act
+            // wait for dispatch logic and expiry to finish, not ideal but polling on BASE index is also not great
+            await Task.Delay(TimeSpan.FromSeconds(3));
+            WaitForIndexing();
+
+            // assert
+            using (var session = store.OpenAsyncSession())
             {
-                await store.Maintenance.SendAsync(
-                    new ConfigureExpirationOperation(
-                        new ExpirationConfiguration { Disabled = true, DeleteFrequencyInSec = 60, }));
+                var outboxRecords = await session.Query<OutboxRecord>().ToListAsync();
+
+                Assert.AreEqual(1, outboxRecords.Count);
+                Assert.AreEqual(notDispatchedOutboxMessage.MessageId, outboxRecords.Single().MessageId);
             }
         }
     }
