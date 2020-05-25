@@ -34,6 +34,7 @@
         /// <param name="configuration">The configuration being extended</param>
         /// <param name="frequencyToRunDeduplicationDataCleanup">The frequency to run the deduplication data cleanup task. By specifying <code>System.Threading.Timeout.InfiniteTimeSpan</code> (-1 milliseconds) the cleanup task will never run.</param>
         /// <returns>The configuration</returns>
+        /// <remarks>When document expiration is enabled on the database, it is recommended to disable the cleanup task by specifying <code>System.Threading.Timeout.InfiniteTimeSpan</code> (-1 milliseconds) for <paramref name="frequencyToRunDeduplicationDataCleanup"/>.</remarks>
         public static EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this EndpointConfiguration configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
         {
             if (frequencyToRunDeduplicationDataCleanup <= TimeSpan.Zero && frequencyToRunDeduplicationDataCleanup != System.Threading.Timeout.InfiniteTimeSpan)

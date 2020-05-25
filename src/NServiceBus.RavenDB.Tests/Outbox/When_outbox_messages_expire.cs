@@ -9,9 +9,10 @@
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
     using Raven.Client.Documents;
+    using Raven.Client.Documents.Operations.Expiration;
 
     [TestFixture]
-    public class When_cleaning_outbox_messages : RavenDBPersistenceTestBase
+    public class When_outbox_messages_expire : RavenDBPersistenceTestBase
     {
         [SetUp]
         public override void SetUp()
@@ -21,31 +22,32 @@
         }
 
         [Test]
-        public async Task Should_delete_all_dispatched_outbox_records()
+        public async Task Should_be_deleted()
         {
+            await store.Maintenance.SendAsync(
+                new ConfigureExpirationOperation(
+                    new ExpirationConfiguration {Disabled = false, DeleteFrequencyInSec = 1,}));
+
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), TimeSpan.FromSeconds(1));
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
-            var notDispatchedOutgoingMessage = new OutboxMessage("NotDispatched", new TransportOperation[0]);
+            var notDispatchedOutboxMessage = new OutboxMessage("NotDispatched", new TransportOperation[0]);
 
             using (var transaction = await persister.BeginTransaction(context))
             {
                 await persister.Store(dispatchedOutboxMessage, transaction, context);
-                await persister.Store(notDispatchedOutgoingMessage, transaction, context);
+                await persister.Store(notDispatchedOutboxMessage, transaction, context);
                 await transaction.Commit();
             }
 
             await persister.SetAsDispatched(dispatchedOutboxMessage.MessageId, context);
-            await Task.Delay(TimeSpan.FromSeconds(1)); // wait for dispatch logic to finish
-
-            WaitForIndexing();
-
-            var cleaner = new OutboxRecordsCleaner(store);
 
             // act
-            await cleaner.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));
+            // wait for dispatch logic and expiry to finish, not ideal but polling on BASE index is also not great
+            await Task.Delay(TimeSpan.FromSeconds(3));
+            WaitForIndexing();
 
             // assert
             using (var session = store.OpenAsyncSession())
@@ -53,7 +55,7 @@
                 var outboxRecords = await session.Query<OutboxRecord>().ToListAsync();
 
                 Assert.AreEqual(1, outboxRecords.Count);
-                Assert.AreEqual(notDispatchedOutgoingMessage.MessageId, outboxRecords.Single().MessageId);
+                Assert.AreEqual(notDispatchedOutboxMessage.MessageId, outboxRecords.Single().MessageId);
             }
         }
     }
