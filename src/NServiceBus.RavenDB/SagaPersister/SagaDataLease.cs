@@ -4,6 +4,8 @@ namespace NServiceBus.Persistence.RavenDB
 
     class SagaDataLease
     {
-        public DateTime? ReservedUntil { get; set; }
+        public SagaDataLease(DateTime reservedUntil) => this.ReservedUntil = reservedUntil;
+
+        public DateTime ReservedUntil { get; }
     }
 }
