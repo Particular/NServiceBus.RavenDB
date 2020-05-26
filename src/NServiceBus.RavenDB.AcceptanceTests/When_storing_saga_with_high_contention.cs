@@ -1,11 +1,10 @@
 namespace NServiceBus.RavenDB.AcceptanceTests
 {
-using System;
-    using System.Diagnostics;
+    using System;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using AcceptanceTesting;
+    using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
@@ -16,111 +15,101 @@ using System;
         [Test]
         public async Task Should_succeed_without_retries()
         {
-            var context = await Scenario.Define<Context>()
-                .WithEndpoint<SagaEndpoint>(b => b.When(session => session.SendLocal(new StartSaga { SomeId = Guid.NewGuid() })))
-                .Done(c => c.Done)
+            var scenario = await Scenario.Define<HighContentionScenario>()
+                .WithEndpoint<HighContentionEndpoint>(behavior => behavior.When(session => session.SendLocal(new StartSaga { SomeId = Guid.NewGuid() })))
+                .Done(s => s.SagaCompleted)
                 .Run();
 
-            Assert.AreEqual(0, context.NumberOfRetries);
-            Assert.IsTrue(context.MessagesSent);
-            Assert.IsTrue(context.SagaStarted);
+            Assert.IsTrue(scenario.ConcurrentMessagesSent);
+            Assert.AreEqual(0, scenario.RetryCount);
         }
 
-        public class Context : ScenarioContext
+        public class HighContentionScenario : ScenarioContext
         {
-            long numberOfRetries;
-            public bool Done { get; set; }
-            public bool SagaStarted { get; set; }
-            public bool MessagesSent { get; set; }
-            public int HitCount { get; set; }
+            long retryCount;
 
-            public Stopwatch Watch { get; } = new Stopwatch();
+            public int ConcurrentMessageCount { get; } = 20;
 
-            public TimeSpan Elapsed => Watch.Elapsed;
+            public bool ConcurrentMessagesSent { get; set; }
 
-            public int NumberOfMessages { get; } = 20;
+            public bool SagaCompleted { get; set; }
 
-            public long NumberOfRetries => Interlocked.Read(ref numberOfRetries);
+            public long RetryCount => Interlocked.Read(ref retryCount);
 
-            public void IncrementNumberOfRetries()
-            {
-                Interlocked.Increment(ref numberOfRetries);
-            }
+            public void IncrementRetryCount() => Interlocked.Increment(ref retryCount);
         }
 
-        class SagaEndpoint : EndpointConfigurationBuilder
+        class HighContentionEndpoint : EndpointConfigurationBuilder
         {
-            public SagaEndpoint()
+            public HighContentionEndpoint()
             {
-                EndpointSetup<DefaultServer, Context>((b, c) =>
+                EndpointSetup<DefaultServer, HighContentionScenario>((endpoint, scenario) =>
                 {
-                    b.LimitMessageProcessingConcurrencyTo(c.NumberOfMessages);
-                    var recoverability = b.Recoverability();
-                    recoverability.Immediate(s =>
+                    endpoint.LimitMessageProcessingConcurrencyTo(scenario.ConcurrentMessageCount);
+
+                    var recoverability = endpoint.Recoverability();
+
+                    recoverability.Immediate(immediateRetries =>
                     {
-                        s.OnMessageBeingRetried(m =>
+                        immediateRetries.OnMessageBeingRetried(m =>
                         {
-                            c.IncrementNumberOfRetries();
+                            scenario.IncrementRetryCount();
                             return Task.CompletedTask;
                         });
-                        s.NumberOfRetries(c.NumberOfMessages);
+
+                        immediateRetries.NumberOfRetries(scenario.ConcurrentMessageCount);
                     });
+
                     recoverability.Delayed(s => s.NumberOfRetries(0));
                 });
             }
 
-            class HighContentionSaga : Saga<HighContentionSaga.HighContentionSagaData>, IAmStartedByMessages<StartSaga>, IHandleMessages<AdditionalMessage>
+            class HighContentionSaga : Saga<HighContentionSaga.HighContentionSagaData>, IAmStartedByMessages<StartSaga>, IHandleMessages<ConcurrentMessage>
             {
-                public Context TestContext { get; set; }
+                readonly HighContentionScenario scenario;
+
+                public HighContentionSaga(HighContentionScenario scenario) => this.scenario = scenario;
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<HighContentionSagaData> mapper)
                 {
-                    mapper.ConfigureMapping<StartSaga>(m => m.SomeId).ToSaga(d => d.SomeId);
-                    mapper.ConfigureMapping<AdditionalMessage>(m => m.SomeId).ToSaga(d => d.SomeId);
+                    mapper.ConfigureMapping<StartSaga>(message => message.SomeId).ToSaga(data => data.SomeId);
+                    mapper.ConfigureMapping<ConcurrentMessage>(message => message.SomeId).ToSaga(data => data.SomeId);
                 }
 
                 public async Task Handle(StartSaga message, IMessageHandlerContext context)
                 {
-                    Data.SomeId = message.SomeId;
-                    TestContext.Watch.Start();
-                    TestContext.SagaStarted = true;
-
-                    await Task.WhenAll(Enumerable.Range(0, TestContext.NumberOfMessages).Select(i => context.SendLocal(new AdditionalMessage {SomeId = message.SomeId})));
-                    TestContext.MessagesSent = true;
+                    await Task.WhenAll(Enumerable.Range(0, scenario.ConcurrentMessageCount).Select(_ => context.SendLocal(new ConcurrentMessage { SomeId = message.SomeId })));
+                    scenario.ConcurrentMessagesSent = true;
                 }
 
                 public class HighContentionSagaData : ContainSagaData
                 {
-                    public int Hit { get; set; }
                     public Guid SomeId { get; set; }
+
+                    public int HitCount { get; set; }
                 }
 
-                public async Task Handle(AdditionalMessage message, IMessageHandlerContext context)
+                public async Task Handle(ConcurrentMessage message, IMessageHandlerContext context)
                 {
-                    Data.Hit++;
+                    Data.HitCount++;
 
-                    if (Data.Hit >= TestContext.NumberOfMessages)
+                    if (Data.HitCount >= scenario.ConcurrentMessageCount)
                     {
                         MarkAsComplete();
-                        await context.SendLocal(new DoneSaga { SomeId = message.SomeId, HitCount = Data.Hit });
+                        await context.SendLocal(new SagaCompleted { SomeId = message.SomeId, HitCount = Data.HitCount });
                     }
                 }
             }
 
-            class DoneHandler : IHandleMessages<DoneSaga>
+            class DoneHandler : IHandleMessages<SagaCompleted>
             {
-                readonly Context testContext;
+                readonly HighContentionScenario scenario;
 
-                public DoneHandler(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
+                public DoneHandler(HighContentionScenario scenario) => this.scenario = scenario;
 
-                public Task Handle(DoneSaga message, IMessageHandlerContext context)
+                public Task Handle(SagaCompleted message, IMessageHandlerContext context)
                 {
-                    testContext.Watch.Stop();
-                    testContext.HitCount = message.HitCount;
-                    testContext.Done = true;
+                    scenario.SagaCompleted = true;
                     return Task.CompletedTask;
                 }
             }
@@ -131,15 +120,16 @@ using System;
             public Guid SomeId { get; set; }
         }
 
-        public class DoneSaga : IMessage
+        public class ConcurrentMessage : IMessage
         {
             public Guid SomeId { get; set; }
-            public int HitCount { get; set; }
         }
 
-        public class AdditionalMessage : IMessage
+        public class SagaCompleted : IMessage
         {
             public Guid SomeId { get; set; }
+
+            public int HitCount { get; set; }
         }
     }
 }
