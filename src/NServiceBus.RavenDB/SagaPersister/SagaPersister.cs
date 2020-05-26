@@ -69,7 +69,7 @@ namespace NServiceBus.Persistence.RavenDB
             // TODO: currently always pessimistic
             var index = await AcquireLease(documentSession.Advanced.DocumentStore, docId).ConfigureAwait(false);
             // only true if we always have synchronized storage session around which is a valid assumption
-            context.Get<SagaDataLeaseHolder>().NamesAndIndex.Add(Tuple.Create(docId, index));
+            context.Get<SagaDataLeaseHolder>().DocumentsIdsAndIndexes.Add(Tuple.Create(docId, index));
 
             var container = await documentSession.LoadAsync<SagaDataContainer>(docId).ConfigureAwait(false);
 
@@ -107,7 +107,7 @@ namespace NServiceBus.Persistence.RavenDB
             // TODO: currently always pessimistic
             var index = await AcquireLease(documentSession.Advanced.DocumentStore, lookup.SagaDocId).ConfigureAwait(false);
             // only true if we always have synchronized storage session around which is a valid assumption
-            context.Get<SagaDataLeaseHolder>().NamesAndIndex.Add(Tuple.Create(lookup.SagaDocId, index));
+            context.Get<SagaDataLeaseHolder>().DocumentsIdsAndIndexes.Add(Tuple.Create(lookup.SagaDocId, index));
 
             // If we have a saga id we can just load it, should have been included in the round-trip already
             var container = await documentSession.LoadAsync<SagaDataContainer>(lookup.SagaDocId).ConfigureAwait(false);
@@ -139,7 +139,7 @@ namespace NServiceBus.Persistence.RavenDB
             return Task.CompletedTask;
         }
 
-        async Task<long> AcquireLease(IDocumentStore store, string sagaDataId)
+        async Task<long> AcquireLease(IDocumentStore store, string sagaDataDocId)
         {
             // TODO: configurable
             var transactionTimeout = TimeSpan.FromSeconds(60);
@@ -149,16 +149,16 @@ namespace NServiceBus.Persistence.RavenDB
                 var token = cancellationTokenSource.Token;
                 while (!token.IsCancellationRequested)
                 {
-                    var resource = new SagaDataLease { ReservedUntil = DateTime.UtcNow.Add(leaseLockTime)};
+                    var lease = new SagaDataLease(DateTime.UtcNow.Add(leaseLockTime));
 
                     // TODO: check cancellation logic and exception bubbling
                     var saveResult = await store.Operations.SendAsync(
-                        new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataId, resource, 0), token: CancellationToken.None)
+                        new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataDocId, lease, 0), token: CancellationToken.None)
                         .ConfigureAwait(false);
 
                     if (saveResult.Successful)
                     {
-                        // resourceName wasn't present - we managed to reserve
+                        // lease wasn't already present - we managed to acquire lease
                         return saveResult.Index;
                     }
 
@@ -168,7 +168,7 @@ namespace NServiceBus.Persistence.RavenDB
                         // Time expired - Update the existing key with the new value
                         // TODO: check cancellation logic and exception bubbling
                         var takeLockWithTimeoutResult = await store.Operations.SendAsync(
-                            new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataId, resource, saveResult.Index), token: CancellationToken.None)
+                            new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataDocId, lease, saveResult.Index), token: CancellationToken.None)
                             .ConfigureAwait(false);
 
                         if (takeLockWithTimeoutResult.Successful)
@@ -188,7 +188,7 @@ namespace NServiceBus.Persistence.RavenDB
                     }
                 }
 
-                throw new TimeoutException($"Unable to acquire exclusive write lock for saga with id '{sagaDataId}'.");
+                throw new TimeoutException($"Unable to acquire exclusive write lock for saga with id '{sagaDataDocId}'.");
             }
         }
 
@@ -205,7 +205,6 @@ namespace NServiceBus.Persistence.RavenDB
         }
 
         const string SagaContainerContextKeyPrefix = "SagaDataContainer:";
-        const string SagaLeaseKeyPrefix = "SagaDataContainerLease:";
         static Random random = new Random();
     }
 }

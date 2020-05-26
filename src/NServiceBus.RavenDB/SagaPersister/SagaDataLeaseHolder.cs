@@ -6,6 +6,6 @@ namespace NServiceBus.Persistence.RavenDB
     class SagaDataLeaseHolder
     {
         // quick and dirty tuple for now
-        public List<Tuple<string, long>> NamesAndIndex { get; set; } = new List<Tuple<string, long>>();
+        public List<Tuple<string, long>> DocumentsIdsAndIndexes { get; } = new List<Tuple<string, long>>();
     }
 }
