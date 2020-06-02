@@ -4,7 +4,6 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPersistenceTestBase
@@ -12,27 +11,28 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
     [Test]
     public async Task Inherited_property_classes_should_be_persisted()
     {
-        IAsyncDocumentSession session;
-        var options = this.CreateContextWithAsyncSessionPresent(out session);
-        var persister = new SagaPersister();
-        var entity = new SagaData
+        using (var session = this.CreateAsyncSessionInContext(out var options))
         {
-            Id = Guid.NewGuid(),
-            UniqueString = "SomeUniqueString",
-            PolymorphicRelatedProperty = new PolymorphicProperty
+            var persister = new SagaPersister();
+            var entity = new SagaData
             {
-                SomeInt = 9
-            }
-        };
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+                Id = Guid.NewGuid(),
+                UniqueString = "SomeUniqueString",
+                PolymorphicRelatedProperty = new PolymorphicProperty
+                {
+                    SomeInt = 9
+                }
+            };
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
-        await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
-        await session.SaveChangesAsync().ConfigureAwait(false);
+            await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
 
-        var savedEntity = await persister.Get<SagaData>(entity.Id, synchronizedSession, options);
-        var expected = (PolymorphicProperty) entity.PolymorphicRelatedProperty;
-        var actual = (PolymorphicProperty) savedEntity.PolymorphicRelatedProperty;
-        Assert.AreEqual(expected.SomeInt, actual.SomeInt);
+            var savedEntity = await persister.Get<SagaData>(entity.Id, synchronizedSession, options);
+            var expected = (PolymorphicProperty)entity.PolymorphicRelatedProperty;
+            var actual = (PolymorphicProperty)savedEntity.PolymorphicRelatedProperty;
+            Assert.AreEqual(expected.SomeInt, actual.SomeInt);
+        }
     }
 
     class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartSaga>

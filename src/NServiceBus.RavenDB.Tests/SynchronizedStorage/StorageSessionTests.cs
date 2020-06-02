@@ -19,7 +19,8 @@
         public async Task CompleteAsync_with_savechanges_enabled_completes_transaction()
         {
             var newDocument = new TestDocument { Value = "42" };
-            using (var writeSession = new RavenDBSynchronizedStorageSession(OpenAsyncSession(), true))
+            using (var writeDocSession = OpenAsyncSession())
+            using (var writeSession = new RavenDBSynchronizedStorageSession(writeDocSession, true))
             {
                 await writeSession.Session.StoreAsync(newDocument);
                 await writeSession.CompleteAsync();
@@ -38,7 +39,8 @@
         public async Task Dispose_without_complete_rolls_back()
         {
             var documentId = Guid.NewGuid().ToString();
-            using (var writeSession = new RavenDBSynchronizedStorageSession(OpenAsyncSession(), true))
+            using (var writeDocSession = OpenAsyncSession())
+            using (var writeSession = new RavenDBSynchronizedStorageSession(writeDocSession, true))
             {
                 await writeSession.Session.StoreAsync(new TestDocument { Value = "43" }, documentId);
                 // do not call CompleteAsync
@@ -56,7 +58,8 @@
         public async Task CompleteAsync_without_savechanges_rolls_back()
         {
             var documentId = Guid.NewGuid().ToString();
-            using (var writeSession = new RavenDBSynchronizedStorageSession(OpenAsyncSession(), false))
+            using (var writeDocSession = OpenAsyncSession())
+            using (var writeSession = new RavenDBSynchronizedStorageSession(writeDocSession, false))
             {
                 await writeSession.Session.StoreAsync(new TestDocument { Value = "43" }, documentId);
                 await writeSession.CompleteAsync();

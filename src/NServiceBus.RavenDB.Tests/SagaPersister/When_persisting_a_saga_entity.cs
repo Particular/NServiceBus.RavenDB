@@ -20,24 +20,26 @@ public class When_persisting_a_saga_entity : RavenDBPersistenceTestBase
         };
 
         var persister = new SagaPersister();
-        var context = this.CreateContextWithAsyncSessionPresent(out var session);
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+        using (var session = this.CreateAsyncSessionInContext(out var context))
+        {
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
-        // act
-        await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, context);
-        await session.SaveChangesAsync();
+            // act
+            await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, context);
+            await session.SaveChangesAsync();
 
-        // assert
-        var sagaDataContainerId = SagaPersister.DocumentIdForSagaData(session, entity);
-        var sagaDataContainer = await session.LoadAsync<SagaDataContainer>(sagaDataContainerId);
-        var sagaDataContainerMetadata = session.Advanced.GetMetadataFor(sagaDataContainer);
+            // assert
+            var sagaDataContainerId = SagaPersister.DocumentIdForSagaData(session, entity);
+            var sagaDataContainer = await session.LoadAsync<SagaDataContainer>(sagaDataContainerId);
+            var sagaDataContainerMetadata = session.Advanced.GetMetadataFor(sagaDataContainer);
 
-        var sagaUniqueIdentityId = sagaDataContainer.IdentityDocId;
-        var sagaUniqueIdentity = await session.LoadAsync<SagaUniqueIdentity>(sagaUniqueIdentityId);
-        var sagaUniqueIdentityMetadata = session.Advanced.GetMetadataFor(sagaUniqueIdentity);
+            var sagaUniqueIdentityId = sagaDataContainer.IdentityDocId;
+            var sagaUniqueIdentity = await session.LoadAsync<SagaUniqueIdentity>(sagaUniqueIdentityId);
+            var sagaUniqueIdentityMetadata = session.Advanced.GetMetadataFor(sagaUniqueIdentity);
 
-        Assert.AreEqual(SagaDataContainer.SchemaVersion, sagaDataContainerMetadata[SchemaVersionExtensions.SagaDataContainerSchemaVersionMetadataKey]);
-        Assert.AreEqual(SagaUniqueIdentity.SchemaVersion, sagaUniqueIdentityMetadata[SchemaVersionExtensions.SagaUniqueIdentitySchemaVersionMetadataKey]);
+            Assert.AreEqual(SagaDataContainer.SchemaVersion, sagaDataContainerMetadata[SchemaVersionExtensions.SagaDataContainerSchemaVersionMetadataKey]);
+            Assert.AreEqual(SagaUniqueIdentity.SchemaVersion, sagaUniqueIdentityMetadata[SchemaVersionExtensions.SagaUniqueIdentitySchemaVersionMetadataKey]);
+        }
     }
 
     class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartSaga>

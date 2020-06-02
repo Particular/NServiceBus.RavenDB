@@ -6,7 +6,6 @@ using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
 using Raven.Client.Documents;
-using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
@@ -16,27 +15,28 @@ public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
     {
         var sagaId = Guid.NewGuid();
 
-        IAsyncDocumentSession session;
-        var options = this.CreateContextWithAsyncSessionPresent(out session);
-        var persister = new SagaPersister();
-
-        var sagaEntity = new SagaData
+        using (var session = this.CreateAsyncSessionInContext(out var options))
         {
-            Id = sagaId,
-            SomeId = Guid.NewGuid()
-        };
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var persister = new SagaPersister();
 
-        await persister.Save(sagaEntity, this.CreateMetadata<SomeSaga>(sagaEntity), synchronizedSession, options);
+            var sagaEntity = new SagaData
+            {
+                Id = sagaId,
+                SomeId = Guid.NewGuid()
+            };
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
-        //session.Advanced.GetMetadataFor(sagaEntity).Remove("NServiceBus-UniqueDocId");
-        await session.SaveChangesAsync().ConfigureAwait(false);
+            await persister.Save(sagaEntity, this.CreateMetadata<SomeSaga>(sagaEntity), synchronizedSession, options);
 
-        var saga = await persister.Get<SagaData>(sagaId, synchronizedSession, options);
-        await persister.Complete(saga, synchronizedSession, options);
-        await session.SaveChangesAsync().ConfigureAwait(false);
+            //session.Advanced.GetMetadataFor(sagaEntity).Remove("NServiceBus-UniqueDocId");
+            await session.SaveChangesAsync().ConfigureAwait(false);
 
-        Assert.Null(await session.Query<SagaUniqueIdentity>().Customize(c => c.WaitForNonStaleResults()).SingleOrDefaultAsync(u => u.SagaId == sagaId));
+            var saga = await persister.Get<SagaData>(sagaId, synchronizedSession, options);
+            await persister.Complete(saga, synchronizedSession, options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
+
+            Assert.Null(await session.Query<SagaUniqueIdentity>().Customize(c => c.WaitForNonStaleResults()).SingleOrDefaultAsync(u => u.SagaId == sagaId));
+        }
     }
 
 
