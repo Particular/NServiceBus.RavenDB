@@ -30,7 +30,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = OpenAsyncSession())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
             {
                 await session.StoreAsync(
                     new OutboxRecord
@@ -48,7 +48,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await persister.SetAsDispatched(incomingMessageId, context);
 
             // assert
-            using (var session = OpenAsyncSession())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
 
@@ -69,7 +69,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = OpenAsyncSession())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
             {
                 await session.StoreAsync(new OutboxRecord { MessageId = incomingMessageId, Dispatched = false, }, outboxRecordId);
                 await session.SaveChangesAsync();
@@ -79,7 +79,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await persister.SetAsDispatched(incomingMessageId, context);
 
             // assert
-            using (var session = OpenAsyncSession())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
@@ -99,7 +99,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = OpenAsyncSession())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
             {
                 await session.StoreAsync(new OutboxRecord { MessageId = incomingMessageId, Dispatched = false, }, outboxRecordId);
                 await session.SaveChangesAsync();
@@ -112,7 +112,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await persister.SetAsDispatched(incomingMessageId, context);
 
             // assert
-            using (var session = OpenAsyncSession())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
@@ -132,7 +132,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = OpenAsyncSession())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
             {
                 await session.StoreAsync(new OutboxRecord { MessageId = incomingMessageId, Dispatched = false, }, outboxRecordId);
                 await session.SaveChangesAsync();
@@ -142,7 +142,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await persister.SetAsDispatched(incomingMessageId, context);
 
             // assert
-            using (var session = OpenAsyncSession())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);

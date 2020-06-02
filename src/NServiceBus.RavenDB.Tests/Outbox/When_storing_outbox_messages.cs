@@ -95,7 +95,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
 
             // assert
-            using (var session = OpenAsyncSession())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
             {
                 var outboxRecord = await session.Query<OutboxRecord>().SingleAsync(record => record.MessageId == incomingMessageId);
 

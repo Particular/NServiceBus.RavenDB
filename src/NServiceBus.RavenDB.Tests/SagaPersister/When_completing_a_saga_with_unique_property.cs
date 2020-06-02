@@ -15,7 +15,7 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
     {
         var sagaId = Guid.NewGuid();
 
-        using (var session = this.CreateAsyncSessionInContext(out var options))
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
             var persister = new SagaPersister();
             var entity = new SagaData

@@ -15,7 +15,7 @@ public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
     {
         var sagaId = Guid.NewGuid();
 
-        using (var session = this.CreateAsyncSessionInContext(out var options))
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
             var persister = new SagaPersister();
 

@@ -11,7 +11,7 @@ public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestB
     [Test]
     public async Task Should_not_generate_a_to_long_unique_property_id()
     {
-        using (var session = this.CreateAsyncSessionInContext(out var options))
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
             var persister = new SagaPersister();
             var uniqueString = Guid.NewGuid().ToString();

@@ -37,7 +37,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     {
         var sagaId = StoreSagaDocuments();
 
-        using (var session = this.OpenAsyncSession())
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
             var persister = new SagaPersister();
             var context = new ContextBag();
@@ -53,7 +53,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             await session.SaveChangesAsync();
         }
 
-        using (var session = this.OpenAsyncSession())
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
             var dataDocs = await session.Advanced.LoadStartingWithAsync<SagaDataContainer>("CountingSagaDatas/");
             var uniqueDocs = await session.Advanced.LoadStartingWithAsync<SagaUniqueIdentity>("Raven3Sagas-");
@@ -96,7 +96,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
 
     Task<CountingSagaData> GetSagaDataByProperty()
     {
-        using (var session = this.OpenAsyncSession())
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
             var persister = new SagaPersister();
             var context = new ContextBag();
@@ -108,7 +108,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
 
     Task<CountingSagaData> GetSagaDataById(Guid sagaId)
     {
-        using (var session = this.OpenAsyncSession())
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
             var persister = new SagaPersister();
             var context = new ContextBag();

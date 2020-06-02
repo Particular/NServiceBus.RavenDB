@@ -33,13 +33,6 @@
             db.Dispose();
         }
 
-        protected internal IAsyncDocumentSession OpenAsyncSession()
-        {
-            var documentSession = store.OpenAsyncSession();
-            documentSession.Advanced.UseOptimisticConcurrency = true;
-            return documentSession;
-        }
-
         protected void WaitForIndexing()
         {
             db.WaitForIndexing(store);
