@@ -15,6 +15,10 @@ namespace NServiceBus.Persistence.RavenDB
 
         public void Dispose()
         {
+            if (callSaveChanges)
+            {
+                Session.Dispose();
+            }
         }
 
         public Task CompleteAsync()
