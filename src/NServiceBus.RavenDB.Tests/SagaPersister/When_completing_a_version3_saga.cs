@@ -28,7 +28,6 @@ public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
 
             await persister.Save(sagaEntity, this.CreateMetadata<SomeSaga>(sagaEntity), synchronizedSession, options);
 
-            //session.Advanced.GetMetadataFor(sagaEntity).Remove("NServiceBus-UniqueDocId");
             await session.SaveChangesAsync().ConfigureAwait(false);
 
             var saga = await persister.Get<SagaData>(sagaId, synchronizedSession, options);
