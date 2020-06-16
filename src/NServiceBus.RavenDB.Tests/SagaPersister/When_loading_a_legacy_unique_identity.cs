@@ -27,20 +27,21 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
         CreateLegacySagaDocuments(store, unique);
 
-        IAsyncDocumentSession session;
-        var options = this.CreateContextWithAsyncSessionPresent(out session);
-        var persister = new SagaPersister();
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        {
+            var persister = new SagaPersister();
 
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
-        var saga = await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options);
+            var saga = await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options);
 
-        Assert.IsNotNull(saga, "Saga is null");
+            Assert.IsNotNull(saga, "Saga is null");
 
-        await persister.Complete(saga, synchronizedSession, options);
-        await session.SaveChangesAsync().ConfigureAwait(false);
+            await persister.Complete(saga, synchronizedSession, options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
 
-        Assert.IsNull(await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options), "Saga was not completed");
+            Assert.IsNull(await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options), "Saga was not completed");
+        }
     }
 
     class SagaWithUniqueProperty : IContainSagaData

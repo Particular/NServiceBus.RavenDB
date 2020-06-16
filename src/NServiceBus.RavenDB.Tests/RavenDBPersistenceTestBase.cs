@@ -29,18 +29,8 @@
         [TearDown]
         public virtual void TearDown()
         {
-            sessions.ForEach(s => s.Dispose());
-            sessions.Clear();
             store.Dispose();
             db.Dispose();
-        }
-
-        protected internal IAsyncDocumentSession OpenAsyncSession()
-        {
-            var documentSession = store.OpenAsyncSession();
-            documentSession.Advanced.UseOptimisticConcurrency = true;
-            sessions.Add(documentSession);
-            return documentSession;
         }
 
         protected void WaitForIndexing()
@@ -80,7 +70,6 @@
             return incomingMessage;
         }
 
-        List<IAsyncDocumentSession> sessions = new List<IAsyncDocumentSession>();
         protected IDocumentStore store;
         ReusableDB db;
 

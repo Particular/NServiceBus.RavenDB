@@ -4,7 +4,6 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_persisting_a_saga_entity_with_a_concrete_class_property : RavenDBPersistenceTestBase
@@ -22,18 +21,19 @@ public class When_persisting_a_saga_entity_with_a_concrete_class_property : Rave
             }
         };
 
-        IAsyncDocumentSession session;
-        var options = this.CreateContextWithAsyncSessionPresent(out session);
-        var persister = new SagaPersister();
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        {
+            var persister = new SagaPersister();
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
-        await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
-        await session.SaveChangesAsync().ConfigureAwait(false);
+            await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
 
-        var savedEntity = await persister.Get<SagaData>(entity.Id, synchronizedSession, options);
+            var savedEntity = await persister.Get<SagaData>(entity.Id, synchronizedSession, options);
 
-        Assert.AreEqual(entity.TestComponent.Property, savedEntity.TestComponent.Property);
-        Assert.AreEqual(entity.TestComponent.AnotherProperty, savedEntity.TestComponent.AnotherProperty);
+            Assert.AreEqual(entity.TestComponent.Property, savedEntity.TestComponent.Property);
+            Assert.AreEqual(entity.TestComponent.AnotherProperty, savedEntity.TestComponent.AnotherProperty);
+        }
     }
 
     class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartSaga>

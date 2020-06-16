@@ -4,7 +4,6 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_persisting_a_saga_entity_with_a_DateTime_property : RavenDBPersistenceTestBase
@@ -19,15 +18,16 @@ public class When_persisting_a_saga_entity_with_a_DateTime_property : RavenDBPer
             DateTimeProperty = DateTime.Parse("12/02/2010 12:00:00.01")
         };
 
-        IAsyncDocumentSession session;
-        var options = this.CreateContextWithAsyncSessionPresent(out session);
-        var persister = new SagaPersister();
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        {
+            var persister = new SagaPersister();
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
-        await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
-        await session.SaveChangesAsync().ConfigureAwait(false);
-        var savedEntity = await persister.Get<SagaData>(entity.Id, synchronizedSession, options);
-        Assert.AreEqual(entity.DateTimeProperty, savedEntity.DateTimeProperty);
+            await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
+            var savedEntity = await persister.Get<SagaData>(entity.Id, synchronizedSession, options);
+            Assert.AreEqual(entity.DateTimeProperty, savedEntity.DateTimeProperty);
+        }
     }
 
     class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartSaga>

@@ -4,7 +4,6 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed_saga : RavenDBPersistenceTestBase
@@ -12,44 +11,49 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
     [Test]
     public async Task It_should_persist_successfully()
     {
-        IAsyncDocumentSession session;
-        var options = this.CreateContextWithAsyncSessionPresent(out session);
-        var persister = new SagaPersister();
+        var saga1Id = Guid.NewGuid();
         var uniqueString = Guid.NewGuid().ToString();
-        var saga1 = new SagaData
+
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            Id = Guid.NewGuid(),
-            UniqueString = uniqueString
-        };
+            var persister = new SagaPersister();
+            var saga1 = new SagaData
+            {
+                Id = saga1Id,
+                UniqueString = uniqueString
+            };
 
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
-        await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), synchronizedSession, options);
-        await session.SaveChangesAsync().ConfigureAwait(false);
+            await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), synchronizedSession, options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
+        }
 
-        session.Dispose();
-
-        options = this.CreateContextWithAsyncSessionPresent(out session);
-        synchronizedSession = new RavenDBSynchronizedStorageSession(session);
-
-        var saga = await persister.Get<SagaData>(saga1.Id, synchronizedSession, options);
-
-        await persister.Complete(saga, synchronizedSession, options);
-        await session.SaveChangesAsync().ConfigureAwait(false);
-
-        session.Dispose();
-
-        options = this.CreateContextWithAsyncSessionPresent(out session);
-        synchronizedSession = new RavenDBSynchronizedStorageSession(session);
-
-        var saga2 = new SagaData
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            Id = Guid.NewGuid(),
-            UniqueString = uniqueString
-        };
+            var persister = new SagaPersister();
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
-        await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), synchronizedSession, options);
-        await session.SaveChangesAsync().ConfigureAwait(false);
+            var saga = await persister.Get<SagaData>(saga1Id, synchronizedSession, options);
+
+            await persister.Complete(saga, synchronizedSession, options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        {
+            var persister = new SagaPersister();
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+
+            var saga2 = new SagaData
+            {
+                Id = Guid.NewGuid(),
+                UniqueString = uniqueString
+            };
+
+            await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), synchronizedSession, options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
+        }
     }
 
     class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartSaga>

@@ -4,7 +4,6 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
@@ -18,18 +17,19 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
             UniqueString = null
         };
 
-        IAsyncDocumentSession session;
-        var context = this.CreateContextWithAsyncSessionPresent(out session);
-        var ravenSession = new RavenDBSynchronizedStorageSession(session);
-        var persister = new SagaPersister();
-
-        var exception = await Catch<ArgumentNullException>(async () =>
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var context))
         {
-            await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), ravenSession, context);
-            await session.SaveChangesAsync().ConfigureAwait(false);
-        });
+            var ravenSession = new RavenDBSynchronizedStorageSession(session);
+            var persister = new SagaPersister();
 
-        Assert.IsNotNull(exception);
+            var exception = await Catch<ArgumentNullException>(async () =>
+            {
+                await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), ravenSession, context);
+                await session.SaveChangesAsync().ConfigureAwait(false);
+            });
+
+            Assert.IsNotNull(exception);
+        }
     }
 
     class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartSaga>

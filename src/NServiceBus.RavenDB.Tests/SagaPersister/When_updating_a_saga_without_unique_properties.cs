@@ -4,7 +4,6 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_updating_a_saga_without_unique_properties : RavenDBPersistenceTestBase
@@ -12,29 +11,30 @@ public class When_updating_a_saga_without_unique_properties : RavenDBPersistence
     [Test]
     public async Task It_should_persist_successfully()
     {
-        IAsyncDocumentSession session;
-        var options = this.CreateContextWithAsyncSessionPresent(out session);
-        var persister = new SagaPersister();
-        var uniqueString = Guid.NewGuid().ToString();
-        var anotherUniqueString = Guid.NewGuid().ToString();
-
-        var saga1 = new SagaData
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            Id = Guid.NewGuid(),
-            UniqueString = uniqueString,
-            NonUniqueString = "notUnique"
-        };
+            var persister = new SagaPersister();
+            var uniqueString = Guid.NewGuid().ToString();
+            var anotherUniqueString = Guid.NewGuid().ToString();
 
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var saga1 = new SagaData
+            {
+                Id = Guid.NewGuid(),
+                UniqueString = uniqueString,
+                NonUniqueString = "notUnique"
+            };
 
-        await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), synchronizedSession, options);
-        await session.SaveChangesAsync().ConfigureAwait(false);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
-        var saga = await persister.Get<SagaData>(saga1.Id, synchronizedSession, options);
-        saga.NonUniqueString = "notUnique2";
-        saga.UniqueString = anotherUniqueString;
-        await persister.Update(saga, synchronizedSession, options);
-        await session.SaveChangesAsync().ConfigureAwait(false);
+            await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), synchronizedSession, options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
+
+            var saga = await persister.Get<SagaData>(saga1.Id, synchronizedSession, options);
+            saga.NonUniqueString = "notUnique2";
+            saga.UniqueString = anotherUniqueString;
+            await persister.Update(saga, synchronizedSession, options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
+        }
     }
 
     class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartSaga>

@@ -4,7 +4,6 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_trying_to_fetch_a_non_existing_saga_by_its_unique_property : RavenDBPersistenceTestBase
@@ -12,12 +11,13 @@ public class When_trying_to_fetch_a_non_existing_saga_by_its_unique_property : R
     [Test]
     public async Task It_should_return_null()
     {
-        IAsyncDocumentSession session;
-        var options = this.CreateContextWithAsyncSessionPresent(out session);
-        var persister = new SagaPersister();
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        {
+            var persister = new SagaPersister();
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
-        Assert.Null(await persister.Get<SagaData>("UniqueString", Guid.NewGuid().ToString(), synchronizedSession, options));
+            Assert.Null(await persister.Get<SagaData>("UniqueString", Guid.NewGuid().ToString(), synchronizedSession, options));
+        }
     }
 
     class SomeSaga : Saga<SagaData>, IAmStartedByMessages<StartSaga>

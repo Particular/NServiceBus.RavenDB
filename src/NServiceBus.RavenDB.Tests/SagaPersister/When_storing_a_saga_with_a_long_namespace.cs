@@ -4,7 +4,6 @@ using NServiceBus;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestBase
@@ -12,19 +11,20 @@ public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestB
     [Test]
     public async Task Should_not_generate_a_to_long_unique_property_id()
     {
-        IAsyncDocumentSession session;
-        var options = this.CreateContextWithAsyncSessionPresent(out session);
-        var persister = new SagaPersister();
-        var uniqueString = Guid.NewGuid().ToString();
-        var saga = new SagaWithUniquePropertyAndALongNamespace
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        {
+            var persister = new SagaPersister();
+            var uniqueString = Guid.NewGuid().ToString();
+            var saga = new SagaWithUniquePropertyAndALongNamespace
             {
                 Id = Guid.NewGuid(),
                 UniqueString = uniqueString
             };
-        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
 
-        await persister.Save(saga, this.CreateMetadata<SomeSaga>(saga), synchronizedSession, options);
-        await session.SaveChangesAsync().ConfigureAwait(false);
+            await persister.Save(saga, this.CreateMetadata<SomeSaga>(saga), synchronizedSession, options);
+            await session.SaveChangesAsync().ConfigureAwait(false);
+        }
     }
 
     class SomeSaga : Saga<SagaWithUniquePropertyAndALongNamespace>, IAmStartedByMessages<StartSaga>

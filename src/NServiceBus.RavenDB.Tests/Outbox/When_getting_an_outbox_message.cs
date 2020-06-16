@@ -33,7 +33,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             };
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = OpenAsyncSession())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
             {
                 var outboxRecord = new OutboxRecord
                 {
