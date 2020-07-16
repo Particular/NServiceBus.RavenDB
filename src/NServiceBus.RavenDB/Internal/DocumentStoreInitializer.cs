@@ -63,7 +63,7 @@
                 ApplyConventions(settings);
 
                 docStore.Initialize();
-                EnsureClusterConfiguration(docStore);
+                EnsureClusterConfiguration(docStore, settings);
 
                 CreateIndexes(docStore);
             }
@@ -102,8 +102,12 @@
             }
         }
 
-        static void EnsureClusterConfiguration(IDocumentStore store)
+        static void EnsureClusterConfiguration(IDocumentStore store, ReadOnlySettings settings)
         {
+            var skip = settings.GetOrDefault<bool>(DoNotEnsureClusterConfiguration);
+            if (skip) 
+                return;
+
             using (var s = store.OpenSession())
             {
                 var getTopologyCmd = new GetClusterTopologyCommand();
@@ -123,5 +127,7 @@
         Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator;
         IDocumentStore docStore;
         bool isInitialized;
+
+        internal const string DoNotEnsureClusterConfiguration = "RavenDB.DoNotEnsureClusterConfiguration";
     }
 }

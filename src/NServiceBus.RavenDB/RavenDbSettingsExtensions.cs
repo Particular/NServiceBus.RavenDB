@@ -110,5 +110,16 @@
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        ///     Tells the persister to not check cluster topology to ensure consistency
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <returns></returns>
+        public static PersistenceExtensions<RavenDBPersistence> DoNotEnsureClusterConfiguration(this PersistenceExtensions<RavenDBPersistence> cfg)
+        {
+            cfg.GetSettings().Set(DocumentStoreInitializer.DoNotEnsureClusterConfiguration, true);
+            return cfg;
+        }
     }
 }
