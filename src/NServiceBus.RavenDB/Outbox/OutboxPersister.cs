@@ -57,8 +57,8 @@
         public Task<OutboxTransaction> BeginTransaction(ContextBag context)
         {
             var session = GetSession(context);
-
             session.Advanced.UseOptimisticConcurrency = true;
+            context.Set(session);
 
             var transaction = new RavenDBOutboxTransaction(session);
             return Task.FromResult<OutboxTransaction>(transaction);
