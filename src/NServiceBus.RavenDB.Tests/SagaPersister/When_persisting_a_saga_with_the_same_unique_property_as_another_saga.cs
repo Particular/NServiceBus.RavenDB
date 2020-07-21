@@ -32,15 +32,19 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
 
         var exception = await Catch<ConcurrencyException>(async () =>
         {
-            options = this.CreateContextWithAsyncSessionPresent(out session);
-            synchronizedSession = new RavenDBSynchronizedStorageSession(session);
-            var saga2 = new SagaData
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
             {
-                Id = Guid.NewGuid(),
-                UniqueString = uniqueString
-            };
-            await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), synchronizedSession, options);
-            await session.SaveChangesAsync().ConfigureAwait(false);
+                var saga2 = new SagaData
+                {
+                    Id = Guid.NewGuid(),
+                    UniqueString = uniqueString
+                };
+
+                var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
+
+                await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), synchronizedSession, options);
+                await session.SaveChangesAsync().ConfigureAwait(false);
+            }
         });
 
         Assert.IsNotNull(exception);
