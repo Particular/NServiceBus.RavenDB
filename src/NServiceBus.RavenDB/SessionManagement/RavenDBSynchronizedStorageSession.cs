@@ -52,6 +52,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public Task CompleteAsync()
         {
+            // TODO: does it make sense to try to release acquired locks when/after saving changes?
             return callSaveChanges
                 ? Session.SaveChangesAsync()
                 : Task.CompletedTask;
