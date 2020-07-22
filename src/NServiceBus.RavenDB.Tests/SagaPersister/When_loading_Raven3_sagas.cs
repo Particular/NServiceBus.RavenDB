@@ -42,7 +42,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             var persister = new SagaPersister();
             var context = new ContextBag();
             context.Set(session);
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, context);
             var sagaData = await getSaga(persister, sagaId, synchronizedSession, context);
 
             Assert.IsNotNull(sagaData);

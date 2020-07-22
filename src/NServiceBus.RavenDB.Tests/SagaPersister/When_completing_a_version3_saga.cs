@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using NServiceBus;
-using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
@@ -25,7 +24,7 @@ public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
                 Id = sagaId,
                 SomeId = Guid.NewGuid()
             };
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 
             await persister.Save(sagaEntity, this.CreateMetadata<SomeSaga>(sagaEntity), synchronizedSession, options);
 
