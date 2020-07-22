@@ -28,7 +28,7 @@ namespace NServiceBus.Persistence.RavenDB
             foreach (var docIdAndIndex in holder.DocumentsIdsAndIndexes)
             {
                 // TODO: can the release operations be batched?
-                ReleaseSagaData(Session.Advanced.DocumentStore, docIdAndIndex.Item1, docIdAndIndex.Item2);
+                ReleaseSagaData(Session.Advanced.DocumentStore, docIdAndIndex.DocumentId, docIdAndIndex.Index);
             }
         }
 

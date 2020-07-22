@@ -69,7 +69,7 @@ namespace NServiceBus.Persistence.RavenDB
             // TODO: currently always pessimistic
             var index = await AcquireLease(documentSession.Advanced.DocumentStore, docId).ConfigureAwait(false);
             // only true if we always have synchronized storage session around which is a valid assumption
-            context.Get<SagaDataLeaseHolder>().DocumentsIdsAndIndexes.Add(Tuple.Create(docId, index));
+            context.Get<SagaDataLeaseHolder>().DocumentsIdsAndIndexes.Add((docId, index));
 
             var container = await documentSession.LoadAsync<SagaDataContainer>(docId).ConfigureAwait(false);
 
@@ -107,7 +107,7 @@ namespace NServiceBus.Persistence.RavenDB
             // TODO: currently always pessimistic
             var index = await AcquireLease(documentSession.Advanced.DocumentStore, lookup.SagaDocId).ConfigureAwait(false);
             // only true if we always have synchronized storage session around which is a valid assumption
-            context.Get<SagaDataLeaseHolder>().DocumentsIdsAndIndexes.Add(Tuple.Create(lookup.SagaDocId, index));
+            context.Get<SagaDataLeaseHolder>().DocumentsIdsAndIndexes.Add((lookup.SagaDocId, index));
 
             // If we have a saga id we can just load it, should have been included in the round-trip already
             var container = await documentSession.LoadAsync<SagaDataContainer>(lookup.SagaDocId).ConfigureAwait(false);
