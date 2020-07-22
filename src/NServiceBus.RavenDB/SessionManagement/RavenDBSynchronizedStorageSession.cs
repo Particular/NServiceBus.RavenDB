@@ -27,6 +27,7 @@ namespace NServiceBus.Persistence.RavenDB
             var holder = context.GetOrCreate<SagaDataLeaseHolder>();
             foreach (var docIdAndIndex in holder.DocumentsIdsAndIndexes)
             {
+                // TODO: can the release operations be batched?
                 ReleaseSagaData(Session.Advanced.DocumentStore, docIdAndIndex.Item1, docIdAndIndex.Item2);
             }
         }
