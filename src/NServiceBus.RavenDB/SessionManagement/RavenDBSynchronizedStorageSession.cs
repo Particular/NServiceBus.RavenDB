@@ -23,36 +23,17 @@ namespace NServiceBus.Persistence.RavenDB
 
         public void Dispose()
         {
-            // TODO: Think about the impact of call save changes, we potentially need to have the same logic in the outbox transaction then
-            var holder = context.GetOrCreate<SagaDataLeaseHolder>();
+            // Releasing locks here at the latest point possible to prevent issues with other pipeline resources depending on the lock.
+            var holder = context.Get<SagaDataLeaseHolder>();
             foreach (var docIdAndIndex in holder.DocumentsIdsAndIndexes)
             {
-                // TODO: can the release operations be batched?
-                ReleaseSagaData(Session.Advanced.DocumentStore, docIdAndIndex.DocumentId, docIdAndIndex.Index);
+                // We are optimistic and fire-and-forget the releasing of the lock and just continue. In case this fails the next message that needs to acquire the lock wil have to wait.
+                _ = Session.Advanced.DocumentStore.Operations.SendAsync(new DeleteCompareExchangeValueOperation<SagaDataLease>(docIdAndIndex.DocumentId, docIdAndIndex.Index));
             }
-        }
-
-        // TODO: Maybe we could use the async APIs and make the dispose async void under the assumption releasing the lock is a best effort
-        private void ReleaseSagaData(IDocumentStore store, string documentId, long index)
-        {
-            var deleteResult = store.Operations.Send(new DeleteCompareExchangeValueOperation<SagaDataLease>(documentId, index));
-
-            if (deleteResult.Successful)
-            {
-                return;
-            }
-
-            // TODO: Meaningful exception
-            throw new TimeoutException();
-
-            // We have 2 options here:
-            // deleteResult.Successful is true - we managed to release resource
-            // deleteResult.Successful is false - someone else took the lock due to timeout
         }
 
         public Task CompleteAsync()
         {
-            // TODO: does it make sense to try to release acquired locks when/after saving changes?
             return callSaveChanges
                 ? Session.SaveChangesAsync()
                 : Task.CompletedTask;
