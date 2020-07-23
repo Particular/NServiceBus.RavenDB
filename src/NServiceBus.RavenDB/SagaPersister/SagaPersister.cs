@@ -142,45 +142,44 @@ namespace NServiceBus.Persistence.RavenDB
         async Task<long> AcquireLease(IDocumentStore store, string sagaDataDocId)
         {
             // TODO: configurable
-            var transactionTimeout = TimeSpan.FromSeconds(60);
+            var obtainTransactionTimeout = TimeSpan.FromSeconds(60);
             var leaseLockTime = TimeSpan.FromSeconds(60);
-            using (var cancellationTokenSource = new CancellationTokenSource(transactionTimeout))
+            var refreshDelayMax = TimeSpan.FromMilliseconds(20);
+
+            using (var cancellationTokenSource = new CancellationTokenSource(obtainTransactionTimeout))
             {
                 var token = cancellationTokenSource.Token;
                 while (!token.IsCancellationRequested)
                 {
-                    var lease = new SagaDataLease(DateTime.UtcNow.Add(leaseLockTime));
-
-                    // TODO: check cancellation logic and exception bubbling
-                    var saveResult = await store.Operations.SendAsync(
-                        new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataDocId, lease, 0), token: CancellationToken.None)
-                        .ConfigureAwait(false);
-
-                    if (saveResult.Successful)
-                    {
-                        // lease wasn't already present - we managed to acquire lease
-                        return saveResult.Index;
-                    }
-
-                    // At this point, Put operation failed - someone else owns the lock or lock time expired
-                    if (saveResult.Value.ReservedUntil < DateTime.UtcNow)
-                    {
-                        // Time expired - Update the existing key with the new value
-                        // TODO: check cancellation logic and exception bubbling
-                        var takeLockWithTimeoutResult = await store.Operations.SendAsync(
-                            new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataDocId, lease, saveResult.Index), token: CancellationToken.None)
-                            .ConfigureAwait(false);
-
-                        if (takeLockWithTimeoutResult.Successful)
-                        {
-                            return takeLockWithTimeoutResult.Index;
-                        }
-                    }
-
-                    // TODO: This logic here has some flaws that need to be ironed out
                     try
                     {
-                        await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), token).ConfigureAwait(false);
+                        var lease = new SagaDataLease(DateTime.UtcNow.Add(leaseLockTime));
+
+                        var saveResult = await store.Operations.SendAsync(
+                                new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataDocId, lease, 0), token: token)
+                            .ConfigureAwait(false);
+
+                        if (saveResult.Successful)
+                        {
+                            // lease wasn't already present - we managed to acquire lease
+                            return saveResult.Index;
+                        }
+
+                        // At this point, Put operation failed - someone else owns the lock or lock time expired
+                        if (saveResult.Value.ReservedUntil < DateTime.UtcNow)
+                        {
+                            // Time expired - Update the existing key with the new value
+                            var takeLockWithTimeoutResult = await store.Operations.SendAsync(
+                                    new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataDocId, lease, saveResult.Index), token: token)
+                                .ConfigureAwait(false);
+
+                            if (takeLockWithTimeoutResult.Successful)
+                            {
+                                return takeLockWithTimeoutResult.Index;
+                            }
+                        }
+
+                        await Task.Delay(TimeSpan.FromTicks(5 + random.Next((int)refreshDelayMax.Ticks)), token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -188,7 +187,7 @@ namespace NServiceBus.Persistence.RavenDB
                     }
                 }
 
-                throw new TimeoutException($"Unable to acquire exclusive write lock for saga with id '{sagaDataDocId}'.");
+                throw new TimeoutException($"Unable to acquire exclusive write lock for saga with id '{sagaDataDocId}' within allocated time '{obtainTransactionTimeout}'.");
             }
         }
 
