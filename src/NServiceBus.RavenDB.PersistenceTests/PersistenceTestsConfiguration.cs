@@ -1,11 +1,14 @@
 ﻿namespace NServiceBus.PersistenceTesting
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
+    using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.Persistence;
     using NServiceBus.Sagas;
     using NServiceBus.Persistence.RavenDB;
+    using NServiceBus.Transport;
     using Raven.Client.Documents;
     using Raven.Client.ServerWide;
     using Raven.Client.ServerWide.Operations;
@@ -30,7 +33,12 @@
 
         public Task Configure()
         {
-            GetContextBagForSagaStorage = () => null;
+            GetContextBagForSagaStorage = () =>
+            {
+                var context = new ContextBag();
+                context.Set(new IncomingMessage("native id", new Dictionary<string, string>(), new byte[0]));
+                return context;
+            };
 
             SagaIdGenerator = new DefaultSagaIdGenerator();
             SagaStorage = new SagaPersister();
