@@ -5,7 +5,6 @@
     using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.ObjectBuilder;
     using NServiceBus.Persistence.RavenDB;
-    using NServiceBus.Pipeline;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Session;
