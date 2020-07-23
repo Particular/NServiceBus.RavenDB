@@ -20,7 +20,7 @@ public class When_persisting_a_saga_entity : RavenDBPersistenceTestBase
             UniqueString = "SomeUniqueString",
         };
 
-        var persister = new SagaPersister();
+        var persister = new SagaPersister(new SagaPersistenceConfiguration());
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var context))
         {
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());

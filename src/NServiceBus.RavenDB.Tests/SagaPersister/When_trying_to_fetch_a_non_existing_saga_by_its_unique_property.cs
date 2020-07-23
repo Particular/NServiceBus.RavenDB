@@ -14,7 +14,7 @@ public class When_trying_to_fetch_a_non_existing_saga_by_its_unique_property : R
     {
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister();
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
 
             Assert.Null(await persister.Get<SagaData>("UniqueString", Guid.NewGuid().ToString(), synchronizedSession, options));

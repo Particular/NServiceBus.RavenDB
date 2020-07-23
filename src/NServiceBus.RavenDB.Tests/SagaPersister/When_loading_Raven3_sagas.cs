@@ -39,7 +39,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
-            var persister = new SagaPersister();
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
             var context = new ContextBag();
             context.Set(session);
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, context);
@@ -98,7 +98,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     {
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
-            var persister = new SagaPersister();
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
             var context = new ContextBag();
             context.Set(session);
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
@@ -110,7 +110,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     {
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
-            var persister = new SagaPersister();
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
             var context = new ContextBag();
             context.Set(session);
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());

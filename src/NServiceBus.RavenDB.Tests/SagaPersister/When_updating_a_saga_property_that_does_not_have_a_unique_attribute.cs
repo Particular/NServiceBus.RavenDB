@@ -13,7 +13,7 @@ public class When_updating_a_saga_property_that_does_not_have_a_unique_attribute
     {
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister();
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
             var uniqueString = Guid.NewGuid().ToString();
 
             var saga1 = new SagaData

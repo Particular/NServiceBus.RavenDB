@@ -13,7 +13,7 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
     {
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister();
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
             var entity = new SagaData
             {
                 Id = Guid.NewGuid(),
