@@ -1,9 +1,7 @@
 namespace NServiceBus.Persistence.RavenDB
 {
-    using System;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
-    using Raven.Client.Documents;
     using Raven.Client.Documents.Operations.CompareExchange;
     using Raven.Client.Documents.Session;
 
@@ -25,10 +23,10 @@ namespace NServiceBus.Persistence.RavenDB
         {
             // Releasing locks here at the latest point possible to prevent issues with other pipeline resources depending on the lock.
             var holder = context.Get<SagaDataLeaseHolder>();
-            foreach (var docIdAndIndex in holder.DocumentsIdsAndIndexes)
+            foreach (var (DocumentId, Index) in holder.DocumentsIdsAndIndexes)
             {
                 // We are optimistic and fire-and-forget the releasing of the lock and just continue. In case this fails the next message that needs to acquire the lock wil have to wait.
-                _ = Session.Advanced.DocumentStore.Operations.SendAsync(new DeleteCompareExchangeValueOperation<SagaDataLease>(docIdAndIndex.DocumentId, docIdAndIndex.Index));
+                _ = Session.Advanced.DocumentStore.Operations.SendAsync(new DeleteCompareExchangeValueOperation<SagaDataLease>(DocumentId, Index));
             }
         }
 
