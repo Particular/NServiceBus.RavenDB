@@ -5,6 +5,7 @@
     using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.ObjectBuilder;
     using NServiceBus.Persistence.RavenDB;
+    using NServiceBus.Pipeline;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Session;
@@ -109,6 +110,14 @@
         public static PersistenceExtensions<RavenDBPersistence> DoNotSetupDatabasePermissions(this PersistenceExtensions<RavenDBPersistence> cfg)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Obtains the saga persistence configuration options.
+        /// </summary>
+        public static SagaPersistenceConfiguration Sagas(this PersistenceExtensions<RavenDBPersistence> cfg)
+        {
+            return cfg.GetSettings().GetOrCreate<SagaPersistenceConfiguration>();
         }
     }
 }

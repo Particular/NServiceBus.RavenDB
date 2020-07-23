@@ -13,6 +13,14 @@ namespace NServiceBus.Persistence.RavenDB
 
     class SagaPersister : ISagaPersister
     {
+        public SagaPersister(SagaPersistenceConfiguration options)
+        {
+            leaseLockTime = options.LeaseLockTime;
+            enablePessimisticLocking = options.EnablePessimisticLocking;
+            acquireLeaseLockRefreshMaximumDelayTicks = (int)options.LeaseLockAcquisitionMaximumRefreshDelay.Ticks;
+            acquireLeaseLockTimeout = options.LeaseLockAcquisitionTimeout;
+        }
+
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
@@ -141,12 +149,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         async Task<long> AcquireLease(IDocumentStore store, string sagaDataDocId)
         {
-            // TODO: configurable
-            var obtainTransactionTimeout = TimeSpan.FromSeconds(60);
-            var leaseLockTime = TimeSpan.FromSeconds(60);
-            var refreshDelayMax = TimeSpan.FromMilliseconds(20);
-
-            using (var cancellationTokenSource = new CancellationTokenSource(obtainTransactionTimeout))
+            using (var cancellationTokenSource = new CancellationTokenSource(acquireLeaseLockTimeout))
             {
                 var token = cancellationTokenSource.Token;
                 while (!token.IsCancellationRequested)
@@ -179,7 +182,7 @@ namespace NServiceBus.Persistence.RavenDB
                             }
                         }
 
-                        await Task.Delay(TimeSpan.FromTicks(5 + random.Next((int)refreshDelayMax.Ticks)), token).ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromTicks(5 + random.Next(acquireLeaseLockRefreshMaximumDelayTicks)), token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -187,7 +190,7 @@ namespace NServiceBus.Persistence.RavenDB
                     }
                 }
 
-                throw new TimeoutException($"Unable to acquire exclusive write lock for saga with id '{sagaDataDocId}' within allocated time '{obtainTransactionTimeout}'.");
+                throw new TimeoutException($"Unable to acquire exclusive write lock for saga with id '{sagaDataDocId}' within allocated time '{acquireLeaseLockTimeout}'.");
             }
         }
 
@@ -205,5 +208,10 @@ namespace NServiceBus.Persistence.RavenDB
 
         const string SagaContainerContextKeyPrefix = "SagaDataContainer:";
         static Random random = new Random();
+
+        TimeSpan leaseLockTime;
+        bool enablePessimisticLocking;
+        int acquireLeaseLockRefreshMaximumDelayTicks;
+        TimeSpan acquireLeaseLockTimeout;
     }
 }
