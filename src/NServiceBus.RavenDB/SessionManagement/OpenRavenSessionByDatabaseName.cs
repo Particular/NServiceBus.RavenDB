@@ -6,9 +6,10 @@
 
     class OpenRavenSessionByDatabaseName : IOpenTenantAwareRavenSessions
     {
-        public OpenRavenSessionByDatabaseName(IDocumentStoreWrapper documentStoreWrapper, Func<IDictionary<string, string>, string> getDatabaseName = null)
+        public OpenRavenSessionByDatabaseName(IDocumentStoreWrapper documentStoreWrapper, SagaPersistenceConfiguration sagaPersistenceConfiguration, Func<IDictionary<string, string>, string> getDatabaseName = null)
         {
             this.documentStoreWrapper = documentStoreWrapper;
+            this.sagaPersistenceConfiguration = sagaPersistenceConfiguration;
             this.getDatabaseName = getDatabaseName ?? (context => string.Empty);
         }
 
@@ -19,12 +20,13 @@
                 ? documentStoreWrapper.DocumentStore.OpenAsyncSession()
                 : documentStoreWrapper.DocumentStore.OpenAsyncSession(databaseName);
 
-            //documentSession.Advanced.UseOptimisticConcurrency = true;
+            documentSession.Advanced.UseOptimisticConcurrency = !sagaPersistenceConfiguration.EnablePessimisticLocking;
 
             return documentSession;
         }
 
         IDocumentStoreWrapper documentStoreWrapper;
+        SagaPersistenceConfiguration sagaPersistenceConfiguration;
         Func<IDictionary<string, string>, string> getDatabaseName;
     }
 }
