@@ -19,7 +19,7 @@
             DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Outbox>(context.Settings)
                 .CreateIndexOnInitialization(new OutboxRecordsIndex());
 
-            var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? TimeSpan.FromDays(7);
+            var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? DeduplicationDataTTLDefault;
 
             context.Container.ConfigureComponent(
                 builder => new OutboxPersister(context.Settings.EndpointName(), builder.Build<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData),
@@ -44,6 +44,7 @@
 
         internal const string TimeToKeepDeduplicationData = "Outbox.TimeToKeepDeduplicationData";
         internal const string FrequencyToRunDeduplicationDataCleanup = "Outbox.FrequencyToRunDeduplicationDataCleanup";
+        internal static readonly TimeSpan DeduplicationDataTTLDefault = TimeSpan.FromDays(7);
 
         class OutboxCleaner : FeatureStartupTask
         {

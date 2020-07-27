@@ -17,7 +17,7 @@
     {
         DocumentStore documentStore;
         public bool SupportsDtc => true;
-        public bool SupportsOutbox => false; //TODO configure and run outbox tests
+        public bool SupportsOutbox => true;
         public bool SupportsFinders => true;
         public bool SupportsPessimisticConcurrency => false;
 
@@ -25,13 +25,11 @@
         public ISagaPersister SagaStorage { get; private set; }
         public ISynchronizedStorage SynchronizedStorage { get; private set; }
         public ISynchronizedStorageAdapter SynchronizedStorageAdapter { get; }
-        public IOutboxStorage OutboxStorage { get; }
-
-
+        public IOutboxStorage OutboxStorage { get; private set; }
 
         public Task Configure()
         {
-            GetContextBagForSagaStorage = () =>
+            GetContextBagForOutbox = GetContextBagForSagaStorage = () =>
             {
                 var context = new ContextBag();
                 context.Set(new IncomingMessage("native id", new Dictionary<string, string>(), new byte[0]));
@@ -54,7 +52,8 @@
 
             IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore));
             SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator);
-            //OutboxStorage = new OutboxPersister(endpointName, sessionCreator, ttl);
+            
+            OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault);
             return Task.CompletedTask;
         }
 
