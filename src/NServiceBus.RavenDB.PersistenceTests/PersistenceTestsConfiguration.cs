@@ -18,7 +18,7 @@
         DocumentStore documentStore;
         public bool SupportsDtc => true;
         public bool SupportsOutbox => true;
-        public bool SupportsFinders => true;
+        public bool SupportsFinders => false;
         public bool SupportsPessimisticConcurrency => false;
 
         public ISagaIdGenerator SagaIdGenerator { get; private set; }
