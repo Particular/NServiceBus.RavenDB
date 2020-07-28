@@ -6,22 +6,20 @@
 
     class OpenRavenSessionByCustomDelegate : IOpenTenantAwareRavenSessions
     {
-        public OpenRavenSessionByCustomDelegate(Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSession, SagaPersistenceConfiguration sagaPersistenceConfiguration)
+        public OpenRavenSessionByCustomDelegate(Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSession)
         {
             getAsyncSessionUsingHeaders = getAsyncSession;
-            this.sagaPersistenceConfiguration = sagaPersistenceConfiguration;
         }
 
         public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
         {
             var session = getAsyncSessionUsingHeaders(messageHeaders);
 
-            session.Advanced.UseOptimisticConcurrency = !sagaPersistenceConfiguration.EnablePessimisticLocking;
+            session.Advanced.UseOptimisticConcurrency = true;
 
             return session;
         }
 
         Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSessionUsingHeaders;
-        SagaPersistenceConfiguration sagaPersistenceConfiguration;
     }
 }
