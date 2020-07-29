@@ -24,7 +24,7 @@
         public ISagaIdGenerator SagaIdGenerator { get; private set; }
         public ISagaPersister SagaStorage { get; private set; }
         public ISynchronizedStorage SynchronizedStorage { get; private set; }
-        public ISynchronizedStorageAdapter SynchronizedStorageAdapter { get; }
+        public ISynchronizedStorageAdapter SynchronizedStorageAdapter { get; private set; }
         public IOutboxStorage OutboxStorage { get; private set; }
 
         public Task Configure()
@@ -52,6 +52,7 @@
 
             IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore));
             SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator);
+            SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter();
             
             OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault);
             return Task.CompletedTask;
