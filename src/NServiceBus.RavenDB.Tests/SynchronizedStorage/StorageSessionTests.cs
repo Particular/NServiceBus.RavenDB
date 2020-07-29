@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Tests;
     using NUnit.Framework;
@@ -20,7 +21,7 @@
         {
             var newDocument = new TestDocument { Value = "42" };
             using (var writeDocSession = store.OpenAsyncSession().UsingOptimisticConcurrency())
-            using (var writeSession = new RavenDBSynchronizedStorageSession(writeDocSession, true))
+            using (var writeSession = new RavenDBSynchronizedStorageSession(writeDocSession, new ContextBag(), true))
             {
                 await writeSession.Session.StoreAsync(newDocument);
                 await writeSession.CompleteAsync();
@@ -40,7 +41,7 @@
         {
             var documentId = Guid.NewGuid().ToString();
             using (var writeDocSession = store.OpenAsyncSession().UsingOptimisticConcurrency())
-            using (var writeSession = new RavenDBSynchronizedStorageSession(writeDocSession, true))
+            using (var writeSession = new RavenDBSynchronizedStorageSession(writeDocSession, new ContextBag(), true))
             {
                 await writeSession.Session.StoreAsync(new TestDocument { Value = "43" }, documentId);
                 // do not call CompleteAsync
@@ -59,7 +60,7 @@
         {
             var documentId = Guid.NewGuid().ToString();
             using (var writeDocSession = store.OpenAsyncSession().UsingOptimisticConcurrency())
-            using (var writeSession = new RavenDBSynchronizedStorageSession(writeDocSession, false))
+            using (var writeSession = new RavenDBSynchronizedStorageSession(writeDocSession, new ContextBag(), false))
             {
                 await writeSession.Session.StoreAsync(new TestDocument { Value = "43" }, documentId);
                 await writeSession.CompleteAsync();

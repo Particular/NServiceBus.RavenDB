@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using NServiceBus;
+using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
@@ -19,8 +20,8 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var context))
         {
-            var ravenSession = new RavenDBSynchronizedStorageSession(session);
-            var persister = new SagaPersister();
+            var ravenSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
 
             var exception = await Catch<ArgumentNullException>(async () =>
             {

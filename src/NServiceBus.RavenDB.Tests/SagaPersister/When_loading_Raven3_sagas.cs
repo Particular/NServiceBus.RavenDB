@@ -39,10 +39,10 @@ class Raven3Sagas : RavenDBPersistenceTestBase
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
-            var persister = new SagaPersister();
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
             var context = new ContextBag();
             context.Set(session);
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, context);
             var sagaData = await getSaga(persister, sagaId, synchronizedSession, context);
 
             Assert.IsNotNull(sagaData);
@@ -98,10 +98,10 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     {
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
-            var persister = new SagaPersister();
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
             var context = new ContextBag();
             context.Set(session);
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
             return persister.Get<CountingSagaData>("Name", "Alpha", synchronizedSession, context);
         }
     }
@@ -110,10 +110,10 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     {
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
-            var persister = new SagaPersister();
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
             var context = new ContextBag();
             context.Set(session);
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
             return persister.Get<CountingSagaData>(sagaId, synchronizedSession, context);
         }
     }

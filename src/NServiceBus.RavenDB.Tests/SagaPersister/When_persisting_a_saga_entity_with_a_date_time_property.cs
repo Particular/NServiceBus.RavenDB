@@ -20,8 +20,8 @@ public class When_persisting_a_saga_entity_with_a_DateTime_property : RavenDBPer
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister();
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 
             await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
             await session.SaveChangesAsync().ConfigureAwait(false);

@@ -110,5 +110,13 @@
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Obtains the saga persistence configuration options.
+        /// </summary>
+        public static SagaPersistenceConfiguration Sagas(this PersistenceExtensions<RavenDBPersistence> cfg)
+        {
+            return cfg.GetSettings().GetOrCreate<SagaPersistenceConfiguration>();
+        }
     }
 }

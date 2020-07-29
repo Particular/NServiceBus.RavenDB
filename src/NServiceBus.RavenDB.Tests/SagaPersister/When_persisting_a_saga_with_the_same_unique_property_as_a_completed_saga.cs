@@ -16,14 +16,14 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister();
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
             var saga1 = new SagaData
             {
                 Id = saga1Id,
                 UniqueString = uniqueString
             };
 
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 
             await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), synchronizedSession, options);
             await session.SaveChangesAsync().ConfigureAwait(false);
@@ -31,19 +31,18 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister();
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 
             var saga = await persister.Get<SagaData>(saga1Id, synchronizedSession, options);
-
             await persister.Complete(saga, synchronizedSession, options);
             await session.SaveChangesAsync().ConfigureAwait(false);
         }
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister();
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 
             var saga2 = new SagaData
             {
