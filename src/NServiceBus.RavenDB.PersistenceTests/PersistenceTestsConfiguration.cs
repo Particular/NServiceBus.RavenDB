@@ -16,7 +16,7 @@
     public partial class PersistenceTestsConfiguration
     {
         DocumentStore documentStore;
-        public bool SupportsDtc => true;
+        public bool SupportsDtc => false;
         public bool SupportsOutbox => true;
         public bool SupportsFinders => false;
         public bool SupportsPessimisticConcurrency => false;
