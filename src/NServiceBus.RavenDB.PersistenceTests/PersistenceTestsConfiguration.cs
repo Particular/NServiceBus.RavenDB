@@ -60,7 +60,6 @@
             if (SessionTimeout.HasValue)
             {
                 sagaPersistenceConfiguration.SetPessimisticLeaseLockAcquisitionTimeout(SessionTimeout.Value);
-                sagaPersistenceConfiguration.SetPessimisticLeaseLockTime(SessionTimeout.Value);
             }
             SagaStorage = new SagaPersister(sagaPersistenceConfiguration);
 
