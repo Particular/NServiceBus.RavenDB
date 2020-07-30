@@ -37,7 +37,7 @@
             };
 
             SagaIdGenerator = new DefaultSagaIdGenerator();
-            SagaStorage = new SagaPersister();
+            SagaStorage = new SagaPersister(new SagaPersistenceConfiguration());
 
             var dbName = Guid.NewGuid().ToString();
             var urls = Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls") ?? "http://localhost:8080";
