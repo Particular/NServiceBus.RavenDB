@@ -15,11 +15,29 @@
 
     public partial class PersistenceTestsConfiguration
     {
+        static PersistenceTestsConfiguration()
+        {
+            var optimisticConcurrencyConfiguration = new SagaPersistenceConfiguration();
+            optimisticConcurrencyConfiguration.UsePessimisticLocking(false);
+            var pessimisticLockingConfiguration = new SagaPersistenceConfiguration();
+            pessimisticLockingConfiguration.UsePessimisticLocking(true);
+
+            SagaVariants = new[]
+            {
+                new TestVariant(optimisticConcurrencyConfiguration),
+                new TestVariant(pessimisticLockingConfiguration)
+            };
+            OutboxVariants = new[]
+            {
+                new TestVariant(optimisticConcurrencyConfiguration)
+            };
+        }
+
         DocumentStore documentStore;
         public bool SupportsDtc => false;
         public bool SupportsOutbox => true;
         public bool SupportsFinders => false;
-        public bool SupportsPessimisticConcurrency => false;
+        public bool SupportsPessimisticConcurrency { get; private set; }
 
         public ISagaIdGenerator SagaIdGenerator { get; private set; }
         public ISagaPersister SagaStorage { get; private set; }
@@ -37,7 +55,14 @@
             };
 
             SagaIdGenerator = new DefaultSagaIdGenerator();
-            SagaStorage = new SagaPersister(new SagaPersistenceConfiguration());
+            var sagaPersistenceConfiguration = Variant.Values[0] as SagaPersistenceConfiguration;
+            SupportsPessimisticConcurrency = sagaPersistenceConfiguration.EnablePessimisticLocking;
+            if (SessionTimeout.HasValue)
+            {
+                sagaPersistenceConfiguration.SetPessimisticLeaseLockAcquisitionTimeout(SessionTimeout.Value);
+                sagaPersistenceConfiguration.SetPessimisticLeaseLockTime(SessionTimeout.Value);
+            }
+            SagaStorage = new SagaPersister(sagaPersistenceConfiguration);
 
             var dbName = Guid.NewGuid().ToString();
             var urls = Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls") ?? "http://localhost:8080";
