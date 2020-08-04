@@ -210,9 +210,9 @@ namespace NServiceBus.Persistence.RavenDB
                         await Task.Delay(TimeSpan.FromTicks(5 + random.Next(acquireLeaseLockRefreshMaximumDelayTicks)), token).ConfigureAwait(false);
                         logger.Warn($"Finished Task.Delay{sagaDataDocId}");
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException e)
                     {
-                        logger.Warn($"Caught OperationCanceledException {sagaDataDocId}");
+                        logger.Warn($"Caught OperationCanceledException {sagaDataDocId}", e);
                         break;
                     }
                 }

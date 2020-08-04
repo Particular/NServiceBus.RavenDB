@@ -18,4 +18,7 @@
     <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="\**\When_concurrent_update_exceed_lock_request_timeout_pessimistic.cs" />
+  </ItemGroup>
 </Project>
