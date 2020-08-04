@@ -179,11 +179,10 @@ namespace NServiceBus.Persistence.RavenDB
                         var saveResult = await store.Operations.SendAsync(
                                 new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataDocId, lease, 0), token: token)
                             .ConfigureAwait(false);
-                        logger.Warn($"Completed PutCompareExchangeValueOperation {DateTime.Now} for {sagaDataDocId}");
+                        logger.Warn($"Completed PutCompareExchangeValueOperation {DateTime.Now} for {sagaDataDocId}. Result: {saveResult.Successful}, Index: {saveResult.Index}");
 
                         if (saveResult.Successful)
                         {
-                            logger.Warn($"Acquired lock for {sagaDataDocId}");
                             // lease wasn't already present - we managed to acquire lease
                             return saveResult.Index;
                         }
