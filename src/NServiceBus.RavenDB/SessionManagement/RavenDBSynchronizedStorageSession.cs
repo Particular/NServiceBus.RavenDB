@@ -12,6 +12,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public RavenDBSynchronizedStorageSession(IAsyncDocumentSession session, ContextBag context, bool callSaveChanges = true)
         {
+            logger.Warn($"Start session {this.GetHashCode()}");
             this.callSaveChanges = callSaveChanges;
             this.context = context;
             Session = session;
@@ -28,17 +29,19 @@ namespace NServiceBus.Persistence.RavenDB
             var holder = context.Get<SagaDataLeaseHolder>();
             foreach (var (DocumentId, Index) in holder.DocumentsIdsAndIndexes)
             {
+                logger.Warn($"Start releasing session {this.GetHashCode()} lock for {DocumentId}/{Index}");
                 // We are optimistic and fire-and-forget the releasing of the lock and just continue. In case this fails the next message that needs to acquire the lock wil have to wait.
                 _ = Session.Advanced.DocumentStore.Operations.SendAsync(new DeleteCompareExchangeValueOperation<SagaDataLease>(DocumentId, Index))
                     .ContinueWith(r =>
                     {
-                        logger.Warn($"released lock for {DocumentId} with Index {Index}. Successful: {r.Result.Successful}.");
+                        logger.Warn($"released lock for session {this.GetHashCode()} for document {DocumentId} with Index {Index}. Successful: {r.Result.Successful}.");
                     }, TaskContinuationOptions.ExecuteSynchronously);
             }
         }
 
         public Task CompleteAsync()
         {
+            logger.Warn($"Complete session {this.GetHashCode()}");
             return callSaveChanges
                 ? Session.SaveChangesAsync()
                 : Task.CompletedTask;

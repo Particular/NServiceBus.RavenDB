@@ -56,6 +56,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: string.Empty, id: container.IdentityDocId).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
+            logger.Warn("Save Complete");
         }
 
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
@@ -65,6 +66,7 @@ namespace NServiceBus.Persistence.RavenDB
             var documentSession = session.RavenSession();
             documentSession.StoreSchemaVersionInMetadata(container);
 
+            logger.Warn("Update complete");
             // dirty tracking will do the rest for us
             return Task.CompletedTask;
         }
