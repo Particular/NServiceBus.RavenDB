@@ -2,11 +2,14 @@ namespace NServiceBus.Persistence.RavenDB
 {
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
+    using NServiceBus.Logging;
     using Raven.Client.Documents.Operations.CompareExchange;
     using Raven.Client.Documents.Session;
 
     class RavenDBSynchronizedStorageSession : CompletableSynchronizedStorageSession
     {
+        static ILog logger = LogManager.GetLogger("RavenLocking");
+
         public RavenDBSynchronizedStorageSession(IAsyncDocumentSession session, ContextBag context, bool callSaveChanges = true)
         {
             this.callSaveChanges = callSaveChanges;
@@ -26,7 +29,11 @@ namespace NServiceBus.Persistence.RavenDB
             foreach (var (DocumentId, Index) in holder.DocumentsIdsAndIndexes)
             {
                 // We are optimistic and fire-and-forget the releasing of the lock and just continue. In case this fails the next message that needs to acquire the lock wil have to wait.
-                _ = Session.Advanced.DocumentStore.Operations.SendAsync(new DeleteCompareExchangeValueOperation<SagaDataLease>(DocumentId, Index));
+                _ = Session.Advanced.DocumentStore.Operations.SendAsync(new DeleteCompareExchangeValueOperation<SagaDataLease>(DocumentId, Index))
+                    .ContinueWith(r =>
+                    {
+                        logger.Warn($"released lock for {DocumentId} with Index {Index}. Successful: {r.Result.Successful}.");
+                    }, TaskContinuationOptions.ExecuteSynchronously);
             }
         }
 

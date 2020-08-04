@@ -4,6 +4,7 @@ namespace NServiceBus.Persistence.RavenDB
     using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
+    using NServiceBus.Logging;
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.Sagas;
     using Raven.Client.Documents;
@@ -174,12 +175,15 @@ namespace NServiceBus.Persistence.RavenDB
                     {
                         var lease = new SagaDataLease(DateTime.UtcNow.Add(leaseLockTime));
 
+                        logger.Warn($"Start acquiring lock {DateTime.Now} for {sagaDataDocId}");
                         var saveResult = await store.Operations.SendAsync(
                                 new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataDocId, lease, 0), token: token)
                             .ConfigureAwait(false);
+                        logger.Warn($"Completed PutCompareExchangeValueOperation {DateTime.Now} for {sagaDataDocId}");
 
                         if (saveResult.Successful)
                         {
+                            logger.Warn($"Acquired lock for {sagaDataDocId}");
                             // lease wasn't already present - we managed to acquire lease
                             return saveResult.Index;
                         }
@@ -187,6 +191,7 @@ namespace NServiceBus.Persistence.RavenDB
                         // At this point, Put operation failed - someone else owns the lock or lock time expired
                         if (saveResult.Value.ReservedUntil < DateTime.UtcNow)
                         {
+                            logger.Warn($"Trying to override existing lock for {sagaDataDocId}");
                             // Time expired - Update the existing key with the new value
                             var takeLockWithTimeoutResult = await store.Operations.SendAsync(
                                     new PutCompareExchangeValueOperation<SagaDataLease>(sagaDataDocId, lease, saveResult.Index), token: token)
@@ -194,14 +199,19 @@ namespace NServiceBus.Persistence.RavenDB
 
                             if (takeLockWithTimeoutResult.Successful)
                             {
+                                logger.Warn($"Lock override successful {sagaDataDocId}");
                                 return takeLockWithTimeoutResult.Index;
                             }
+                            logger.Warn($"lock override failed {sagaDataDocId}");
                         }
 
+                        logger.Warn($"Start Task.Delay {sagaDataDocId}");
                         await Task.Delay(TimeSpan.FromTicks(5 + random.Next(acquireLeaseLockRefreshMaximumDelayTicks)), token).ConfigureAwait(false);
+                        logger.Warn($"Finished Task.Delay{sagaDataDocId}");
                     }
                     catch (OperationCanceledException)
                     {
+                        logger.Warn($"Caught OperationCanceledException {sagaDataDocId}");
                         break;
                     }
                 }
@@ -221,6 +231,8 @@ namespace NServiceBus.Persistence.RavenDB
             var collectionName = conventions.FindCollectionName(sagaDataType);
             return $"{collectionName}{conventions.IdentityPartsSeparator}{sagaId}";
         }
+
+        static ILog logger = LogManager.GetLogger("RavenLocking");
 
         const string SagaContainerContextKeyPrefix = "SagaDataContainer:";
         static Random random = new Random();
