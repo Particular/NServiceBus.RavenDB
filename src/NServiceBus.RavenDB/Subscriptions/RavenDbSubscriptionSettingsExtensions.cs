@@ -68,38 +68,5 @@
             cfg.GetSettings().Set(RavenDbSubscriptionStorage.CacheSubscriptionsFor, aggressiveCacheDuration);
             return cfg;
         }
-
-        /// <summary>
-        /// Do not include message assembly major version in subscription document lookup key.
-        /// Subscription behavior will be changed such that all existing subscriptions will be rendered invalid.
-        /// Do not enable in an existing system without converting subscription documents first.
-        /// </summary>
-        /// <param name="cfg"></param>
-        /// <returns></returns>
-        [ObsoleteEx(
-            Message = "Subscriptions must be converted to the new format.",
-            TreatAsErrorFromVersion = "6.0.0",
-            RemoveInVersion = "7.0.0")]
-        public static PersistenceExtensions<RavenDBPersistence> DisableSubscriptionVersioning(this PersistenceExtensions<RavenDBPersistence> cfg)
-        {
-            throw new NotImplementedException("Subscriptions must be converted to the new format.");
-        }
-
-        /// <summary>
-        /// Continue to use legacy method of subscription versioning that includes the message assembly
-        /// major version in the subscription document lookup key. This option will be obsoleted in NServiceBus.RavenDB 6.0.0,
-        /// so subscriptions should be converted to the new format, after which the <see cref="DisableSubscriptionVersioning" />
-        /// option should be used instead.
-        /// </summary>
-        /// <param name="cfg"></param>
-        /// <returns></returns>
-        [ObsoleteEx(
-            Message = "Subscriptions must be converted to the new format.",
-            TreatAsErrorFromVersion = "6.0.0",
-            RemoveInVersion = "7.0.0")]
-        public static PersistenceExtensions<RavenDBPersistence> UseLegacyVersionedSubscriptions(this PersistenceExtensions<RavenDBPersistence> cfg)
-        {
-            throw new NotImplementedException("Subscriptions must be converted to the new format.");
-        }
     }
 }

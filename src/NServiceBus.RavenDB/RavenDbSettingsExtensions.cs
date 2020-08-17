@@ -50,21 +50,6 @@
         }
 
         /// <summary>
-        /// Configures the persisters to connection to the server specified
-        /// </summary>
-        /// <param name="cfg"></param>
-        /// <param name="connectionParameters">Connection details</param>
-        /// <returns></returns>
-        [ObsoleteEx(
-            Message = "ConnectionParameters is no longer supported. Use an alternate overload and supply the fully configured IDocumentStore.",
-            RemoveInVersion = "7.0.0",
-            TreatAsErrorFromVersion = "6.0.0")]
-        public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, ConnectionParameters connectionParameters)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Specifies the async session that the shared persisters (saga + outbox) that should be used.
         /// The lifecycle is controlled by me
         /// </summary>
@@ -94,20 +79,6 @@
         {
             cfg.GetSettings().Set(RavenDbStorageSession.MessageToDatabaseMappingConvention, convention);
             return cfg;
-        }
-
-        /// <summary>
-        /// Tells the persister to not setup user permissions for the database
-        /// </summary>
-        /// <param name="cfg"></param>
-        /// <returns></returns>
-        [ObsoleteEx(
-            Message = "Database permissions are no longer set up, so this method has no effect. All calls to this method may be safely removed.",
-            RemoveInVersion = "7.0.0",
-            TreatAsErrorFromVersion = "6.0.0")]
-        public static PersistenceExtensions<RavenDBPersistence> DoNotSetupDatabasePermissions(this PersistenceExtensions<RavenDBPersistence> cfg)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
