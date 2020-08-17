@@ -69,7 +69,7 @@
 
             }
 
-            public void ConfigureComponent<T>(Func<IBuilder, T> componentFactory, DependencyLifecycle dependencyLifecycle)
+            public void ConfigureComponent<T>(Func<IServiceProvider, T> componentFactory, DependencyLifecycle dependencyLifecycle)
             {
 
             }
