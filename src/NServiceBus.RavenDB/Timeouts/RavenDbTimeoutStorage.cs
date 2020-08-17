@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System.Threading.Tasks;
+    using Microsoft.Extensions.DependencyInjection;
     using NServiceBus.Features;
 
     class RavenDbTimeoutStorage : Feature
@@ -29,7 +30,7 @@
             }, DependencyLifecycle.SingleInstance); // Needs to be SingleInstance because it contains cleanup state
 
             context.Container.ConfigureComponent(typeof(QueryCanceller), DependencyLifecycle.InstancePerCall);
-            context.RegisterStartupTask(b => b.Build<QueryCanceller>());
+            context.RegisterStartupTask(b => b.GetService<QueryCanceller>());
         }
 
         class QueryCanceller : FeatureStartupTask
