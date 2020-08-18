@@ -40,7 +40,7 @@ namespace NServiceBus
         [System.ObsoleteAttribute("RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB ded" +
             "icated package. The member currently throws a NotImplementedException. Will be r" +
             "emoved in version 8.0.0.", true)]
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, NServiceBus.ObjectBuilder.IBuilder, Raven.Client.Documents.IDocumentStore> storeCreator) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, System.IServiceProvider, Raven.Client.Documents.IDocumentStore> storeCreator) { }
     }
     public class static RavenDbSagaSettingsExtensions
     {
