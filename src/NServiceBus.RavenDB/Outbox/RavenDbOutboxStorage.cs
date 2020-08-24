@@ -3,6 +3,7 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.DependencyInjection;
     using NServiceBus.Features;
     using NServiceBus.Logging;
 
@@ -22,7 +23,7 @@
             var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? DeduplicationDataTTLDefault;
 
             context.Container.ConfigureComponent(
-                builder => new OutboxPersister(context.Settings.EndpointName(), builder.Build<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData),
+                builder => new OutboxPersister(context.Settings.EndpointName(), builder.GetRequiredService<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData),
                 DependencyLifecycle.InstancePerCall);
 
             var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? TimeSpan.FromMinutes(1);

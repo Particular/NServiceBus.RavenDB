@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using NServiceBus.ConsistencyGuarantees;
-    using NServiceBus.ObjectBuilder;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Indexes;
@@ -12,7 +11,7 @@
 
     class DocumentStoreInitializer
     {
-        internal DocumentStoreInitializer(Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator)
+        internal DocumentStoreInitializer(Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
         {
             this.storeCreator = storeCreator;
         }
@@ -55,7 +54,7 @@
             }
         }
 
-        internal IDocumentStore Init(ReadOnlySettings settings, IBuilder builder)
+        internal IDocumentStore Init(ReadOnlySettings settings, IServiceProvider builder)
         {
             if (!isInitialized)
             {
@@ -72,7 +71,7 @@
             return docStore;
         }
 
-        void EnsureDocStoreCreated(ReadOnlySettings settings, IBuilder builder)
+        void EnsureDocStoreCreated(ReadOnlySettings settings, IServiceProvider builder)
         {
             if (docStore == null)
             {
@@ -120,7 +119,7 @@
         }
 
         List<AbstractIndexCreationTask> indexesToCreate = new List<AbstractIndexCreationTask>();
-        Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator;
+        Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator;
         IDocumentStore docStore;
         bool isInitialized;
     }

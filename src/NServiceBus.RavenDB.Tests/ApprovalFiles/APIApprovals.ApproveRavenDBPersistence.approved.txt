@@ -3,22 +3,6 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute(@"NServiceBus.RavenDB.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100dde965e6172e019ac82c2639ffe494dd2e7dd16347c34762a05732b492e110f2e4e2e1b5ef2d85c848ccfb671ee20a47c8d1376276708dc30a90ff1121b647ba3b7259a6bc383b2034938ef0e275b58b920375ac605076178123693c6c4f1331661a62eba28c249386855637780e3ff5f23a6d854700eaa6803ef48907513b92")]
 namespace NServiceBus.Persistence.RavenDB
 {
-    [System.ObsoleteAttribute("ConnectionParameters is no longer supported, the fully configured IDocumentStore " +
-        "must be provided using persistence.SetDefaultDocumentStore(documentStore). Will " +
-        "be removed in version 7.0.0.", true)]
-    public class ConnectionParameters
-    {
-        public ConnectionParameters() { }
-        public string ApiKey { get; set; }
-        public System.Net.ICredentials Credentials { get; set; }
-        public string DatabaseName { get; set; }
-        public string Url { get; set; }
-    }
-    public class static DocumentIdConventionsExtensions
-    {
-        [System.ObsoleteAttribute(@"NServiceBus will now use whatever document conventions are configured on the DocumentStore. It this method was used before, it can safely be removed as it is now the default. The member currently throws a NotImplementedException. Will be removed in version 7.0.0.", true)]
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> DoNotUseLegacyConventionsWhichIsOnlySafeForNewEndpoints(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> config) { }
-    }
     public interface IAsyncSessionProvider
     {
         Raven.Client.Documents.Session.IAsyncDocumentSession AsyncSession { get; }
@@ -37,13 +21,7 @@ namespace NServiceBus
     public class static RavenDBOutboxExtensions
     {
         public static void SetFrequencyToRunDeduplicationDataCleanup(this NServiceBus.Outbox.OutboxSettings configuration, System.TimeSpan frequencyToRunDeduplicationDataCleanup) { }
-        [System.ObsoleteAttribute("Use `SetFrequencyToRunDeduplicationDataCleanup` available on the `OutboxSettings`" +
-            " instead. Will be removed in version 7.0.0.", true)]
-        public static NServiceBus.EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this NServiceBus.EndpointConfiguration configuration, System.TimeSpan frequencyToRunDeduplicationDataCleanup) { }
         public static void SetTimeToKeepDeduplicationData(this NServiceBus.Outbox.OutboxSettings configuration, System.TimeSpan timeToKeepDeduplicationData) { }
-        [System.ObsoleteAttribute("Use `SetTimeToKeepDeduplicationData` available on the `OutboxSettings` instead. W" +
-            "ill be removed in version 7.0.0.", true)]
-        public static NServiceBus.EndpointConfiguration SetTimeToKeepDeduplicationData(this NServiceBus.EndpointConfiguration configuration, System.TimeSpan timeToKeepDeduplicationData) { }
     }
     public class RavenDBPersistence : NServiceBus.Persistence.PersistenceDefinition
     {
@@ -52,57 +30,46 @@ namespace NServiceBus
     public class static RavenDbGatewayDeduplicationSettingsExtensions
     {
         [System.ObsoleteAttribute("RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB ded" +
-            "icated package. Will be treated as an error from version 7.0.0. Will be removed " +
-            "in version 8.0.0.", false)]
+            "icated package. The member currently throws a NotImplementedException. Will be r" +
+            "emoved in version 8.0.0.", true)]
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.Documents.IDocumentStore documentStore) { }
         [System.ObsoleteAttribute("RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB ded" +
-            "icated package. Will be treated as an error from version 7.0.0. Will be removed " +
-            "in version 8.0.0.", false)]
+            "icated package. The member currently throws a NotImplementedException. Will be r" +
+            "emoved in version 8.0.0.", true)]
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, NServiceBus.ObjectBuilder.IBuilder, Raven.Client.Documents.IDocumentStore> storeCreator) { }
+        [System.ObsoleteAttribute("RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB ded" +
+            "icated package. The member currently throws a NotImplementedException. Will be r" +
+            "emoved in version 8.0.0.", true)]
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, System.IServiceProvider, Raven.Client.Documents.IDocumentStore> storeCreator) { }
     }
     public class static RavenDbSagaSettingsExtensions
     {
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSagas(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.Documents.IDocumentStore documentStore) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSagas(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSagas(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, NServiceBus.ObjectBuilder.IBuilder, Raven.Client.Documents.IDocumentStore> storeCreator) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSagas(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, System.IServiceProvider, Raven.Client.Documents.IDocumentStore> storeCreator) { }
     }
     public class static RavenDbSettingsExtensions
     {
-        [System.ObsoleteAttribute("Database permissions are no longer set up, so this method has no effect. All call" +
-            "s to this method may be safely removed. The member currently throws a NotImpleme" +
-            "ntedException. Will be removed in version 7.0.0.", true)]
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> DoNotSetupDatabasePermissions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.Persistence.RavenDB.SagaPersistenceConfiguration Sagas(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.Documents.IDocumentStore documentStore) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, NServiceBus.ObjectBuilder.IBuilder, Raven.Client.Documents.IDocumentStore> storeCreator) { }
-        [System.ObsoleteAttribute("ConnectionParameters is no longer supported. Use an alternate overload and supply" +
-            " the fully configured IDocumentStore. The member currently throws a NotImplement" +
-            "edException. Will be removed in version 7.0.0.", true)]
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, NServiceBus.Persistence.RavenDB.ConnectionParameters connectionParameters) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, System.IServiceProvider, Raven.Client.Documents.IDocumentStore> storeCreator) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetMessageToDatabaseMappingConvention(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<System.Collections.Generic.IDictionary<string, string>, string> convention) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseSharedAsyncSession(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<System.Collections.Generic.IDictionary<string, string>, Raven.Client.Documents.Session.IAsyncDocumentSession> getAsyncSessionFunc) { }
     }
     public class static RavenDbSubscriptionSettingsExtensions
     {
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> CacheSubscriptionsFor(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.TimeSpan aggressiveCacheDuration) { }
-        [System.ObsoleteAttribute("Subscriptions must be converted to the new format. Will be removed in version 7.0" +
-            ".0.", true)]
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> DisableSubscriptionVersioning(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> DoNotCacheSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.Documents.IDocumentStore documentStore) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, NServiceBus.ObjectBuilder.IBuilder, Raven.Client.Documents.IDocumentStore> storeCreator) { }
-        [System.ObsoleteAttribute("Subscriptions must be converted to the new format. Will be removed in version 7.0" +
-            ".0.", true)]
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseLegacyVersionedSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, System.IServiceProvider, Raven.Client.Documents.IDocumentStore> storeCreator) { }
     }
     public class static RavenDbTimeoutSettingsExtensions
     {
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForTimeouts(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.Documents.IDocumentStore documentStore) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForTimeouts(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForTimeouts(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, NServiceBus.ObjectBuilder.IBuilder, Raven.Client.Documents.IDocumentStore> storeCreator) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForTimeouts(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, System.IServiceProvider, Raven.Client.Documents.IDocumentStore> storeCreator) { }
     }
     public class static RavenSessionExtension
     {

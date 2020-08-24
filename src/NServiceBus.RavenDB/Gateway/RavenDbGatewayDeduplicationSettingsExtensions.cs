@@ -1,9 +1,6 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using NServiceBus.Configuration.AdvancedExtensibility;
-    using NServiceBus.ObjectBuilder;
-    using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
 
@@ -23,8 +20,7 @@
             TreatAsErrorFromVersion = "7.0.0")]
         public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this PersistenceExtensions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
-            DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(cfg.GetSettings(), documentStore);
-            return cfg;
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -38,8 +34,7 @@
             TreatAsErrorFromVersion = "7.0.0")]
         public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IDocumentStore> storeCreator)
         {
-            DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(cfg.GetSettings(), storeCreator);
-            return cfg;
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -47,10 +42,13 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
-        public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator)
+        [ObsoleteEx(
+            Message = "RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB dedicated package.",
+            RemoveInVersion = "8.0.0",
+            TreatAsErrorFromVersion = "7.0.0")]
+        public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
         {
-            DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(cfg.GetSettings(), storeCreator);
-            return cfg;
+            throw new NotImplementedException();
         }
     }
 }

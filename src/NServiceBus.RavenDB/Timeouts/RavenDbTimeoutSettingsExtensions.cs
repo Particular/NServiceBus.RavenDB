@@ -2,7 +2,6 @@
 {
     using System;
     using NServiceBus.Configuration.AdvancedExtensibility;
-    using NServiceBus.ObjectBuilder;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
@@ -39,7 +38,7 @@
         /// </summary>
         /// <param name="cfg"></param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
-        public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForTimeouts(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator)
+        public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForTimeouts(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
         {
             DocumentStoreManager.SetDocumentStore<StorageType.Timeouts>(cfg.GetSettings(), storeCreator);
             return cfg;
