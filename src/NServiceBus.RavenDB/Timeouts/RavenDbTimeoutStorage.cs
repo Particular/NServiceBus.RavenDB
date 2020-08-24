@@ -30,7 +30,7 @@
             }, DependencyLifecycle.SingleInstance); // Needs to be SingleInstance because it contains cleanup state
 
             context.Container.ConfigureComponent(typeof(QueryCanceller), DependencyLifecycle.InstancePerCall);
-            context.RegisterStartupTask(b => b.GetService<QueryCanceller>());
+            context.RegisterStartupTask(b => b.GetRequiredService<QueryCanceller>());
         }
 
         class QueryCanceller : FeatureStartupTask
