@@ -6,6 +6,7 @@
     using Microsoft.Extensions.DependencyInjection;
     using NServiceBus.Features;
     using NServiceBus.Logging;
+    using NServiceBus.Outbox;
 
     class RavenDbOutboxStorage : Feature
     {
@@ -22,9 +23,8 @@
 
             var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? DeduplicationDataTTLDefault;
 
-            context.Container.ConfigureComponent(
-                builder => new OutboxPersister(context.Settings.EndpointName(), builder.GetRequiredService<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData),
-                DependencyLifecycle.InstancePerCall);
+            context.Services.AddTransient<IOutboxStorage>(
+                sp => new OutboxPersister(context.Settings.EndpointName(), sp.GetRequiredService<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData));
 
             var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? TimeSpan.FromMinutes(1);
 
