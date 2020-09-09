@@ -3,6 +3,7 @@
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using NServiceBus.Features;
+    using NServiceBus.Timeout.Core;
 
     class RavenDbTimeoutStorage : Feature
     {
@@ -17,19 +18,20 @@
             DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Timeouts>(context.Settings)
                 .CreateIndexOnInitialization(new TimeoutsIndex());
 
-            context.Container.ConfigureComponent(b =>
+            context.Services.AddTransient<IPersistTimeouts>(sp =>
             {
-                var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings, b);
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings, sp);
                 return new TimeoutPersister(store);
-            }, DependencyLifecycle.InstancePerCall);
+            });
 
-            context.Container.ConfigureComponent(b =>
+            context.Services.AddSingleton(sp =>
             {
-                var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings, b);
+                var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings, sp);
                 return new QueryTimeouts(store, context.Settings.EndpointName());
-            }, DependencyLifecycle.SingleInstance); // Needs to be SingleInstance because it contains cleanup state
+            }); // Needs to be SingleInstance because it contains cleanup state
+            context.Services.AddSingleton<IQueryTimeouts>(sp => sp.GetRequiredService<QueryTimeouts>());
 
-            context.Container.ConfigureComponent(typeof(QueryCanceller), DependencyLifecycle.InstancePerCall);
+            context.Services.AddTransient<QueryCanceller>();
             context.RegisterStartupTask(b => b.GetRequiredService<QueryCanceller>());
         }
 

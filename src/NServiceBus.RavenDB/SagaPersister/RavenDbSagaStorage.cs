@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+    using Microsoft.Extensions.DependencyInjection;
     using NServiceBus.Features;
     using NServiceBus.Sagas;
 
@@ -17,8 +18,8 @@
         protected override void Setup(FeatureConfigurationContext context)
         {
             var options = context.Settings.GetOrDefault<SagaPersistenceConfiguration>() ?? new SagaPersistenceConfiguration();
-            context.Container.RegisterSingleton(options);
-            context.Container.ConfigureComponent<SagaPersister>(DependencyLifecycle.SingleInstance);
+            context.Services.AddSingleton(options);
+            context.Services.AddSingleton<ISagaPersister, SagaPersister>();
 
             if (!context.Settings.TryGet(out SagaMetadataCollection allSagas))
             {
