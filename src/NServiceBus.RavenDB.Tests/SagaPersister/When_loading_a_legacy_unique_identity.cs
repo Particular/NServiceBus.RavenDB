@@ -36,6 +36,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
             var saga = await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options);
 
             Assert.IsNotNull(saga, "Saga is null");
+            Assert.AreNotEqual(Guid.Empty, saga.Id, "Id is Guid.Empty");
 
             await persister.Complete(saga, synchronizedSession, options);
             await session.SaveChangesAsync().ConfigureAwait(false);
