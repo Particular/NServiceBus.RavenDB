@@ -45,6 +45,56 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         }
     }
 
+    [Test]
+    public async Task Improperly_converted_saga_can_be_fixed()
+    {
+        var sagaId = Guid.NewGuid();
+        var sagaDocId = $"SagaWithUniqueProperty/{sagaId}";
+        var uniqueString = "abcd";
+        var identityDocId = SagaUniqueIdentity.FormatId(typeof(SagaWithUniqueProperty), "UniqueString", uniqueString);
+
+        var sagaData = new SagaWithUniqueProperty
+        {
+            Id = Guid.Empty, // Improperly converted
+            UniqueString = uniqueString
+        };
+
+        var sagaContainer = new SagaDataContainer
+        {
+            Id = sagaDocId,
+            Data = sagaData,
+            IdentityDocId = identityDocId
+        };
+
+        var uniqueIdentity = new SagaUniqueIdentity
+        {
+            Id = SagaUniqueIdentity.FormatId(typeof(SagaWithUniqueProperty), "UniqueString", uniqueString),
+            SagaId = sagaId,
+            SagaDocId = sagaDocId,
+            UniqueValue = uniqueString
+        };
+
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var _))
+        {
+            await session.StoreAsync(sagaContainer);
+            await session.StoreAsync(uniqueIdentity);
+            await session.SaveChangesAsync();
+        }
+
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        {
+            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+
+            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
+
+            var loadedSaga = await persister.Get<SagaWithUniqueProperty>("UniqueString", uniqueString, synchronizedSession, options);
+
+            Assert.IsNotNull(loadedSaga, "Saga is null");
+            Assert.AreNotEqual(Guid.Empty, loadedSaga.Id, "Id is Guid.Empty");
+            Assert.AreEqual(sagaId, loadedSaga.Id, "Saga Id is not the correct value.");
+        }
+    }
+
     class SagaWithUniqueProperty : IContainSagaData
     {
         public Guid Id { get; set; }
