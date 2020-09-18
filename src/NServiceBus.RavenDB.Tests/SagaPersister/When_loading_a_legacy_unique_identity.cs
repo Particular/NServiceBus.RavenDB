@@ -36,11 +36,61 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         var saga = await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options);
 
         Assert.IsNotNull(saga, "Saga is null");
+        Assert.AreNotEqual(Guid.Empty, saga.Id, "Id is Guid.Empty");
 
         await persister.Complete(saga, synchronizedSession, options);
         await session.SaveChangesAsync().ConfigureAwait(false);
 
         Assert.IsNull(await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options), "Saga was not completed");
+    }
+
+    [Test]
+    public async Task Improperly_converted_saga_can_be_fixed()
+    {
+        var sagaId = Guid.NewGuid();
+        var sagaDocId = $"SagaWithUniqueProperty/{sagaId}";
+        var uniqueString = "abcd";
+        var identityDocId = SagaUniqueIdentity.FormatId(typeof(SagaWithUniqueProperty), "UniqueString", uniqueString);
+
+        var sagaData = new SagaWithUniqueProperty
+        {
+            Id = Guid.Empty, // Improperly converted
+            UniqueString = uniqueString
+        };
+
+        var sagaContainer = new SagaDataContainer
+        {
+            Id = sagaDocId,
+            Data = sagaData,
+            IdentityDocId = identityDocId
+        };
+
+        var uniqueIdentity = new SagaUniqueIdentity
+        {
+            Id = SagaUniqueIdentity.FormatId(typeof(SagaWithUniqueProperty), "UniqueString", uniqueString),
+            SagaId = sagaId,
+            SagaDocId = sagaDocId,
+            UniqueValue = uniqueString
+        };
+
+        using (var setupSession = store.OpenAsyncSession())
+        {
+            await setupSession.StoreAsync(sagaContainer);
+            await setupSession.StoreAsync(uniqueIdentity);
+            await setupSession.SaveChangesAsync();
+        }
+
+        IAsyncDocumentSession session;
+        var options = this.CreateContextWithAsyncSessionPresent(out session);
+        var persister = new SagaPersister();
+
+        var synchronizedSession = new RavenDBSynchronizedStorageSession(session);
+
+        var loadedSaga = await persister.Get<SagaWithUniqueProperty>("UniqueString", uniqueString, synchronizedSession, options);
+
+        Assert.IsNotNull(loadedSaga, "Saga is null");
+        Assert.AreNotEqual(Guid.Empty, loadedSaga.Id, "Id is Guid.Empty");
+        Assert.AreEqual(sagaId, loadedSaga.Id, "Saga Id is not the correct value.");
     }
 
     class SagaWithUniqueProperty : IContainSagaData
