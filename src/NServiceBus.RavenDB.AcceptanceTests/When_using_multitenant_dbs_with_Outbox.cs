@@ -105,7 +105,7 @@
             public string Db1 { get; set; }
             public string Db2 { get; set; }
             public List<string> ObservedDbs { get; } = new List<string>();
-            public string ObservedDbsOutput => String.Join(", ", ObservedDbs);
+            public string ObservedDbsOutput => string.Join(", ", ObservedDbs);
             public ContextDbConfig DbConfig { get; } = new ContextDbConfig();
             public int MessagesObserved;
         }

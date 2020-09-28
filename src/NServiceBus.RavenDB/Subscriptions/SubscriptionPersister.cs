@@ -81,7 +81,8 @@ namespace NServiceBus.Persistence.RavenDB
                 {
                     attempts++;
                 }
-            } while (attempts < 5);
+            } 
+            while (attempts < 5);
         }
 
         public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)

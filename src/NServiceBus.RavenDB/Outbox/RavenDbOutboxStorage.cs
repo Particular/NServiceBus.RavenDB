@@ -80,7 +80,6 @@
                     return;
                 }
 
-                // ReSharper disable once MethodSupportsCancellation
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30));
                 var finishedTask = await Task.WhenAny(cleanupTask, timeoutTask).ConfigureAwait(false);
 

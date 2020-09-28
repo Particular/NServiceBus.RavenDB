@@ -56,7 +56,7 @@
 
         public void WaitForIndexing(IDocumentStore store)
         {
-            while(store.Maintenance.Send(new GetStatisticsOperation()).StaleIndexes.Length != 0)
+            while (store.Maintenance.Send(new GetStatisticsOperation()).StaleIndexes.Length != 0)
             {
                 Thread.Sleep(250);
             }

@@ -52,9 +52,7 @@ public class When_updating_a_saga_without_unique_properties : RavenDBPersistence
 
     class SagaData : IContainSagaData
     {
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string NonUniqueString { get; set; }
         public Guid Id { get; set; }
         public string Originator { get; set; }

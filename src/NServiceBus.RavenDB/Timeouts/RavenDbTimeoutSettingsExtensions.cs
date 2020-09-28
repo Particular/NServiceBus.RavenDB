@@ -14,7 +14,7 @@
         /// <summary>
         /// Configures the given document store to be used when storing timeouts
         /// </summary>
-        /// <param name="cfg"></param>
+        /// <param name="cfg">The persistence configuration object</param>
         /// <param name="documentStore">The document store to use</param>
         public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForTimeouts(this PersistenceExtensions<RavenDBPersistence> cfg, IDocumentStore documentStore)
         {
@@ -25,7 +25,7 @@
         /// <summary>
         /// Configures the given document store to be used when storing timeouts
         /// </summary>
-        /// <param name="cfg"></param>
+        /// <param name="cfg">The persistence configuration object</param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
         public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForTimeouts(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IDocumentStore> storeCreator)
         {
@@ -36,7 +36,7 @@
         /// <summary>
         /// Configures the given document store to be used when storing timeouts
         /// </summary>
-        /// <param name="cfg"></param>
+        /// <param name="cfg">The persistence configuration object</param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
         public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForTimeouts(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
         {

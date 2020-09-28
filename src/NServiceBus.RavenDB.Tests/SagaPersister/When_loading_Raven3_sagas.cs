@@ -185,4 +185,3 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         }
     }
 }
-

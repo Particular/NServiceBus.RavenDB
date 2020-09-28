@@ -15,6 +15,7 @@
     <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="8.0.0-alpha.561" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="Particular.CodeRules" Version="0.7.0" PrivateAssets="All" />
     <PackageReference Include="RavenDB.Client" Version="4.2.103" />
   </ItemGroup>
 
@@ -46,6 +47,7 @@
     <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\When_using_multitenant_dbs_with_Outbox.cs">
       <Link>When_using_multitenant_dbs_with_Outbox.cs</Link>
     </Compile>
+    <Compile Include="..\TestSuppressions.cs" Link="TestSuppressions.cs" />
   </ItemGroup>
 
 </Project>

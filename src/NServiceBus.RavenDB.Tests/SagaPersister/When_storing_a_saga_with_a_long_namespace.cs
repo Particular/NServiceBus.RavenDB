@@ -46,8 +46,6 @@ public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestB
         public Guid Id { get; set; }
         public string Originator { get; set; }
         public string OriginalMessageId { get; set; }
-
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
     }
 }

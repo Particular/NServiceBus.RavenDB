@@ -25,21 +25,21 @@ namespace NServiceBus.Persistence.RavenDB
 
         public TimeSpan CleanupGapFromTimeslice
         {
-            get => _cleanupGapFromTimeslice;
+            get => cleanupGapFromTimeslice;
             set
             {
                 if (value < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(CleanupGapFromTimeslice));
-                _cleanupGapFromTimeslice = value;
+                cleanupGapFromTimeslice = value;
             }
         }
 
         public TimeSpan TriggerCleanupEvery
         {
-            get => _triggerCleanupEvery;
+            get => triggerCleanupEvery;
             set
             {
                 if (value < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(TriggerCleanupEvery));
-                _triggerCleanupEvery = value;
+                triggerCleanupEvery = value;
             }
         }
 
@@ -194,8 +194,8 @@ namespace NServiceBus.Persistence.RavenDB
 
         CancellationTokenSource shutdownTokenSource;
         ILog logger;
-        TimeSpan _triggerCleanupEvery;
-        TimeSpan _cleanupGapFromTimeslice;
+        TimeSpan triggerCleanupEvery;
+        TimeSpan cleanupGapFromTimeslice;
         static TimeoutsChunk.Timeout[] EmptyTimeouts = new TimeoutsChunk.Timeout[0];
     }
 }
