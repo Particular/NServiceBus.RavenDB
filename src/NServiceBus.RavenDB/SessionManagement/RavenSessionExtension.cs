@@ -15,7 +15,6 @@
         /// Gets the current RavenDB session.
         /// </summary>
         /// <param name="session">The storage session.</param>
-        /// <returns></returns>
         public static IAsyncDocumentSession RavenSession(this SynchronizedStorageSession session)
         {
             switch (session)

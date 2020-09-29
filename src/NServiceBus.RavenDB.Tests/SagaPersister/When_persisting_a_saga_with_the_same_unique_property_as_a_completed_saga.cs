@@ -70,7 +70,6 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
 
     sealed class SagaData : IContainSagaData
     {
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
         public Guid Id { get; set; }
         public string Originator { get; set; }

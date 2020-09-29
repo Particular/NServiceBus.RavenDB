@@ -29,7 +29,6 @@
         /// <summary>
         /// Set saga persistence pessimistic lease lock acquisition timeout. Default is 60 seconds.
         /// </summary>
-        /// <param name="value"></param>
         public void SetPessimisticLeaseLockAcquisitionTimeout(TimeSpan value)
         {
             if (value <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(value), value, "Lease lock acquisition timeout must be greater than zero.");
@@ -39,7 +38,6 @@
         /// <summary>
         /// Set maximum saga persistence lease lock acquisition refresh delay.
         /// </summary>
-        /// <param name="value"></param>
         public void SetPessimisticLeaseLockAcquisitionMaximumRefreshDelay(TimeSpan value)
         {
             if (value <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(value), value, "Lease lock acquisition maximum refresh delay must be between zero and 1 second");

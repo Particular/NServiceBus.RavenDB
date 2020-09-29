@@ -48,7 +48,6 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
 
     class SagaData : IContainSagaData
     {
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
         public Guid Id { get; set; }
         public string Originator { get; set; }

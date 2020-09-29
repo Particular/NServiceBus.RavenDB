@@ -12,7 +12,7 @@
         /// <summary>
         /// Configures the given document store to be used when storing gateway deduplication data
         /// </summary>
-        /// <param name="cfg"></param>
+        /// <param name="cfg">The persistence configuration object</param>
         /// <param name="documentStore">The document store to use</param>
         [ObsoleteEx(
             Message = "RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB dedicated package.",
@@ -26,7 +26,7 @@
         /// <summary>
         /// Configures the given document store to be used when storing gateway deduplication data
         /// </summary>
-        /// <param name="cfg"></param>
+        /// <param name="cfg">The persistence configuration object</param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
         [ObsoleteEx(
             Message = "RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB dedicated package.",
@@ -40,7 +40,7 @@
         /// <summary>
         /// Configures the given document store to be used when storing gateway deduplication data
         /// </summary>
-        /// <param name="cfg"></param>
+        /// <param name="cfg">The persistence configuration object</param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
         [ObsoleteEx(
             Message = "RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB dedicated package.",

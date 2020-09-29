@@ -10,7 +10,6 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
         public string Id { get; set; }
 
         [JsonConverter(typeof(MessageTypeConverter))]
-// ReSharper disable once UnusedAutoPropertyAccessor.Global
         public MessageType MessageType { get; set; }
 
         public List<SubscriptionClient> Subscribers
@@ -21,10 +20,13 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
                 {
                     subscribers = new List<SubscriptionClient>();
                 }
-
                 return subscribers;
             }
-            set { subscribers = value; }
+
+            set
+            {
+                subscribers = value;
+            }
         }
 
         List<SubscriptionClient> subscribers;
