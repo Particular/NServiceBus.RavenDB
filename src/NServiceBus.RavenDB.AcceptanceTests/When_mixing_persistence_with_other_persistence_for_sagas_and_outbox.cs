@@ -35,8 +35,8 @@ namespace NServiceBus.RavenDB.AcceptanceTests
             {
                 EndpointSetup<DefaultServer>(config =>
                 {
-                    config.UsePersistence<InMemoryPersistence, StorageType.Sagas>();
-                    config.UsePersistence<InMemoryPersistence, StorageType.Outbox>();
+                    config.UsePersistence<LearningPersistence, StorageType.Sagas>();
+                    config.UsePersistence<LearningPersistence, StorageType.Outbox>();
 
                     config.EnableOutbox();
                 });
