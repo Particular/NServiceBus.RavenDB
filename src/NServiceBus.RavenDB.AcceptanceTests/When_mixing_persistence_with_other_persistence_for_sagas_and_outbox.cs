@@ -10,7 +10,7 @@ namespace NServiceBus.RavenDB.AcceptanceTests
     public class When_mixing_persistence_with_other_persistence_for_sagas_and_outbox : NServiceBusAcceptanceTest
     {
         [Test]
-        public async Task Should_work()
+        public async Task Should_not_interfere_with_synchronized_session()
         {
             var context = await Scenario.Define<Context>()
                 .WithEndpoint<EndpointWithMixedPersistence>(
@@ -35,8 +35,9 @@ namespace NServiceBus.RavenDB.AcceptanceTests
             {
                 EndpointSetup<DefaultServer>(config =>
                 {
-                    config.UsePersistence<LearningPersistence, StorageType.Sagas>();
-                    config.UsePersistence<LearningPersistence, StorageType.Outbox>();
+                    // Mongo is configured by default, so we're adding the acceptancetestingpersistence mixed in
+                    config.UsePersistence<AcceptanceTestingPersistence, StorageType.Sagas>();
+                    config.UsePersistence<AcceptanceTestingPersistence, StorageType.Outbox>();
 
                     config.EnableOutbox();
                 });
