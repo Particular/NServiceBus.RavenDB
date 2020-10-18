@@ -36,12 +36,12 @@
                 var persister = new TimeoutPersister(documentStore);
                 var context = new ContextBag();
 
-                var startSlice = DateTime.UtcNow.AddYears(-10);
+                var startSlice = DateTimeOffset.UtcNow.AddYears(-10);
                 // avoid cleanup from running during the test by making it register as being run
                 Assert.AreEqual(0, (await query.GetCleanupChunk(startSlice)).Count());
 
-                var expected = new List<Tuple<string, DateTime>>();
-                var lastTimeout = DateTime.UtcNow;
+                var expected = new List<Tuple<string, DateTimeOffset>>();
+                var lastTimeout = DateTimeOffset.UtcNow;
                 var finishedAdding = false;
 
                 new Thread(() =>
@@ -53,11 +53,11 @@
                         {
                             SagaId = sagaId,
                             Destination = "queue@machine",
-                            Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
+                            Time = DateTimeOffset.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                             OwningTimeoutManager = string.Empty
                         };
                         persister.Add(td, context).Wait();
-                        expected.Add(new Tuple<string, DateTime>(td.Id, td.Time));
+                        expected.Add(new Tuple<string, DateTimeOffset>(td.Id, td.Time));
                         lastTimeout = (td.Time > lastTimeout) ? td.Time : lastTimeout;
                     }
                     finishedAdding = true;
@@ -87,7 +87,7 @@
                 // we need to perform manual cleaup.
                 while (true)
                 {
-                    var chunkToCleanup = (await query.GetCleanupChunk(DateTime.UtcNow.AddDays(1))).ToArray();
+                    var chunkToCleanup = (await query.GetCleanupChunk(DateTimeOffset.UtcNow.AddDays(1))).ToArray();
                     if (chunkToCleanup.Length == 0)
                     {
                         break;
@@ -132,13 +132,13 @@
                 var persister = new TimeoutPersister(documentStore);
                 var context = new ContextBag();
 
-                var startSlice = DateTime.UtcNow.AddYears(-10);
+                var startSlice = DateTimeOffset.UtcNow.AddYears(-10);
                 // avoid cleanup from running during the test by making it register as being run
                 Assert.AreEqual(0, (await query.GetCleanupChunk(startSlice)).Count());
 
                 const int insertsPerThread = 1000;
                 var expected = 0;
-                var lastExpectedTimeout = DateTime.UtcNow;
+                var lastExpectedTimeout = DateTimeOffset.UtcNow;
                 var finishedAdding1 = false;
                 var finishedAdding2 = false;
 
@@ -151,7 +151,7 @@
                         {
                             SagaId = sagaId,
                             Destination = "queue@machine",
-                            Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
+                            Time = DateTimeOffset.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                             OwningTimeoutManager = string.Empty
                         };
                         persister.Add(td, context).Wait();
@@ -179,7 +179,7 @@
                             {
                                 SagaId = sagaId,
                                 Destination = "queue@machine",
-                                Time = DateTime.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
+                                Time = DateTimeOffset.UtcNow.AddSeconds(RandomProvider.GetThreadRandom().Next(1, 20)),
                                 OwningTimeoutManager = string.Empty
                             };
                             persister2.Add(td, context).Wait();
@@ -214,7 +214,7 @@
                 // we need to perform manual cleaup.
                 while (true)
                 {
-                    var chunkToCleanup = (await query.GetCleanupChunk(DateTime.UtcNow.AddDays(1))).ToArray();
+                    var chunkToCleanup = (await query.GetCleanupChunk(DateTimeOffset.UtcNow.AddDays(1))).ToArray();
                     Console.WriteLine("Cleanup: got a chunk of size " + chunkToCleanup.Length);
                     if (chunkToCleanup.Length == 0)
                     {
