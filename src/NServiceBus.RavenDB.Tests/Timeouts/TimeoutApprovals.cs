@@ -17,7 +17,7 @@ public class TimeoutApprovals
             Destination = nameof(Timeout.Destination),
             SagaId = new Guid("05F4B926-FD16-486F-8440-7ED42BA2C4DF"),
             State = Array.Empty<byte>(),
-            Time = new DateTime(2020, 05, 06, 10, 10, 10, 10),
+            Time = new DateTimeOffset(2020, 05, 06, 10, 10, 10, TimeSpan.Zero),
             OwningTimeoutManager = nameof(Timeout.OwningTimeoutManager),
             Headers = new Dictionary<string, string>(),
         });

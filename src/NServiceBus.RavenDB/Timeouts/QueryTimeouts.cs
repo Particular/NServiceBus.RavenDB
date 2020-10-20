@@ -43,9 +43,9 @@ namespace NServiceBus.Persistence.RavenDB
             }
         }
 
-        public Func<DateTime> GetUtcNow { get; set; } = () => DateTime.UtcNow;
+        public Func<DateTimeOffset> GetUtcNow { get; set; } = () => DateTimeOffset.UtcNow;
 
-        public async Task<TimeoutsChunk> GetNextChunk(DateTime startSlice)
+        public async Task<TimeoutsChunk> GetNextChunk(DateTimeOffset startSlice)
         {
             var now = GetUtcNow();
             List<TimeoutsChunk.Timeout> results;
@@ -61,7 +61,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             // Allow for occasionally cleaning up old timeouts for edge cases where timeouts have been
             // added after startSlice have been set to a later timout and we might have missed them
-            // because of stale indexes. lastCleanupTime may be DateTime.MinValue, in which case it would run.
+            // because of stale indexes. lastCleanupTime may be DateTimeOffset.MinValue, in which case it would run.
             var nextTimeToPerformCleanup = lastCleanupTime.Add(TriggerCleanupEvery);
             if (now > nextTimeToPerformCleanup)
             {
@@ -139,7 +139,7 @@ namespace NServiceBus.Persistence.RavenDB
             return new TimeoutsChunk(results.ToArray(), nextTimeoutToExpire);
         }
 
-        public async Task<List<TimeoutsChunk.Timeout>> GetCleanupChunk(DateTime fromTime)
+        public async Task<List<TimeoutsChunk.Timeout>> GetCleanupChunk(DateTimeOffset fromTime)
         {
             var cutoff = fromTime.Subtract(CleanupGapFromTimeslice);
 
@@ -158,7 +158,7 @@ namespace NServiceBus.Persistence.RavenDB
 
                 var chunk = query.Select(arg => new TimeoutsChunk.Timeout(arg.Id, arg.Time)).ToList();
 
-                lastCleanupTime = DateTime.UtcNow;
+                lastCleanupTime = DateTimeOffset.UtcNow;
 
                 return chunk;
             }
@@ -184,7 +184,7 @@ namespace NServiceBus.Persistence.RavenDB
         }
 
         string endpointName;
-        DateTime lastCleanupTime = DateTime.MinValue;
+        DateTimeOffset lastCleanupTime = DateTimeOffset.MinValue;
         IDocumentStore documentStore;
 
         /// <summary>
