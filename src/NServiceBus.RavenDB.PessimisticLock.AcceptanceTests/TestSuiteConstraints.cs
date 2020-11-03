@@ -10,11 +10,11 @@
 
         public bool SupportsNativePubSub => false;
 
-        public bool SupportsNativeDeferral => false;
+        public bool SupportsDelayedDelivery => true;
 
         public bool SupportsOutbox => true;
 
-        public IConfigureEndpointTestExecution CreateTransportConfiguration() => new ConfigureEndpointAcceptanceTestingTransport(SupportsNativePubSub, SupportsNativeDeferral);
+        public IConfigureEndpointTestExecution CreateTransportConfiguration() => new ConfigureEndpointAcceptanceTestingTransport(SupportsNativePubSub, SupportsDelayedDelivery);
 
         public IConfigureEndpointTestExecution CreatePersistenceConfiguration() => new ConfigureEndpointRavenDBPersistence();
     }

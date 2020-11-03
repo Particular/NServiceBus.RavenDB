@@ -65,6 +65,8 @@ namespace NServiceBus
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.ReadOnlySettings, System.IServiceProvider, Raven.Client.Documents.IDocumentStore> storeCreator) { }
     }
+    [System.ObsoleteAttribute("Timeout manager removed. Timeout storage configuration can be removed. Will be re" +
+        "moved in version 8.0.0.", true)]
     public class static RavenDbTimeoutSettingsExtensions
     {
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForTimeouts(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.Documents.IDocumentStore documentStore) { }
