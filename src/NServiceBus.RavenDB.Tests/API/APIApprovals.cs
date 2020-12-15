@@ -10,8 +10,7 @@
         [Test]
         public void ApproveRavenDBPersistence()
         {
-
-            var publicApi = ApiGenerator.GeneratePublicApi(typeof(RavenDBPersistence).Assembly, excludeAttributes: new[] { "System.Runtime.Versioning.TargetFrameworkAttribute" });
+            var publicApi = ApiGenerator.GeneratePublicApi(typeof(RavenDBPersistence).Assembly, excludeAttributes: new[] { "System.Runtime.Versioning.TargetFrameworkAttribute", "System.Reflection.AssemblyMetadataAttribute" });
             Approver.Verify(publicApi);
         }
     }
