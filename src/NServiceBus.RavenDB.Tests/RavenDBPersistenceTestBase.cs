@@ -61,7 +61,11 @@
 
         protected IncomingMessage SimulateIncomingMessage(ContextBag context, string messageId = null)
         {
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable IDE0054 // False positive
             messageId = messageId ?? Guid.NewGuid().ToString("N");
+#pragma warning restore IDE0054 // False positive
+#pragma warning restore IDE0079 // Remove unnecessary suppression
 
             var incomingMessage = new IncomingMessage(messageId, new Dictionary<string, string>(), new byte[0]);
 
