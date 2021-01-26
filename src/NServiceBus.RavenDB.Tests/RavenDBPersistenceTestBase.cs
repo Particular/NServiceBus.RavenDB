@@ -19,7 +19,7 @@
             var docStore = db.NewStore();
             CustomizeDocumentStore(docStore);
             docStore.Initialize();
-            this.store = docStore;
+            store = docStore;
         }
 
         protected virtual void CustomizeDocumentStore(IDocumentStore docStore)
@@ -51,7 +51,7 @@
             try
             {
                 await action();
-                return default(TException);
+                return default;
             }
             catch (TException ex)
             {
@@ -75,7 +75,7 @@
 
         internal IOpenTenantAwareRavenSessions CreateTestSessionOpener()
         {
-            return new TestOpenSessionsInPipeline(this.store);
+            return new TestOpenSessionsInPipeline(store);
         }
 
         class TestOpenSessionsInPipeline : IOpenTenantAwareRavenSessions

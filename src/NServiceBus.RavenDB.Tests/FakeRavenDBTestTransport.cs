@@ -43,7 +43,7 @@
 
         public override IEnumerable<Type> DeliveryConstraints { get; } = Enumerable.Empty<Type>();
 
-        private TransportTransactionMode transactionMode;
+        TransportTransactionMode transactionMode;
 
         public override TransportTransactionMode TransactionMode => transactionMode;
 

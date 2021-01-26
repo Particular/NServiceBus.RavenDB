@@ -16,16 +16,11 @@
     <PackageReference Include="NServiceBus.PersistenceTests.Sources" Version="8.0.0-alpha.644" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Particular.CodeRules" Version="0.7.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
     <!--Because this test randomly times out on lock acquistion-->
     <Compile Remove="\**\When_concurrent_update_exceed_lock_request_timeout_pessimistic.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="..\TestSuppressions.cs" Link="TestSuppressions.cs" />
   </ItemGroup>
 
 </Project>

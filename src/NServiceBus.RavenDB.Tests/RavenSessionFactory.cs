@@ -27,7 +27,9 @@
         public void ReleaseSession()
         {
             if (session == null)
+            {
                 return;
+            }
 
             session.Dispose();
             session = null;
