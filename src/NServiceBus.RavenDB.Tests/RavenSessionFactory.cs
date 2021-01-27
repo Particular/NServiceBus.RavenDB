@@ -21,7 +21,6 @@
 #pragma warning restore IDE0074 // False positive
 #pragma warning restore IDE0079 // Remove unnecessary suppression
 
-
         IAsyncDocumentSession OpenAsyncSession()
         {
             var documentSession = store.OpenAsyncSession();
