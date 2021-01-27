@@ -11,7 +11,7 @@
     using NUnit.Framework;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Operations;
-    using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
+    using TimeoutData = Timeout.Core.TimeoutData;
 
     [TestFixture]
     public class Should_not_skip_timeouts

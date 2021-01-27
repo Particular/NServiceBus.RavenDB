@@ -8,7 +8,7 @@
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Support;
     using NUnit.Framework;
-    using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
+    using TimeoutData = Timeout.Core.TimeoutData;
 
     public class When_fetching_timeouts_from_storage : RavenDBPersistenceTestBase
     {

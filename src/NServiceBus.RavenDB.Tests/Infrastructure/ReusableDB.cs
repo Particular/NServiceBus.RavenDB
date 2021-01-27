@@ -9,8 +9,8 @@
 
     class ReusableDB : IDisposable
     {
-        private readonly string databaseName;
-        private readonly bool deleteOnCompletion;
+        readonly string databaseName;
+        readonly bool deleteOnCompletion;
 
         public ReusableDB(bool deleteOnCompletion = true)
         {
@@ -45,7 +45,7 @@
             return store;
         }
 
-        private IDocumentStore CreateStore()
+        IDocumentStore CreateStore()
         {
             return new DocumentStore
             {
@@ -56,7 +56,7 @@
 
         public void WaitForIndexing(IDocumentStore store)
         {
-            while(store.Maintenance.Send(new GetStatisticsOperation()).StaleIndexes.Length != 0)
+            while (store.Maintenance.Send(new GetStatisticsOperation()).StaleIndexes.Length != 0)
             {
                 Thread.Sleep(250);
             }

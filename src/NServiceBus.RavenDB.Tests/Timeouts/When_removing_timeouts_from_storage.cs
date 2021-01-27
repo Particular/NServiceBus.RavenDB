@@ -5,7 +5,7 @@
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
-    using TimeoutData = NServiceBus.Timeout.Core.TimeoutData;
+    using TimeoutData = Timeout.Core.TimeoutData;
 
     public class When_removing_timeouts_from_storage : RavenDBPersistenceTestBase
     {

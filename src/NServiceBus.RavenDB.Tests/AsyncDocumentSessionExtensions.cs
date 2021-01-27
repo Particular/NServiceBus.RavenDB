@@ -1,8 +1,8 @@
-﻿using NServiceBus.Extensibility;
-using Raven.Client.Documents.Session;
-
-namespace NServiceBus.RavenDB.Tests
+﻿namespace NServiceBus.RavenDB.Tests
 {
+    using NServiceBus.Extensibility;
+    using Raven.Client.Documents.Session;
+
     static class AsyncDocumentSessionExtensions
     {
         public static IAsyncDocumentSession UsingOptimisticConcurrency(this IAsyncDocumentSession session)

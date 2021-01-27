@@ -8,7 +8,7 @@
         public IEnumerable<string> KeysStored => keysStored;
         public int KeyCount => keysStored.Count;
 
-        private StoreSnooper()
+        StoreSnooper()
         {
         }
 
@@ -26,6 +26,6 @@
             return snooper;
         }
 
-        private List<string> keysStored = new List<string>();
+        List<string> keysStored = new List<string>();
     }
 }

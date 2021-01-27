@@ -15,7 +15,7 @@
             store.OnAfterConversionToEntity += Store_OnAfterConversionToEntity;
         }
 
-        private static void Store_OnAfterConversionToEntity(object sender, AfterConversionToEntityEventArgs e)
+        static void Store_OnAfterConversionToEntity(object sender, AfterConversionToEntityEventArgs e)
         {
             // Original v5 to v6 converter did not set the Data.Id value causing it to be Guid.Empty
             if (e.Entity is SagaDataContainer sagaDataContainer && sagaDataContainer.Data.Id == Guid.Empty)
@@ -72,7 +72,7 @@
             args.Document = args.Session.Context.ReadObject(document, args.Id);
         }
 
-        private static string StripSagaIdFromDocumentId(string documentId)
+        static string StripSagaIdFromDocumentId(string documentId)
         {
             return documentId.Substring(documentId.IndexOf("/") + 1);
         }

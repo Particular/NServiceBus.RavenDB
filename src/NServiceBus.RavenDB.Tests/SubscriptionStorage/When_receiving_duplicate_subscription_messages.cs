@@ -13,10 +13,12 @@ using Raven.Client.Documents;
 public class When_receiving_duplicate_subscription_messages : RavenDBPersistenceTestBase
 {
     [Test]
-    public async Task should_not_create_additional_db_rows()
+    public async Task Should_not_create_additional_db_rows()
     {
-        var storage = new SubscriptionPersister(store);
-        storage.DisableAggressiveCaching = true;
+        var storage = new SubscriptionPersister(store)
+        {
+            DisableAggressiveCaching = true
+        };
 
         await storage.Subscribe(new Subscriber("testEndPoint@localhost", "testEndPoint"), new MessageType("SomeMessageType", "1.0.0.0"), new ContextBag());
 
@@ -35,15 +37,17 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
 
 
     [Test]
-    public async Task should_overwrite_existing_subscription()
+    public async Task Should_overwrite_existing_subscription()
     {
         const string subscriberAddress = "testEndPoint@localhost";
         var messageType = new MessageType("SomeMessageType", "1.0.0.0");
         var subscriber_v6 = new Subscriber(subscriberAddress, "endpoint_name");
         var subscriber_v6_2 = new Subscriber(subscriberAddress, "new_endpoint_name");
 
-        var storage = new SubscriptionPersister(store);
-        storage.DisableAggressiveCaching = true;
+        var storage = new SubscriptionPersister(store)
+        {
+            DisableAggressiveCaching = true
+        };
         await storage.Subscribe(subscriber_v6, messageType, new ContextBag());
         await storage.Subscribe(subscriber_v6_2, messageType, new ContextBag());
 

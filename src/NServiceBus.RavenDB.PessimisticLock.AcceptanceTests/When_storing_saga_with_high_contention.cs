@@ -19,7 +19,7 @@ namespace NServiceBus.RavenDB.AcceptanceTests
                 .WithEndpoint<HighContentionEndpoint>(behavior =>
                 {
                     behavior.CustomConfig(configuration => configuration.UsePersistence<RavenDBPersistence>().Sagas().UsePessimisticLocking(true));
-                    behavior.When(session => session.SendLocal(new StartSaga {SomeId = Guid.NewGuid()}));
+                    behavior.When(session => session.SendLocal(new StartSaga { SomeId = Guid.NewGuid() }));
                 })
                 .Done(s => s.SagaCompleted)
                 .Run();

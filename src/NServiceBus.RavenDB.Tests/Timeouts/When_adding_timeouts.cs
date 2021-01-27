@@ -6,8 +6,8 @@
     using NServiceBus.Persistence.RavenDB;
     using NUnit.Framework;
     using Raven.Client.Documents;
-    using CoreTimeoutData = NServiceBus.Timeout.Core.TimeoutData;
-    using RavenDBTimeoutData = NServiceBus.TimeoutPersisters.RavenDB.TimeoutData;
+    using CoreTimeoutData = Timeout.Core.TimeoutData;
+    using RavenDBTimeoutData = TimeoutPersisters.RavenDB.TimeoutData;
 
     public class When_adding_timeouts : RavenDBPersistenceTestBase
     {

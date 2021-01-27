@@ -8,8 +8,8 @@ namespace NServiceBus.Persistence.RavenDB
     using Raven.Client.Documents.Operations;
     using Raven.Client.Documents.Queries;
     using Raven.Client.Exceptions;
-    using CoreTimeoutData = NServiceBus.Timeout.Core.TimeoutData;
-    using Timeout = NServiceBus.TimeoutPersisters.RavenDB.TimeoutData;
+    using CoreTimeoutData = Timeout.Core.TimeoutData;
+    using Timeout = TimeoutPersisters.RavenDB.TimeoutData;
 
     class TimeoutPersister : IPersistTimeouts
     {
@@ -70,7 +70,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public Task RemoveTimeoutBy(Guid sagaId, ContextBag context)
         {
-            var options = new QueryOperationOptions {AllowStale = true};
+            var options = new QueryOperationOptions { AllowStale = true };
             var deleteOp = new DeleteByQueryOperation<Timeout, TimeoutsIndex>(timeout => timeout.SagaId == sagaId, options);
 
             return documentStore.Operations.SendAsync(deleteOp);
