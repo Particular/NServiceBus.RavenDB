@@ -22,7 +22,11 @@
         /// <param name="value">Pessimistic lease lock duration.</param>
         public void SetPessimisticLeaseLockTime(TimeSpan value)
         {
-            if (value <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(value), value, "Lease lock time must be greater than zero.");
+            if (value <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "Lease lock time must be greater than zero.");
+            }
+
             LeaseLockTime = value;
         }
 
@@ -32,7 +36,11 @@
         /// <param name="value"></param>
         public void SetPessimisticLeaseLockAcquisitionTimeout(TimeSpan value)
         {
-            if (value <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(value), value, "Lease lock acquisition timeout must be greater than zero.");
+            if (value <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "Lease lock acquisition timeout must be greater than zero.");
+            }
+
             LeaseLockAcquisitionTimeout = value;
         }
 
@@ -42,8 +50,16 @@
         /// <param name="value"></param>
         public void SetPessimisticLeaseLockAcquisitionMaximumRefreshDelay(TimeSpan value)
         {
-            if (value <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(value), value, "Lease lock acquisition maximum refresh delay must be between zero and 1 second");
-            if (value > TimeSpan.FromSeconds(1)) throw new ArgumentOutOfRangeException(nameof(value), value, "Lease lock acquisition maximum refresh delay must be between zero and 1 second");
+            if (value <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "Lease lock acquisition maximum refresh delay must be between zero and 1 second");
+            }
+
+            if (value > TimeSpan.FromSeconds(1))
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "Lease lock acquisition maximum refresh delay must be between zero and 1 second");
+            }
+
             LeaseLockAcquisitionMaximumRefreshDelay = value;
         }
 

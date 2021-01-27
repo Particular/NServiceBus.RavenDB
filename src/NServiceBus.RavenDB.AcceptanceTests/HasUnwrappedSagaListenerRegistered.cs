@@ -64,9 +64,8 @@
             {
                 var eventField = typeof(DocumentStoreBase).GetField("OnBeforeConversionToEntity", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetField);
 
-                var eventDelegate = eventField.GetValue(store) as EventHandler<BeforeConversionToEntityEventArgs>;
 
-                if (eventDelegate == null)
+                if (!(eventField.GetValue(store) is EventHandler<BeforeConversionToEntityEventArgs> eventDelegate))
                 {
                     return false;
                 }

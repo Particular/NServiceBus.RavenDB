@@ -9,12 +9,12 @@
         public TimeoutsIndex()
         {
             Map = docs => from doc in docs
-                select new
-                {
-                    doc.Time,
-                    doc.SagaId,
-                    doc.OwningTimeoutManager
-                };
+                          select new
+                          {
+                              doc.Time,
+                              doc.SagaId,
+                              doc.OwningTimeoutManager
+                          };
         }
     }
 }

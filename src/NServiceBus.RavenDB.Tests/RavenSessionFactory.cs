@@ -15,7 +15,11 @@
             this.store = store;
         }
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable IDE0074 // False positive
         public IAsyncDocumentSession AsyncSession => session ?? (session = OpenAsyncSession());
+#pragma warning restore IDE0074 // False positive
+#pragma warning restore IDE0079 // Remove unnecessary suppression
 
         IAsyncDocumentSession OpenAsyncSession()
         {
@@ -27,7 +31,9 @@
         public void ReleaseSession()
         {
             if (session == null)
+            {
                 return;
+            }
 
             session.Dispose();
             session = null;

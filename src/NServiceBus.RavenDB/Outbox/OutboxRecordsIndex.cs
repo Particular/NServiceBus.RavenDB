@@ -9,11 +9,11 @@
         public OutboxRecordsIndex()
         {
             Map = docs => from doc in docs
-                select new
-                {
-                    doc.Dispatched,
-                    doc.DispatchedAt
-                };
+                          select new
+                          {
+                              doc.Dispatched,
+                              doc.DispatchedAt
+                          };
         }
     }
 }
