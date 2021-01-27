@@ -10,7 +10,7 @@ using NUnit.Framework;
 public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
 {
     [Test]
-    public async Task should_throw_a_ArgumentNullException()
+    public async Task Should_throw_a_ArgumentNullException()
     {
         var saga1 = new SagaData
         {

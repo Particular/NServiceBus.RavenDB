@@ -10,29 +10,30 @@
         [Test]
         public void ShouldCompareNoCase()
         {
-            var list = new List<SubscriptionClient>();
-
-            // Different casings of TransportAddress
-            list.Add(new SubscriptionClient
+            var list = new List<SubscriptionClient>
             {
-                Endpoint = "MyEndpoint",
-                TransportAddress = "My.Transport.Address@servername"
-            });
-            list.Add(new SubscriptionClient
-            {
-                Endpoint = "MyEndpoint",
-                TransportAddress = "My.Transport.Address@SERVERNAME"
-            });
-            list.Add(new SubscriptionClient
-            {
-                Endpoint = "MyEndpoint",
-                TransportAddress = "MY.TRANSPORT.ADDRESS@SERVERNAME"
-            });
-            list.Add(new SubscriptionClient
-            {
-                Endpoint = "MyEndpoint",
-                TransportAddress = "my.transport.address@servername"
-            });
+                // Different casings of TransportAddress
+                new SubscriptionClient
+                {
+                    Endpoint = "MyEndpoint",
+                    TransportAddress = "My.Transport.Address@servername"
+                },
+                new SubscriptionClient
+                {
+                    Endpoint = "MyEndpoint",
+                    TransportAddress = "My.Transport.Address@SERVERNAME"
+                },
+                new SubscriptionClient
+                {
+                    Endpoint = "MyEndpoint",
+                    TransportAddress = "MY.TRANSPORT.ADDRESS@SERVERNAME"
+                },
+                new SubscriptionClient
+                {
+                    Endpoint = "MyEndpoint",
+                    TransportAddress = "my.transport.address@servername"
+                }
+            };
 
             // Distinct on different casings should result in 1 item
             var distinctList = list.Distinct().ToList();

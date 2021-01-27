@@ -33,7 +33,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         return RunTestUsing((persister, sagaId, syncSession, context) => persister.Get<CountingSagaData>(sagaId, syncSession, context));
     }
 
-    private async Task RunTestUsing(GetSagaDelegate getSaga)
+    async Task RunTestUsing(GetSagaDelegate getSaga)
     {
         var sagaId = StoreSagaDocuments();
 
@@ -94,30 +94,6 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         return sagaId;
     }
 
-    Task<CountingSagaData> GetSagaDataByProperty()
-    {
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
-        {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
-            var context = new ContextBag();
-            context.Set(session);
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
-            return persister.Get<CountingSagaData>("Name", "Alpha", synchronizedSession, context);
-        }
-    }
-
-    Task<CountingSagaData> GetSagaDataById(Guid sagaId)
-    {
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
-        {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
-            var context = new ContextBag();
-            context.Set(session);
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
-            return persister.Get<CountingSagaData>(sagaId, synchronizedSession, context);
-        }
-    }
-
     public class CountingSaga : Saga<CountingSagaData>,
         IAmStartedByMessages<CountMsg>
     {
@@ -128,7 +104,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
 
         public Task Handle(CountMsg message, IMessageHandlerContext context)
         {
-            this.Data.Counter++;
+            Data.Counter++;
             return Task.CompletedTask;
         }
     }

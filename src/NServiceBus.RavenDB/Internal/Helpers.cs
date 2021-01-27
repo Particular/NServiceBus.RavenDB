@@ -6,7 +6,7 @@
 
     class Helpers
     {
-        static void LogRavenConnectionFailure(Exception exception, IDocumentStore store)
+        static void LogRavenConnectionFailure(Exception exception)
         {
             var error = $@"RavenDB could not be contacted. Check your DocumentStore configuration.
 Original exception: {exception}";
@@ -26,7 +26,7 @@ Original exception: {exception}";
             }
             catch (Exception e)
             {
-                LogRavenConnectionFailure(e, documentStore);
+                LogRavenConnectionFailure(e);
                 throw;
             }
         }

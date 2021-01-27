@@ -11,7 +11,7 @@ using NUnit.Framework;
 public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestBase
 {
     [Test]
-    public async Task should_ignore_message_version()
+    public async Task Should_ignore_message_version()
     {
         var subscriberAddress_v1 = "v1@localhost";
         var subscriberAddress_v2 = "v2@localhost";
@@ -20,8 +20,10 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
         var subscriber_v1 = new Subscriber(subscriberAddress_v1, "some_endpoint_name");
         var subscriber_v2 = new Subscriber(subscriberAddress_v2, "another_endpoint_name");
 
-        var storage = new SubscriptionPersister(store);
-        storage.DisableAggressiveCaching = true;
+        var storage = new SubscriptionPersister(store)
+        {
+            DisableAggressiveCaching = true
+        };
 
         await storage.Subscribe(subscriber_v1, messageType_v1, new ContextBag());
         await storage.Subscribe(subscriber_v2, messageType_v2, new ContextBag());
@@ -50,8 +52,10 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
         var subscriber_v1 = new Subscriber(subscriberAddress, endpointName);
         var subscriber_v2 = new Subscriber(subscriberAddress, endpointName);
 
-        var storage = new SubscriptionPersister(store);
-        storage.DisableAggressiveCaching = true;
+        var storage = new SubscriptionPersister(store)
+        {
+            DisableAggressiveCaching = true
+        };
 
         await storage.Subscribe(subscriber_v1, messageType_v1, new ContextBag());
 

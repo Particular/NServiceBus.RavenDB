@@ -11,7 +11,7 @@
     using Raven.Client.Documents.Commands.Batches;
     using Raven.Client.Documents.Operations;
     using Raven.Client.Documents.Session;
-    using TransportOperation = NServiceBus.Outbox.TransportOperation;
+    using TransportOperation = Outbox.TransportOperation;
 
     class OutboxPersister : IOutboxStorage
     {
@@ -144,7 +144,6 @@ this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
 
         string endpointName;
         TransportOperation[] emptyTransportOperations = new TransportOperation[0];
-        OutboxRecord.OutboxOperation[] emptyOutboxOperations = new OutboxRecord.OutboxOperation[0];
         IOpenTenantAwareRavenSessions sessionCreator;
         TimeSpan timeToKeepDeduplicationData;
     }

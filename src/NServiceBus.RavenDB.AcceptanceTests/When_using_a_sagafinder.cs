@@ -17,12 +17,12 @@
         {
             var exception = Assert.ThrowsAsync<Exception>(async () =>
             {
-               await Scenario.Define<Context>()
-                    .WithEndpoint<SagaFinderEndpoint>(b => b
-                        .When(bus => bus.SendLocal(new StartSagaMessage()))
-                        .When(c => c.SagaId != Guid.Empty, bus => bus.SendLocal(new StartSagaMessage())))
-                    .Done(c => c.SecondMessageProcessed)
-                    .Run();
+                await Scenario.Define<Context>()
+                     .WithEndpoint<SagaFinderEndpoint>(b => b
+                         .When(bus => bus.SendLocal(new StartSagaMessage()))
+                         .When(c => c.SagaId != Guid.Empty, bus => bus.SendLocal(new StartSagaMessage())))
+                     .Done(c => c.SecondMessageProcessed)
+                     .Run();
             });
 
             Assert.IsTrue(exception.Message.Contains("does not support custom saga finders"), "Exception message did not contain expected phrase");

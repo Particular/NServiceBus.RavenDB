@@ -6,11 +6,11 @@
     {
         public static SagaCorrelationProperty CreateMetadata<T>(this RavenDBPersistenceTestBase test, IContainSagaData sagaEntity)
         {
+            _ = test;
+
             var metadata = SagaMetadata.Create(typeof(T));
 
-            SagaMetadata.CorrelationPropertyMetadata correlationPropertyMetadata;
-
-            metadata.TryGetCorrelationProperty(out correlationPropertyMetadata);
+            metadata.TryGetCorrelationProperty(out SagaMetadata.CorrelationPropertyMetadata correlationPropertyMetadata);
 
             var propertyInfo = metadata.SagaEntityType.GetProperty(correlationPropertyMetadata.Name);
             var value = propertyInfo.GetValue(sagaEntity);

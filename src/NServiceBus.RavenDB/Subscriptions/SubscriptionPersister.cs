@@ -81,7 +81,7 @@ namespace NServiceBus.Persistence.RavenDB
                 {
                     attempts++;
                 }
-            } 
+            }
             while (attempts < 5);
         }
 
