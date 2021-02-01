@@ -28,6 +28,10 @@ namespace NServiceBus.Persistence.RavenDB
         public void SetPessimisticLeaseLockAcquisitionMaximumRefreshDelay(System.TimeSpan value) { }
         public void SetPessimisticLeaseLockAcquisitionTimeout(System.TimeSpan value) { }
         public void SetPessimisticLeaseLockTime(System.TimeSpan value) { }
+        public void UseOptimisticLocking() { }
+        [System.ObsoleteAttribute("Pessimistic locking will be the default in next major. Use UseOptimisticLocking()" +
+            " to enable optimistic locking. Will be treated as an error from version 7.0.0. W" +
+            "ill be removed in version 8.0.0.", false)]
         public void UsePessimisticLocking(bool value = True) { }
     }
 }
