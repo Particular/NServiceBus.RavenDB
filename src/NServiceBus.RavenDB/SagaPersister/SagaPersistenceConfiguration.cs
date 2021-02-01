@@ -11,9 +11,20 @@
         /// Enables or disables default saga persistence pessimistic locking. Default to optimistic locking when not used.
         /// </summary>
         /// <param name="value">True to enable pessimistic locking, otherwise optimistic locking.</param>
+        [ObsoleteEx(Message = "Pessimistic locking will be the default in next major. Use UseOptimisticLocking() to enable optimistic locking.",
+            TreatAsErrorFromVersion = "7.0",
+            RemoveInVersion = "8.0")]
         public void UsePessimisticLocking(bool value = true)
         {
             EnablePessimisticLocking = value;
+        }
+
+        /// <summary>
+        /// Enables default saga persistence optimistic locking. Default to pessimistic locking when not used.
+        /// </summary>
+        public void UseOptimisticLocking()
+        {
+            EnablePessimisticLocking = false;
         }
 
         /// <summary>
