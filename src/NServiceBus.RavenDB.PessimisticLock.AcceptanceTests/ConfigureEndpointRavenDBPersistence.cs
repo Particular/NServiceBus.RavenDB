@@ -25,9 +25,6 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
             .DoNotCacheSubscriptions()
             .SetDefaultDocumentStore(documentStore);
 
-        var sagasConfiguration = persistenceExtensions.Sagas();
-        sagasConfiguration.UsePessimisticLocking();
-
         configuration.GetSettings().Set(DefaultPersistenceExtensionsKey, persistenceExtensions);
 
         Console.WriteLine("Created '{0}' database", documentStore.Database);

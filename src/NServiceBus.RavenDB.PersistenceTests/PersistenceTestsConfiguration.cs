@@ -18,9 +18,8 @@
         static PersistenceTestsConfiguration()
         {
             var optimisticConcurrencyConfiguration = new SagaPersistenceConfiguration();
-            optimisticConcurrencyConfiguration.UsePessimisticLocking(false);
+            optimisticConcurrencyConfiguration.UseOptimisticLocking();
             var pessimisticLockingConfiguration = new SagaPersistenceConfiguration();
-            pessimisticLockingConfiguration.UsePessimisticLocking(true);
 
             SagaVariants = new[]
             {

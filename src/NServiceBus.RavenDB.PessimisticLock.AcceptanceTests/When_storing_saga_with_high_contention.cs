@@ -18,7 +18,7 @@ namespace NServiceBus.RavenDB.AcceptanceTests
             var scenario = await Scenario.Define<HighContentionScenario>()
                 .WithEndpoint<HighContentionEndpoint>(behavior =>
                 {
-                    behavior.CustomConfig(configuration => configuration.UsePersistence<RavenDBPersistence>().Sagas().UsePessimisticLocking(true));
+                    behavior.CustomConfig(configuration => configuration.UsePersistence<RavenDBPersistence>().Sagas());
                     behavior.When(session => session.SendLocal(new StartSaga { SomeId = Guid.NewGuid() }));
                 })
                 .Done(s => s.SagaCompleted)
