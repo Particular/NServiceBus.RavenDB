@@ -47,7 +47,7 @@
         }
 
         /// <summary>
-        /// Specifies the async session that the shared persisters (saga + outbox) that should be used.
+        /// Specifies the async session that the shared persisters (saga + outbox) should use.
         /// The lifecycle is controlled by me
         /// </summary>
         /// <param name="cfg">The persistence configuration object</param>

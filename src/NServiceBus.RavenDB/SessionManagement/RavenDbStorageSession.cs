@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
     using Microsoft.Extensions.DependencyInjection;
-    using NServiceBus.Features;
+    using Features;
     using Raven.Client.Documents.Session;
 
     class RavenDbStorageSession : Feature
@@ -15,7 +15,6 @@
 
             // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
             var getAsyncSessionFunc = context.Settings.GetOrDefault<Func<IDictionary<string, string>, IAsyncDocumentSession>>(SharedAsyncSession);
-
             if (getAsyncSessionFunc != null)
             {
                 IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc);
@@ -46,6 +45,10 @@
                         HasMessageToDatabaseMappingConvention = context.Settings.HasSetting(MessageToDatabaseMappingConvention),
                     });
             }
+
+            var sessionHolder = new CurrentSessionHolder();
+            context.Services.AddScoped(_ => sessionHolder.Current);
+            context.Pipeline.Register(new CurrentSessionBehavior(sessionHolder), "Manages the lifecycle of the current session holder.");
         }
 
         internal const string SharedAsyncSession = "RavenDbSharedAsyncSession";
