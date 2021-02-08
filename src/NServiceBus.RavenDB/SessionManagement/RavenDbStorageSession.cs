@@ -11,7 +11,6 @@
         protected override void Setup(FeatureConfigurationContext context)
         {
             context.Services.AddSingleton<ISynchronizedStorageAdapter, RavenDBSynchronizedStorageAdapter>();
-            context.Services.AddSingleton<ISynchronizedStorage, RavenDBSynchronizedStorage>();
 
             // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
             var getAsyncSessionFunc = context.Settings.GetOrDefault<Func<IDictionary<string, string>, IAsyncDocumentSession>>(SharedAsyncSession);
@@ -49,6 +48,7 @@
             var sessionHolder = new CurrentSessionHolder();
             context.Services.AddScoped(_ => sessionHolder.Current);
             context.Pipeline.Register(new CurrentSessionBehavior(sessionHolder), "Manages the lifecycle of the current session holder.");
+            context.Services.AddSingleton<ISynchronizedStorage, RavenDBSynchronizedStorage>(provider => new RavenDBSynchronizedStorage(provider.GetService<IOpenTenantAwareRavenSessions>(), sessionHolder));
         }
 
         internal const string SharedAsyncSession = "RavenDbSharedAsyncSession";
