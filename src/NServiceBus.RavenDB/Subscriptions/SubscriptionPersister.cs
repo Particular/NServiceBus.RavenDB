@@ -165,6 +165,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         IAsyncDocumentSession OpenAsyncSession()
         {
+            // TODO: we need to make use of a cluster wide transaction here if they are enabled, optimistic concurrency might result in dataloss if two subscriptions are handled on two different nodes
             var session = documentStore.OpenAsyncSession();
             session.Advanced.UseOptimisticConcurrency = true;
             return session;

@@ -12,6 +12,7 @@
     using Raven.Client.Documents;
     using Raven.Client.ServerWide;
     using Raven.Client.ServerWide.Operations;
+    using Settings;
 
     public partial class PersistenceTestsConfiguration
     {
@@ -81,7 +82,7 @@
             var dbRecord = new DatabaseRecord(dbName);
             documentStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
 
-            IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore));
+            IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore), new SettingsHolder());
             SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator);
             SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter();
 

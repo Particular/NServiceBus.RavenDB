@@ -24,6 +24,7 @@ namespace NServiceBus.Persistence.RavenDB
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
+            var useClusterWideTx = ((InMemoryDocumentSessionOperations)documentSession).TransactionMode == TransactionMode.ClusterWide;
 
             if (sagaData == null)
             {
@@ -42,6 +43,13 @@ namespace NServiceBus.Persistence.RavenDB
                 IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value),
             };
 
+            if (useClusterWideTx)
+            {
+                // CompareExchangeValue for both Id (find by Id) and IdentityDocId (find by correlation property value)
+                documentSession.Advanced.ClusterTransaction.CreateCompareExchangeValue(container.Id, container.Id);
+                documentSession.Advanced.ClusterTransaction.CreateCompareExchangeValue(container.IdentityDocId, container.Id);
+            }
+
             await documentSession.StoreAsync(container, string.Empty, container.Id).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(container);
 
@@ -59,9 +67,19 @@ namespace NServiceBus.Persistence.RavenDB
 
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
+            var documentSession = session.RavenSession();
+            var useClusterWideTx = ((InMemoryDocumentSessionOperations)documentSession).TransactionMode == TransactionMode.ClusterWide;
+
+            if (useClusterWideTx)
+            {
+                var sagaIdCev = context.Get<CompareExchangeValue<string>>(SagaIdCompareExchange);
+                var sagaUniqueDocIdCev = context.Get<CompareExchangeValue<string>>(SagaUniqueDocIdCompareExchange);
+                documentSession.Advanced.ClusterTransaction.UpdateCompareExchangeValue(new CompareExchangeValue<string>(sagaIdCev.Key, sagaIdCev.Index, sagaIdCev.Value));
+                documentSession.Advanced.ClusterTransaction.UpdateCompareExchangeValue(new CompareExchangeValue<string>(sagaUniqueDocIdCev.Key, sagaUniqueDocIdCev.Index, sagaUniqueDocIdCev.Value));
+            }
+
             // store the schema version in case it has changed
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
-            var documentSession = session.RavenSession();
             documentSession.StoreSchemaVersionInMetadata(container);
 
             // dirty tracking will do the rest for us
@@ -73,6 +91,7 @@ namespace NServiceBus.Persistence.RavenDB
         {
             var documentSession = session.RavenSession();
             var docId = DocumentIdForSagaData(documentSession, typeof(T), sagaId);
+            var useClusterWideTx = ((InMemoryDocumentSessionOperations)documentSession).TransactionMode == TransactionMode.ClusterWide;
 
             if (enablePessimisticLocking)
             {
@@ -81,24 +100,31 @@ namespace NServiceBus.Persistence.RavenDB
                 context.Get<SagaDataLeaseHolder>().DocumentsIdsAndIndexes.Add((docId, index));
             }
 
-            var container = await documentSession.LoadAsync<SagaDataContainer>(docId).ConfigureAwait(false);
-
-            if (container == null)
+            var sagaWrapper = await documentSession.LoadAsync<SagaDataContainer>(docId).ConfigureAwait(false);
+            if (sagaWrapper == null)
             {
                 return default;
             }
 
-            context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
+            if (useClusterWideTx)
+            {
+                var sagaIdCev = await documentSession.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>(sagaWrapper.Id).ConfigureAwait(false);
+                var sagaUniqueDocIdCev = await documentSession.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>(sagaWrapper.IdentityDocId).ConfigureAwait(false);
+                context.Set(SagaIdCompareExchange, sagaIdCev);
+                context.Set(SagaUniqueDocIdCompareExchange, sagaUniqueDocIdCev);
+            }
 
-            return container.Data as T;
+            context.Set($"{SagaContainerContextKeyPrefix}{sagaWrapper.Data.Id}", sagaWrapper);
+
+            return sagaWrapper.Data as T;
         }
 
         public async Task<T> Get<T>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context)
             where T : class, IContainSagaData
         {
             var documentSession = session.RavenSession();
-
             var lookupId = SagaUniqueIdentity.FormatId(typeof(T), propertyName, propertyValue);
+            var useClusterWideTx = ((InMemoryDocumentSessionOperations)documentSession).TransactionMode == TransactionMode.ClusterWide;
 
             SagaUniqueIdentity lookup;
 
@@ -146,6 +172,14 @@ namespace NServiceBus.Persistence.RavenDB
                 container.IdentityDocId = lookupId;
             }
 
+            if (useClusterWideTx)
+            {
+                var sagaIdCev = await documentSession.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>(container.Id).ConfigureAwait(false);
+                var sagaUniqueDocIdCev = await documentSession.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>(container.IdentityDocId).ConfigureAwait(false);
+                context.Set(SagaIdCompareExchange, sagaIdCev);
+                context.Set(SagaUniqueDocIdCompareExchange, sagaUniqueDocIdCev);
+            }
+
             context.Set($"{SagaContainerContextKeyPrefix}{container.Data.Id}", container);
             return (T)container.Data;
         }
@@ -153,11 +187,21 @@ namespace NServiceBus.Persistence.RavenDB
         public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
+            var useClusterWideTx = ((InMemoryDocumentSessionOperations)documentSession).TransactionMode == TransactionMode.ClusterWide;
+
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
             documentSession.Delete(container);
             if (container.IdentityDocId != null)
             {
                 documentSession.Advanced.Defer(new DeleteCommandData(container.IdentityDocId, null));
+            }
+
+            if (useClusterWideTx)
+            {
+                var sagaIdCev = context.Get<CompareExchangeValue<string>>(SagaIdCompareExchange);
+                var sagaUniqueDocIdCev = context.Get<CompareExchangeValue<string>>(SagaUniqueDocIdCompareExchange);
+                documentSession.Advanced.ClusterTransaction.DeleteCompareExchangeValue(new CompareExchangeValue<string>(sagaIdCev.Key, sagaIdCev.Index, sagaIdCev.Value));
+                documentSession.Advanced.ClusterTransaction.DeleteCompareExchangeValue(new CompareExchangeValue<string>(sagaUniqueDocIdCev.Key, sagaUniqueDocIdCev.Index, sagaUniqueDocIdCev.Value));
             }
 
             return Task.CompletedTask;
@@ -224,6 +268,9 @@ namespace NServiceBus.Persistence.RavenDB
 
         const string SagaContainerContextKeyPrefix = "SagaDataContainer:";
         static Random random = new Random();
+
+        internal const string SagaIdCompareExchange = "NServiceBus.RavenDB.ClusterWideTx.SagaID";
+        internal const string SagaUniqueDocIdCompareExchange = "NServiceBus.RavenDB.ClusterWideTx.SagaUniqueDocID";
 
         TimeSpan leaseLockTime;
         bool enablePessimisticLocking;

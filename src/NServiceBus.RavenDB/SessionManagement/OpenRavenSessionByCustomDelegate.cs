@@ -14,8 +14,22 @@
         public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
         {
             var session = getAsyncSessionUsingHeaders(messageHeaders);
+            var txMode = ((InMemoryDocumentSessionOperations)session).TransactionMode;
 
-            session.Advanced.UseOptimisticConcurrency = true;
+            // TODO: throw all the exceptions if the config is not aligned with the session settings
+            if (txMode == TransactionMode.ClusterWide)
+            {
+                if (session.Advanced.UseOptimisticConcurrency)
+                {
+                    throw new InvalidOperationException("The configured session is set to use Cluster wide transactions, but the session's concurrency behavior is set to optimistic concurrency, which is incompatible.");
+                }
+            }
+            else
+            {
+                // Optimistic concurrency is not compatible with cluster wide concurrency
+                session.Advanced.UseOptimisticConcurrency = true;
+            }
+
 
             return session;
         }

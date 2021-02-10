@@ -35,7 +35,7 @@
                     var store = DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(context.Settings, sp);
                     var storeWrapper = new DocumentStoreWrapper(store);
                     var dbNameConvention = context.Settings.GetOrDefault<Func<IDictionary<string, string>, string>>(MessageToDatabaseMappingConvention);
-                    return new OpenRavenSessionByDatabaseName(storeWrapper, dbNameConvention);
+                    return new OpenRavenSessionByDatabaseName(storeWrapper, context.Settings, dbNameConvention);
                 });
 
                 context.Settings.AddStartupDiagnosticsSection(
@@ -51,5 +51,6 @@
         internal const string SharedAsyncSession = "RavenDbSharedAsyncSession";
         internal const string MessageToDatabaseMappingConvention = "RavenDB.SetMessageToDatabaseMappingConvention";
         const string StartupDiagnosticsSectionName = "NServiceBus.Persistence.RavenDB.StorageSession";
+        internal const string UseClusterWideTransactions = "NServiceBus.Persistence.RavenDB.UseClusterWideTransactions";
     }
 }
