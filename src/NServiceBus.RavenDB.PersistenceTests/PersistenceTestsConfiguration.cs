@@ -1,14 +1,15 @@
-﻿namespace NServiceBus.PersistenceTesting
+namespace NServiceBus.PersistenceTesting
 {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using NServiceBus.Extensibility;
+    using Configuration.AdvancedExtensibility;
+    using Extensibility;
     using NServiceBus.Outbox;
-    using NServiceBus.Persistence;
+    using Persistence;
     using NServiceBus.Sagas;
     using NServiceBus.Persistence.RavenDB;
-    using NServiceBus.Transport;
+    using Transport;
     using Raven.Client.Documents;
     using Raven.Client.ServerWide;
     using Raven.Client.ServerWide.Operations;
@@ -21,11 +22,15 @@
             var optimisticConcurrencyConfiguration = new SagaPersistenceConfiguration();
             optimisticConcurrencyConfiguration.UseOptimisticLocking();
             var pessimisticLockingConfiguration = new SagaPersistenceConfiguration();
+            var persistenceExtensionsWithClusterWideTx = new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder());
+            persistenceExtensionsWithClusterWideTx.UseClusterWideTransactions();
 
             SagaVariants = new[]
             {
-                new TestVariant(optimisticConcurrencyConfiguration),
-                new TestVariant(pessimisticLockingConfiguration)
+                new TestVariant(optimisticConcurrencyConfiguration, new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder())),
+                new TestVariant(pessimisticLockingConfiguration, new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder())),
+                new TestVariant(optimisticConcurrencyConfiguration, persistenceExtensionsWithClusterWideTx),
+                new TestVariant(pessimisticLockingConfiguration, persistenceExtensionsWithClusterWideTx),
             };
             OutboxVariants = new[]
             {
@@ -64,6 +69,9 @@
 
             SagaIdGenerator = new DefaultSagaIdGenerator();
             var sagaPersistenceConfiguration = Variant.Values[0] as SagaPersistenceConfiguration;
+            var ravenConfiguration = Variant.Values[1] as PersistenceExtensions<RavenDBPersistence>;
+            var settings = ravenConfiguration.GetSettings();
+
             SupportsPessimisticConcurrency = sagaPersistenceConfiguration.EnablePessimisticLocking;
             if (SessionTimeout.HasValue)
             {
@@ -82,7 +90,7 @@
             var dbRecord = new DatabaseRecord(dbName);
             documentStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
 
-            IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore), new SettingsHolder());
+            IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore), settings);
             SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator);
             SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter();
 

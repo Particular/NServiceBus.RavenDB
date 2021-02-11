@@ -27,6 +27,7 @@
             else
             {
                 // Optimistic concurrency is not compatible with cluster wide concurrency
+                // TODO: log if we change the value
                 session.Advanced.UseOptimisticConcurrency = true;
             }
 
