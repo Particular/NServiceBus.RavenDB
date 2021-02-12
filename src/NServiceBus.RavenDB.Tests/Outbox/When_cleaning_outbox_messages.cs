@@ -20,11 +20,12 @@
             new OutboxRecordsIndex().Execute(store);
         }
 
-        [Test]
-        public async Task Should_delete_all_dispatched_outbox_records()
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_delete_all_dispatched_outbox_records(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);

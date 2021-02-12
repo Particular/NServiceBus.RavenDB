@@ -21,15 +21,16 @@
             new OutboxRecordsIndex().Execute(store);
         }
 
-        [Test]
-        public async Task Should_be_deleted()
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_be_deleted(bool useClusterWideTx)
         {
             await store.Maintenance.SendAsync(
                 new ConfigureExpirationOperation(
                     new ExpirationConfiguration { Disabled = false, DeleteFrequencyInSec = 1, }));
 
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), TimeSpan.FromSeconds(1));
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), TimeSpan.FromSeconds(1), useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);

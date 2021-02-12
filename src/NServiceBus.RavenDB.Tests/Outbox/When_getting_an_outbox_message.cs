@@ -17,11 +17,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             new OutboxRecordsIndex().Execute(store);
         }
 
-        [Test]
-        public async Task Should_get_the_message()
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_get_the_message(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxOperation = new OutboxRecord.OutboxOperation

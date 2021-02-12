@@ -22,11 +22,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             new OutboxRecordsIndex().Execute(store);
         }
 
-        [Test]
-        public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id_in_the_same_transaction()
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id_in_the_same_transaction(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxMessage1 = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
@@ -47,11 +48,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             Assert.NotNull(exception);
         }
 
-        [Test]
-        public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id()
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxMessage1 = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
@@ -77,11 +79,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             Assert.NotNull(exception);
         }
 
-        [Test]
-        public async Task Should_store_outbox_record_as_not_dispatched()
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_store_outbox_record_as_not_dispatched(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outgoingMessageId = "outgoingMessageId";
@@ -107,11 +110,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [Test]
-        public async Task Should_store_schema_version_in_metadata()
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_store_schema_version_in_metadata(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxMessage = new OutboxMessage(incomingMessageId, new[] { new TransportOperation("foo", default, default, default) });
@@ -135,11 +139,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [Test]
-        public async Task Should_filter_invalid_docid_character()
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_filter_invalid_docid_character(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = $@"{Guid.NewGuid()}\12345";
 
