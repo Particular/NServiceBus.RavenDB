@@ -17,7 +17,7 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
             var entity = new SagaData
             {
                 Id = sagaId

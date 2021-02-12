@@ -29,7 +29,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
 
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 
@@ -83,7 +83,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
 
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 

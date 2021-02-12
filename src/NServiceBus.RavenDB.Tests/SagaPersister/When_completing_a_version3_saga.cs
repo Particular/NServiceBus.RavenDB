@@ -17,7 +17,7 @@ public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
 
             var sagaEntity = new SagaData
             {

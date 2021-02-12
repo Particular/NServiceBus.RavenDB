@@ -14,7 +14,7 @@ public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestB
     {
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
             var uniqueString = Guid.NewGuid().ToString();
             var saga = new SagaWithUniquePropertyAndALongNamespace
             {

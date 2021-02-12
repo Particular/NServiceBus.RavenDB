@@ -20,7 +20,7 @@ public class When_persisting_a_saga_entity_with_an_Enum_property : RavenDBPersis
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var context))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, context);
 
             await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, context);
