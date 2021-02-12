@@ -15,9 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\GitVersion.yml = ..\GitVersion.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.PessimisticLock.AcceptanceTests", "NServiceBus.RavenDB.PessimisticLock.AcceptanceTests\NServiceBus.RavenDB.PessimisticLock.AcceptanceTests.csproj", "{57785D1B-193C-4B59-86C2-F8E1E6B50A0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.PessimisticLock.AcceptanceTests", "NServiceBus.RavenDB.PessimisticLock.AcceptanceTests\NServiceBus.RavenDB.PessimisticLock.AcceptanceTests.csproj", "{57785D1B-193C-4B59-86C2-F8E1E6B50A0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.PersistenceTests", "NServiceBus.RavenDB.PersistenceTests\NServiceBus.RavenDB.PersistenceTests.csproj", "{D4632C6A-F916-4107-9A76-EC66B3978BF8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.PersistenceTests", "NServiceBus.RavenDB.PersistenceTests\NServiceBus.RavenDB.PersistenceTests.csproj", "{D4632C6A-F916-4107-9A76-EC66B3978BF8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.PessimisticLock.ClusterWideTx.AcceptanceTests", "NServiceBus.RavenDB.PessimisticLock.ClusterWideTx.AcceptanceTests\NServiceBus.RavenDB.PessimisticLock.ClusterWideTx.AcceptanceTests.csproj", "{35653BBE-0E10-4801-891B-45D10BA99538}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.ClusterWideTx.AcceptanceTests", "NServiceBus.RavenDB.ClusterWideTx.AcceptanceTests\NServiceBus.RavenDB.ClusterWideTx.AcceptanceTests.csproj", "{5EA9987C-D4EC-499E-B6F0-BCF3DB522497}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +49,14 @@ Global
 		{D4632C6A-F916-4107-9A76-EC66B3978BF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4632C6A-F916-4107-9A76-EC66B3978BF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4632C6A-F916-4107-9A76-EC66B3978BF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35653BBE-0E10-4801-891B-45D10BA99538}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35653BBE-0E10-4801-891B-45D10BA99538}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35653BBE-0E10-4801-891B-45D10BA99538}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35653BBE-0E10-4801-891B-45D10BA99538}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EA9987C-D4EC-499E-B6F0-BCF3DB522497}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EA9987C-D4EC-499E-B6F0-BCF3DB522497}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EA9987C-D4EC-499E-B6F0-BCF3DB522497}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EA9987C-D4EC-499E-B6F0-BCF3DB522497}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
