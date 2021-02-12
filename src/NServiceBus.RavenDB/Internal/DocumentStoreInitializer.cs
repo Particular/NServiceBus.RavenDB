@@ -11,9 +11,10 @@
 
     class DocumentStoreInitializer
     {
-        internal DocumentStoreInitializer(Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
+        internal DocumentStoreInitializer(Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator, bool useClusterWideTx)
         {
             this.storeCreator = storeCreator;
+            this.useClusterWideTx = useClusterWideTx;
         }
 
         internal DocumentStoreInitializer(IDocumentStore store)
@@ -62,7 +63,7 @@
                 ApplyConventions(settings);
 
                 docStore.Initialize();
-                EnsureClusterConfiguration(docStore);
+                EnsureClusterConfiguration(docStore, useClusterWideTx);
 
                 CreateIndexes(docStore);
             }
@@ -101,8 +102,13 @@
             }
         }
 
-        static void EnsureClusterConfiguration(IDocumentStore store)
+        static void EnsureClusterConfiguration(IDocumentStore store, bool useClusterWideTx)
         {
+            if (useClusterWideTx)
+            {
+                return;
+            }
+
             using (var s = store.OpenSession())
             {
                 var getTopologyCmd = new GetClusterTopologyCommand();
@@ -120,6 +126,7 @@
 
         List<AbstractIndexCreationTask> indexesToCreate = new List<AbstractIndexCreationTask>();
         Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator;
+        readonly bool useClusterWideTx;
         IDocumentStore docStore;
         bool isInitialized;
     }

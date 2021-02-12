@@ -51,7 +51,7 @@
 
         static void SetDocumentStoreInternal(SettingsHolder settings, Type storageType, Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
         {
-            var initContext = new DocumentStoreInitializer(storeCreator);
+            var initContext = new DocumentStoreInitializer(storeCreator, settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions));
             settings.Set(featureSettingsKeys[storageType], initContext);
         }
 
@@ -87,7 +87,7 @@
 
         static void SetDefaultStoreInternal(SettingsHolder settings, Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
         {
-            var initContext = new DocumentStoreInitializer(storeCreator);
+            var initContext = new DocumentStoreInitializer(storeCreator, settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions));
             settings.Set(defaultDocStoreSettingsKey, initContext);
         }
 
