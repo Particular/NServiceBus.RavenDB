@@ -72,17 +72,6 @@ namespace NServiceBus.PersistenceTesting
             var ravenConfiguration = Variant.Values[1] as PersistenceExtensions<RavenDBPersistence>;
             var settings = ravenConfiguration.GetSettings();
 
-            IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore), settings);
-            SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator);
-            SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter();
-
-            SupportsPessimisticConcurrency = sagaPersistenceConfiguration.EnablePessimisticLocking;
-            if (SessionTimeout.HasValue)
-            {
-                sagaPersistenceConfiguration.SetPessimisticLeaseLockAcquisitionTimeout(SessionTimeout.Value);
-            }
-            SagaStorage = new SagaPersister(sagaPersistenceConfiguration, sessionCreator);
-
             var dbName = Guid.NewGuid().ToString();
             var urls = Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls") ?? "http://localhost:8080";
             documentStore = new DocumentStore
@@ -93,6 +82,17 @@ namespace NServiceBus.PersistenceTesting
             documentStore.Initialize();
             var dbRecord = new DatabaseRecord(dbName);
             documentStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
+
+            IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore), settings);
+            SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator);
+            SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter();
+
+            SupportsPessimisticConcurrency = sagaPersistenceConfiguration.EnablePessimisticLocking;
+            if (SessionTimeout.HasValue)
+            {
+                sagaPersistenceConfiguration.SetPessimisticLeaseLockAcquisitionTimeout(SessionTimeout.Value);
+            }
+            SagaStorage = new SagaPersister(sagaPersistenceConfiguration, sessionCreator);
 
             OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault);
             return Task.CompletedTask;
