@@ -15,10 +15,10 @@
 
             // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
             var getAsyncSessionFunc = context.Settings.GetOrDefault<Func<IDictionary<string, string>, IAsyncDocumentSession>>(SharedAsyncSession);
-
+            var useClusterWideTx = context.Settings.GetOrDefault<bool>(UseClusterWideTransactions);
             if (getAsyncSessionFunc != null)
             {
-                IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc);
+                IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc, useClusterWideTx);
                 context.Services.AddSingleton(sessionCreator);
 
                 context.Settings.AddStartupDiagnosticsSection(

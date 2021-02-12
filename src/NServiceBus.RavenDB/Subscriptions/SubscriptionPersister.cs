@@ -12,14 +12,16 @@ namespace NServiceBus.Persistence.RavenDB
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
     using Raven.Client.Documents;
+    using Raven.Client.Documents.Operations.CompareExchange;
     using Raven.Client.Documents.Session;
     using Raven.Client.Exceptions;
 
     class SubscriptionPersister : ISubscriptionStorage
     {
-        public SubscriptionPersister(IDocumentStore store)
+        public SubscriptionPersister(IDocumentStore store, bool useClusterWideTx)
         {
             documentStore = store;
+            this.useClusterWideTx = useClusterWideTx;
         }
 
         public TimeSpan AggressiveCacheDuration { get; set; }
@@ -46,6 +48,12 @@ namespace NServiceBus.Persistence.RavenDB
 
                         var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
 
+                        CompareExchangeValue<string> subscriptionCev = null;
+                        if (useClusterWideTx)
+                        {
+                            subscriptionCev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{SubscriptionPersisterCompareExchangePrefix}/{subscriptionDocId}").ConfigureAwait(false);
+                        }
+
                         if (subscription == null)
                         {
                             subscription = new Subscription
@@ -57,6 +65,22 @@ namespace NServiceBus.Persistence.RavenDB
 
                             await session.StoreAsync(subscription).ConfigureAwait(false);
                             session.StoreSchemaVersionInMetadata(subscription);
+                        }
+
+                        if (useClusterWideTx)
+                        {
+                            if (subscriptionCev == null)
+                            {
+                                // subscriptionCev will be null in 2 scenarios:
+                                // - there is no subscription document
+                                // - there is a subscription document created without using cluster wide transactions
+                                // in both cases we need one
+                                session.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SubscriptionPersisterCompareExchangePrefix}/{subscriptionDocId}", subscriptionDocId);
+                            }
+                            else
+                            {
+                                session.Advanced.ClusterTransaction.UpdateCompareExchangeValue(new CompareExchangeValue<string>(subscriptionCev.Key, subscriptionCev.Index, subscriptionCev.Value));
+                            }
                         }
 
                         if (!subscription.Subscribers.Contains(subscriptionClient))
@@ -98,6 +122,22 @@ namespace NServiceBus.Persistence.RavenDB
                 if (subscription == null)
                 {
                     return;
+                }
+
+                if (useClusterWideTx)
+                {
+                    var subscriptionCev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{SubscriptionPersisterCompareExchangePrefix}/{subscriptionDocId}").ConfigureAwait(false);
+                    if (subscriptionCev == null)
+                    {
+                        // subscriptionCev will be null in 1 scenario:
+                        // - there is a subscription document created without using cluster wide transactions
+                        // we need one
+                        session.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SubscriptionPersisterCompareExchangePrefix}/{subscriptionDocId}", subscriptionDocId);
+                    }
+                    else
+                    {
+                        session.Advanced.ClusterTransaction.UpdateCompareExchangeValue(new CompareExchangeValue<string>(subscriptionCev.Key, subscriptionCev.Index, subscriptionCev.Value));
+                    }
                 }
 
                 if (subscription.Subscribers.Contains(subscriptionClient))
@@ -165,13 +205,21 @@ namespace NServiceBus.Persistence.RavenDB
 
         IAsyncDocumentSession OpenAsyncSession()
         {
-            // TODO: we need to make use of a cluster wide transaction here if they are enabled, optimistic concurrency might result in dataloss if two subscriptions are handled on two different nodes
-            var session = documentStore.OpenAsyncSession();
-            session.Advanced.UseOptimisticConcurrency = true;
+            var options = new SessionOptions();
+            if (useClusterWideTx)
+            {
+                options.TransactionMode = TransactionMode.ClusterWide;
+            }
+
+            var session = documentStore.OpenAsyncSession(options);
+            session.Advanced.UseOptimisticConcurrency = !useClusterWideTx;
+
             return session;
         }
 
         IDocumentStore documentStore;
+        bool useClusterWideTx;
+        const string SubscriptionPersisterCompareExchangePrefix = "SubscriptionCevPrefix";
 
         sealed class EmptyDisposable : IDisposable
         {
