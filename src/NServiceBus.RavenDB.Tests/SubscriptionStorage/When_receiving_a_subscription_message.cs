@@ -11,12 +11,13 @@ using Raven.Client.Documents;
 [TestFixture]
 public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
 {
-    [Test]
-    public async Task A_subscription_entry_should_be_added_to_the_database()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task A_subscription_entry_should_be_added_to_the_database(bool useClusterWideTx)
     {
         var clientEndpoint = new Subscriber("TestEndpoint", "TestEndpoint");
 
-        var storage = new SubscriptionPersister(store);
+        var storage = new SubscriptionPersister(store, useClusterWideTx);
 
         await storage.Subscribe(clientEndpoint, new MessageType("MessageType1", "1.0.0.0"), new ContextBag());
 

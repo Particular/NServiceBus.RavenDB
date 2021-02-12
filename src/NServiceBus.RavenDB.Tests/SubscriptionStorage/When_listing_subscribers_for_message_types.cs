@@ -9,10 +9,11 @@ using NUnit.Framework;
 [TestFixture]
 public class When_listing_subscribers_for_message_types : RavenDBPersistenceTestBase
 {
-    [Test]
-    public async Task The_names_of_all_subscribers_should_be_returned()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task The_names_of_all_subscribers_should_be_returned(bool useClusterWideTx)
     {
-        var storage = new SubscriptionPersister(store);
+        var storage = new SubscriptionPersister(store, useClusterWideTx);
         var context = new ContextBag();
 
         await storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA, context);
@@ -31,10 +32,11 @@ public class When_listing_subscribers_for_message_types : RavenDBPersistenceTest
         Assert.AreEqual(TestClients.ClientB.Endpoint, subscriptionsForMessageType.ElementAt(1).Endpoint);
     }
 
-    [Test]
-    public async Task Duplicates_should_not_be_generated_for_interface_inheritance_chains()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Duplicates_should_not_be_generated_for_interface_inheritance_chains(bool useClusterWideTx)
     {
-        var storage = new SubscriptionPersister(store);
+        var storage = new SubscriptionPersister(store, useClusterWideTx);
         var context = new ContextBag();
 
         await storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface)), context);

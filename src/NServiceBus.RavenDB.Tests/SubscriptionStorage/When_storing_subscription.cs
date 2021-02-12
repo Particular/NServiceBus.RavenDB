@@ -11,12 +11,13 @@ using Raven.Client.Documents;
 [TestFixture]
 public class When_storing_subscription : RavenDBPersistenceTestBase
 {
-    [Test]
-    public async Task Should_store_schema_version()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Should_store_schema_version(bool useClusterWideTx)
     {
         // arrange
         var subscriber = new Subscriber("SomeTransportAddress", "SomeEndpoint");
-        var storage = new SubscriptionPersister(store);
+        var storage = new SubscriptionPersister(store, useClusterWideTx);
 
         // act
         await storage.Subscribe(subscriber, new MessageType("MessageType1", "1.0.0.0"), new ContextBag());

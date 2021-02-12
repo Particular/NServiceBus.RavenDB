@@ -10,8 +10,9 @@ using NUnit.Framework;
 [TestFixture]
 public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestBase
 {
-    [Test]
-    public async Task Should_ignore_message_version()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Should_ignore_message_version(bool useClusterWideTx)
     {
         var subscriberAddress_v1 = "v1@localhost";
         var subscriberAddress_v2 = "v2@localhost";
@@ -20,7 +21,7 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
         var subscriber_v1 = new Subscriber(subscriberAddress_v1, "some_endpoint_name");
         var subscriber_v2 = new Subscriber(subscriberAddress_v2, "another_endpoint_name");
 
-        var storage = new SubscriptionPersister(store)
+        var storage = new SubscriptionPersister(store, useClusterWideTx)
         {
             DisableAggressiveCaching = true
         };
@@ -42,8 +43,9 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
         Assert.AreEqual(2, subscribers_looked_up_by_v2.Length);
     }
 
-    [Test]
-    public async Task At_unsubscribe_time_should_ignore_message_version()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task At_unsubscribe_time_should_ignore_message_version(bool useClusterWideTx)
     {
         var subscriberAddress = "subscriber@localhost";
         var endpointName = "endpoint_name";
@@ -52,7 +54,7 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
         var subscriber_v1 = new Subscriber(subscriberAddress, endpointName);
         var subscriber_v2 = new Subscriber(subscriberAddress, endpointName);
 
-        var storage = new SubscriptionPersister(store)
+        var storage = new SubscriptionPersister(store, useClusterWideTx)
         {
             DisableAggressiveCaching = true
         };

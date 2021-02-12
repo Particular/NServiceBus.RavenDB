@@ -8,10 +8,11 @@ using NUnit.Framework;
 [TestFixture]
 public class When_listing_subscribers_for_a_non_existing_message_type : RavenDBPersistenceTestBase
 {
-    [Test]
-    public async Task No_subscribers_should_be_returned()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task No_subscribers_should_be_returned(bool useClusterWideTx)
     {
-        var persister = new SubscriptionPersister(store);
+        var persister = new SubscriptionPersister(store, useClusterWideTx);
         var subscriptionsForMessageType = await persister.GetSubscriberAddressesForMessage(new[] { MessageTypes.MessageA }, new ContextBag());
 
         Assert.AreEqual(0, subscriptionsForMessageType.Count());
