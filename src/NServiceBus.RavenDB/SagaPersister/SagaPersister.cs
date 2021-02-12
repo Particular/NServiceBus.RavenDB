@@ -122,7 +122,7 @@ namespace NServiceBus.Persistence.RavenDB
 
             if (useClusterWideTx)
             {
-                // TODO: if we can't find the compare exchange value, we're in an upgrade scenario
+                // if we can't find the compare exchange value, we're in an upgrade scenario
 
                 var sagaIdCev = await documentSession.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{SagaPersisterCompareExchangePrefix}/{sagaWrapper.Id}").ConfigureAwait(false);
                 var sagaUniqueDocIdCev = await documentSession.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{SagaPersisterCompareExchangePrefix}/{sagaWrapper.IdentityDocId}").ConfigureAwait(false);
