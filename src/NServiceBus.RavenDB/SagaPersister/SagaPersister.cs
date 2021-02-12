@@ -6,6 +6,7 @@ namespace NServiceBus.Persistence.RavenDB
     using NServiceBus.Extensibility;
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.Sagas;
+    using NServiceBus.Transport;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Commands.Batches;
     using Raven.Client.Documents.Operations.CompareExchange;
@@ -13,12 +14,13 @@ namespace NServiceBus.Persistence.RavenDB
 
     class SagaPersister : ISagaPersister
     {
-        public SagaPersister(SagaPersistenceConfiguration options)
+        public SagaPersister(SagaPersistenceConfiguration options, IOpenTenantAwareRavenSessions openTenantAwareRavenSessions)
         {
             leaseLockTime = options.LeaseLockTime;
             enablePessimisticLocking = options.EnablePessimisticLocking;
             acquireLeaseLockRefreshMaximumDelayTicks = (int)options.LeaseLockAcquisitionMaximumRefreshDelay.Ticks;
             acquireLeaseLockTimeout = options.LeaseLockAcquisitionTimeout;
+            this.openTenantAwareRavenSessions = openTenantAwareRavenSessions;
         }
 
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
@@ -188,7 +190,8 @@ namespace NServiceBus.Persistence.RavenDB
 
             if (useClusterWideTx)
             {
-                // TODO: if we can't find the compare exchange value, we're in an upgrade scenario
+                // if we can't find the compare exchange value, we're in an upgrade scenario.
+                // We store them as null in the context bag and handle the case in Update/Delete
                 var sagaIdCev = await documentSession.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{SagaPersisterCompareExchangePrefix}/{container.Id}").ConfigureAwait(false);
                 var sagaUniqueDocIdCev = await documentSession.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{SagaPersisterCompareExchangePrefix}/{container.IdentityDocId}").ConfigureAwait(false);
                 context.Set(SagaIdCompareExchange, sagaIdCev);
@@ -199,7 +202,7 @@ namespace NServiceBus.Persistence.RavenDB
             return (T)container.Data;
         }
 
-        public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
+        public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
             var useClusterWideTx = ((InMemoryDocumentSessionOperations)documentSession).TransactionMode == TransactionMode.ClusterWide;
@@ -215,11 +218,24 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 var sagaIdCev = context.Get<CompareExchangeValue<string>>(SagaIdCompareExchange);
                 var sagaUniqueDocIdCev = context.Get<CompareExchangeValue<string>>(SagaUniqueDocIdCompareExchange);
+                if (sagaIdCev == null || sagaUniqueDocIdCev == null)
+                {
+                    // this is an upgrade scenario, this is UGLY
+                    // We have to create CEV out of band otherwise the delete
+                    // cannot participate in a cluster wide transaction
+                    var message = context.Get<IncomingMessage>();
+                    using (var outOfBandSession = openTenantAwareRavenSessions.OpenSession(message.Headers))
+                    {
+                        outOfBandSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SagaPersisterCompareExchangePrefix}/{container.Id}", container.Id);
+                        outOfBandSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SagaPersisterCompareExchangePrefix}/{container.IdentityDocId}", container.Id);
+
+                        await outOfBandSession.SaveChangesAsync().ConfigureAwait(false);
+                    }
+                }
+
                 documentSession.Advanced.ClusterTransaction.DeleteCompareExchangeValue(new CompareExchangeValue<string>(sagaIdCev.Key, sagaIdCev.Index, sagaIdCev.Value));
                 documentSession.Advanced.ClusterTransaction.DeleteCompareExchangeValue(new CompareExchangeValue<string>(sagaUniqueDocIdCev.Key, sagaUniqueDocIdCev.Index, sagaUniqueDocIdCev.Value));
             }
-
-            return Task.CompletedTask;
         }
 
         async Task<long> AcquireLease(IDocumentStore store, string sagaDataDocId)
@@ -287,7 +303,7 @@ namespace NServiceBus.Persistence.RavenDB
         internal const string SagaIdCompareExchange = "NServiceBus.RavenDB.ClusterWideTx.SagaID";
         internal const string SagaUniqueDocIdCompareExchange = "NServiceBus.RavenDB.ClusterWideTx.SagaUniqueDocID";
         internal const string SagaPersisterCompareExchangePrefix = "SagaCevPrefix";
-
+        IOpenTenantAwareRavenSessions openTenantAwareRavenSessions;
         TimeSpan leaseLockTime;
         bool enablePessimisticLocking;
         int acquireLeaseLockRefreshMaximumDelayTicks;
