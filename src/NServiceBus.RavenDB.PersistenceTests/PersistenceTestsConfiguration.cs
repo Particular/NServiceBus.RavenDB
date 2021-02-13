@@ -14,7 +14,6 @@ namespace NServiceBus.PersistenceTesting
     using Raven.Client.ServerWide;
     using Raven.Client.ServerWide.Operations;
     using Settings;
-    using Raven.Client.Documents.Session;
 
     public partial class PersistenceTestsConfiguration
     {
@@ -95,8 +94,7 @@ namespace NServiceBus.PersistenceTesting
             }
             SagaStorage = new SagaPersister(sagaPersistenceConfiguration, sessionCreator);
 
-            // TODO: Is this the right setting? 
-            var useClusterWideTx = ((InMemoryDocumentSessionOperations)documentStore.OpenSession()).TransactionMode == TransactionMode.ClusterWide;
+            var useClusterWideTx = settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
             OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault, useClusterWideTx);
             return Task.CompletedTask;
         }
