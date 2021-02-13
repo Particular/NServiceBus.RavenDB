@@ -22,19 +22,22 @@ namespace NServiceBus.PersistenceTesting
             var optimisticConcurrencyConfiguration = new SagaPersistenceConfiguration();
             optimisticConcurrencyConfiguration.UseOptimisticLocking();
             var pessimisticLockingConfiguration = new SagaPersistenceConfiguration();
-            var persistenceExtensionsWithClusterWideTx = new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder());
-            persistenceExtensionsWithClusterWideTx.UseClusterWideTransactions();
+
+            var doNotClusterWideTx = new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder());
+            var useClusterWideTx = new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder());
+            useClusterWideTx.UseClusterWideTransactions();
 
             SagaVariants = new[]
             {
-                new TestVariant(optimisticConcurrencyConfiguration, new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder())),
-                new TestVariant(pessimisticLockingConfiguration, new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder())),
-                new TestVariant(optimisticConcurrencyConfiguration, persistenceExtensionsWithClusterWideTx),
-                new TestVariant(pessimisticLockingConfiguration, persistenceExtensionsWithClusterWideTx),
+                new TestVariant(optimisticConcurrencyConfiguration, doNotClusterWideTx),
+                new TestVariant(pessimisticLockingConfiguration, doNotClusterWideTx),
+                new TestVariant(optimisticConcurrencyConfiguration, useClusterWideTx),
+                new TestVariant(pessimisticLockingConfiguration, useClusterWideTx),
             };
             OutboxVariants = new[]
             {
-                new TestVariant(optimisticConcurrencyConfiguration)
+                new TestVariant(optimisticConcurrencyConfiguration, doNotClusterWideTx),
+                new TestVariant(optimisticConcurrencyConfiguration, useClusterWideTx)
             };
         }
 
