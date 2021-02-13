@@ -95,6 +95,12 @@
             };
 
             await session.StoreAsync(outboxRecord, GetOutboxRecordId(message.MessageId)).ConfigureAwait(false);
+
+            if (useClusterWideTx)
+            {
+                // TODO: create the compare exchange
+            }
+
             session.StoreSchemaVersionInMetadata(outboxRecord);
         }
 
@@ -102,14 +108,21 @@
         {
             using (var session = GetSession(options))
             {
-                // to avoid loading the whole document we directly patch the document atomically
-                session.Advanced.Defer(new PatchCommandData(
-                    id: GetOutboxRecordId(messageId),
-                    changeVector: null,
-                    patch: new PatchRequest
-                    {
-                        Script =
-$@"if(this.Dispatched === true)
+                if (useClusterWideTx)
+                {
+                    // cannot use PATCH with cluster wide transactions
+                    // TODO: load and save the document and update CEV? Or maybe we can delete the CEV at this point
+                }
+                else
+                {
+                    // to avoid loading the whole document we directly patch the document atomically
+                    session.Advanced.Defer(new PatchCommandData(
+                        id: GetOutboxRecordId(messageId),
+                        changeVector: null,
+                        patch: new PatchRequest
+                        {
+                            Script =
+    $@"if(this.Dispatched === true)
   return;
 this.Dispatched = true
 this.DispatchedAt = args.DispatchedAt.Now
@@ -118,8 +131,8 @@ this['@metadata']['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey
 if(args.Expire.Should === false)
   return;
 this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
-                        Values =
-                        {
+                            Values =
+                            {
                             {
                                 "DispatchedAt", new { Now = DateTime.UtcNow }
                             },
@@ -129,9 +142,10 @@ this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
                             {
                                 "Expire", new { Should = timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) }
                             }
-                        }
-                    },
-                    patchIfMissing: null));
+                            }
+                        },
+                        patchIfMissing: null));
+                }
 
                 await session.SaveChangesAsync().ConfigureAwait(false);
             }
