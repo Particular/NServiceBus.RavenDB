@@ -59,6 +59,7 @@
         {
             var session = GetSession(context);
 
+            // TODO: Do we need this? Isn't this done by the session creator anyway?
             if (useClusterWideTx == false)
             {
                 session.Advanced.UseOptimisticConcurrency = true;
