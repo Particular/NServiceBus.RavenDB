@@ -95,11 +95,12 @@
                 TransportOperations = operations
             };
 
-            await session.StoreAsync(outboxRecord, GetOutboxRecordId(message.MessageId)).ConfigureAwait(false);
+            string outboxRecordId = GetOutboxRecordId(message.MessageId);
+            await session.StoreAsync(outboxRecord, outboxRecordId).ConfigureAwait(false);
 
             if (useClusterWideTx)
             {
-                // TODO: create the compare exchange
+                session.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{OutboxPersisterCompareExchangePrefix}/{outboxRecordId}", outboxRecordId);
             }
 
             session.StoreSchemaVersionInMetadata(outboxRecord);
@@ -161,6 +162,7 @@ this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
 
         string GetOutboxRecordId(string messageId) => $"Outbox/{endpointName}/{messageId.Replace('\\', '_')}";
 
+        const string OutboxPersisterCompareExchangePrefix = "outbox/transactions";
         string endpointName;
         TransportOperation[] emptyTransportOperations = new TransportOperation[0];
         IOpenTenantAwareRavenSessions sessionCreator;
