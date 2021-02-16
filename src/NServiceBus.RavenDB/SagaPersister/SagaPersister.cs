@@ -300,9 +300,9 @@ namespace NServiceBus.Persistence.RavenDB
         const string SagaContainerContextKeyPrefix = "SagaDataContainer:";
         static Random random = new Random();
 
-        internal const string SagaIdCompareExchange = "NServiceBus.RavenDB.ClusterWideTx.SagaID";
-        internal const string SagaUniqueDocIdCompareExchange = "NServiceBus.RavenDB.ClusterWideTx.SagaUniqueDocID";
-        internal const string SagaPersisterCompareExchangePrefix = "SagaCevPrefix";
+        const string SagaIdCompareExchange = "NServiceBus.RavenDB.ClusterWideTx.SagaID";
+        const string SagaUniqueDocIdCompareExchange = "NServiceBus.RavenDB.ClusterWideTx.SagaUniqueDocID";
+        const string SagaPersisterCompareExchangePrefix = "sagas";
         IOpenTenantAwareRavenSessions openTenantAwareRavenSessions;
         TimeSpan leaseLockTime;
         bool enablePessimisticLocking;

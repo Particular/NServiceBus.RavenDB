@@ -219,7 +219,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         IDocumentStore documentStore;
         bool useClusterWideTx;
-        const string SubscriptionPersisterCompareExchangePrefix = "SubscriptionCevPrefix";
+        const string SubscriptionPersisterCompareExchangePrefix = "subscriptions";
 
         sealed class EmptyDisposable : IDisposable
         {
