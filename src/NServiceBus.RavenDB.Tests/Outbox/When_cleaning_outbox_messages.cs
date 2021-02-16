@@ -25,7 +25,7 @@
         public async Task Should_delete_all_dispatched_outbox_records(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(useClusterWideTx), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
@@ -43,7 +43,7 @@
 
             WaitForIndexing();
 
-            var cleaner = new OutboxRecordsCleaner(store);
+            var cleaner = new OutboxRecordsCleaner(store, useClusterWideTx);
 
             // act
             await cleaner.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));

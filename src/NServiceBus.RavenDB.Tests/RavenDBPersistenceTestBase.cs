@@ -77,23 +77,29 @@
         protected IDocumentStore store;
         ReusableDB db;
 
-        internal IOpenTenantAwareRavenSessions CreateTestSessionOpener()
+        internal IOpenTenantAwareRavenSessions CreateTestSessionOpener(bool useClusterWideTransactions = false)
         {
-            return new TestOpenSessionsInPipeline(store);
+            return new TestOpenSessionsInPipeline(store, useClusterWideTransactions);
         }
 
         class TestOpenSessionsInPipeline : IOpenTenantAwareRavenSessions
         {
             IDocumentStore store;
+            bool useClusterWideTx;
 
-            public TestOpenSessionsInPipeline(IDocumentStore store)
+            public TestOpenSessionsInPipeline(IDocumentStore store, bool useClusterWideTx)
             {
                 this.store = store;
+                this.useClusterWideTx = useClusterWideTx;
             }
 
             public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
             {
-                return store.OpenAsyncSession();
+                var sessionOptions = new SessionOptions
+                {
+                    TransactionMode = useClusterWideTx ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+                };
+                return store.OpenAsyncSession(sessionOptions);
             }
         }
     }

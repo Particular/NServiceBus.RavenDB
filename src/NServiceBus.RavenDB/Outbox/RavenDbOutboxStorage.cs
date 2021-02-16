@@ -32,7 +32,7 @@
             context.RegisterStartupTask(builder =>
             {
                 var store = DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(context.Settings, builder);
-                return new OutboxCleaner(new OutboxRecordsCleaner(store), frequencyToRunDeduplicationDataCleanup, timeToKeepDeduplicationData);
+                return new OutboxCleaner(new OutboxRecordsCleaner(store, useClusterWideTx), frequencyToRunDeduplicationDataCleanup, timeToKeepDeduplicationData);
             });
 
             context.Settings.AddStartupDiagnosticsSection(

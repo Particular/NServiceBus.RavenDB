@@ -3,10 +3,10 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using NServiceBus.Extensibility;
-    using NServiceBus.Outbox;
+    using Extensibility;
+    using Outbox;
     using NServiceBus.RavenDB.Outbox;
-    using NServiceBus.Transport;
+    using Transport;
     using Raven.Client;
     using Raven.Client.Documents.Commands.Batches;
     using Raven.Client.Documents.Operations;
@@ -188,7 +188,7 @@ this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
 
         string GetOutboxRecordId(string messageId) => $"Outbox/{endpointName}/{messageId.Replace('\\', '_')}";
 
-        const string OutboxPersisterCompareExchangePrefix = "outbox/transactions";
+        internal const string OutboxPersisterCompareExchangePrefix = "outbox/transactions";
         string endpointName;
         TransportOperation[] emptyTransportOperations = new TransportOperation[0];
         IOpenTenantAwareRavenSessions sessionCreator;
