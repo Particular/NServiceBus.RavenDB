@@ -10,6 +10,7 @@
     using Raven.Client;
     using Raven.Client.Documents.Commands.Batches;
     using Raven.Client.Documents.Operations;
+    using Raven.Client.Documents.Operations.CompareExchange;
     using Raven.Client.Documents.Session;
     using TransportOperation = Outbox.TransportOperation;
 
@@ -29,13 +30,16 @@
             using (var session = GetSession(options))
             {
                 // We use Load operation and not queries to avoid stale results
-                var outboxDocId = GetOutboxRecordId(messageId);
-                result = await session.LoadAsync<OutboxRecord>(outboxDocId).ConfigureAwait(false);
-            }
+                var outboxRecordId = GetOutboxRecordId(messageId);
+                result = await session.LoadAsync<OutboxRecord>(outboxRecordId).ConfigureAwait(false);
 
-            if (result == null)
-            {
-                return default;
+                if (result == null)
+                {
+                    return default;
+                }
+
+                var outboxRecordCev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{OutboxPersisterCompareExchangePrefix}/{outboxRecordId}").ConfigureAwait(false);
+                options.Set(outboxRecordCev);
             }
 
             if (result.Dispatched || result.TransportOperations.Length == 0)
@@ -58,13 +62,6 @@
         public Task<OutboxTransaction> BeginTransaction(ContextBag context)
         {
             var session = GetSession(context);
-
-            // TODO: Do we need this? Isn't this done by the session creator anyway?
-            if (useClusterWideTx == false)
-            {
-                session.Advanced.UseOptimisticConcurrency = true;
-            };
-
             var transaction = new RavenDBOutboxTransaction(session);
             return Task.FromResult<OutboxTransaction>(transaction);
         }
@@ -101,6 +98,8 @@
             if (useClusterWideTx)
             {
                 session.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{OutboxPersisterCompareExchangePrefix}/{outboxRecordId}", outboxRecordId);
+                var outboxRecordCev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{OutboxPersisterCompareExchangePrefix}/{outboxRecordId}").ConfigureAwait(false);
+                context.Set(outboxRecordCev);
             }
 
             session.StoreSchemaVersionInMetadata(outboxRecord);
@@ -110,16 +109,43 @@
         {
             using (var session = GetSession(options))
             {
+                var outboxRecordId = GetOutboxRecordId(messageId);
+                var expireMetadataValue = new { Should = timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) };
                 if (useClusterWideTx)
                 {
+                    // this is tricky
+                    var outboxRecordCev = options.Get<CompareExchangeValue<string>>();
+                    if (outboxRecordCev == null)
+                    {
+                        // this is an upgrade scenario
+                        using (var outOfBandSession = GetSession(options))
+                        {
+                            outOfBandSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{OutboxPersisterCompareExchangePrefix}/{outboxRecordId}", outboxRecordId);
+                            await outOfBandSession.SaveChangesAsync().ConfigureAwait(false);
+                        }
+
+                        outboxRecordCev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{OutboxPersisterCompareExchangePrefix}/{outboxRecordId}").ConfigureAwait(false);
+                    }
+
                     // cannot use PATCH with cluster wide transactions
-                    // TODO: load and save the document and update CEV? Or maybe we can delete the CEV at this point
+                    var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId).ConfigureAwait(false);
+                    if (!outboxRecord.Dispatched)
+                    {
+                        outboxRecord.Dispatched = true;
+                        outboxRecord.DispatchedAt = DateTime.UtcNow;
+                        session.StoreSchemaVersionInMetadata(outboxRecord);
+
+                        var metadata = session.Advanced.GetMetadataFor(outboxRecord);
+                        metadata[Constants.Documents.Metadata.Expires] = expireMetadataValue;
+                    }
+
+                    session.Advanced.ClusterTransaction.DeleteCompareExchangeValue(outboxRecordCev.Key, outboxRecordCev.Index);
                 }
                 else
                 {
                     // to avoid loading the whole document we directly patch the document atomically
                     session.Advanced.Defer(new PatchCommandData(
-                        id: GetOutboxRecordId(messageId),
+                        id: outboxRecordId,
                         changeVector: null,
                         patch: new PatchRequest
                         {
@@ -142,7 +168,7 @@ this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
                                 "SchemaVersion", new { Version = OutboxRecord.SchemaVersion }
                             },
                             {
-                                "Expire", new { Should = timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) }
+                                "Expire", expireMetadataValue
                             }
                             }
                         },
