@@ -41,8 +41,7 @@
                 {
                     foreach (var deletedCompareExchangeValueKey in compareExchangeKeysForDeletedRecords)
                     {
-                        var cev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>(
-                            deletedCompareExchangeValueKey).ConfigureAwait(false);
+                        var cev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>(deletedCompareExchangeValueKey, cancellationToken).ConfigureAwait(false);
                         session.Advanced.ClusterTransaction.DeleteCompareExchangeValue(cev);
                     }
                 }
