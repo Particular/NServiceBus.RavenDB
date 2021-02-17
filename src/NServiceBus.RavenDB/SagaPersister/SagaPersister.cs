@@ -131,7 +131,10 @@ namespace NServiceBus.Persistence.RavenDB
             if (useClusterWideTx)
             {
                 // if we can't find the compare exchange value, we're in an upgrade scenario
-
+                // We could create missing CEV here, however:
+                //  - It'd be a side effect for a read operation
+                //  - we would need to do that out of band to store them in storage because the current session doesn't get flushed till the end
+                //  - we can handle this during update/save
                 var sagaIdCev = await documentSession.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{SagaPersisterCompareExchangePrefix}/{sagaWrapper.Id}").ConfigureAwait(false);
                 var sagaUniqueDocIdCev = await documentSession.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{SagaPersisterCompareExchangePrefix}/{sagaWrapper.IdentityDocId}").ConfigureAwait(false);
                 context.Set(SagaIdCompareExchange, sagaIdCev);
