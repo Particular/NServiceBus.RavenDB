@@ -113,40 +113,55 @@ namespace NServiceBus.Persistence.RavenDB
         {
             var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint };
 
-            using (var session = OpenAsyncSession())
+            var attempts = 0;
+
+            //note: since we have a design that can run into concurrency exceptions we perform a few retries
+            // we should redesign this in the future to use a separate doc per subscriber and message type
+            do
             {
-                var subscriptionDocId = GetDocumentIdForMessageType(messageType);
-
-                var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
-
-                if (subscription == null)
+                try
                 {
-                    return;
-                }
-
-                if (useClusterWideTx)
-                {
-                    var subscriptionCev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{SubscriptionPersisterCompareExchangePrefix}/{subscriptionDocId}").ConfigureAwait(false);
-                    if (subscriptionCev == null)
+                    using (var session = OpenAsyncSession())
                     {
-                        // subscriptionCev will be null in 1 scenario:
-                        // - there is a subscription document created without using cluster wide transactions
-                        // we need one
-                        session.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SubscriptionPersisterCompareExchangePrefix}/{subscriptionDocId}", subscriptionDocId);
-                    }
-                    else
-                    {
-                        session.Advanced.ClusterTransaction.UpdateCompareExchangeValue(new CompareExchangeValue<string>(subscriptionCev.Key, subscriptionCev.Index, subscriptionCev.Value));
+                        var subscriptionDocId = GetDocumentIdForMessageType(messageType);
+
+                        var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
+
+                        if (subscription == null)
+                        {
+                            return;
+                        }
+
+                        if (useClusterWideTx)
+                        {
+                            var subscriptionCev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{SubscriptionPersisterCompareExchangePrefix}/{subscriptionDocId}").ConfigureAwait(false);
+                            if (subscriptionCev == null)
+                            {
+                                // subscriptionCev will be null in 1 scenario:
+                                // - there is a subscription document created without using cluster wide transactions
+                                // we need one
+                                session.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SubscriptionPersisterCompareExchangePrefix}/{subscriptionDocId}", subscriptionDocId);
+                            }
+                            else
+                            {
+                                session.Advanced.ClusterTransaction.UpdateCompareExchangeValue(new CompareExchangeValue<string>(subscriptionCev.Key, subscriptionCev.Index, subscriptionCev.Value));
+                            }
+                        }
+
+                        if (subscription.Subscribers.Contains(subscriptionClient))
+                        {
+                            subscription.Subscribers.Remove(subscriptionClient);
+                        }
+
+                        await session.SaveChangesAsync().ConfigureAwait(false);
                     }
                 }
-
-                if (subscription.Subscribers.Contains(subscriptionClient))
+                catch (ConcurrencyException)
                 {
-                    subscription.Subscribers.Remove(subscriptionClient);
+                    attempts++;
                 }
-
-                await session.SaveChangesAsync().ConfigureAwait(false);
             }
+            while (attempts < 5);
         }
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
