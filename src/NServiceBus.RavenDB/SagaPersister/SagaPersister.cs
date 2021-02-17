@@ -232,13 +232,24 @@ namespace NServiceBus.Persistence.RavenDB
                 if (sagaIdCev == null || sagaUniqueDocIdCev == null)
                 {
                     // this is an upgrade scenario, this is UGLY
-                    // We have to create CEV out of band otherwise the delete
+                    // we have to create CEV out of band otherwise the delete
                     // cannot participate in a cluster wide transaction
                     var message = context.Get<IncomingMessage>();
                     using (var outOfBandSession = openTenantAwareRavenSessions.OpenSession(message.Headers))
                     {
-                        outOfBandSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SagaPersisterCompareExchangePrefix}/{container.Id}", container.Id);
-                        outOfBandSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SagaPersisterCompareExchangePrefix}/{container.IdentityDocId}", container.Id);
+                        // we need to create only the missing one.
+                        // we could have implemented the logic as in Update and throw if only one
+                        // was missing. We couldn't find a good use case though and decided to assume
+                        // that at deletion time this is safe enough
+                        if (sagaIdCev == null)
+                        {
+                            outOfBandSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SagaPersisterCompareExchangePrefix}/{container.Id}", container.Id);
+                        }
+
+                        if (sagaUniqueDocIdCev == null)
+                        {
+                            outOfBandSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SagaPersisterCompareExchangePrefix}/{container.IdentityDocId}", container.Id);
+                        }
 
                         await outOfBandSession.SaveChangesAsync().ConfigureAwait(false);
                     }
