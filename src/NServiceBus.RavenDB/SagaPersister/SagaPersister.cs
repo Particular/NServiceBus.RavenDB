@@ -14,19 +14,19 @@ namespace NServiceBus.Persistence.RavenDB
 
     class SagaPersister : ISagaPersister
     {
-        public SagaPersister(SagaPersistenceConfiguration options, IOpenTenantAwareRavenSessions openTenantAwareRavenSessions)
+        public SagaPersister(SagaPersistenceConfiguration options, IOpenTenantAwareRavenSessions openTenantAwareRavenSessions, bool useClusterWideTx)
         {
             leaseLockTime = options.LeaseLockTime;
             enablePessimisticLocking = options.EnablePessimisticLocking;
             acquireLeaseLockRefreshMaximumDelayTicks = (int)options.LeaseLockAcquisitionMaximumRefreshDelay.Ticks;
             acquireLeaseLockTimeout = options.LeaseLockAcquisitionTimeout;
             this.openTenantAwareRavenSessions = openTenantAwareRavenSessions;
+            this.useClusterWideTx = useClusterWideTx;
         }
 
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
-            var useClusterWideTx = ((InMemoryDocumentSessionOperations)documentSession).TransactionMode == TransactionMode.ClusterWide;
 
             if (sagaData == null)
             {
@@ -76,7 +76,6 @@ namespace NServiceBus.Persistence.RavenDB
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
-            var useClusterWideTx = ((InMemoryDocumentSessionOperations)documentSession).TransactionMode == TransactionMode.ClusterWide;
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
 
             if (useClusterWideTx)
@@ -113,7 +112,6 @@ namespace NServiceBus.Persistence.RavenDB
         {
             var documentSession = session.RavenSession();
             var docId = DocumentIdForSagaData(documentSession, typeof(T), sagaId);
-            var useClusterWideTx = ((InMemoryDocumentSessionOperations)documentSession).TransactionMode == TransactionMode.ClusterWide;
 
             if (enablePessimisticLocking)
             {
@@ -151,7 +149,6 @@ namespace NServiceBus.Persistence.RavenDB
         {
             var documentSession = session.RavenSession();
             var lookupId = SagaUniqueIdentity.FormatId(typeof(T), propertyName, propertyValue);
-            var useClusterWideTx = ((InMemoryDocumentSessionOperations)documentSession).TransactionMode == TransactionMode.ClusterWide;
 
             SagaUniqueIdentity lookup;
 
@@ -216,7 +213,6 @@ namespace NServiceBus.Persistence.RavenDB
         public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
-            var useClusterWideTx = ((InMemoryDocumentSessionOperations)documentSession).TransactionMode == TransactionMode.ClusterWide;
 
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
             documentSession.Delete(container);
@@ -326,6 +322,7 @@ namespace NServiceBus.Persistence.RavenDB
         const string SagaUniqueDocIdCompareExchange = "NServiceBus.RavenDB.ClusterWideTx.SagaUniqueDocID";
         const string SagaPersisterCompareExchangePrefix = "sagas";
         IOpenTenantAwareRavenSessions openTenantAwareRavenSessions;
+        readonly bool useClusterWideTx;
         TimeSpan leaseLockTime;
         bool enablePessimisticLocking;
         int acquireLeaseLockRefreshMaximumDelayTicks;

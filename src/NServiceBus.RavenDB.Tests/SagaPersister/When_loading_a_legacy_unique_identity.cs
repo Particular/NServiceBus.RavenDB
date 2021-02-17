@@ -20,8 +20,9 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         UnwrappedSagaListener.Register(store as DocumentStore);
     }
 
-    [Test]
-    public async Task It_should_load_successfully()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task It_should_load_successfully(bool useClusterWideTx)
     {
         var unique = Guid.NewGuid().ToString();
 
@@ -29,7 +30,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
 
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 
@@ -45,8 +46,9 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         }
     }
 
-    [Test]
-    public async Task Improperly_converted_saga_can_be_fixed()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Improperly_converted_saga_can_be_fixed(bool useClusterWideTx)
     {
         var sagaId = Guid.NewGuid();
         var sagaDocId = $"SagaWithUniqueProperty/{sagaId}";
@@ -83,7 +85,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
 
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 

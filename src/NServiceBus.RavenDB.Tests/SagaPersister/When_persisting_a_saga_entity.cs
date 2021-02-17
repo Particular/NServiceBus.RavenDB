@@ -10,8 +10,9 @@ using NUnit.Framework;
 [TestFixture]
 public class When_persisting_a_saga_entity : RavenDBPersistenceTestBase
 {
-    [Test]
-    public async Task Schema_version_should_be_persisted()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Schema_version_should_be_persisted(bool useClusterWideTx)
     {
         // arrange
         var entity = new SagaData
@@ -20,7 +21,7 @@ public class When_persisting_a_saga_entity : RavenDBPersistenceTestBase
             UniqueString = "SomeUniqueString",
         };
 
-        var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
+        var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var context))
         {
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());

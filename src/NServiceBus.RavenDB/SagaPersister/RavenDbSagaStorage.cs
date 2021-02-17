@@ -18,8 +18,13 @@
         protected override void Setup(FeatureConfigurationContext context)
         {
             var options = context.Settings.GetOrDefault<SagaPersistenceConfiguration>() ?? new SagaPersistenceConfiguration();
-            context.Services.AddSingleton(options);
-            context.Services.AddSingleton<ISagaPersister, SagaPersister>();
+            context.Services.AddSingleton((Func<IServiceProvider, ISagaPersister>)(container =>
+            {
+                var openTenantAwareRavenSessions = container.GetRequiredService<IOpenTenantAwareRavenSessions>();
+                var useClusterWideTx = context.Settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
+
+                return new SagaPersister(options, openTenantAwareRavenSessions, useClusterWideTx);
+            }));
 
             if (!context.Settings.TryGet(out SagaMetadataCollection allSagas))
             {

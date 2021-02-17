@@ -10,14 +10,15 @@ using Raven.Client.Documents;
 [TestFixture]
 public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
 {
-    [Test]
-    public async Task Should_delete_the_unique_doc_properly()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Should_delete_the_unique_doc_properly(bool useClusterWideTx)
     {
         var sagaId = Guid.NewGuid();
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
 
             var sagaEntity = new SagaData
             {

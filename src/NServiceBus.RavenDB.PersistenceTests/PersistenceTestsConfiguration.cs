@@ -95,10 +95,12 @@ namespace NServiceBus.PersistenceTesting
             {
                 sagaPersistenceConfiguration.SetPessimisticLeaseLockAcquisitionTimeout(SessionTimeout.Value);
             }
-            SagaStorage = new SagaPersister(sagaPersistenceConfiguration, sessionCreator);
 
             var useClusterWideTx = settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
+
+            SagaStorage = new SagaPersister(sagaPersistenceConfiguration, sessionCreator, useClusterWideTx);
             OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault, useClusterWideTx);
+
             return Task.CompletedTask;
         }
 

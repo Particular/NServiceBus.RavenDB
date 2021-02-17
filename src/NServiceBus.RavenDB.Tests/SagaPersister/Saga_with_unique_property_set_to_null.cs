@@ -9,8 +9,9 @@ using NUnit.Framework;
 [TestFixture]
 public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
 {
-    [Test]
-    public async Task Should_throw_a_ArgumentNullException()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Should_throw_a_ArgumentNullException(bool useClusterWideTx)
     {
         var saga1 = new SagaData
         {
@@ -21,7 +22,7 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var context))
         {
             var ravenSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
-            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
 
             var exception = await Catch<ArgumentNullException>(async () =>
             {

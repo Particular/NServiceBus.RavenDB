@@ -21,25 +21,27 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         UnwrappedSagaListener.Register(docStore as DocumentStore);
     }
 
-    [Test]
-    public Task CanLoadAndRemoveByCorrelation()
+    [TestCase(true)]
+    [TestCase(false)]
+    public Task CanLoadAndRemoveByCorrelation(bool useClusterWideTx)
     {
-        return RunTestUsing((persister, sagaId, syncSession, context) => persister.Get<CountingSagaData>("Name", "Alpha", syncSession, context));
+        return RunTestUsing((persister, sagaId, syncSession, context) => persister.Get<CountingSagaData>("Name", "Alpha", syncSession, context), useClusterWideTx);
     }
 
-    [Test]
-    public Task CanLoadAndRemoveById()
+    [TestCase(true)]
+    [TestCase(false)]
+    public Task CanLoadAndRemoveById(bool useClusterWideTx)
     {
-        return RunTestUsing((persister, sagaId, syncSession, context) => persister.Get<CountingSagaData>(sagaId, syncSession, context));
+        return RunTestUsing((persister, sagaId, syncSession, context) => persister.Get<CountingSagaData>(sagaId, syncSession, context), useClusterWideTx);
     }
 
-    async Task RunTestUsing(GetSagaDelegate getSaga)
+    async Task RunTestUsing(GetSagaDelegate getSaga, bool useClusterWideTx)
     {
         var sagaId = StoreSagaDocuments();
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
             var context = new ContextBag();
             context.Set(session);
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, context);

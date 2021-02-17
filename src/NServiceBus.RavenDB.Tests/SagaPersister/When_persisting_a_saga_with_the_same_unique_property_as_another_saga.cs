@@ -10,10 +10,11 @@ using Raven.Client.Exceptions;
 [TestFixture]
 public class When_persisting_a_saga_with_the_same_unique_property_as_another_saga : RavenDBPersistenceTestBase
 {
-    [Test]
-    public async Task It_should_enforce_uniqueness()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task It_should_enforce_uniqueness(bool useClusterWideTx)
     {
-        var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
+        var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
         var uniqueString = Guid.NewGuid().ToString();
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))

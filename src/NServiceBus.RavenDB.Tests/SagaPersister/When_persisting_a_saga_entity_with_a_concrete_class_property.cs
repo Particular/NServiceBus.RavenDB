@@ -8,8 +8,9 @@ using NUnit.Framework;
 [TestFixture]
 public class When_persisting_a_saga_entity_with_a_concrete_class_property : RavenDBPersistenceTestBase
 {
-    [Test]
-    public async Task Public_setters_and_getters_of_concrete_classes_should_be_persisted()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Public_setters_and_getters_of_concrete_classes_should_be_persisted(bool useClusterWideTx)
     {
         var entity = new SagaData
         {
@@ -23,7 +24,7 @@ public class When_persisting_a_saga_entity_with_a_concrete_class_property : Rave
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 
             await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
