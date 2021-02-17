@@ -44,17 +44,6 @@ namespace NServiceBus.Persistence.RavenDB
                 Data = sagaData,
                 IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value),
             };
-
-            var changeVector = string.Empty;
-            if (useClusterWideTx)
-            {
-                // CompareExchangeValue for both Id (find by Id) and IdentityDocId (find by correlation property value)
-                documentSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SagaPersisterCompareExchangePrefix}/{container.Id}", container.Id);
-                documentSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SagaPersisterCompareExchangePrefix}/{container.IdentityDocId}", container.Id);
-                changeVector = null;
-            }
-
-            await documentSession.StoreAsync(container, changeVector, container.Id).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(container);
 
             var sagaUniqueIdentity = new SagaUniqueIdentity
@@ -64,9 +53,24 @@ namespace NServiceBus.Persistence.RavenDB
                 UniqueValue = correlationProperty.Value,
                 SagaDocId = container.Id
             };
-
-            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector, id: container.IdentityDocId).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
+
+            if (useClusterWideTx)
+            {
+                // CompareExchangeValue for both Id (find by Id) and IdentityDocId (find by correlation property value)
+                documentSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SagaPersisterCompareExchangePrefix}/{container.Id}", container.Id);
+                documentSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SagaPersisterCompareExchangePrefix}/{container.IdentityDocId}", container.Id);
+
+                // We cannot pass any changeVector because using change vectors is incompatible with cluster-wide TXs
+                await documentSession.StoreAsync(container, null, container.Id).ConfigureAwait(false);
+                await documentSession.StoreAsync(sagaUniqueIdentity, null, container.IdentityDocId).ConfigureAwait(false);
+            }
+            else
+            {
+                // We cannot pass a null changeVector to signal that the document is new and we want optimistic concurrency on document creation
+                await documentSession.StoreAsync(container, string.Empty, container.Id).ConfigureAwait(false);
+                await documentSession.StoreAsync(sagaUniqueIdentity, string.Empty, id: container.IdentityDocId).ConfigureAwait(false);
+            }
         }
 
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
