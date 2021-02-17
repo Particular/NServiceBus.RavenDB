@@ -5,15 +5,14 @@
     /// <summary>
     /// The saga persistence configuration options.
     /// </summary>
-    public class SagaPersistenceConfiguration
+    public partial class SagaPersistenceConfiguration
     {
         /// <summary>
         /// Enables or disables default saga persistence pessimistic locking. Default to optimistic locking when not used.
         /// </summary>
-        /// <param name="value">True to enable pessimistic locking, otherwise optimistic locking.</param>
-        public void UsePessimisticLocking(bool value = true)
+        public void UseOptimisticLocking()
         {
-            EnablePessimisticLocking = value;
+            EnablePessimisticLocking = false;
         }
 
         /// <summary>
@@ -64,6 +63,6 @@
         internal TimeSpan LeaseLockAcquisitionTimeout { get; private set; } = TimeSpan.FromSeconds(60);
         internal TimeSpan LeaseLockTime { get; private set; } = TimeSpan.FromSeconds(60);
         internal TimeSpan LeaseLockAcquisitionMaximumRefreshDelay { get; private set; } = TimeSpan.FromMilliseconds(20);
-        internal bool EnablePessimisticLocking { get; private set; }
+        internal bool EnablePessimisticLocking { get; private set; } = true;
     }
 }
