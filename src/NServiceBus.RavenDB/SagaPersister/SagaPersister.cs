@@ -90,6 +90,10 @@ namespace NServiceBus.Persistence.RavenDB
                     documentSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SagaPersisterCompareExchangePrefix}/{container.Id}", container.Id);
                     documentSession.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{SagaPersisterCompareExchangePrefix}/{container.IdentityDocId}", container.Id);
                 }
+                else if (sagaIdCev == null || sagaUniqueDocIdCev == null)
+                {
+                    throw new Exception($"One of the required compare exchange values for the saga identified by '{sagaData.Id}' is missing. Please contact support with this exception message.");
+                }
                 else
                 {
                     documentSession.Advanced.ClusterTransaction.UpdateCompareExchangeValue(new CompareExchangeValue<string>(sagaIdCev.Key, sagaIdCev.Index, sagaIdCev.Value));
