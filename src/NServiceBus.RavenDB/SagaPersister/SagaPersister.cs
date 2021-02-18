@@ -44,7 +44,6 @@ namespace NServiceBus.Persistence.RavenDB
                 Data = sagaData,
                 IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value),
             };
-            documentSession.StoreSchemaVersionInMetadata(container);
 
             var sagaUniqueIdentity = new SagaUniqueIdentity
             {
@@ -53,7 +52,6 @@ namespace NServiceBus.Persistence.RavenDB
                 UniqueValue = correlationProperty.Value,
                 SagaDocId = container.Id
             };
-            documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
 
             if (useClusterWideTx)
             {
@@ -71,6 +69,9 @@ namespace NServiceBus.Persistence.RavenDB
                 await documentSession.StoreAsync(container, string.Empty, container.Id).ConfigureAwait(false);
                 await documentSession.StoreAsync(sagaUniqueIdentity, string.Empty, id: container.IdentityDocId).ConfigureAwait(false);
             }
+
+            documentSession.StoreSchemaVersionInMetadata(container);
+            documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
         }
 
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)

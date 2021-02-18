@@ -97,15 +97,14 @@
 
             if (useClusterWideTx)
             {
-                var compareExchangeValue = context.Get<CompareExchangeValue<string>>(OutboxPersisterCompareExchangeContextKey);
-                if (compareExchangeValue == null)
-                {
-                    session.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{OutboxPersisterCompareExchangePrefix}/{outboxRecordId}", outboxRecordId);
-                }
-                else
+                if (context.TryGet<CompareExchangeValue<string>>(OutboxPersisterCompareExchangeContextKey, out var compareExchangeValue))
                 {
                     //handling concurrent processing in the case of Store succeeded by SetAsDispatched not yet.
                     session.Advanced.ClusterTransaction.UpdateCompareExchangeValue(compareExchangeValue);
+                }
+                else
+                {
+                    session.Advanced.ClusterTransaction.CreateCompareExchangeValue($"{OutboxPersisterCompareExchangePrefix}/{outboxRecordId}", outboxRecordId);
                 }
             }
 
@@ -117,14 +116,13 @@
             using (var session = GetSession(context))
             {
                 var outboxRecordId = GetOutboxRecordId(messageId);
-                var expireMetadataValue = new { Should = timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) };
+
                 if (useClusterWideTx)
                 {
                     //this is tricky
                     //if outboxRecordCev != null it is a SetAsDispatched without a Store: the outbox record in the Get op was not null.
                     //we will only update the CEV to make sure that no other SetAsDispatched can succeed.
-                    var outboxRecordCev = context.Get<CompareExchangeValue<string>>(OutboxPersisterCompareExchangeContextKey);
-                    if (outboxRecordCev == null)
+                    if (!context.TryGet<CompareExchangeValue<string>>(OutboxPersisterCompareExchangeContextKey, out var outboxRecordCev))
                     {
                         //there was no CEV during get and one should have been created by Store
                         outboxRecordCev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{OutboxPersisterCompareExchangePrefix}/{outboxRecordId}").ConfigureAwait(false);
@@ -139,7 +137,7 @@
                         session.StoreSchemaVersionInMetadata(outboxRecord);
 
                         var metadata = session.Advanced.GetMetadataFor(outboxRecord);
-                        metadata[Constants.Documents.Metadata.Expires] = expireMetadataValue;
+                        metadata[Constants.Documents.Metadata.Expires] = DateTime.UtcNow.Add(timeToKeepDeduplicationData);
 
                         //If the OutboxRecord was modified then we also have to update the CEV;
                         //otherwise no need for anything
@@ -173,7 +171,7 @@ this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
                                 "SchemaVersion", new { Version = OutboxRecord.SchemaVersion }
                             },
                             {
-                                "Expire", expireMetadataValue
+                                "Expire", new { Should = timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) }
                             }
                             }
                         },
