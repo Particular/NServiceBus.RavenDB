@@ -26,7 +26,11 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
             .SetDefaultDocumentStore(documentStore);
 
         var sagasConfiguration = persistenceExtensions.Sagas();
+#pragma warning disable IDE0079
+#pragma warning disable CS0618
         sagasConfiguration.UsePessimisticLocking();
+#pragma warning restore CS0618
+#pragma warning restore IDE0079
 
         configuration.GetSettings().Set(DefaultPersistenceExtensionsKey, persistenceExtensions);
 
