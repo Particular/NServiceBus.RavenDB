@@ -26,6 +26,8 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
             .SetDefaultDocumentStore(documentStore)
             .UseClusterWideTransactions();
 
+        persistenceExtensions.Sagas().UseOptimisticLocking();
+
         configuration.GetSettings().Set(DefaultPersistenceExtensionsKey, persistenceExtensions);
 
         Console.WriteLine("Created '{0}' database", documentStore.Database);
