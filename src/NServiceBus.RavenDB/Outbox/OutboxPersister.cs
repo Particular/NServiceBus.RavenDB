@@ -38,8 +38,11 @@
                     return default;
                 }
 
-                var outboxRecordCev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{OutboxPersisterCompareExchangePrefix}/{outboxRecordId}").ConfigureAwait(false);
-                context.Set(OutboxPersisterCompareExchangeContextKey, outboxRecordCev);
+                if (useClusterWideTx)
+                {
+                    var outboxRecordCev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{OutboxPersisterCompareExchangePrefix}/{outboxRecordId}").ConfigureAwait(false);
+                    context.Set(OutboxPersisterCompareExchangeContextKey, outboxRecordCev);
+                }
             }
 
             if (result.Dispatched || result.TransportOperations.Length == 0)
