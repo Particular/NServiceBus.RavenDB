@@ -137,6 +137,7 @@
                     {
                         outboxRecord.Dispatched = true;
                         outboxRecord.DispatchedAt = DateTime.UtcNow;
+                        outboxRecord.TransportOperations = new OutboxRecord.OutboxOperation[0];
                         session.StoreSchemaVersionInMetadata(outboxRecord);
 
                         var metadata = session.Advanced.GetMetadataFor(outboxRecord);
