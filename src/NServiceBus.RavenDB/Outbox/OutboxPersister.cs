@@ -103,6 +103,7 @@
                 if (context.TryGet<CompareExchangeValue<string>>(OutboxPersisterCompareExchangeContextKey, out var compareExchangeValue))
                 {
                     //handling concurrent processing in the case of Store succeeded by SetAsDispatched not yet.
+                    // TODO: double check if there is a use case where Core invokes Store for an existing OutboxMessage
                     session.Advanced.ClusterTransaction.UpdateCompareExchangeValue(compareExchangeValue);
                 }
                 else
@@ -125,6 +126,8 @@
                     //this is tricky
                     //if outboxRecordCev != null it is a SetAsDispatched without a Store: the outbox record in the Get op was not null.
                     //we will only update the CEV to make sure that no other SetAsDispatched can succeed.
+                    //TODO: do we really this CEV? this operation is idempotent and in case of cluster-wide TX last win,
+                    //which in any case would lead to a correct situation
                     if (!context.TryGet<CompareExchangeValue<string>>(OutboxPersisterCompareExchangeContextKey, out var outboxRecordCev))
                     {
                         //there was no CEV during get and one should have been created by Store
@@ -145,6 +148,8 @@
 
                         //If the OutboxRecord was modified then we also have to update the CEV;
                         //otherwise no need for anything
+                        //TODO: do we really this CEV? this operation is idempotent and in case of cluster-wide TX last win,
+                        //which in any case would lead to a correct situation
                         session.Advanced.ClusterTransaction.UpdateCompareExchangeValue(outboxRecordCev);
                     }
                 }
