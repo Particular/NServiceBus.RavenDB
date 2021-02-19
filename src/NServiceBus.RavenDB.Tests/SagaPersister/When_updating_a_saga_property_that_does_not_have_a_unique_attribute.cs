@@ -12,7 +12,7 @@ public class When_updating_a_saga_property_that_does_not_have_a_unique_attribute
     [TestCase(false)]
     public async Task It_should_persist_successfully(bool useClusterWideTx)
     {
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(useClusterWideTx).InContext(out var options))
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
             var uniqueString = Guid.NewGuid().ToString();

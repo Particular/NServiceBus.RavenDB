@@ -13,7 +13,7 @@ public class When_trying_to_fetch_a_non_existing_saga_by_its_unique_property : R
     [TestCase(false)]
     public async Task It_should_return_null(bool useClusterWideTx)
     {
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(useClusterWideTx).InContext(out var options))
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());

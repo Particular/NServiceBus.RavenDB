@@ -6,6 +6,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
+    using Raven.Client.Documents.Session;
 
     [TestFixture]
     public class When_getting_an_outbox_message : RavenDBPersistenceTestBase
@@ -22,7 +23,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_get_the_message(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(useClusterWideTx), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxOperation = new OutboxRecord.OutboxOperation
@@ -33,8 +34,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 Options = new Dictionary<string, string> { { "optionName1", "optionValue1" } },
             };
 
+            var sessionOptions = new SessionOptions()
+            {
+                TransactionMode = useClusterWideTx ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency(useClusterWideTx))
             {
                 var outboxRecord = new OutboxRecord
                 {

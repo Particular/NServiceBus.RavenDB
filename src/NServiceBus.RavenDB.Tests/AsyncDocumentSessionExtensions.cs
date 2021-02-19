@@ -5,9 +5,9 @@
 
     static class AsyncDocumentSessionExtensions
     {
-        public static IAsyncDocumentSession UsingOptimisticConcurrency(this IAsyncDocumentSession session)
+        public static IAsyncDocumentSession UsingOptimisticConcurrency(this IAsyncDocumentSession session, bool useClusterWideTransactions)
         {
-            session.Advanced.UseOptimisticConcurrency = true;
+            session.Advanced.UseOptimisticConcurrency = !useClusterWideTransactions;
             return session;
         }
 

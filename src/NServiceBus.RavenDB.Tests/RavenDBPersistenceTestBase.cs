@@ -77,7 +77,7 @@
         protected IDocumentStore store;
         ReusableDB db;
 
-        internal IOpenTenantAwareRavenSessions CreateTestSessionOpener(bool useClusterWideTransactions = false)
+        internal IOpenTenantAwareRavenSessions CreateTestSessionOpener(bool useClusterWideTransactions)
         {
             return new TestOpenSessionsInPipeline(store, useClusterWideTransactions);
         }
@@ -99,7 +99,7 @@
                 {
                     TransactionMode = useClusterWideTx ? TransactionMode.ClusterWide : TransactionMode.SingleNode
                 };
-                return store.OpenAsyncSession(sessionOptions);
+                return store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency(useClusterWideTx);
             }
         }
     }

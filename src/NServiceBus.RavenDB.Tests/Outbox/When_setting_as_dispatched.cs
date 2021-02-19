@@ -9,6 +9,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
     using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     [TestFixture]
     public class When_setting_as_dispatched : RavenDBPersistenceTestBase
@@ -25,13 +26,19 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_set_outbox_record_as_dispatched(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(useClusterWideTx), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
 
+            var sessionOptions = new SessionOptions()
+            {
+                TransactionMode = useClusterWideTx ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
+
+            //TODO: if useClusterWideTx == true we need to also create the CEV for the simulated message.
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency(useClusterWideTx))
             {
                 await session.StoreAsync(
                     new OutboxRecord
@@ -49,7 +56,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await persister.SetAsDispatched(incomingMessageId, context);
 
             // assert
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(false))
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
 
@@ -65,13 +72,14 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_store_schema_version_in_metadata(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(useClusterWideTx), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
 
+            //TODO: if useClusterWideTx == true we need to also create the CEV for the simulated message.
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(false))
             {
                 await session.StoreAsync(new OutboxRecord { MessageId = incomingMessageId, Dispatched = false, }, outboxRecordId);
                 await session.SaveChangesAsync();
@@ -81,7 +89,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await persister.SetAsDispatched(incomingMessageId, context);
 
             // assert
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(false))
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
@@ -96,13 +104,14 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         {
             // arrange
             var timeToKeepDeduplicationData = TimeSpan.FromSeconds(60);
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), timeToKeepDeduplicationData, useClusterWideTx);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(useClusterWideTx), timeToKeepDeduplicationData, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
 
+            //TODO: if useClusterWideTx == true we need to also create the CEV for the simulated message.
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(false))
             {
                 await session.StoreAsync(new OutboxRecord { MessageId = incomingMessageId, Dispatched = false, }, outboxRecordId);
                 await session.SaveChangesAsync();
@@ -115,7 +124,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await persister.SetAsDispatched(incomingMessageId, context);
 
             // assert
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(false))
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
@@ -130,13 +139,15 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should__not_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_infinite(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), Timeout.InfiniteTimeSpan, useClusterWideTx);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(useClusterWideTx), Timeout.InfiniteTimeSpan, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
 
+            //TODO: if useClusterWideTx == true we need to also create the CEV for the simulated message.
+
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(false))
             {
                 await session.StoreAsync(new OutboxRecord { MessageId = incomingMessageId, Dispatched = false, }, outboxRecordId);
                 await session.SaveChangesAsync();
@@ -146,7 +157,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await persister.SetAsDispatched(incomingMessageId, context);
 
             // assert
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(false))
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);

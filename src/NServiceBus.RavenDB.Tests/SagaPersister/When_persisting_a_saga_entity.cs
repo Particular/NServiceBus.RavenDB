@@ -22,7 +22,7 @@ public class When_persisting_a_saga_entity : RavenDBPersistenceTestBase
         };
 
         var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var context))
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(useClusterWideTx).InContext(out var context))
         {
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
 

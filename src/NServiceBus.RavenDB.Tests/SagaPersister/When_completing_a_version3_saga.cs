@@ -6,6 +6,7 @@ using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
@@ -16,7 +17,11 @@ public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
     {
         var sagaId = Guid.NewGuid();
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        var sessionOptions = new SessionOptions()
+        {
+            TransactionMode = useClusterWideTx ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+        };
+        using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency(useClusterWideTx).InContext(out var options))
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
 

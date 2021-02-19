@@ -28,7 +28,11 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
         CreateLegacySagaDocuments(store, unique);
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        var sessionOptions = new SessionOptions()
+        {
+            TransactionMode = useClusterWideTx ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+        };
+        using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency(useClusterWideTx).InContext(out var options))
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
 
@@ -55,6 +59,8 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         var uniqueString = "abcd";
         var identityDocId = SagaUniqueIdentity.FormatId(typeof(SagaWithUniqueProperty), "UniqueString", uniqueString);
 
+        //TODO: should we also create CEV documents?
+
         var sagaData = new SagaWithUniqueProperty
         {
             Id = Guid.Empty, // Improperly converted
@@ -76,14 +82,18 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
             UniqueValue = uniqueString
         };
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var _))
+        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(useClusterWideTx).InContext(out var _))
         {
             await session.StoreAsync(sagaContainer);
             await session.StoreAsync(uniqueIdentity);
             await session.SaveChangesAsync();
         }
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        var sessionOptions = new SessionOptions()
+        {
+            TransactionMode = useClusterWideTx ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+        };
+        using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency(useClusterWideTx).InContext(out var options))
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), CreateTestSessionOpener(useClusterWideTx), useClusterWideTx);
 

@@ -27,7 +27,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id_in_the_same_transaction(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(useClusterWideTx), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxMessage1 = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
@@ -53,7 +53,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(useClusterWideTx), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxMessage1 = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
@@ -84,7 +84,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_store_outbox_record_as_not_dispatched(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(useClusterWideTx), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outgoingMessageId = "outgoingMessageId";
@@ -98,7 +98,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
 
             // assert
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(false))
             {
                 var outboxRecord = await session.Query<OutboxRecord>().SingleAsync(record => record.MessageId == incomingMessageId);
 
@@ -115,7 +115,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_store_schema_version_in_metadata(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(useClusterWideTx), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxMessage = new OutboxMessage(incomingMessageId, new[] { new TransportOperation("foo", default, default, default) });
@@ -144,7 +144,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_filter_invalid_docid_character(bool useClusterWideTx)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTx);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(useClusterWideTx), default, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = $@"{Guid.NewGuid()}\12345";
 
