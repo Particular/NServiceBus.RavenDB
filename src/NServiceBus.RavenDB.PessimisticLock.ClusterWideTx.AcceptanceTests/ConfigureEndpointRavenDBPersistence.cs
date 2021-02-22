@@ -28,6 +28,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
         configuration.GetSettings().Set(DefaultPersistenceExtensionsKey, persistenceExtensions);
 
+        var bla = new {Message = "Test"};
         Console.WriteLine("Created '{0}' database", documentStore.Database);
 
         return Task.FromResult(0);

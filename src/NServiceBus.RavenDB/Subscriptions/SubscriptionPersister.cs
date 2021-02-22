@@ -155,6 +155,8 @@ namespace NServiceBus.Persistence.RavenDB
 
                         await session.SaveChangesAsync().ConfigureAwait(false);
                     }
+
+                    return;
                 }
                 catch (ConcurrencyException)
                 {
