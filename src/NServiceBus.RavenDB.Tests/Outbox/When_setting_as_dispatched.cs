@@ -36,7 +36,6 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 TransactionMode = useClusterWideTx ? TransactionMode.ClusterWide : TransactionMode.SingleNode
             };
 
-            //TODO: if useClusterWideTx == true we need to also create the CEV for the simulated message.
             //manually store an OutboxRecord to control the OutboxRecordId format
             using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency(useClusterWideTx))
             {
@@ -136,15 +135,13 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
         [TestCase(true)]
         [TestCase(false)]
-        public async Task Should__not_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_infinite(bool useClusterWideTx)
+        public async Task Should_not_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_infinite(bool useClusterWideTx)
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(useClusterWideTx), Timeout.InfiniteTimeSpan, useClusterWideTx);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
-
-            //TODO: if useClusterWideTx == true we need to also create the CEV for the simulated message.
 
             //manually store an OutboxRecord to control the OutboxRecordId format
             using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency(false))

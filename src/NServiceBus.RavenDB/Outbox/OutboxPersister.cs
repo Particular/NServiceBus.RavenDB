@@ -123,17 +123,7 @@
 
                 if (useClusterWideTx)
                 {
-                    //this is tricky
-                    //if outboxRecordCev != null it is a SetAsDispatched without a Store: the outbox record in the Get op was not null.
-                    //we will only update the CEV to make sure that no other SetAsDispatched can succeed.
-                    //TODO: do we really this CEV? this operation is idempotent and in case of cluster-wide TX last win,
-                    //which in any case would lead to a correct situation
-                    if (!context.TryGet<CompareExchangeValue<string>>(OutboxPersisterCompareExchangeContextKey, out var outboxRecordCev))
-                    {
-                        //there was no CEV during get and one should have been created by Store
-                        outboxRecordCev = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<string>($"{OutboxPersisterCompareExchangePrefix}/{outboxRecordId}").ConfigureAwait(false);
-                    }
-
+                    // we're not retrieving the compare exchange value for the outbox record here as we consider the SetAsDispatched method to be idempotent so we allow the last one to "win"
                     // cannot use PATCH with cluster wide transactions
                     var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId).ConfigureAwait(false);
                     if (!outboxRecord.Dispatched)
@@ -143,14 +133,11 @@
                         outboxRecord.TransportOperations = new OutboxRecord.OutboxOperation[0];
                         session.StoreSchemaVersionInMetadata(outboxRecord);
 
-                        var metadata = session.Advanced.GetMetadataFor(outboxRecord);
-                        metadata[Constants.Documents.Metadata.Expires] = DateTime.UtcNow.Add(timeToKeepDeduplicationData);
-
-                        //If the OutboxRecord was modified then we also have to update the CEV;
-                        //otherwise no need for anything
-                        //TODO: do we really this CEV? this operation is idempotent and in case of cluster-wide TX last win,
-                        //which in any case would lead to a correct situation
-                        session.Advanced.ClusterTransaction.UpdateCompareExchangeValue(outboxRecordCev);
+                        if (timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan)
+                        {
+                            var metadata = session.Advanced.GetMetadataFor(outboxRecord);
+                            metadata[Constants.Documents.Metadata.Expires] = DateTime.UtcNow.Add(timeToKeepDeduplicationData);
+                        }
                     }
                 }
                 else
