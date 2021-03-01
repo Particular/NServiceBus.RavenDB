@@ -18,7 +18,11 @@ namespace NServiceBus.RavenDB.AcceptanceTests
             var scenario = await Scenario.Define<HighContentionScenario>()
                 .WithEndpoint<HighContentionEndpoint>(behavior =>
                 {
+#pragma warning disable IDE0079
+#pragma warning disable CS0618
                     behavior.CustomConfig(configuration => configuration.UsePersistence<RavenDBPersistence>().Sagas().UsePessimisticLocking(true));
+#pragma warning restore CS0618
+#pragma warning restore IDE0079
                     behavior.When(session => session.SendLocal(new StartSaga { SomeId = Guid.NewGuid() }));
                 })
                 .Done(s => s.SagaCompleted)
