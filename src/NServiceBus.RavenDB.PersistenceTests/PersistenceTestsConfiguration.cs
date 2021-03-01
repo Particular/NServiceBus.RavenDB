@@ -82,7 +82,7 @@
             documentStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
 
             IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore));
-            SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator);
+            SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator, null);
             SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter();
 
             OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault);

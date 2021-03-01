@@ -1,7 +1,7 @@
 namespace NServiceBus.Persistence.RavenDB
 {
     using System.Threading.Tasks;
-    using NServiceBus.Extensibility;
+    using Extensibility;
     using Raven.Client.Documents.Operations.CompareExchange;
     using Raven.Client.Documents.Session;
 
