@@ -7,10 +7,16 @@
 
     class RavenDBSynchronizedStorageAdapter : ISynchronizedStorageAdapter
     {
+        public RavenDBSynchronizedStorageAdapter(CurrentSessionHolder sessionHolder)
+        {
+            this.sessionHolder = sessionHolder;
+        }
+
         public Task<CompletableSynchronizedStorageSession> TryAdapt(OutboxTransaction transaction, ContextBag context)
         {
             if (transaction is RavenDBOutboxTransaction outboxTransaction)
             {
+                sessionHolder?.SetCurrentSession(outboxTransaction.AsyncSession);
                 return Task.FromResult<CompletableSynchronizedStorageSession>(
                     new RavenDBSynchronizedStorageSession(outboxTransaction.AsyncSession, context, false));
             }
@@ -25,5 +31,6 @@
         }
 
         static readonly Task<CompletableSynchronizedStorageSession> EmptyResult = Task.FromResult((CompletableSynchronizedStorageSession)null);
+        readonly CurrentSessionHolder sessionHolder;
     }
 }
