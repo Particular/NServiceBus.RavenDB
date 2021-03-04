@@ -9,8 +9,6 @@
     {
         protected override void Setup(FeatureConfigurationContext context)
         {
-            context.Container.ConfigureComponent<RavenDBSynchronizedStorageAdapter>(DependencyLifecycle.SingleInstance);
-
             // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
             var getAsyncSessionFunc = context.Settings.GetOrDefault<Func<IDictionary<string, string>, IAsyncDocumentSession>>(SharedAsyncSession);
 
@@ -50,6 +48,7 @@
             var sessionHolder = new CurrentSessionHolder();
             context.Container.ConfigureComponent(_ => sessionHolder.Current, DependencyLifecycle.InstancePerUnitOfWork);
             context.Pipeline.Register(new CurrentSessionBehavior(sessionHolder), "Manages the lifecycle of the current session holder.");
+            context.Container.ConfigureComponent(_ => new RavenDBSynchronizedStorageAdapter(sessionHolder), DependencyLifecycle.SingleInstance);
             context.Container.ConfigureComponent(provider => new RavenDBSynchronizedStorage(provider.Build<IOpenTenantAwareRavenSessions>(), sessionHolder), DependencyLifecycle.SingleInstance);
 
         }
