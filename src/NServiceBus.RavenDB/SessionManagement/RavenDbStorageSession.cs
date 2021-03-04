@@ -2,16 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
-    using Microsoft.Extensions.DependencyInjection;
     using Features;
+    using Microsoft.Extensions.DependencyInjection;
     using Raven.Client.Documents.Session;
 
     class RavenDbStorageSession : Feature
     {
         protected override void Setup(FeatureConfigurationContext context)
         {
-            context.Services.AddSingleton<ISynchronizedStorageAdapter, RavenDBSynchronizedStorageAdapter>();
-
             // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
             var getAsyncSessionFunc = context.Settings.GetOrDefault<Func<IDictionary<string, string>, IAsyncDocumentSession>>(SharedAsyncSession);
             if (getAsyncSessionFunc != null)
@@ -49,6 +47,7 @@
             context.Services.AddScoped(_ => sessionHolder.Current);
             context.Pipeline.Register(new CurrentSessionBehavior(sessionHolder), "Manages the lifecycle of the current session holder.");
             context.Services.AddSingleton<ISynchronizedStorage, RavenDBSynchronizedStorage>(provider => new RavenDBSynchronizedStorage(provider.GetService<IOpenTenantAwareRavenSessions>(), sessionHolder));
+            context.Services.AddSingleton<ISynchronizedStorageAdapter>(new RavenDBSynchronizedStorageAdapter(sessionHolder));
         }
 
         internal const string SharedAsyncSession = "RavenDbSharedAsyncSession";
