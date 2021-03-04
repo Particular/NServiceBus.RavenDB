@@ -16,7 +16,7 @@
         {
             if (transaction is RavenDBOutboxTransaction outboxTransaction)
             {
-                sessionHolder.SetCurrentSession(outboxTransaction.AsyncSession);
+                sessionHolder?.SetCurrentSession(outboxTransaction.AsyncSession);
                 return Task.FromResult<CompletableSynchronizedStorageSession>(
                     new RavenDBSynchronizedStorageSession(outboxTransaction.AsyncSession, context, false));
             }
