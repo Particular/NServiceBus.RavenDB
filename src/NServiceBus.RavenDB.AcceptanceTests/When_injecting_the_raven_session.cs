@@ -21,10 +21,7 @@
                 session = documentStore.OpenAsyncSession();
 
                 RavenSessionTestContext context =
-                    await Scenario.Define<RavenSessionTestContext>(testContext =>
-                        {
-                            testContext.RavenSessionFromTest = session;
-                        })
+                    await Scenario.Define<RavenSessionTestContext>()
                         .WithEndpoint<SharedRavenSessionExtensions>(b =>
                             b.CustomConfig(config =>
                                 {
@@ -92,7 +89,6 @@
 
         public class RavenSessionTestContext : ScenarioContext
         {
-            public IAsyncDocumentSession RavenSessionFromTest { get; set; }
             public IAsyncDocumentSession RavenSessionFromHandler { get; set; }
             public bool HandlerWasHit { get; set; }
         }
