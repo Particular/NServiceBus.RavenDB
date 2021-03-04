@@ -1,31 +1,38 @@
 ﻿namespace NServiceBus.AcceptanceTests.ApiExtension
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using EndpointTemplates;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using NUnit.Framework;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Session;
 
-    public class When_injecting_the_raven_session : NServiceBusAcceptanceTest
+    public class When_injecting_the_raven_session_with_outbox : NServiceBusAcceptanceTest
     {
         [Test]
         public async Task It_should_return_configured_session()
         {
             DocumentStore documentStore = null;
-            IAsyncDocumentSession session = null;
+            var createdSessions = new List<IAsyncDocumentSession>();
             try
             {
                 documentStore = ConfigureEndpointRavenDBPersistence.GetDocumentStore();
-                session = documentStore.OpenAsyncSession();
 
                 RavenSessionTestContext context =
                     await Scenario.Define<RavenSessionTestContext>()
                         .WithEndpoint<SharedRavenSessionExtensions>(b =>
                             b.CustomConfig(config =>
                                 {
-                                    config.UsePersistence<RavenDBPersistence>().UseSharedAsyncSession(_ => session);
+                                    config.UsePersistence<RavenDBPersistence>().UseSharedAsyncSession(_ =>
+                                    {
+                                        var session = documentStore.OpenAsyncSession();
+                                        createdSessions.Add(session);
+                                        return session;
+                                    });
                                 })
                                 .When((bus, c) =>
                                 {
@@ -38,14 +45,15 @@
                         .Done(c => c.HandlerWasHit)
                         .Run();
 
-                Assert.AreSame(session, context.RavenSessionFromHandler);
+                var injectedSessionId = ((InMemoryDocumentSessionOperations)context.RavenSessionFromHandler).Id;
+                var found = createdSessions.Cast<InMemoryDocumentSessionOperations>().Any(session => session.Id == injectedSessionId);
+                Assert.IsTrue(found);
             }
             finally
             {
-                if (session != null)
+                foreach (var session in createdSessions)
                 {
                     session.Dispose();
-                    session = null;
                 }
 
                 if (documentStore != null)
@@ -89,13 +97,21 @@
 
         public class RavenSessionTestContext : ScenarioContext
         {
+            public IAsyncDocumentSession RavenSessionFromTest { get; set; }
             public IAsyncDocumentSession RavenSessionFromHandler { get; set; }
             public bool HandlerWasHit { get; set; }
         }
 
         public class SharedRavenSessionExtensions : EndpointConfigurationBuilder
         {
-            public SharedRavenSessionExtensions() => EndpointSetup<DefaultServer>();
+            public SharedRavenSessionExtensions()
+            {
+                EndpointSetup<DefaultServer>((config, context) =>
+                {
+                    config.GetSettings().Set("DisableOutboxTransportCheck", true);
+                    config.EnableOutbox();
+                });
+            }
 
             public class SharedSessionSagaData : IContainSagaData
             {

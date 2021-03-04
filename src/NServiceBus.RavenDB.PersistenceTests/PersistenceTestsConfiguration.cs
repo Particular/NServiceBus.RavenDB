@@ -6,8 +6,8 @@
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.Persistence;
-    using NServiceBus.Sagas;
     using NServiceBus.Persistence.RavenDB;
+    using NServiceBus.Sagas;
     using NServiceBus.Transport;
     using Raven.Client.Documents;
     using Raven.Client.ServerWide;
@@ -83,7 +83,7 @@
 
             IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore));
             SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator, null);
-            SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter();
+            SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter(null);
 
             OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault);
             return Task.CompletedTask;
