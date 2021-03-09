@@ -14,7 +14,7 @@
             var endpointConfiguration = new EndpointConfiguration("custom-docstore-endpoint");
 
             endpointConfiguration.AssemblyScanner().ExcludeAssemblies("NServiceBus.RavenDB.Tests");
-            endpointConfiguration.UseTransport(new LearningTransport());
+            endpointConfiguration.UseTransport(new LearningTransport { TransportTransactionMode = TransportTransactionMode.ReceiveOnly });
             endpointConfiguration.EnableOutbox();
 
             endpointConfiguration.UsePersistence<RavenDBPersistence>()

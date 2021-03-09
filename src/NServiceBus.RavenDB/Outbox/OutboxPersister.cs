@@ -46,7 +46,8 @@
             var index = 0;
             foreach (var op in result.TransportOperations)
             {
-                transportOperations[index] = new TransportOperation(op.MessageId, new DispatchProperties(op.Options), op.Message, op.Headers);
+                var dispatchProperties = op.Options == null ? null : new DispatchProperties(op.Options);
+                transportOperations[index] = new TransportOperation(op.MessageId, dispatchProperties, op.Message, op.Headers);
                 index++;
             }
 
