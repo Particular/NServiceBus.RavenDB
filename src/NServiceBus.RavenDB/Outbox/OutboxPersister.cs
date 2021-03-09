@@ -22,14 +22,14 @@
             this.timeToKeepDeduplicationData = timeToKeepDeduplicationData;
         }
 
-        public async Task<OutboxMessage> Get(string messageId, ContextBag options)
+        public async Task<OutboxMessage> Get(string messageId, ContextBag options, CancellationToken cancellationToken = default)
         {
             OutboxRecord result;
             using (var session = GetSession(options))
             {
                 // We use Load operation and not queries to avoid stale results
                 var outboxDocId = GetOutboxRecordId(messageId);
-                result = await session.LoadAsync<OutboxRecord>(outboxDocId).ConfigureAwait(false);
+                result = await session.LoadAsync<OutboxRecord>(outboxDocId, cancellationToken).ConfigureAwait(false);
             }
 
             if (result == null)
@@ -46,7 +46,7 @@
             var index = 0;
             foreach (var op in result.TransportOperations)
             {
-                transportOperations[index] = new TransportOperation(op.MessageId, op.Options, op.Message, op.Headers);
+                transportOperations[index] = new TransportOperation(op.MessageId, new DispatchProperties(op.Options), op.Message, op.Headers);
                 index++;
             }
 
@@ -54,7 +54,7 @@
         }
 
 
-        public Task<OutboxTransaction> BeginTransaction(ContextBag context)
+        public Task<OutboxTransaction> BeginTransaction(ContextBag context, CancellationToken cancellationToken = default)
         {
             var session = GetSession(context);
 
@@ -64,7 +64,7 @@
             return Task.FromResult<OutboxTransaction>(transaction);
         }
 
-        public async Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
+        public async Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context, CancellationToken cancellationToken = default)
         {
             var session = ((RavenDBOutboxTransaction)transaction).AsyncSession;
 
@@ -90,11 +90,11 @@
                 TransportOperations = operations
             };
 
-            await session.StoreAsync(outboxRecord, GetOutboxRecordId(message.MessageId)).ConfigureAwait(false);
+            await session.StoreAsync(outboxRecord, GetOutboxRecordId(message.MessageId), cancellationToken).ConfigureAwait(false);
             session.StoreSchemaVersionInMetadata(outboxRecord);
         }
 
-        public async Task SetAsDispatched(string messageId, ContextBag options)
+        public async Task SetAsDispatched(string messageId, ContextBag options, CancellationToken cancellationToken = default)
         {
             using (var session = GetSession(options))
             {
@@ -129,7 +129,7 @@ this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
                     },
                     patchIfMissing: null));
 
-                await session.SaveChangesAsync().ConfigureAwait(false);
+                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 

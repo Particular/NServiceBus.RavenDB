@@ -1,5 +1,6 @@
 namespace NServiceBus.Persistence.RavenDB
 {
+    using System.Threading;
     using System.Threading.Tasks;
     using Extensibility;
     using Raven.Client.Documents.Operations.CompareExchange;
@@ -30,10 +31,10 @@ namespace NServiceBus.Persistence.RavenDB
             }
         }
 
-        public Task CompleteAsync()
+        public Task CompleteAsync(CancellationToken cancellationToken = default)
         {
             return callSaveChanges
-                ? Session.SaveChangesAsync()
+                ? Session.SaveChangesAsync(cancellationToken)
                 : Task.CompletedTask;
         }
 

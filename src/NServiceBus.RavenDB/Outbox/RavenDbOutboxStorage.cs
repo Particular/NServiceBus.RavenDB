@@ -56,7 +56,7 @@
                 this.timeToKeepDeduplicationData = timeToKeepDeduplicationData;
             }
 
-            protected override Task OnStart(IMessageSession session)
+            protected override Task OnStart(IMessageSession session, CancellationToken cleanupCancellationToken = default)
             {
                 if (frequencyToRunDeduplicationDataCleanup == Timeout.InfiniteTimeSpan)
                 {
@@ -64,14 +64,12 @@
                 }
 
                 cancellationTokenSource = new CancellationTokenSource();
-                cancellationToken = cancellationTokenSource.Token;
-
-                cleanupTask = Task.Run(() => PerformCleanup(), CancellationToken.None);
+                cleanupTask = Task.Run(() => PerformCleanup(cancellationTokenSource.Token), cleanupCancellationToken);
 
                 return Task.CompletedTask;
             }
 
-            protected override async Task OnStop(IMessageSession session)
+            protected override async Task OnStop(IMessageSession session, CancellationToken cancellationToken = default)
             {
                 cancellationTokenSource.Cancel();
 
@@ -80,16 +78,18 @@
                     return;
                 }
 
-                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30));
-                var finishedTask = await Task.WhenAny(cleanupTask, timeoutTask).ConfigureAwait(false);
+                var taskCompletionSource = new TaskCompletionSource<bool>();
+                cancellationToken.Register(() => taskCompletionSource.SetResult(true));
 
-                if (finishedTask == timeoutTask)
+                var finishedTask = await Task.WhenAny(cleanupTask, taskCompletionSource.Task).ConfigureAwait(false);
+
+                if (finishedTask == taskCompletionSource.Task)
                 {
                     logger.Error("RavenOutboxCleaner failed to stop within the time allowed (30s).");
                 }
             }
 
-            async Task PerformCleanup()
+            async Task PerformCleanup(CancellationToken cancellationToken)
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
@@ -122,7 +122,6 @@
             TimeSpan timeToKeepDeduplicationData;
             TimeSpan frequencyToRunDeduplicationDataCleanup;
             CancellationTokenSource cancellationTokenSource;
-            CancellationToken cancellationToken;
 
             static readonly ILog logger = LogManager.GetLogger<OutboxCleaner>();
         }

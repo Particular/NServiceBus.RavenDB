@@ -5,6 +5,7 @@ namespace NServiceBus.Persistence.RavenDB
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Transactions;
     using NServiceBus.Extensibility;
@@ -26,7 +27,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         public bool DisableAggressiveCaching { get; set; }
 
-        public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
+        public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context, CancellationToken cancellationToken = default)
         {
             //When the subscriber is running V6 and UseLegacyMessageDrivenSubscriptionMode is enabled at the subscriber the 'subcriber.Endpoint' value is null
             var endpoint = subscriber.Endpoint ?? subscriber.TransportAddress.Split('@').First();
@@ -44,7 +45,7 @@ namespace NServiceBus.Persistence.RavenDB
                     {
                         var subscriptionDocId = GetDocumentIdForMessageType(messageType);
 
-                        var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
+                        var subscription = await session.LoadAsync<Subscription>(subscriptionDocId, cancellationToken).ConfigureAwait(false);
 
                         if (subscription == null)
                         {
@@ -55,7 +56,7 @@ namespace NServiceBus.Persistence.RavenDB
                                 Subscribers = new List<SubscriptionClient>()
                             };
 
-                            await session.StoreAsync(subscription).ConfigureAwait(false);
+                            await session.StoreAsync(subscription, cancellationToken).ConfigureAwait(false);
                             session.StoreSchemaVersionInMetadata(subscription);
                         }
 
@@ -72,7 +73,7 @@ namespace NServiceBus.Persistence.RavenDB
                             }
                         }
 
-                        await session.SaveChangesAsync().ConfigureAwait(false);
+                        await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
 
                     return;
@@ -85,7 +86,7 @@ namespace NServiceBus.Persistence.RavenDB
             while (attempts < 5);
         }
 
-        public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
+        public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context, CancellationToken cancellationToken = default)
         {
             var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint };
 
@@ -93,7 +94,7 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 var subscriptionDocId = GetDocumentIdForMessageType(messageType);
 
-                var subscription = await session.LoadAsync<Subscription>(subscriptionDocId).ConfigureAwait(false);
+                var subscription = await session.LoadAsync<Subscription>(subscriptionDocId, cancellationToken).ConfigureAwait(false);
 
                 if (subscription == null)
                 {
@@ -105,11 +106,11 @@ namespace NServiceBus.Persistence.RavenDB
                     subscription.Subscribers.Remove(subscriptionClient);
                 }
 
-                await session.SaveChangesAsync().ConfigureAwait(false);
+                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
-        public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
+        public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context, CancellationToken cancellationToken = default)
         {
             var ids = messageTypes.Select(GetDocumentIdForMessageType).ToList();
 
@@ -120,7 +121,7 @@ namespace NServiceBus.Persistence.RavenDB
                 {
                     using (ConfigureAggressiveCaching(session))
                     {
-                        var subscriptions = await session.LoadAsync<Subscription>(ids).ConfigureAwait(false);
+                        var subscriptions = await session.LoadAsync<Subscription>(ids, cancellationToken).ConfigureAwait(false);
 
                         subscribers = subscriptions.Values.Where(s => s != null)
                             .SelectMany(s => s.Subscribers)
