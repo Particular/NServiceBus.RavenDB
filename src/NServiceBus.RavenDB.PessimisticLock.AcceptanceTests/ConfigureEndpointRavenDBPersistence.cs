@@ -19,9 +19,6 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
         databaseName = documentStore.Database;
 
-        var transport = new AcceptanceTestingTransport(true, false) { TransportTransactionMode = TransportTransactionMode.ReceiveOnly };
-        configuration.UseTransport(transport);
-
         configuration.GetSettings().Set(DefaultDocumentStoreKey, documentStore);
 
         var persistenceExtensions = configuration.UsePersistence<RavenDBPersistence>()
