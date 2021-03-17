@@ -56,22 +56,22 @@
                 this.timeToKeepDeduplicationData = timeToKeepDeduplicationData;
             }
 
-            protected override Task OnStart(IMessageSession session, CancellationToken cleanupCancellationToken = default)
+            protected override Task OnStart(IMessageSession session, CancellationToken cancellationToken = default)
             {
                 if (frequencyToRunDeduplicationDataCleanup == Timeout.InfiniteTimeSpan)
                 {
                     return Task.CompletedTask;
                 }
 
-                cancellationTokenSource = new CancellationTokenSource();
-                cleanupTask = Task.Run(() => PerformCleanup(cancellationTokenSource.Token), cleanupCancellationToken);
+                cleanupCancellationTokenSource = new CancellationTokenSource();
+                cleanupTask = Task.Run(() => PerformCleanup(cleanupCancellationTokenSource.Token), cancellationToken);
 
                 return Task.CompletedTask;
             }
 
             protected override async Task OnStop(IMessageSession session, CancellationToken cancellationToken = default)
             {
-                cancellationTokenSource.Cancel();
+                cleanupCancellationTokenSource.Cancel();
 
                 if (cleanupTask == null)
                 {
@@ -79,13 +79,15 @@
                 }
 
                 var taskCompletionSource = new TaskCompletionSource<bool>();
-                cancellationToken.Register(() => taskCompletionSource.SetResult(true));
 
-                var finishedTask = await Task.WhenAny(cleanupTask, taskCompletionSource.Task).ConfigureAwait(false);
-
-                if (finishedTask == taskCompletionSource.Task)
+                using (cancellationToken.Register(() => taskCompletionSource.SetResult(true)))
                 {
-                    logger.Error("RavenOutboxCleaner failed to stop within the time allowed (30s).");
+                    var finishedTask = await Task.WhenAny(cleanupTask, taskCompletionSource.Task).ConfigureAwait(false);
+
+                    if (finishedTask == taskCompletionSource.Task)
+                    {
+                        logger.Error("RavenOutboxCleaner failed to stop within the time allowed (30s).");
+                    }
                 }
             }
 
@@ -121,7 +123,7 @@
             Task cleanupTask;
             TimeSpan timeToKeepDeduplicationData;
             TimeSpan frequencyToRunDeduplicationDataCleanup;
-            CancellationTokenSource cancellationTokenSource;
+            CancellationTokenSource cleanupCancellationTokenSource;
 
             static readonly ILog logger = LogManager.GetLogger<OutboxCleaner>();
         }
