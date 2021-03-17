@@ -14,7 +14,7 @@
             using (var db = new ReusableDB())
             {
                 var cfg = new EndpointConfiguration("FakeEndpoint");
-                cfg.UseTransport(new LearningTransport { TransportTransactionMode = TransportTransactionMode.None });
+                cfg.UseTransport(new LearningTransport());
                 cfg.SendOnly();
 
                 var persistence = cfg.UsePersistence<RavenDBPersistence>();
