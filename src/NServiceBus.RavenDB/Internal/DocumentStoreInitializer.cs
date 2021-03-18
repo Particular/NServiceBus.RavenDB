@@ -110,10 +110,10 @@
 
                 var topology = getTopologyCmd.Result.Topology;
 
-                // Currently do not support clusters with more than one possible primary member. Watchers (passive replication targets) are OK.
-                if (topology.Members.Count != 1)
+                // Currently do not support clusters.
+                if (topology.AllNodes.Count != 1)
                 {
-                    throw new InvalidOperationException("RavenDB Persistence does not support RavenDB clusters with more than one Leader/Member node. Only clusters with a single Leader and (optionally) Watcher nodes are supported.");
+                    throw new InvalidOperationException("RavenDB Persistence does not support RavenDB clusters. Only single node setup is supported.");
                 }
             }
         }
