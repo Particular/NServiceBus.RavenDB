@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using NServiceBus.ConsistencyGuarantees;
+    using NServiceBus.Logging;
     using NServiceBus.ObjectBuilder;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
@@ -111,6 +112,12 @@
 
                 var topology = getTopologyCmd.Result.Topology;
 
+                // Currently do not support clusters
+                if (topology.AllNodes.Count != 1)
+                {
+                    logger.Error("RavenDB Persistence does not support RavenDB clusters. Only single node setup is supported.");
+                }
+
                 // Currently do not support clusters with more than one possible primary member. Watchers (passive replication targets) are OK.
                 if (topology.Members.Count != 1)
                 {
@@ -123,5 +130,6 @@
         Func<ReadOnlySettings, IBuilder, IDocumentStore> storeCreator;
         IDocumentStore docStore;
         bool isInitialized;
+        static ILog logger = LogManager.GetLogger<DocumentStoreInitializer>();
     }
 }
