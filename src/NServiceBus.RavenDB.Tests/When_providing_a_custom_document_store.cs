@@ -14,8 +14,7 @@
             var endpointConfiguration = new EndpointConfiguration("custom-docstore-endpoint");
 
             endpointConfiguration.AssemblyScanner().ExcludeAssemblies("NServiceBus.RavenDB.Tests");
-            // ReceiveOnly required because of Outbox
-            endpointConfiguration.UseTransport(new LearningTransport { TransportTransactionMode = TransportTransactionMode.ReceiveOnly });
+            endpointConfiguration.UseTransport(new LearningTransport());
             endpointConfiguration.EnableOutbox();
 
             endpointConfiguration.UsePersistence<RavenDBPersistence>()
