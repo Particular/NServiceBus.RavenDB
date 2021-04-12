@@ -113,7 +113,7 @@
                 // Currently do not support clusters.
                 if (topology.AllNodes.Count != 1)
                 {
-                    throw new InvalidOperationException("RavenDB Persistence does not support RavenDB clusters. Only single node setup is supported.");
+                    throw new InvalidOperationException("RavenDB Persistence does not support RavenDB clusters with multiple nodes. Only a single node setup is supported.");
                 }
             }
         }
