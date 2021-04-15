@@ -49,7 +49,7 @@
             {
                 public Context Context { get; set; }
 
-                public Task<SagaFinderSagaData> FindBy(StartSagaMessage message, SynchronizedStorageSession session, ReadOnlyContextBag options, CancellationToken cancellationToken)
+                public Task<SagaFinderSagaData> FindBy(StartSagaMessage message, SynchronizedStorageSession session, ReadOnlyContextBag options, CancellationToken cancellationToken = default)
                 {
                     if (Context.SagaId == Guid.Empty)
                     {

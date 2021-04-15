@@ -163,7 +163,7 @@ namespace NServiceBus.Persistence.RavenDB
             return Task.CompletedTask;
         }
 
-        async Task<long> AcquireLease(IDocumentStore store, string sagaDataDocId, CancellationToken cancellationToken = default)
+        async Task<long> AcquireLease(IDocumentStore store, string sagaDataDocId, CancellationToken cancellationToken)
         {
             using (var timedTokenSource = new CancellationTokenSource(acquireLeaseLockTimeout))
             using (var combinedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timedTokenSource.Token, cancellationToken))
