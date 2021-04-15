@@ -66,6 +66,11 @@
                 cleanupCancellationTokenSource = new CancellationTokenSource();
                 cleanupTask = Task.Run(() => PerformCleanup(cleanupCancellationTokenSource.Token), cancellationToken);
 
+                if (cleanupTask.IsCanceled)
+                {
+                    throw new OperationCanceledException(cancellationToken);
+                }
+
                 return Task.CompletedTask;
             }
 
@@ -78,16 +83,16 @@
                     return;
                 }
 
-                var taskCompletionSource = new TaskCompletionSource<bool>();
+                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+                var finishedTask = await Task.WhenAny(cleanupTask, timeoutTask).ConfigureAwait(false);
 
-                using (cancellationToken.Register(() => taskCompletionSource.SetResult(true)))
+                // This will throw OperationCancelled if invoked because of the cancellationToken
+                await finishedTask.ConfigureAwait(false);
+
+                if (finishedTask == timeoutTask)
                 {
-                    var finishedTask = await Task.WhenAny(cleanupTask, taskCompletionSource.Task).ConfigureAwait(false);
-
-                    if (finishedTask == taskCompletionSource.Task)
-                    {
-                        logger.Error("RavenOutboxCleaner failed to stop within the time allowed (30s).");
-                    }
+                    // Was the result of the pre-existing 30s timeout
+                    logger.Error("RavenOutboxCleaner failed to stop within the maximum time allowed (30s).");
                 }
             }
 
