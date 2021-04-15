@@ -23,10 +23,10 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
             var ravenSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
             var persister = new SagaPersister(new SagaPersistenceConfiguration());
 
-            var exception = await Catch<ArgumentNullException>(async () =>
+            var exception = await Catch<ArgumentNullException>(async cancellationToken =>
             {
-                await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), ravenSession, context);
-                await session.SaveChangesAsync().ConfigureAwait(false);
+                await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), ravenSession, context, cancellationToken);
+                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             });
 
             Assert.IsNotNull(exception);

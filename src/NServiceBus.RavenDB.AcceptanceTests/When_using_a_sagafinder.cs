@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.RavenDB.AcceptanceTests
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests;
@@ -48,14 +49,14 @@
             {
                 public Context Context { get; set; }
 
-                public Task<SagaFinderSagaData> FindBy(StartSagaMessage message, SynchronizedStorageSession session, ReadOnlyContextBag options)
+                public Task<SagaFinderSagaData> FindBy(StartSagaMessage message, SynchronizedStorageSession session, ReadOnlyContextBag options, CancellationToken cancellationToken = default)
                 {
                     if (Context.SagaId == Guid.Empty)
                     {
                         return Task.FromResult(default(SagaFinderSagaData));
                     }
 
-                    return session.RavenSession().LoadAsync<SagaFinderSagaData>(Context.SagaId.ToString());
+                    return session.RavenSession().LoadAsync<SagaFinderSagaData>(Context.SagaId.ToString(), cancellationToken);
                 }
             }
 

@@ -1,9 +1,9 @@
-﻿using NServiceBus;
-using NServiceBus.AcceptanceTesting.Support;
-using NServiceBus.Settings;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using NServiceBus;
+using NServiceBus.AcceptanceTesting.Support;
 using NServiceBus.Configuration.AdvancedExtensibility;
+using NServiceBus.Settings;
 using Raven.Client.Documents;
 using Raven.Client.ServerWide;
 using Raven.Client.ServerWide.Operations;

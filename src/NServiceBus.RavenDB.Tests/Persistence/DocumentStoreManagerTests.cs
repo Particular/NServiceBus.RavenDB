@@ -1,6 +1,6 @@
 ﻿namespace NServiceBus.RavenDB.Tests.Persistence
 {
-    using System;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
     using NUnit.Framework;
@@ -13,12 +13,12 @@
         {
             using (var db = new ReusableDB())
             {
-                var settings = new SettingsHolder();
-                settings.Set("Transactions.SuppressDistributedTransactions", true);
-                settings.Set("TypesToScan", new Type[0]);
-                settings.Set("NServiceBus.Routing.EndpointName", "FakeEndpoint");
-                settings.Set("NServiceBus.Transport.TransportInfrastructure", new FakeRavenDBTransportInfrastructure(TransportTransactionMode.None));
-                settings.Set("Endpoint.SendOnly", true);
+                var cfg = new EndpointConfiguration("FakeEndpoint");
+                cfg.UseTransport(new LearningTransport());
+                cfg.SendOnly();
+
+                var persistence = cfg.UsePersistence<RavenDBPersistence>();
+                var settings = persistence.GetSettings();
 
                 DocumentStoreManager.SetDocumentStore<StorageType.Outbox>(settings, db.NewStore("Outbox"));
                 DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(settings, db.NewStore("Sagas"));

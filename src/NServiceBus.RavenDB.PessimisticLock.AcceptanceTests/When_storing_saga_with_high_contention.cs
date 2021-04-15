@@ -55,7 +55,7 @@ namespace NServiceBus.RavenDB.AcceptanceTests
 
                     recoverability.Immediate(immediateRetries =>
                     {
-                        immediateRetries.OnMessageBeingRetried(m =>
+                        immediateRetries.OnMessageBeingRetried((m, _) =>
                         {
                             scenario.IncrementRetryCount();
                             return Task.CompletedTask;

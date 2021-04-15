@@ -33,13 +33,13 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var outboxMessage2 = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
 
             // act
-            var exception = await Catch<NonUniqueObjectException>(async () =>
+            var exception = await Catch<NonUniqueObjectException>(async cancellationToken =>
             {
-                using (var transaction = await persister.BeginTransaction(context))
+                using (var transaction = await persister.BeginTransaction(context, cancellationToken))
                 {
-                    await persister.Store(outboxMessage1, transaction, context);
-                    await persister.Store(outboxMessage2, transaction, context);
-                    await transaction.Commit();
+                    await persister.Store(outboxMessage1, transaction, context, cancellationToken);
+                    await persister.Store(outboxMessage2, transaction, context, cancellationToken);
+                    await transaction.Commit(cancellationToken);
                 }
             });
 
@@ -64,12 +64,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
 
             // act
-            var exception = await Catch<ConcurrencyException>(async () =>
+            var exception = await Catch<ConcurrencyException>(async cancellationToken =>
             {
-                using (var transaction = await persister.BeginTransaction(context))
+                using (var transaction = await persister.BeginTransaction(context, cancellationToken))
                 {
-                    await persister.Store(outboxMessage2, transaction, context);
-                    await transaction.Commit();
+                    await persister.Store(outboxMessage2, transaction, context, cancellationToken);
+                    await transaction.Commit(cancellationToken);
                 }
             });
 

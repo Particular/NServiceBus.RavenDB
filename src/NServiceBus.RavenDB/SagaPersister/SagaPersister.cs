@@ -21,7 +21,7 @@ namespace NServiceBus.Persistence.RavenDB
             acquireLeaseLockTimeout = options.LeaseLockAcquisitionTimeout;
         }
 
-        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
+        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             var documentSession = session.RavenSession();
 
@@ -42,7 +42,7 @@ namespace NServiceBus.Persistence.RavenDB
                 IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value),
             };
 
-            await documentSession.StoreAsync(container, string.Empty, container.Id).ConfigureAwait(false);
+            await documentSession.StoreAsync(container, string.Empty, container.Id, cancellationToken).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(container);
 
             var sagaUniqueIdentity = new SagaUniqueIdentity
@@ -53,11 +53,11 @@ namespace NServiceBus.Persistence.RavenDB
                 SagaDocId = container.Id
             };
 
-            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: string.Empty, id: container.IdentityDocId).ConfigureAwait(false);
+            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: string.Empty, id: container.IdentityDocId, token: cancellationToken).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
         }
 
-        public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
+        public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             // store the schema version in case it has changed
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
@@ -68,7 +68,7 @@ namespace NServiceBus.Persistence.RavenDB
             return Task.CompletedTask;
         }
 
-        public async Task<T> Get<T>(Guid sagaId, SynchronizedStorageSession session, ContextBag context)
+        public async Task<T> Get<T>(Guid sagaId, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
             where T : class, IContainSagaData
         {
             var documentSession = session.RavenSession();
@@ -76,12 +76,12 @@ namespace NServiceBus.Persistence.RavenDB
 
             if (enablePessimisticLocking)
             {
-                var index = await AcquireLease(documentSession.Advanced.DocumentStore, docId).ConfigureAwait(false);
+                var index = await AcquireLease(documentSession.Advanced.DocumentStore, docId, cancellationToken).ConfigureAwait(false);
                 // only true if we always have synchronized storage session around which is a valid assumption
                 context.Get<SagaDataLeaseHolder>().DocumentsIdsAndIndexes.Add((docId, index));
             }
 
-            var container = await documentSession.LoadAsync<SagaDataContainer>(docId).ConfigureAwait(false);
+            var container = await documentSession.LoadAsync<SagaDataContainer>(docId, cancellationToken).ConfigureAwait(false);
 
             if (container == null)
             {
@@ -93,7 +93,7 @@ namespace NServiceBus.Persistence.RavenDB
             return container.Data as T;
         }
 
-        public async Task<T> Get<T>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context)
+        public async Task<T> Get<T>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
             where T : class, IContainSagaData
         {
             var documentSession = session.RavenSession();
@@ -108,15 +108,15 @@ namespace NServiceBus.Persistence.RavenDB
                 // if this is locked and need to acquire the lock
                 // first and then document.
                 lookup = await documentSession
-                .LoadAsync<SagaUniqueIdentity>(lookupId)
-                .ConfigureAwait(false);
+                    .LoadAsync<SagaUniqueIdentity>(lookupId, cancellationToken)
+                    .ConfigureAwait(false);
             }
             else
             {
                 lookup = await documentSession
-                .Include(nameof(SagaUniqueIdentity.SagaDocId))
-                .LoadAsync<SagaUniqueIdentity>(lookupId)
-                .ConfigureAwait(false);
+                    .Include(nameof(SagaUniqueIdentity.SagaDocId))
+                    .LoadAsync<SagaUniqueIdentity>(lookupId, cancellationToken)
+                    .ConfigureAwait(false);
             }
 
             if (lookup == null)
@@ -128,13 +128,13 @@ namespace NServiceBus.Persistence.RavenDB
 
             if (enablePessimisticLocking)
             {
-                var index = await AcquireLease(documentSession.Advanced.DocumentStore, lookup.SagaDocId).ConfigureAwait(false);
+                var index = await AcquireLease(documentSession.Advanced.DocumentStore, lookup.SagaDocId, cancellationToken).ConfigureAwait(false);
                 // only true if we always have synchronized storage session around which is a valid assumption
                 context.Get<SagaDataLeaseHolder>().DocumentsIdsAndIndexes.Add((lookup.SagaDocId, index));
             }
 
             // If we have a saga id we can just load it, should have been included in the round-trip already
-            var container = await documentSession.LoadAsync<SagaDataContainer>(lookup.SagaDocId).ConfigureAwait(false);
+            var container = await documentSession.LoadAsync<SagaDataContainer>(lookup.SagaDocId, cancellationToken).ConfigureAwait(false);
 
             if (container == null)
             {
@@ -150,7 +150,7 @@ namespace NServiceBus.Persistence.RavenDB
             return (T)container.Data;
         }
 
-        public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
+        public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             var documentSession = session.RavenSession();
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
@@ -163,11 +163,12 @@ namespace NServiceBus.Persistence.RavenDB
             return Task.CompletedTask;
         }
 
-        async Task<long> AcquireLease(IDocumentStore store, string sagaDataDocId)
+        async Task<long> AcquireLease(IDocumentStore store, string sagaDataDocId, CancellationToken cancellationToken)
         {
-            using (var cancellationTokenSource = new CancellationTokenSource(acquireLeaseLockTimeout))
+            using (var timedTokenSource = new CancellationTokenSource(acquireLeaseLockTimeout))
+            using (var combinedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timedTokenSource.Token, cancellationToken))
             {
-                var token = cancellationTokenSource.Token;
+                var token = combinedTokenSource.Token;
                 while (!token.IsCancellationRequested)
                 {
                     try

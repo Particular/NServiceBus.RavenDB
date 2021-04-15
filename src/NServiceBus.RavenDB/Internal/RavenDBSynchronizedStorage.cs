@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
+    using System.Threading;
     using System.Threading.Tasks;
     using Extensibility;
     using Transport;
@@ -12,7 +13,7 @@
             this.sessionHolder = sessionHolder;
         }
 
-        public Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag context)
+        public Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag context, CancellationToken cancellationToken = default)
         {
             var message = context.Get<IncomingMessage>();
             var session = sessionCreator.OpenSession(message.Headers);

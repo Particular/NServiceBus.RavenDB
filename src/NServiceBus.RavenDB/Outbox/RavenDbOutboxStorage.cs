@@ -56,40 +56,47 @@
                 this.timeToKeepDeduplicationData = timeToKeepDeduplicationData;
             }
 
-            protected override Task OnStart(IMessageSession session)
+            protected override Task OnStart(IMessageSession session, CancellationToken cancellationToken = default)
             {
                 if (frequencyToRunDeduplicationDataCleanup == Timeout.InfiniteTimeSpan)
                 {
                     return Task.CompletedTask;
                 }
 
-                cancellationTokenSource = new CancellationTokenSource();
-                cancellationToken = cancellationTokenSource.Token;
+                cleanupCancellationTokenSource = new CancellationTokenSource();
+                cleanupTask = Task.Run(() => PerformCleanup(cleanupCancellationTokenSource.Token), cancellationToken);
 
-                cleanupTask = Task.Run(() => PerformCleanup(), CancellationToken.None);
+                if (cleanupTask.IsCanceled)
+                {
+                    throw new OperationCanceledException(cancellationToken);
+                }
 
                 return Task.CompletedTask;
             }
 
-            protected override async Task OnStop(IMessageSession session)
+            protected override async Task OnStop(IMessageSession session, CancellationToken cancellationToken = default)
             {
-                cancellationTokenSource.Cancel();
+                cleanupCancellationTokenSource.Cancel();
 
                 if (cleanupTask == null)
                 {
                     return;
                 }
 
-                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30));
+                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
                 var finishedTask = await Task.WhenAny(cleanupTask, timeoutTask).ConfigureAwait(false);
+
+                // This will throw OperationCancelled if invoked because of the cancellationToken
+                await finishedTask.ConfigureAwait(false);
 
                 if (finishedTask == timeoutTask)
                 {
-                    logger.Error("RavenOutboxCleaner failed to stop within the time allowed (30s).");
+                    // Was the result of the pre-existing 30s timeout
+                    logger.Error("RavenOutboxCleaner failed to stop within the maximum time allowed (30s).");
                 }
             }
 
-            async Task PerformCleanup()
+            async Task PerformCleanup(CancellationToken cancellationToken)
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
@@ -121,8 +128,7 @@
             Task cleanupTask;
             TimeSpan timeToKeepDeduplicationData;
             TimeSpan frequencyToRunDeduplicationDataCleanup;
-            CancellationTokenSource cancellationTokenSource;
-            CancellationToken cancellationToken;
+            CancellationTokenSource cleanupCancellationTokenSource;
 
             static readonly ILog logger = LogManager.GetLogger<OutboxCleaner>();
         }

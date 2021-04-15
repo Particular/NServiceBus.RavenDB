@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
@@ -52,7 +53,7 @@
 
         public IOutboxStorage OutboxStorage { get; private set; }
 
-        public Task Configure()
+        public Task Configure(CancellationToken cancellationToken = default)
         {
             GetContextBagForOutbox = GetContextBagForSagaStorage = () =>
             {
@@ -89,7 +90,7 @@
             return Task.CompletedTask;
         }
 
-        public async Task Cleanup()
+        public async Task Cleanup(CancellationToken cancellationToken = default)
         {
             // Periodically the delete will throw an exception because Raven has the database locked
             // To solve this we have a retry loop with a delay
@@ -110,7 +111,7 @@
                         throw;
                     }
 
-                    await Task.Delay(250);
+                    await Task.Delay(250, cancellationToken);
                 }
             }
         }

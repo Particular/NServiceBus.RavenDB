@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Extensibility;
@@ -24,16 +25,16 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     [Test]
     public Task CanLoadAndRemoveByCorrelation()
     {
-        return RunTestUsing((persister, sagaId, syncSession, context) => persister.Get<CountingSagaData>("Name", "Alpha", syncSession, context));
+        return RunTestUsing((persister, sagaId, syncSession, context, cancellationToken) => persister.Get<CountingSagaData>("Name", "Alpha", syncSession, context, cancellationToken));
     }
 
     [Test]
     public Task CanLoadAndRemoveById()
     {
-        return RunTestUsing((persister, sagaId, syncSession, context) => persister.Get<CountingSagaData>(sagaId, syncSession, context));
+        return RunTestUsing((persister, sagaId, syncSession, context, cancellationToken) => persister.Get<CountingSagaData>(sagaId, syncSession, context, cancellationToken));
     }
 
-    async Task RunTestUsing(GetSagaDelegate getSaga)
+    async Task RunTestUsing(GetSagaDelegate getSaga, CancellationToken cancellationToken = default)
     {
         var sagaId = StoreSagaDocuments();
 
@@ -43,27 +44,27 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             var context = new ContextBag();
             context.Set(session);
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, context);
-            var sagaData = await getSaga(persister, sagaId, synchronizedSession, context);
+            var sagaData = await getSaga(persister, sagaId, synchronizedSession, context, cancellationToken);
 
             Assert.IsNotNull(sagaData);
             Assert.AreEqual(42, sagaData.Counter);
             Assert.AreEqual("Alpha", sagaData.Name);
 
-            await persister.Complete(sagaData, synchronizedSession, context);
-            await session.SaveChangesAsync();
+            await persister.Complete(sagaData, synchronizedSession, context, cancellationToken);
+            await session.SaveChangesAsync(cancellationToken);
         }
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
-            var dataDocs = await session.Advanced.LoadStartingWithAsync<SagaDataContainer>("CountingSagaDatas/");
-            var uniqueDocs = await session.Advanced.LoadStartingWithAsync<SagaUniqueIdentity>("Raven3Sagas-");
+            var dataDocs = await session.Advanced.LoadStartingWithAsync<SagaDataContainer>("CountingSagaDatas/", token: cancellationToken);
+            var uniqueDocs = await session.Advanced.LoadStartingWithAsync<SagaUniqueIdentity>("Raven3Sagas-", token: cancellationToken);
 
             Assert.IsEmpty(dataDocs);
             Assert.IsEmpty(uniqueDocs);
         }
     }
 
-    delegate Task<CountingSagaData> GetSagaDelegate(SagaPersister persister, Guid sagaId, RavenDBSynchronizedStorageSession syncSession, ContextBag context);
+    delegate Task<CountingSagaData> GetSagaDelegate(SagaPersister persister, Guid sagaId, RavenDBSynchronizedStorageSession syncSession, ContextBag context, CancellationToken cancellationToken = default);
 
     Guid StoreSagaDocuments()
     {

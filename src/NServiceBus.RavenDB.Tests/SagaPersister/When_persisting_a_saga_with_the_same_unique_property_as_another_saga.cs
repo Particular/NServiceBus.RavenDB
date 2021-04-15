@@ -30,7 +30,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
             await session.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        var exception = await Catch<ConcurrencyException>(async () =>
+        var exception = await Catch<ConcurrencyException>(async cancellationToken =>
         {
             using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
             {
@@ -42,8 +42,8 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
 
                 var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
 
-                await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), synchronizedSession, options);
-                await session.SaveChangesAsync().ConfigureAwait(false);
+                await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), synchronizedSession, options, cancellationToken);
+                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         });
 
