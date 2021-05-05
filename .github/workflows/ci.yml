@@ -5,6 +5,8 @@ on:
       - master
       - release-[5-9].*
   pull_request:
+    branches-ignore:
+      - release-[0-4].*
   pull_request_target:
     branches-ignore:
       - release-[0-4].*
