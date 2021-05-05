@@ -82,11 +82,13 @@ jobs:
 
           echo "CommaSeparatedRavenClusterUrls=http://$($fqdn):8080" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
       - name: Run Windows tests
-        if: runner.os == 'Windows'
-        run: dotnet test src --configuration Release --no-build --logger "GitHubActions;report-warnings=false"
+        if: matrix.name == 'Windows'
+        # -m:1 parameter prevents test projects from being run in parallel, which could cause conflicts since PessimisticLocks project shares same tests
+        run: dotnet test src --configuration Release --no-build --logger "GitHubActions;report-warnings=false" -m:1
       - name: Run Linux tests
-        if: runner.os == 'Linux'
-        run: dotnet test src --configuration Release --no-build --framework netcoreapp3.1 --logger "GitHubActions;report-warnings=false"
+        if: matrix.name == 'Linux'
+        # -m:1 parameter prevents test projects from being run in parallel, which could cause conflicts since PessimisticLocks project shares same tests
+        run: dotnet test src --configuration Release --no-build --framework netcoreapp3.1 -m:1 --logger "GitHubActions;report-warnings=false"
       - name: Teardown RavenDB
         if: ${{ always() }}
         shell: pwsh
