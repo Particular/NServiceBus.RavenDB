@@ -117,7 +117,7 @@
                         }
                         else
                         {
-                            logger.Warn("Operation cancelled thrown.", ex);
+                            logger.Warn("OperationCanceledException thrown.", ex);
                         }
                     }
                     catch (Exception ex)
