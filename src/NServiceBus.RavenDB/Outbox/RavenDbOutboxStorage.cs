@@ -64,12 +64,7 @@
                 }
 
                 cleanupCancellationTokenSource = new CancellationTokenSource();
-                cleanupTask = Task.Run(() => PerformCleanup(cleanupCancellationTokenSource.Token), cancellationToken);
-
-                if (cleanupTask.IsCanceled)
-                {
-                    throw new OperationCanceledException(cancellationToken);
-                }
+                cleanupTask = Task.Run(() => PerformCleanup(cleanupCancellationTokenSource.Token), CancellationToken.None);
 
                 return Task.CompletedTask;
             }
@@ -113,9 +108,17 @@
                             await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
                         }
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException ex)
                     {
                         // Graceful shutdown
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            logger.Debug("RavenDB outbox cleanup cancelled.", ex);
+                        }
+                        else
+                        {
+                            logger.Warn("Operation cancelled thrown.", ex);
+                        }
                     }
                     catch (Exception ex)
                     {

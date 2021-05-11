@@ -201,8 +201,10 @@ namespace NServiceBus.Persistence.RavenDB
 
                         await Task.Delay(TimeSpan.FromTicks(5 + random.Next(acquireLeaseLockRefreshMaximumDelayTicks)), token).ConfigureAwait(false);
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException) when (timedTokenSource.IsCancellationRequested)
                     {
+                        // Timed token source triggering breaks and results in TimeoutException
+                        // Passed in cancellationToken triggering will throw out of this method to be handled by caller
                         break;
                     }
                 }
