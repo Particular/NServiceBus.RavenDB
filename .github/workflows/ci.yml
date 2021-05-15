@@ -128,7 +128,7 @@ jobs:
   cleanup:
     needs: [build, test]
     name: Cleanup
-    if: needs.build.result == 'success'
+    if: ${{ needs.build.result == 'success' }}
     runs-on: ubuntu-20.04
     steps:
       - name: Azure login
