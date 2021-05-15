@@ -22,6 +22,7 @@ jobs:
     name: Build
     outputs:
       hostname: ${{ steps.infra.outputs.hostname }}
+      ravenfqdn: ${{ steps.infra.outputs.fqdn }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check for secrets
@@ -79,6 +80,7 @@ jobs:
 
           $fqdn=$details.ipAddress.fqdn
           echo "::add-mask::$fqdn"
+          echo "::set-output name=fqdn::$fqdn"
 
           echo "Tagging container image"
           $dateTag = "Created=$(Get-Date -Format "yyyy-MM-dd")"
@@ -99,7 +101,7 @@ jobs:
           - NServiceBus.RavenDB.PessimisticLock.AcceptanceTests
       fail-fast: false
     env:
-      CommaSeparatedRavenClusterUrls: "http://${{ needs.build.outputs.hostname }}:8080"
+      CommaSeparatedRavenClusterUrls: "http://${{ needs.build.outputs.ravenfqdn }}:8080"
     steps:
       - name: Download testing artifacts
         uses: actions/download-artifact@v2.0.9
