@@ -105,22 +105,25 @@ jobs:
       fail-fast: false
     env:
       CommaSeparatedRavenClusterUrls: "http://${{ needs.build.outputs.ravenfqdn }}:8080"
-    if: ${{ !(matrix.framework == 'net472' && runner.os == 'Linux') }}
     steps:
       - name: Download testing artifacts
+        if: ${{ !(matrix.framework == 'net472' && runner.os == 'Linux') }}
         uses: actions/download-artifact@v2.0.9
         with:
           name: Tests
           path: src
       - name: Setup .NET SDK
+        if: ${{ !(matrix.framework == 'net472' && runner.os == 'Linux') }}
         uses: actions/setup-dotnet@v1.7.2
         with:
           dotnet-version: 5.0.x
       - name: Setup .NET Core 3.1 runtime
+        if: ${{ !(matrix.framework == 'net472' && runner.os == 'Linux') }}
         uses: actions/setup-dotnet@v1.7.2
         with:
           dotnet-version: 3.1.x
       - name: Run tests for ${{ matrix.framework }}
+        if: ${{ !(matrix.framework == 'net472' && runner.os == 'Linux') }}
         shell: pwsh
         run: dotnet test src/NServiceBus.RavenDB.${{ matrix.project }}/bin/Release/${{ matrix.framework }}/NServiceBus.RavenDB.${{ matrix.project}}.dll  --logger "GitHubActions;report-warnings=false"
   cleanup:
