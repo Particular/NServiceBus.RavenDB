@@ -95,13 +95,17 @@ jobs:
           - windows-2019
           - ubuntu-20.04
         project:
-          - NServiceBus.RavenDB.Tests
-          - NServiceBus.RavenDB.PersistenceTests
-          - NServiceBus.RavenDB.AcceptanceTests
-          - NServiceBus.RavenDB.PessimisticLock.AcceptanceTests
+          - Tests
+          - PersistenceTests
+          - AcceptanceTests
+          - PessimisticLock.AcceptanceTests
+        framework:
+          - netcoreapp3.1
+          - net472
       fail-fast: false
     env:
       CommaSeparatedRavenClusterUrls: "http://${{ needs.build.outputs.ravenfqdn }}:8080"
+    if: ${{ !(matrix.framework == 'net472' && runner.os == 'Linux') }}
     steps:
       - name: Download testing artifacts
         uses: actions/download-artifact@v2.0.9
@@ -116,13 +120,9 @@ jobs:
         uses: actions/setup-dotnet@v1.7.2
         with:
           dotnet-version: 3.1.x
-      - name: Run tests for netcoreapp3.1
+      - name: Run tests for ${{ matrix.framework }}
         shell: pwsh
-        run: dotnet test src/${{ matrix.project }}/bin/Release/netcoreapp3.1/${{ matrix.project}}.dll  --logger "GitHubActions;report-warnings=false"
-      - name: Run tests for net472
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: dotnet test src/${{ matrix.project }}/bin/Release/net472/${{ matrix.project}}.dll  --logger "GitHubActions;report-warnings=false"
+        run: dotnet test src/NServiceBus.RavenDB.${{ matrix.project }}/bin/Release/${{ matrix.framework }}/NServiceBus.RavenDB.${{ matrix.project}}.dll  --logger "GitHubActions;report-warnings=false"
   cleanup:
     needs: [build, test]
     name: Cleanup
