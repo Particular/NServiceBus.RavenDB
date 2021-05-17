@@ -107,4 +107,4 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
       - name: Teardown infrastructure
-        run: $ignore = az container delete --resource-group GitHubActions-RG --name ${{ needs.build.outputs.hostname }} --yes
+        run: $ignore = az container delete --resource-group GitHubActions-RG --name ${{ needs.setup.outputs.hostname }} --yes
