@@ -93,7 +93,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-2019, ubuntu-20.04 ]
-        framework: [ net5.0, netcoreapp3.1, net472 ]
+        framework: [ netcoreapp3.1, net472 ]
         exclude:
           - os: ubuntu-20.04
             framework: net472
