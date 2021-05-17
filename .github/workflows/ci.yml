@@ -117,7 +117,7 @@ jobs:
       - name: Run tests
         run: |
           $exitCode = 0
-          Get-ChildItem -Include *Tests.dll -Recurse | Where-Object { $_.DirectoryName -match $(Join-Path bin Release netcoreapp3.1) } | ForEachObject -Process
+          Get-ChildItem -Include *Tests.dll -Recurse | Where-Object { $_.DirectoryName -match $(Join-Path bin Release netcoreapp3.1) } | ForEach-Object -Process
           {
             echo "Running tests: $_.Name"
             $testResult = dotnet test $_.FullName --logger "GitHubActions;report-warnings=false"
