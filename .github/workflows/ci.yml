@@ -88,21 +88,12 @@ jobs:
           $ignore = az tag create --resource-id $details.id --tags Package=RavenPersistence RunnerOS=${{ runner.os }} $dateTag
   test:
     needs: build
-    name: ${{ matrix.project }} (${{ matrix.os }}/${{ matrix.framework }})
+    name: Test ${{matrix.framework}} on ${{runner.os}}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os:
-          - windows-2019
-          - ubuntu-20.04
-        project:
-          - Tests
-          - PersistenceTests
-          - AcceptanceTests
-          - PessimisticLock.AcceptanceTests
-        framework:
-          - netcoreapp3.1
-          - net472
+        os: [ windows-2019, ubuntu-20.04 ]
+        framework: [ net5.0, netcoreapp3.1, net472 ]
         exclude:
           - os: ubuntu-20.04
             framework: net472
@@ -123,8 +114,16 @@ jobs:
         uses: actions/setup-dotnet@v1.7.2
         with:
           dotnet-version: 3.1.x
-      - name: Run tests for ${{ matrix.framework }}
-        run: dotnet test src/NServiceBus.RavenDB.${{ matrix.project }}/bin/Release/${{ matrix.framework }}/NServiceBus.RavenDB.${{ matrix.project}}.dll  --logger "GitHubActions;report-warnings=false"
+      - name: Run tests
+        run: |
+          $exitCode = 0
+          Get-ChildItem -Include *Tests.dll -Recurse | Where-Object { $_.DirectoryName -match $(Join-Path bin Release netcoreapp3.1) } | ForEachObject -Process
+          {
+            echo "Running tests: $_.Name"
+            $testResult = dotnet test $_.FullName --logger "GitHubActions;report-warnings=false"
+            $exitCode = $exitCode + $testResult
+          }
+          Exit $exitCode
   cleanup:
     needs: [build, test]
     name: Cleanup
