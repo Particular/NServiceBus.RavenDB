@@ -4,6 +4,7 @@ namespace NServiceBus.Persistence.RavenDB
     using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
+    using NServiceBus.Logging;
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.Sagas;
     using Raven.Client.Documents;
@@ -169,10 +170,13 @@ namespace NServiceBus.Persistence.RavenDB
             using (var combinedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timedTokenSource.Token, cancellationToken))
             {
                 var token = combinedTokenSource.Token;
-                while (!token.IsCancellationRequested)
+
+                while (!timedTokenSource.IsCancellationRequested)
                 {
                     try
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var lease = new SagaDataLease(DateTime.UtcNow.Add(leaseLockTime));
 
                         var saveResult = await store.Operations.SendAsync(
@@ -201,10 +205,12 @@ namespace NServiceBus.Persistence.RavenDB
 
                         await Task.Delay(TimeSpan.FromTicks(5 + random.Next(acquireLeaseLockRefreshMaximumDelayTicks)), token).ConfigureAwait(false);
                     }
-                    catch (OperationCanceledException) when (timedTokenSource.IsCancellationRequested)
+                    catch (Exception ex) when (ex.IsCausedBy(timedTokenSource.Token))
                     {
                         // Timed token source triggering breaks and results in TimeoutException
                         // Passed in cancellationToken triggering will throw out of this method to be handled by caller
+                        // log the exception in case the stack trace is ever needed for debugging
+                        log.Debug("Operation canceled when time out exhausted for acquiring exclusive write lock.", ex);
                         break;
                     }
                 }
@@ -226,11 +232,14 @@ namespace NServiceBus.Persistence.RavenDB
         }
 
         const string SagaContainerContextKeyPrefix = "SagaDataContainer:";
-        static Random random = new Random();
+
+        static readonly ILog log = LogManager.GetLogger<SagaPersister>();
+        static readonly Random random = new Random();
+
+        readonly bool enablePessimisticLocking;
+        readonly int acquireLeaseLockRefreshMaximumDelayTicks;
 
         TimeSpan leaseLockTime;
-        bool enablePessimisticLocking;
-        int acquireLeaseLockRefreshMaximumDelayTicks;
         TimeSpan acquireLeaseLockTimeout;
     }
 }
