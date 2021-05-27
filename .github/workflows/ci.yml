@@ -91,7 +91,9 @@ jobs:
       - name: Run Linux tests
         if: matrix.name == 'Linux'
         # -m:1 parameter prevents test projects from being run in parallel, which could cause conflicts since PessimisticLocks project shares same tests
-        run: dotnet test src --configuration Release --no-build --framework netcoreapp3.1 -m:1 --logger "GitHubActions;report-warnings=false"
+        run: |
+          dotnet test src --configuration Release --no-build --framework netcoreapp3.1 --logger "GitHubActions;report-warnings=false"
+          dotnet test src --configuration Release --no-build --framework net5.0 --logger "GitHubActions;report-warnings=false"
       - name: Teardown RavenDB
         if: ${{ always() }}
         shell: pwsh
