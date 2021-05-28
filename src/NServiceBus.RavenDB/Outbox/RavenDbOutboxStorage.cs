@@ -64,7 +64,9 @@
                 }
 
                 cleanupCancellationTokenSource = new CancellationTokenSource();
-                cleanupTask = Task.Run(() => PerformCleanup(cleanupCancellationTokenSource.Token), CancellationToken.None);
+
+                // Task.Run() so the call returns immediately instead of waiting for the first await or return down the call stack
+                cleanupTask = Task.Run(() => PerformCleanupAndSwallowExceptions(cleanupCancellationTokenSource.Token), CancellationToken.None);
 
                 return Task.CompletedTask;
             }
@@ -81,7 +83,7 @@
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
                 var finishedTask = await Task.WhenAny(cleanupTask, timeoutTask).ConfigureAwait(false);
 
-                // This will throw OperationCancelled if invoked because of the cancellationToken
+                // This will throw OperationCanceledException if invoked because of the cancellationToken
                 await finishedTask.ConfigureAwait(false);
 
                 if (finishedTask == timeoutTask)
@@ -91,7 +93,7 @@
                 }
             }
 
-            async Task PerformCleanup(CancellationToken cancellationToken)
+            async Task PerformCleanupAndSwallowExceptions(CancellationToken cancellationToken)
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
@@ -108,17 +110,11 @@
                             await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
                         }
                     }
-                    catch (OperationCanceledException ex)
+                    catch (Exception ex) when (ex.IsCausedBy(cancellationToken))
                     {
-                        // Graceful shutdown
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            logger.Debug("RavenDB outbox cleanup cancelled.", ex);
-                        }
-                        else
-                        {
-                            logger.Warn("OperationCanceledException thrown.", ex);
-                        }
+                        // private token, cleaner is being stopped, log exception in case the stack trace is ever needed for debugging
+                        logger.Debug("Operation canceled while stopping outbox cleaner.", ex);
+                        break;
                     }
                     catch (Exception ex)
                     {
