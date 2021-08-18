@@ -17,11 +17,11 @@ namespace NServiceBus
         {
             throw new NotImplementedException();
         }
-        public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForTimeouts(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IDocumentStore> storeCreator)
+        public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForTimeouts(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IReadOnlySettings, IDocumentStore> storeCreator)
         {
             throw new NotImplementedException();
         }
-        public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForTimeouts(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
+        public static PersistenceExtensions<RavenDBPersistence> UseDocumentStoreForTimeouts(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
         {
             throw new NotImplementedException();
         }

@@ -5,7 +5,7 @@
     using NServiceBus.Outbox;
     using Raven.Client.Documents.Session;
 
-    class RavenDBOutboxTransaction : OutboxTransaction
+    class RavenDBOutboxTransaction : IOutboxTransaction
     {
         public RavenDBOutboxTransaction(IAsyncDocumentSession session)
         {

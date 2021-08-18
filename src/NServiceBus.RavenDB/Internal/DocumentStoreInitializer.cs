@@ -11,7 +11,7 @@
 
     class DocumentStoreInitializer
     {
-        internal DocumentStoreInitializer(Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
+        internal DocumentStoreInitializer(Func<IReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
         {
             this.storeCreator = storeCreator;
         }
@@ -54,7 +54,7 @@
             }
         }
 
-        internal IDocumentStore Init(ReadOnlySettings settings, IServiceProvider builder)
+        internal IDocumentStore Init(IReadOnlySettings settings, IServiceProvider builder)
         {
             if (!isInitialized)
             {
@@ -71,7 +71,7 @@
             return docStore;
         }
 
-        void EnsureDocStoreCreated(ReadOnlySettings settings, IServiceProvider builder)
+        void EnsureDocStoreCreated(IReadOnlySettings settings, IServiceProvider builder)
         {
             if (docStore == null)
             {
@@ -79,7 +79,7 @@
             }
         }
 
-        void ApplyConventions(ReadOnlySettings settings)
+        void ApplyConventions(IReadOnlySettings settings)
         {
             if (!(docStore is DocumentStore store))
             {
@@ -117,7 +117,7 @@
         }
 
         List<AbstractIndexCreationTask> indexesToCreate = new List<AbstractIndexCreationTask>();
-        Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator;
+        Func<IReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator;
         IDocumentStore docStore;
         bool isInitialized;
     }

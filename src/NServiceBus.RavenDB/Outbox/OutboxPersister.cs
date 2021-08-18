@@ -55,17 +55,17 @@
         }
 
 
-        public Task<OutboxTransaction> BeginTransaction(ContextBag context, CancellationToken cancellationToken = default)
+        public Task<IOutboxTransaction> BeginTransaction(ContextBag context, CancellationToken cancellationToken = default)
         {
             var session = GetSession(context);
 
             session.Advanced.UseOptimisticConcurrency = true;
 
             var transaction = new RavenDBOutboxTransaction(session);
-            return Task.FromResult<OutboxTransaction>(transaction);
+            return Task.FromResult<IOutboxTransaction>(transaction);
         }
 
-        public async Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context, CancellationToken cancellationToken = default)
+        public async Task Store(OutboxMessage message, IOutboxTransaction transaction, ContextBag context, CancellationToken cancellationToken = default)
         {
             var session = ((RavenDBOutboxTransaction)transaction).AsyncSession;
 

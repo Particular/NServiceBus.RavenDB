@@ -29,7 +29,7 @@
         /// </summary>
         /// <param name="cfg">The persistence configuration object</param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
-        public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IDocumentStore> storeCreator)
+        public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IReadOnlySettings, IDocumentStore> storeCreator)
         {
             DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), storeCreator);
             return cfg;
@@ -40,7 +40,7 @@
         /// </summary>
         /// <param name="cfg">The persistence configuration object</param>
         /// <param name="storeCreator">A Func that will create the document store on NServiceBus initialization.</param>
-        public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, Func<ReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
+        public static PersistenceExtensions<RavenDBPersistence> SetDefaultDocumentStore(this PersistenceExtensions<RavenDBPersistence> cfg, Func<IReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
         {
             DocumentStoreManager.SetDefaultStore(cfg.GetSettings(), storeCreator);
             return cfg;

@@ -4,9 +4,9 @@
     using Raven.Client.Documents.Session;
 
     /// <summary>
-    /// A fake implementation for <see cref="SynchronizedStorageSession" /> for testing purposes.
+    /// A fake implementation for <see cref="ISynchronizedStorageSession" /> for testing purposes.
     /// </summary>
-    public class TestableRavenStorageSession : SynchronizedStorageSession
+    public class TestableRavenStorageSession : ISynchronizedStorageSession
     {
         /// <summary>
         /// Creates a new instance of <see cref="TestableRavenStorageSession" />

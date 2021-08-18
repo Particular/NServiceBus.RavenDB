@@ -6,7 +6,7 @@ namespace NServiceBus.Persistence.RavenDB
     using Raven.Client.Documents.Operations.CompareExchange;
     using Raven.Client.Documents.Session;
 
-    class RavenDBSynchronizedStorageSession : CompletableSynchronizedStorageSession
+    class RavenDBSynchronizedStorageSession : ICompletableSynchronizedStorageSession
     {
         public RavenDBSynchronizedStorageSession(IAsyncDocumentSession session, ContextBag context, bool callSaveChanges = true)
         {
