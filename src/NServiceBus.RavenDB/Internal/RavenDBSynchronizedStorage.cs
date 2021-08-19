@@ -13,15 +13,15 @@
             this.sessionHolder = sessionHolder;
         }
 
-        public Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag context, CancellationToken cancellationToken = default)
+        public Task<ICompletableSynchronizedStorageSession> OpenSession(ContextBag context, CancellationToken cancellationToken = default)
         {
             var message = context.Get<IncomingMessage>();
             var session = sessionCreator.OpenSession(message.Headers);
-            var synchronizedStorageSession = new RavenDBSynchronizedStorageSession(session, context, true);
+            var ISynchronizedStorageSession = new RavenDBSynchronizedStorageSession(session, context, true);
 
             sessionHolder?.SetCurrentSession(session);
 
-            return Task.FromResult((CompletableSynchronizedStorageSession)synchronizedStorageSession);
+            return Task.FromResult((ICompletableSynchronizedStorageSession)ISynchronizedStorageSession);
         }
 
         IOpenTenantAwareRavenSessions sessionCreator;

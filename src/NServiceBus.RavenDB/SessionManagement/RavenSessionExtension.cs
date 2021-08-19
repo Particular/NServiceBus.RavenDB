@@ -15,12 +15,12 @@
         /// Gets the current RavenDB session.
         /// </summary>
         /// <param name="session">The storage session.</param>
-        public static IAsyncDocumentSession RavenSession(this SynchronizedStorageSession session)
+        public static IAsyncDocumentSession RavenSession(this ISynchronizedStorageSession session)
         {
             switch (session)
             {
-                case RavenDBSynchronizedStorageSession synchronizedStorageSession:
-                    return synchronizedStorageSession.Session;
+                case RavenDBSynchronizedStorageSession ISynchronizedStorageSession:
+                    return ISynchronizedStorageSession.Session;
                 case TestableRavenStorageSession testableStorageSession:
                     return testableStorageSession.Session;
                 default:

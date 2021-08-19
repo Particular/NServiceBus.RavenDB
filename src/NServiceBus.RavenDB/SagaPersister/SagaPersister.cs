@@ -22,7 +22,7 @@ namespace NServiceBus.Persistence.RavenDB
             acquireLeaseLockTimeout = options.LeaseLockAcquisitionTimeout;
         }
 
-        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
+        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             var documentSession = session.RavenSession();
 
@@ -58,7 +58,7 @@ namespace NServiceBus.Persistence.RavenDB
             documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
         }
 
-        public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
+        public Task Update(IContainSagaData sagaData, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             // store the schema version in case it has changed
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");
@@ -69,7 +69,7 @@ namespace NServiceBus.Persistence.RavenDB
             return Task.CompletedTask;
         }
 
-        public async Task<T> Get<T>(Guid sagaId, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
+        public async Task<T> Get<T>(Guid sagaId, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
             where T : class, IContainSagaData
         {
             var documentSession = session.RavenSession();
@@ -94,7 +94,7 @@ namespace NServiceBus.Persistence.RavenDB
             return container.Data as T;
         }
 
-        public async Task<T> Get<T>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
+        public async Task<T> Get<T>(string propertyName, object propertyValue, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
             where T : class, IContainSagaData
         {
             var documentSession = session.RavenSession();
@@ -151,7 +151,7 @@ namespace NServiceBus.Persistence.RavenDB
             return (T)container.Data;
         }
 
-        public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
+        public Task Complete(IContainSagaData sagaData, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             var documentSession = session.RavenSession();
             var container = context.Get<SagaDataContainer>($"{SagaContainerContextKeyPrefix}{sagaData.Id}");

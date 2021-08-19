@@ -45,11 +45,11 @@
             }
 
 
-            class MySagaFinder : IFindSagas<SagaFinderSagaData>.Using<StartSagaMessage>
+            class MySagaFinder : ISagaFinder<SagaFinderSagaData, StartSagaMessage>
             {
                 public Context Context { get; set; }
 
-                public Task<SagaFinderSagaData> FindBy(StartSagaMessage message, SynchronizedStorageSession session, ReadOnlyContextBag options, CancellationToken cancellationToken = default)
+                public Task<SagaFinderSagaData> FindBy(StartSagaMessage message, ISynchronizedStorageSession session, IReadOnlyContextBag options, CancellationToken cancellationToken = default)
                 {
                     if (Context.SagaId == Guid.Empty)
                     {

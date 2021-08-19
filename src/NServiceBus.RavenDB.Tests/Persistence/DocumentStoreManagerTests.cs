@@ -25,7 +25,7 @@
                 DocumentStoreManager.SetDocumentStore<StorageType.Subscriptions>(settings, db.NewStore("Subscriptions"));
                 DocumentStoreManager.SetDefaultStore(settings, db.NewStore("Default"));
 
-                var readOnly = settings as ReadOnlySettings;
+                var readOnly = settings as IReadOnlySettings;
 
                 Assert.AreEqual("Outbox", DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(readOnly, null).Identifier);
                 Assert.AreEqual("Sagas", DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(readOnly, null).Identifier);

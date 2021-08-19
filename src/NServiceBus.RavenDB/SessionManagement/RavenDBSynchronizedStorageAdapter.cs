@@ -13,25 +13,25 @@
             this.sessionHolder = sessionHolder;
         }
 
-        public Task<CompletableSynchronizedStorageSession> TryAdapt(OutboxTransaction transaction, ContextBag context, CancellationToken cancellationToken = default)
+        public Task<ICompletableSynchronizedStorageSession> TryAdapt(IOutboxTransaction transaction, ContextBag context, CancellationToken cancellationToken = default)
         {
-            if (transaction is RavenDBOutboxTransaction outboxTransaction)
+            if (transaction is RavenDBOutboxTransaction IOutboxTransaction)
             {
-                sessionHolder?.SetCurrentSession(outboxTransaction.AsyncSession);
-                return Task.FromResult<CompletableSynchronizedStorageSession>(
-                    new RavenDBSynchronizedStorageSession(outboxTransaction.AsyncSession, context, false));
+                sessionHolder?.SetCurrentSession(IOutboxTransaction.AsyncSession);
+                return Task.FromResult<ICompletableSynchronizedStorageSession>(
+                    new RavenDBSynchronizedStorageSession(IOutboxTransaction.AsyncSession, context, false));
             }
 
             return EmptyResult;
         }
 
-        public Task<CompletableSynchronizedStorageSession> TryAdapt(TransportTransaction transportTransaction, ContextBag context, CancellationToken cancellationToken = default)
+        public Task<ICompletableSynchronizedStorageSession> TryAdapt(TransportTransaction transportTransaction, ContextBag context, CancellationToken cancellationToken = default)
         {
             // Since RavenDB doesn't support System.Transactions (or have transactions), there's no way to adapt anything out of the transport transaction.
             return EmptyResult;
         }
 
-        static readonly Task<CompletableSynchronizedStorageSession> EmptyResult = Task.FromResult((CompletableSynchronizedStorageSession)null);
+        static readonly Task<ICompletableSynchronizedStorageSession> EmptyResult = Task.FromResult((ICompletableSynchronizedStorageSession)null);
         readonly CurrentSessionHolder sessionHolder;
     }
 }

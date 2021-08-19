@@ -102,12 +102,12 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     string databaseName;
 
-    public static DocumentStore GetDefaultDocumentStore(ReadOnlySettings settings)
+    public static DocumentStore GetDefaultDocumentStore(IReadOnlySettings settings)
     {
         return settings.Get<DocumentStore>(DefaultDocumentStoreKey);
     }
 
-    public static PersistenceExtensions<RavenDBPersistence> GetDefaultPersistenceExtensions(ReadOnlySettings settings)
+    public static PersistenceExtensions<RavenDBPersistence> GetDefaultPersistenceExtensions(IReadOnlySettings settings)
     {
         return settings.Get<PersistenceExtensions<RavenDBPersistence>>(DefaultPersistenceExtensionsKey);
     }
