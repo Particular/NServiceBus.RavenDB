@@ -76,7 +76,7 @@
             {
                 operations[index] = new OutboxRecord.OutboxOperation
                 {
-                    Message = transportOperation.Body,
+                    Message = transportOperation.Body.ToArray(),
                     Headers = transportOperation.Headers,
                     MessageId = transportOperation.MessageId,
                     Options = transportOperation.Options
