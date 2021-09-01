@@ -59,7 +59,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var outgoingMessage = outboxMessage.TransportOperations[0];
             Assert.AreEqual(outboxOperation.MessageId, outgoingMessage.MessageId);
             Assert.AreEqual(outboxOperation.Headers, outgoingMessage.Headers);
-            Assert.AreEqual(outboxOperation.Message, outgoingMessage.Body);
+            Assert.AreEqual(outboxOperation.Message, outgoingMessage.Body.ToArray());
             Assert.AreEqual(outboxOperation.Options, outgoingMessage.Options);
         }
     }
