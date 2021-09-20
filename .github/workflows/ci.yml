@@ -99,6 +99,7 @@ jobs:
           dotnet test src --configuration Release --no-build --framework net5.0 --logger "GitHubActions;report-warnings=false"
       - name: Teardown RavenDB
         if: ${{ always() }}
-        shell: pwsh
-        run: |
-          $ignore = az container delete --resource-group GitHubActions-RG --name ${{ steps.setup-ravendb.outputs.hostname }} --yes
+        uses: Azure/powershell@v1
+        with:
+          inlineScript: Remove-AzContainerGroup -ResourceGroupName GitHubActions-RG -Name ${{ steps.setup-ravendb.outputs.hostname }}
+          azPSVersion: latest          
