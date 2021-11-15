@@ -16,10 +16,10 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     public class When_storing_outbox_messages : RavenDBPersistenceTestBase
     {
         [SetUp]
-        public override void SetUp()
+        public override async Task SetUp()
         {
-            base.SetUp();
-            new OutboxRecordsIndex().Execute(store);
+            await base.SetUp();
+            await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
         [Test]
@@ -123,7 +123,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 await transaction.Commit();
             }
 
-            WaitForIndexing();
+            await WaitForIndexing();
 
             // assert
             using (var session = store.OpenAsyncSession())

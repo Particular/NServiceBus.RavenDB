@@ -14,10 +14,10 @@
     public class When_cleaning_outbox_messages : RavenDBPersistenceTestBase
     {
         [SetUp]
-        public override void SetUp()
+        public override async Task SetUp()
         {
-            base.SetUp();
-            new OutboxRecordsIndex().Execute(store);
+            await base.SetUp();
+            await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
         [Test]
@@ -40,7 +40,7 @@
             await persister.SetAsDispatched(dispatchedOutboxMessage.MessageId, context);
             await Task.Delay(TimeSpan.FromSeconds(1)); // wait for dispatch logic to finish
 
-            WaitForIndexing();
+            await WaitForIndexing();
 
             var cleaner = new OutboxRecordsCleaner(store);
 

@@ -4,22 +4,27 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using NServiceBus.Extensibility;
+    using Extensibility;
     using NServiceBus.Persistence.RavenDB;
-    using NServiceBus.Transport;
     using NUnit.Framework;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Session;
+    using Transport;
 
     public class RavenDBPersistenceTestBase
     {
+        ReusableDB db;
+
+        protected IDocumentStore store;
+
         [SetUp]
-        public virtual void SetUp()
+        public virtual async Task SetUp()
         {
             db = new ReusableDB();
-            var docStore = db.NewStore();
+            IDocumentStore docStore = db.NewStore();
             CustomizeDocumentStore(docStore);
             docStore.Initialize();
+            await db.EnsureDatabaseExists(docStore);
             store = docStore;
         }
 
@@ -34,15 +39,14 @@
             db.Dispose();
         }
 
-        protected void WaitForIndexing()
-        {
-            db.WaitForIndexing(store);
-        }
+        protected Task WaitForIndexing(CancellationToken cancellationToken = default) =>
+            db.WaitForIndexing(store, cancellationToken);
 
         /// <summary>
         ///     This helper is necessary because RavenTestBase doesn't like Assert.Throws, Assert.That... with async void methods.
         /// </summary>
-        protected static async Task<TException> Catch<TException>(Func<CancellationToken, Task> action, CancellationToken cancellationToken = default) where TException : Exception
+        protected static async Task<TException> Catch<TException>(Func<CancellationToken, Task> action,
+            CancellationToken cancellationToken = default) where TException : Exception
         {
             try
             {
@@ -70,27 +74,16 @@
             return incomingMessage;
         }
 
-        protected IDocumentStore store;
-        ReusableDB db;
-
-        internal IOpenTenantAwareRavenSessions CreateTestSessionOpener()
-        {
-            return new TestOpenSessionsInPipeline(store);
-        }
+        internal IOpenTenantAwareRavenSessions CreateTestSessionOpener() => new TestOpenSessionsInPipeline(store);
 
         class TestOpenSessionsInPipeline : IOpenTenantAwareRavenSessions
         {
-            IDocumentStore store;
+            readonly IDocumentStore store;
 
-            public TestOpenSessionsInPipeline(IDocumentStore store)
-            {
-                this.store = store;
-            }
+            public TestOpenSessionsInPipeline(IDocumentStore store) => this.store = store;
 
-            public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
-            {
-                return store.OpenAsyncSession();
-            }
+            public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders) =>
+                store.OpenAsyncSession();
         }
     }
 }
