@@ -35,8 +35,8 @@
 
         async Task RunTest(Action<ContextDbConfig> configureMultiTenant)
         {
-            string tenantOneDbName = "Tenant1-" + Guid.NewGuid().ToString("n").Substring(16);
-            string tenantTwoDbName = "Tenant2-" + Guid.NewGuid().ToString("n").Substring(16);
+            string tenantOneDbName = "Tenant1-" + Guid.NewGuid().ToString("N").Substring(16);
+            string tenantTwoDbName = "Tenant2-" + Guid.NewGuid().ToString("N").Substring(16);
 
             using (var tenantOneStore = ConfigureEndpointRavenDBPersistence.GetInitializedDocumentStore(tenantOneDbName))
             using (var tenantTwoStore = ConfigureEndpointRavenDBPersistence.GetInitializedDocumentStore(tenantTwoDbName))

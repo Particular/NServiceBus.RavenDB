@@ -37,7 +37,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     public static async Task<DocumentStore> GetDocumentStore()
     {
-        var dbName = Guid.NewGuid().ToString();
+        var dbName = Guid.NewGuid().ToString("N");
 
         var documentStore = GetInitializedDocumentStore(dbName);
 
