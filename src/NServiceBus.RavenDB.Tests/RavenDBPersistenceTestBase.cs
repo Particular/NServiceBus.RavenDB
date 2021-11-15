@@ -11,7 +11,7 @@
     using Raven.Client.Documents.Session;
     using Transport;
 
-    public class RavenDBPersistenceTestBase
+    public abstract class RavenDBPersistenceTestBase
     {
         ReusableDB db;
 
