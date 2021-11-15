@@ -78,7 +78,7 @@ jobs:
           $hostname = "psw-ravendb-$(Get-Random)"
           echo "::set-output name=hostname::$hostname"
           echo "Creating RavenDB container $hostname in $region (This can take a while.)"
-          $details = az container create --image ravendb/ravendb:4.2-ubuntu-latest  --name $hostname --location $region --dns-name-label $hostname --resource-group GitHubActions-RG --cpu 4 --memory 16 --ports 8080 38888 --ip-address public -e RAVEN_ARGS='--ServerUrl=http://0.0.0.0:8080 --Setup.Mode=None --License.Eula.Accepted=true --Security.UnsecuredAccessAllowed=PublicNetwork' | ConvertFrom-Json
+          $details = az container create --image ravendb/ravendb:5.2-ubuntu-latest  --name $hostname --location $region --dns-name-label $hostname --resource-group GitHubActions-RG --cpu 4 --memory 16 --ports 8080 38888 --ip-address public -e RAVEN_ARGS='--ServerUrl=http://0.0.0.0:8080 --Setup.Mode=None --License.Eula.Accepted=true --Security.UnsecuredAccessAllowed=PublicNetwork' | ConvertFrom-Json
 
           $fqdn=$details.ipAddress.fqdn
           echo "::add-mask::$fqdn"
