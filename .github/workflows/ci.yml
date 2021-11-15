@@ -88,6 +88,12 @@ jobs:
           $ignore = az tag create --resource-id $details.id --tags Package=RavenPersistence RunnerOS=${{ runner.os }} $dateTag
 
           echo "CommaSeparatedRavenClusterUrls=http://$($fqdn):8080" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+
+          $result = {};
+          do
+          {
+            $result = Test-NetConnection -ComputerName $fqdn -Port 8080
+          } While($result.TcpTestSucceeded -ne "True")
       - name: Run Windows tests
         if: matrix.name == 'Windows'
         # -m:1 parameter prevents test projects from being run in parallel, which could cause conflicts since PessimisticLocks project shares same tests
