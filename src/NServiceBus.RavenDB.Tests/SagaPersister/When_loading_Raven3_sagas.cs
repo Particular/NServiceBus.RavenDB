@@ -135,7 +135,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         Console.WriteLine($"Creating {entityName}: {id}");
         using (var session = store.OpenSession())
         {
-            var blittableDoc = session.Advanced.EntityToBlittable.ConvertEntityToBlittable(document, documentInfo);
+            var blittableDoc = session.Advanced.JsonConverter.ToBlittable(document, documentInfo);
             var command = new PutDocumentCommand(id, string.Empty, blittableDoc);
             session.Advanced.RequestExecutor.Execute(command, session.Advanced.Context);
             session.SaveChanges();
@@ -155,7 +155,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         Console.WriteLine($"Creating unique identity: {id}");
         using (var session = store.OpenSession())
         {
-            var blittableDoc = session.Advanced.EntityToBlittable.ConvertEntityToBlittable(document, documentInfo);
+            var blittableDoc = session.Advanced.JsonConverter.ToBlittable(document, documentInfo);
             var command = new PutDocumentCommand(id, string.Empty, blittableDoc);
             session.Advanced.RequestExecutor.Execute(command, session.Advanced.Context);
             session.SaveChanges();
