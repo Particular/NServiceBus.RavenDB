@@ -102,16 +102,8 @@ jobs:
               }
           } While($tcpClient.Connected -ne "True")
           echo "Connection verified"
-      - name: Run Windows tests
-        if: matrix.name == 'Windows'
-        # -m:1 parameter prevents test projects from being run in parallel, which could cause conflicts since PessimisticLocks project shares same tests
-        run: dotnet test src --configuration Release --no-build --logger "GitHubActions;report-warnings=false" -m:1
-      - name: Run Linux tests
-        if: matrix.name == 'Linux'
-        # -m:1 parameter prevents test projects from being run in parallel, which could cause conflicts since PessimisticLocks project shares same tests
-        run: |
-          dotnet test src --configuration Release --no-build --framework netcoreapp3.1 --logger "GitHubActions;report-warnings=false"
-          dotnet test src --configuration Release --no-build --framework net5.0 --logger "GitHubActions;report-warnings=false"
+      - name: Run tests
+        uses: Particular/run-tests-action@v1.0.0
       - name: Teardown RavenDB
         if: ${{ always() }}
         uses: Azure/powershell@v1
