@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.RavenDB.Tests.Persistence
 {
+    using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Testing;
@@ -8,11 +9,13 @@
     public class RavenSessionExtensionTests
     {
         [Test]
-        public void CanGetNormalSession()
+        public async Task CanGetNormalSession()
         {
             using (var db = new ReusableDB())
+            using (var store = db.NewStore().Initialize())
             {
-                var store = db.NewStore().Initialize();
+                await db.EnsureDatabaseExists(store);
+
                 var session = store.OpenAsyncSession();
 
                 var storageSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
@@ -24,11 +27,13 @@
         }
 
         [Test]
-        public void CanGetTestableSession()
+        public async Task CanGetTestableSession()
         {
             using (var db = new ReusableDB())
+            using (var store = db.NewStore().Initialize())
             {
-                var store = db.NewStore().Initialize();
+                await db.EnsureDatabaseExists(store);
+
                 var session = store.OpenAsyncSession();
 
                 var storageSession = new TestableRavenStorageSession(session);
