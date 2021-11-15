@@ -20,7 +20,7 @@
             var createdSessions = new List<IAsyncDocumentSession>();
             try
             {
-                documentStore = ConfigureEndpointRavenDBPersistence.GetDocumentStore();
+                documentStore = await ConfigureEndpointRavenDBPersistence.GetDocumentStore();
 
                 RavenSessionTestContext context =
                     await Scenario.Define<RavenSessionTestContext>()
@@ -69,7 +69,7 @@
             DocumentStore documentStore = null;
             try
             {
-                documentStore = ConfigureEndpointRavenDBPersistence.GetDocumentStore();
+                documentStore = await ConfigureEndpointRavenDBPersistence.GetDocumentStore();
 
                 RavenSessionTestContext context =
                     await Scenario.Define<RavenSessionTestContext>(testContext => { })

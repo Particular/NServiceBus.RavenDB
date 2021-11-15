@@ -17,7 +17,7 @@
             IAsyncDocumentSession session = null;
             try
             {
-                documentStore = ConfigureEndpointRavenDBPersistence.GetDocumentStore();
+                documentStore = await ConfigureEndpointRavenDBPersistence.GetDocumentStore();
                 session = documentStore.OpenAsyncSession();
 
                 var context =
