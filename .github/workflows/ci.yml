@@ -78,7 +78,7 @@ jobs:
           $hostname = "psw-ravendb-$(Get-Random)"
           echo "::set-output name=hostname::$hostname"
           echo "Creating RavenDB container $hostname in $region (This can take a while.)"
-          $details = az container create --image ravendb/ravendb:4.2-ubuntu-latest  --name $hostname --location $region --dns-name-label $hostname --resource-group GitHubActions-RG --cpu 4 --memory 16 --ports 8080 38888 --ip-address public -e RAVEN_ARGS='--ServerUrl=http://0.0.0.0:8080 --Setup.Mode=None --License.Eula.Accepted=true --Security.UnsecuredAccessAllowed=PublicNetwork' | ConvertFrom-Json
+          $details = az container create --image ravendb/ravendb:5.2-ubuntu-latest  --name $hostname --location $region --dns-name-label $hostname --resource-group GitHubActions-RG --cpu 4 --memory 16 --ports 8080 38888 --ip-address public -e RAVEN_ARGS='--ServerUrl=http://0.0.0.0:8080 --Setup.Mode=None --License.Eula.Accepted=true --Security.UnsecuredAccessAllowed=PublicNetwork' | ConvertFrom-Json
 
           $fqdn=$details.ipAddress.fqdn
           echo "::add-mask::$fqdn"
@@ -88,16 +88,22 @@ jobs:
           $ignore = az tag create --resource-id $details.id --tags Package=RavenPersistence RunnerOS=${{ runner.os }} $dateTag
 
           echo "CommaSeparatedRavenClusterUrls=http://$($fqdn):8080" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-      - name: Run Windows tests
-        if: matrix.name == 'Windows'
-        # -m:1 parameter prevents test projects from being run in parallel, which could cause conflicts since PessimisticLocks project shares same tests
-        run: dotnet test src --configuration Release --no-build --logger "GitHubActions;report-warnings=false" -m:1
-      - name: Run Linux tests
-        if: matrix.name == 'Linux'
-        # -m:1 parameter prevents test projects from being run in parallel, which could cause conflicts since PessimisticLocks project shares same tests
-        run: |
-          dotnet test src --configuration Release --no-build --framework netcoreapp3.1 --logger "GitHubActions;report-warnings=false"
-          dotnet test src --configuration Release --no-build --framework net5.0 --logger "GitHubActions;report-warnings=false"
+
+          $tcpClient = New-Object Net.Sockets.TcpClient
+          echo "Verifying connection"
+          do
+          {
+              try
+              {
+                  $tcpClient.Connect($fqdn, 8080)
+              } catch 
+              {
+                  Start-Sleep -Seconds 2
+              }
+          } While($tcpClient.Connected -ne "True")
+          echo "Connection verified"
+      - name: Run tests
+        uses: Particular/run-tests-action@v1.0.0
       - name: Teardown RavenDB
         if: ${{ always() }}
         uses: Azure/powershell@v1

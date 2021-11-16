@@ -53,7 +53,7 @@
 
         public IOutboxStorage OutboxStorage { get; private set; }
 
-        public Task Configure(CancellationToken cancellationToken = default)
+        public async Task Configure(CancellationToken cancellationToken = default)
         {
             GetContextBagForOutbox = GetContextBagForSagaStorage = () =>
             {
@@ -80,14 +80,13 @@
             };
             documentStore.Initialize();
             var dbRecord = new DatabaseRecord(dbName);
-            documentStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
+            await documentStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord), cancellationToken);
 
             IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore));
             SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator, null);
             SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter(null);
 
             OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault);
-            return Task.CompletedTask;
         }
 
         public async Task Cleanup(CancellationToken cancellationToken = default)
@@ -100,11 +99,11 @@
             {
                 try
                 {
-                    documentStore.Maintenance.Server.Send(new DeleteDatabasesOperation(documentStore.Database, hardDelete: true));
+                    await documentStore.Maintenance.Server.SendAsync(new DeleteDatabasesOperation(documentStore.Database, hardDelete: true), cancellationToken);
                     documentStore.Dispose();
                     break;
                 }
-                catch
+                catch (Exception ex) when (!(ex is OperationCanceledException) || !cancellationToken.IsCancellationRequested)
                 {
                     if (triesLeft == 0)
                     {

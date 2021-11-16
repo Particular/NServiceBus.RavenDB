@@ -20,7 +20,7 @@ public class When_storing_subscription : RavenDBPersistenceTestBase
 
         // act
         await storage.Subscribe(subscriber, new MessageType("MessageType1", "1.0.0.0"), new ContextBag());
-        WaitForIndexing();
+        await WaitForIndexing();
 
         // assert
         using (var session = store.OpenAsyncSession())

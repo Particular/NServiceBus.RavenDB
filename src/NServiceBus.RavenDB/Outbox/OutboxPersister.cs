@@ -108,13 +108,14 @@
                         Script =
 $@"if(this.Dispatched === true)
   return;
-this.Dispatched = true
-this.DispatchedAt = args.DispatchedAt.Now
-this.TransportOperations = []
-this['@metadata']['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey}'] = args.SchemaVersion.Version
+this.Dispatched = true;
+this.DispatchedAt = args.DispatchedAt.Now;
+this.TransportOperations = [];
+var metadata = this['@metadata'];
+metadata['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey}'] = args.SchemaVersion.Version;
 if(args.Expire.Should === false)
   return;
-this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
+metadata['{Constants.Documents.Metadata.Expires}'] = args.Expire.At;",
                         Values =
                         {
                             {

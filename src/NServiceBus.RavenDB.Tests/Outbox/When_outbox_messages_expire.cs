@@ -15,10 +15,10 @@
     public class When_outbox_messages_expire : RavenDBPersistenceTestBase
     {
         [SetUp]
-        public override void SetUp()
+        public override async Task SetUp()
         {
-            base.SetUp();
-            new OutboxRecordsIndex().Execute(store);
+            await base.SetUp();
+            await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
         [Test]
@@ -47,7 +47,7 @@
             // act
             // wait for dispatch logic and expiry to finish, not ideal but polling on BASE index is also not great
             await Task.Delay(TimeSpan.FromSeconds(3));
-            WaitForIndexing();
+            await WaitForIndexing();
 
             // assert
             using (var session = store.OpenAsyncSession())

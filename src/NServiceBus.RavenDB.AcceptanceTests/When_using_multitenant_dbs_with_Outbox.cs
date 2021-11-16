@@ -35,10 +35,20 @@
 
         async Task RunTest(Action<ContextDbConfig> configureMultiTenant)
         {
+            string tenantOneDbName = "Tenant1-" + Guid.NewGuid().ToString("N").Substring(16);
+            string tenantTwoDbName = "Tenant2-" + Guid.NewGuid().ToString("N").Substring(16);
+
+            using (var tenantOneStore = ConfigureEndpointRavenDBPersistence.GetInitializedDocumentStore(tenantOneDbName))
+            using (var tenantTwoStore = ConfigureEndpointRavenDBPersistence.GetInitializedDocumentStore(tenantTwoDbName))
+            {
+                await ConfigureEndpointRavenDBPersistence.CreateDatabase(tenantOneStore, tenantOneDbName);
+                await ConfigureEndpointRavenDBPersistence.CreateDatabase(tenantTwoStore, tenantTwoDbName);
+            }
+
             var context = await Scenario.Define<Context>(c =>
                 {
-                    c.Db1 = "Tenant1-" + Guid.NewGuid().ToString("n").Substring(16);
-                    c.Db2 = "Tenant2-" + Guid.NewGuid().ToString("n").Substring(16);
+                    c.Db1 = tenantOneDbName;
+                    c.Db2 = tenantTwoDbName;
                 })
                 .WithEndpoint<MultiTenantEndpoint>(b =>
                 {
@@ -53,9 +63,6 @@
                         var defaultStore = ConfigureEndpointRavenDBPersistence.GetDefaultDocumentStore(settings);
                         c.DefaultDb = defaultStore.Database;
                         c.DbConfig.DefaultStore = defaultStore;
-
-                        ConfigureEndpointRavenDBPersistence.CreateDatabase(defaultStore, c.Db1);
-                        ConfigureEndpointRavenDBPersistence.CreateDatabase(defaultStore, c.Db2);
 
                         c.DbConfig.PersistenceExtensions = ConfigureEndpointRavenDBPersistence.GetDefaultPersistenceExtensions(settings);
                         configureMultiTenant(c.DbConfig);

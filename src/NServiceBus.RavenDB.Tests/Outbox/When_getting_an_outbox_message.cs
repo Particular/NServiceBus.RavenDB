@@ -11,10 +11,10 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     public class When_getting_an_outbox_message : RavenDBPersistenceTestBase
     {
         [SetUp]
-        public override void SetUp()
+        public override async Task SetUp()
         {
-            base.SetUp();
-            new OutboxRecordsIndex().Execute(store);
+            await base.SetUp();
+            await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
         [Test]
