@@ -74,10 +74,7 @@ jobs:
         run: |
           $hostInfo = curl -H Metadata:true "169.254.169.254/metadata/instance?api-version=2017-08-01" | ConvertFrom-Json
           $region = $hostInfo.compute.location
-          $license = '${{ secrets.RAVENDB_LICENSE_WINDOWS }}'
-          if ($PSVersionTable.Platform -eq 'Unix') {
-              $license = '${{ secrets.RAVENDB_LICENSE_LINUX }}'
-          }
+          $license = '${{ secrets.RAVENDB_LICENSE }}'
 
           function NewRavenDBNode {
               param (
