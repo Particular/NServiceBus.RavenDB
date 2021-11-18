@@ -60,7 +60,7 @@
             if (!isInitialized)
             {
                 EnsureDocStoreCreated(settings, builder);
-                EnsureServerVersion(docStore);
+                EnsureCompatibleServerVersion(docStore);
                 ApplyConventions(settings);
 
                 docStore.Initialize();
@@ -73,7 +73,7 @@
             return docStore;
         }
 
-        void EnsureServerVersion(IDocumentStore documentStore)
+        void EnsureCompatibleServerVersion(IDocumentStore documentStore)
         {
             var requiredVersion = new Version(5, 2);
             var serverVersion = documentStore.Maintenance.Server.Send(new GetBuildNumberOperation());
