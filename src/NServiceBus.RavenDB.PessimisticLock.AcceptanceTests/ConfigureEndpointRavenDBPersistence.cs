@@ -46,7 +46,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     internal static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
     {
-        var urls = Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls") ?? "http://localhost:8080";
+        var urls = Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
 
         var documentStore = new DocumentStore
         {
