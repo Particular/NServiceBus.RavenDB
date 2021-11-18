@@ -67,21 +67,22 @@ jobs:
 
           echo "::set-output name=prefix::$prefix"
 
-          $fqdnRavenDB = @(0, 1, 2, 3)
+          $fqdnRavenDB = @{ singlenode = ""; leader = ""; follower1 = ""; follower2 = "" }
 
           $NewRavenDBNodeDef = $function:NewRavenDBNode.ToString()
 
-          $fqdnRavenDB | ForEach-Object -Parallel {
+          @($fqdnRavenDB.keys) | ForEach-Object -Parallel {
               $function:NewRavenDBNode = $using:NewRavenDBNodeDef
               $region = $using:region;
               $prefix = $using:prefix;
               $detail = NewRavenDBNode $region $prefix $_ ${{ runner.os }} ${{ github.sha }}
-              $arr = $using:fqdnRavenDB;
-              $arr[$_] = $detail
+              $hashTable = $using:fqdnRavenDB;
+              $hashTable[$_] = $detail
           }
 
-          $fqdnRavenDB | ForEach-Object -Parallel {
-              echo "::add-mask::$_"
+          @($fqdnRavenDB.keys) | ForEach-Object -Parallel {
+              $hashTable = $using:fqdnRavenDB;
+              echo "::add-mask::$hashTable[$_]"
               $tcpClient = New-Object Net.Sockets.TcpClient
               echo "Verifying connection $_"
               do
@@ -89,7 +90,7 @@ jobs:
                   try
                   {
                       echo "Trying to connect to $_"
-                      $tcpClient.Connect($_, 8080)
+                      $tcpClient.Connect($hashTable[$_], 8080)
                       echo "Connection to $_ successful"
                   } catch 
                   {
@@ -101,22 +102,25 @@ jobs:
           }
 
           # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
-          echo "Activating license on $($fqdnRavenDB[0])"
-          curl "http://$($fqdnRavenDB[0]):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
+          echo "Activating license on singlenode"
+          curl "http://$($fqdnRavenDB['singlenode']):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
 
           # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
-          echo "Activating license on $($fqdnRavenDB[1])"
-          curl "http://$($fqdnRavenDB[1]):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
+          echo "Activating license on leader"
+          curl "http://$($fqdnRavenDB['leader']):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
 
-          curl "http://$($fqdnRavenDB[1]):8080/admin/license/set-limit?nodeTag=A&newAssignedCores=1" -X POST -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
-          $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB[2]):8080") 
-          curl "http://$($fqdnRavenDB[1]):8080/admin/cluster/node?url=$($encodedURL)&tag=B&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
-          $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB[3]):8080")
-          curl "http://$($fqdnRavenDB[1]):8080/admin/cluster/node?url=$($encodedURL)&tag=C&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
+          curl "http://$($fqdnRavenDB['leader']):8080/admin/license/set-limit?nodeTag=A&newAssignedCores=1" -X POST -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
+          $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB['follower1']):8080") 
+          curl "http://$($fqdnRavenDB['leader']):8080/admin/cluster/node?url=$($encodedURL)&tag=B&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
+          $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB['follower2']):8080")
+          curl "http://$($fqdnRavenDB['leader']):8080/admin/cluster/node?url=$($encodedURL)&
 
-          echo "::set-output name=singlenodeurl::http://$($fqdnRavenDB[0]):8080"
+          $singlenodeurl = "http://$($fqdnRavenDB['singlenode']):8080";
+          echo "::set-output name=singlenodeurl::$singlenodeurl"
           echo "::add-mask::singlenodeurl"
-          echo "::set-output name=clusterurl::http://$($fqdnRavenDB[1]):8080,http://$($fqdnRavenDB[2]):8080,http://$($fqdnRavenDB[3]):8080"
+
+          $clusterurl = "http://$($fqdnRavenDB['leader']):8080,http://$($fqdnRavenDB['follower1']):8080,http://$($fqdnRavenDB['follower2']):8080"
+          echo "::set-output name=clusterurl::$clusterurl"
           echo "::add-mask::clusterurl"
 
   build:
