@@ -185,5 +185,5 @@ jobs:
         if: ${{ always() }}
         uses: Azure/powershell@v1
         with:
-          inlineScript: Get-AzContainerGroup -ResourceGroupName GitHubActions-RG | Where-Object { $_.Name -like "${{ needs.setup.outputs.prefix }}*" } | Remove-AzContainerGroup | Out-Null
+          inlineScript: Get-AzContainerGroup -ResourceGroupName GitHubActions-RG | Where-Object { $_.Name -like "${{ needs.setup.outputs.prefix }}*" } | Remove-AzContainerGroup
           azPSVersion: latest      
