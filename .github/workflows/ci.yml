@@ -115,11 +115,9 @@ jobs:
           curl "http://$($fqdnRavenDB['leader']):8080/admin/cluster/node?url=$($encodedURL)&tag=C&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
 
           $singlenodeurl = "http://$($fqdnRavenDB['singlenode']):8080"
-          echo "::add-mask::$singlenodeurl"
           echo "::set-output name=singlenodeurl::$singlenodeurl"
 
           $clusterurl = "http://$($fqdnRavenDB['leader']):8080,http://$($fqdnRavenDB['follower1']):8080,http://$($fqdnRavenDB['follower2']):8080"
-          echo "::add-mask::$clusterurl"
           echo "::set-output name=clusterurl::$clusterurl"
 
   build:
@@ -168,6 +166,11 @@ jobs:
           name: NuGet packages
           path: nugets/
           retention-days: 7
+      - name: Prepare for tests
+        shell: pwsh
+        run: |
+          echo "::add-mask::${{ needs.setup.outputs.singlenodeurl }}"
+          echo "::add-mask::${{ needs.setup.outputs.clusterurl }}"
       - name: Run tests
         env:
           RavenSingleNodeUrl: ${{ needs.setup.outputs.singlenodeurl }}
