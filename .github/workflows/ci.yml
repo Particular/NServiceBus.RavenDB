@@ -113,7 +113,7 @@ jobs:
           $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB['follower1']):8080") 
           curl "http://$($fqdnRavenDB['leader']):8080/admin/cluster/node?url=$($encodedURL)&tag=B&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
           $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB['follower2']):8080")
-          curl "http://$($fqdnRavenDB['leader']):8080/admin/cluster/node?url=$($encodedURL)&
+          curl "http://$($fqdnRavenDB['leader']):8080/admin/cluster/node?url=$($encodedURL)&tag=C&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
 
           $singlenodeurl = "http://$($fqdnRavenDB['singlenode']):8080"
           echo "::set-output name=singlenodeurl::$singlenodeurl"
