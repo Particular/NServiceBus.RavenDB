@@ -178,7 +178,7 @@ jobs:
           name: NuGet packages
           path: nugets/
           retention-days: 7
-      - name: Download artifact
+      - name: Download Urls
         uses: actions/download-artifact@v2
         with:
           name: ravendburls
