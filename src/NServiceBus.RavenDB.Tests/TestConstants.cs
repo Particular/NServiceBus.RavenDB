@@ -8,7 +8,7 @@
         {
             get
             {
-                var urls = Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls") ?? "http://localhost:8080";
+                var urls = Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
                 return urls.Split(',');
             }
         }
