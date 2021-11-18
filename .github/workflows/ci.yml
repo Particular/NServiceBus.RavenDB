@@ -115,7 +115,7 @@ jobs:
           $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB['follower2']):8080")
           curl "http://$($fqdnRavenDB['leader']):8080/admin/cluster/node?url=$($encodedURL)&
 
-          $singlenodeurl = "http://$($fqdnRavenDB['singlenode']):8080";
+          $singlenodeurl = "http://$($fqdnRavenDB['singlenode']):8080"
           echo "::set-output name=singlenodeurl::$singlenodeurl"
           echo "::add-mask::$singlenodeurl"
 
