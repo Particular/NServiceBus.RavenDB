@@ -74,9 +74,11 @@ jobs:
         run: |
           $hostInfo = curl -H Metadata:true "169.254.169.254/metadata/instance?api-version=2017-08-01" | ConvertFrom-Json
           $region = $hostInfo.compute.location
+          $license = ${{ secrets.RAVENDB_LICENSE_WINDOWS }}
+          if ($PSVersionTable.Platform -eq 'Unix') {
+              $license = ${{ secrets.RAVENDB_LICENSE_LINUX }}
+          }
 
-          echo $region
-          
           function NewRavenDBNode {
               param (
                   $region,
@@ -138,10 +140,10 @@ jobs:
           }
 
           echo "Activating license on $($fqdnRavenDB[0])"
-          curl "http://$($fqdnRavenDB[0]):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d '${{ secrets.RAVENDB_LICENSE }}'
+          curl "http://$($fqdnRavenDB[0]):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d '$license'
 
           echo "Activating license on $($fqdnRavenDB[1])"
-          curl "http://$($fqdnRavenDB[1]):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d '{\"Id\":\"f4769b49-29a1-4e1c-b1bd-d4607bd7e523\",\"Name\":\"Particular Software\",\"Keys\":[\"SPkHXx0eemc1PN2nOoXWeNNT2\",\"zAcbQ5FmbhbwF/AbhYroWvFO4\",\"Bw1bJ1ch4bBF7B3+5brL18DgC\",\"mvBFe3MHGI8x1vd82iapiAreE\",\"vuAqaPWZ6wCS1w1BymcJGw6k0\",\"dwHuNCXqOQ26joJtj94IfTJMR\",\"NoPlpEhjBCwMaMGRPiwbxAAUE\",\"oBQYHKEkDCgsMDQ4PEBESExQ1\",\"FkMGRANiWlI=\"]}'
+          curl "http://$($fqdnRavenDB[1]):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d '$license'
 
           curl "http://$($fqdnRavenDB[1]):8080/admin/license/set-limit?nodeTag=A&newAssignedCores=1" -X POST -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
           $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB[2]):8080") 
