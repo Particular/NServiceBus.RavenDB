@@ -170,10 +170,13 @@ jobs:
         shell: pwsh
         run: |
           echo '::echo::off'
-          echo "RavenSingleNodeUrl=${{ needs.setup.outputs.singlenodeurl }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-          echo "CommaSeparatedRavenClusterUrls=${{ needs.setup.outputs.clusterurl }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+          echo "::add-mask::${{ needs.setup.outputs.clusterurl }}"
+          echo "::add-mask::${{ needs.setup.outputs.clusterurl }}"
           echo '::echo::on'
       - name: Run tests
+        env:
+          RavenSingleNodeUrl: ${{ needs.setup.outputs.singlenodeurl }}
+          CommaSeparatedRavenClusterUrls: ${{ needs.setup.outputs.clusterurl }}
         uses: Particular/run-tests-action@v1.0.0
 
   cleanup:
