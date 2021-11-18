@@ -170,8 +170,10 @@ jobs:
         run: |
           singlenodeurl = "${{ needs.setup.outputs.singlenodeurl }}"
           echo "::add-mask::$singlenodeurl"
+          echo "::set-output name=singlenodeurl::$singlenodeurl"
           clusterurl = "${{ needs.setup.outputs.clusterurl }}"
           echo "::add-mask::$clusterurl"
+          echo "::set-output name=clusterurl::$clusterurl"
       - name: Run tests
         env:
           RavenSingleNodeUrl: ${{ needs.setup.outputs.singlenodeurl }}
