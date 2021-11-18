@@ -167,17 +167,11 @@ jobs:
           path: nugets/
           retention-days: 7
       - name: Prepare for tests
+        shell: pwsh
         run: |
-          singlenodeurl = "${{ needs.setup.outputs.singlenodeurl }}"
-          echo "::add-mask::$singlenodeurl"
-          echo "::set-output name=singlenodeurl::$singlenodeurl"
-          clusterurl = "${{ needs.setup.outputs.clusterurl }}"
-          echo "::add-mask::$clusterurl"
-          echo "::set-output name=clusterurl::$clusterurl"
+          echo "RavenSingleNodeUrl=${{ needs.setup.outputs.singlenodeurl }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+          echo "CommaSeparatedRavenClusterUrls=${{ needs.setup.outputs.clusterurl }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
       - name: Run tests
-        env:
-          RavenSingleNodeUrl: ${{ needs.setup.outputs.singlenodeurl }}
-          CommaSeparatedRavenClusterUrls: ${{ needs.setup.outputs.clusterurl }}
         uses: Particular/run-tests-action@v1.0.0
 
   cleanup:
