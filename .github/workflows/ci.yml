@@ -115,7 +115,9 @@ jobs:
           curl "http://$($fqdnRavenDB[1]):8080/admin/cluster/node?url=$($encodedURL)&tag=C&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
 
           echo "::set-output name=singlenodeurl::http://$($fqdnRavenDB[0]):8080"
+          echo "::add-mask::singlenodeurl"
           echo "::set-output name=clusterurl::http://$($fqdnRavenDB[1]):8080,http://$($fqdnRavenDB[2]):8080,http://$($fqdnRavenDB[3]):8080"
+          echo "::add-mask::clusterurl"
 
   build:
     name: ${{ matrix.name }}
@@ -163,12 +165,10 @@ jobs:
           name: NuGet packages
           path: nugets/
           retention-days: 7
-      - name: Prepare Environment for tests
-        shell: pwsh
-        run: |
-          echo "RavenSingleNodeUrl=${{ needs.setup.outputs.singlenodeurl }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-          echo "CommaSeparatedRavenClusterUrls=${{ needs.setup.outputs.clusterurl }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
       - name: Run tests
+        env:
+          RavenSingleNodeUrl: ${{ needs.setup.outputs.singlenodeurl }}
+          CommaSeparatedRavenClusterUrls: ${{ needs.setup.outputs.clusterurl }}
         uses: Particular/run-tests-action@v1.0.0
 
   cleanup:
