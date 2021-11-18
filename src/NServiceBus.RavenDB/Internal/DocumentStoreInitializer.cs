@@ -81,11 +81,11 @@
 
             if (fullVersion.Major < requiredVersion.Major)
             {
-                throw new Exception("The RavenDB persistence requires RavenDB server 5.2 or higher");
+                throw new Exception($"We detected that the server is running on version {serverVersion.FullVersion}. RavenDB persistence requires RavenDB server 5.2 or higher");
             }
             if (fullVersion.Major == requiredVersion.Major && fullVersion.Minor < requiredVersion.Minor)
             {
-                throw new Exception("The RavenDB persistence requires RavenDB server 5.2 or higher");
+                throw new Exception($"We detected that the server is running on version {serverVersion.FullVersion}. RavenDB persistence requires RavenDB server 5.2 or higher");
             }
         }
 
