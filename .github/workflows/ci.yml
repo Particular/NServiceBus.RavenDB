@@ -151,8 +151,8 @@ jobs:
           $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB[3]):8080")
           curl "http://$($fqdnRavenDB[1]):8080/admin/cluster/node?url=$($encodedURL)&tag=C&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
 
-          echo "CommaSeparatedRavenClusterUrls=http://$($fqdnRavenDB[0]):8080" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-          echo "CommaSeparatedRavenClusterTransactionUrls=http://$($fqdnRavenDB[1]):8080,http://$($fqdnRavenDB[2]):8080,http://$($fqdnRavenDB[3]):8080" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+          echo "RavenSingleNodeUrl=http://$($fqdnRavenDB[0]):8080" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+          echo "CommaSeparatedRavenClusterUrls=http://$($fqdnRavenDB[1]):8080,http://$($fqdnRavenDB[2]):8080,http://$($fqdnRavenDB[3]):8080" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
 
       - name: Run tests
         uses: Particular/run-tests-action@v1.0.0
