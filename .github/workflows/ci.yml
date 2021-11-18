@@ -23,8 +23,6 @@ jobs:
     runs-on: ubuntu-20.04
     outputs:
       prefix: ${{ steps.setup-ravendb.outputs.prefix }}
-      singlenodeurl: ${{ steps.setup-ravendb.outputs.singlenodeurl }}
-      clusterurl: ${{ steps.setup-ravendb.outputs.clusterurl }}
     steps:
       - name: Azure login
         uses: azure/login@v1.4.1
@@ -116,14 +114,17 @@ jobs:
 
           $singlenodeurl = "http://$($fqdnRavenDB['singlenode']):8080"
           echo "::set-output name=singlenodeurl::$singlenodeurl"
+          echo "::add-mask::$singlenodeurl"
 
           $clusterurl = "http://$($fqdnRavenDB['leader']):8080,http://$($fqdnRavenDB['follower1']):8080,http://$($fqdnRavenDB['follower2']):8080"
           echo "::set-output name=clusterurl::$clusterurl"
-      - name: Run a one-line script
+          echo "::add-mask::$clusterurl"
+      - name: Encrypt Urls
         run: |
+          # Unfortunately masking breaks job outputs so we go the extra mile
           echo ${{ steps.setup-ravendb.outputs.singlenodeurl }} | gpg --quiet --symmetric --cipher-algo AES256 --batch --yes --passphrase '${{ secrets.PASSPHRASE }}' --output singlenodeurl.txt.gpg
           echo ${{ steps.setup-ravendb.outputs.clusterurl }} | gpg --quiet --symmetric --cipher-algo AES256 --batch --yes --passphrase '${{ secrets.PASSPHRASE }}' --output clusterurl.txt.gpg
-      - name: 'Upload Artifact'
+      - name: Upload Urls
         uses: actions/upload-artifact@v2
         with:
           name: ravendburls
@@ -185,6 +186,7 @@ jobs:
         id: prepare
         shell: pwsh
         run: |
+          # Unfortunately masking breaks job outputs so we go the extra mile
           gpg --quiet --batch --yes --decrypt --passphrase='${{ secrets.PASSPHRASE }}' --output singlenodeurl.txt singlenodeurl.txt.gpg
           gpg --quiet --batch --yes --decrypt --passphrase='${{ secrets.PASSPHRASE }}' --output clusterurl.txt clusterurl.txt.gpg
           $singlenodeurl = cat singlenodeurl.txt
