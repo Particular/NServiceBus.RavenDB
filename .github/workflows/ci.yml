@@ -139,9 +139,11 @@ jobs:
               echo "Connection to $_ verified"
           }
 
+          # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
           echo "Activating license on $($fqdnRavenDB[0])"
           curl "http://$($fqdnRavenDB[0]):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
 
+          # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
           echo "Activating license on $($fqdnRavenDB[1])"
           curl "http://$($fqdnRavenDB[1]):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
 
