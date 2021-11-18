@@ -60,10 +60,10 @@
             if (!isInitialized)
             {
                 EnsureDocStoreCreated(settings, builder);
-                EnsureCompatibleServerVersion(docStore);
                 ApplyConventions(settings);
 
                 docStore.Initialize();
+                EnsureCompatibleServerVersion(docStore);
                 EnsureClusterConfiguration(docStore);
 
                 CreateIndexes(docStore);
