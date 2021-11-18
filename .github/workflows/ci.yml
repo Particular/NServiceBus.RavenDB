@@ -119,7 +119,18 @@ jobs:
 
           $clusterurl = "http://$($fqdnRavenDB['leader']):8080,http://$($fqdnRavenDB['follower1']):8080,http://$($fqdnRavenDB['follower2']):8080"
           echo "::set-output name=clusterurl::$clusterurl"
-
+      - name: Run a one-line script
+        run: |
+          echo ${{ steps.setup-ravendb.outputs.singlenodeurl }} | gpg --quiet --symmetric --cipher-algo AES256 --batch --yes --passphrase '${{ secrets.PASSPHRASE }}' --output singlenodeurl.txt.gpg
+          echo ${{ steps.setup-ravendb.outputs.clusterurl }} | gpg --quiet --symmetric --cipher-algo AES256 --batch --yes --passphrase '${{ secrets.PASSPHRASE }}' --output clusterurl.txt.gpg
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ravendburls
+          path: |
+            singlenodeurl.txt.gpg
+            clusterurl.txt.gpg
+          retention-days: 1
   build:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
@@ -166,17 +177,26 @@ jobs:
           name: NuGet packages
           path: nugets/
           retention-days: 7
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: ravendburls
       - name: Prepare for tests
+        id: prepare
         shell: pwsh
         run: |
-          echo '::echo::off'
-          echo "::add-mask::${{ needs.setup.outputs.clusterurl }}"
-          echo "::add-mask::${{ needs.setup.outputs.clusterurl }}"
-          echo '::echo::on'
+          gpg --quiet --batch --yes --decrypt --passphrase='${{ secrets.PASSPHRASE }}' --output singlenodeurl.txt singlenodeurl.txt.gpg
+          gpg --quiet --batch --yes --decrypt --passphrase='${{ secrets.PASSPHRASE }}' --output clusterurl.txt clusterurl.txt.gpg
+          $singlenodeurl = cat singlenodeurl.txt
+          echo "::add-mask::$singlenodeurl"
+          echo "::set-output name=singlenodeurl::$singlenodeurl"
+          $clusterurl = cat clusterurl.txt
+          echo "::add-mask::$clusterurl"
+          echo "::set-output name=clusterurl::$clusterurl"
       - name: Run tests
         env:
-          RavenSingleNodeUrl: ${{ needs.setup.outputs.singlenodeurl }}
-          CommaSeparatedRavenClusterUrls: ${{ needs.setup.outputs.clusterurl }}
+          RavenSingleNodeUrl: ${{ steps.prepare.outputs.singlenodeurl }}
+          CommaSeparatedRavenClusterUrls: ${{ steps.prepare.outputs.clusterurl }}
         uses: Particular/run-tests-action@v1.0.0
 
   cleanup:
