@@ -8,4 +8,4 @@ If you are interested in contributing, please follow the instructions [here.](ht
 
 ## Running the tests
 
-Running the tests requires RavenDB 4.2 available on `localhost:8080` or an environment variable named `CommaSeparatedRavenClusterUrls` containing the connection URLs, separated by commas if testing a cluster. The tests can be run with a RavenDB server hosted on a Docker container.
+Running the tests requires RavenDB 5.2 and two environment variables. One named `CommaSeparatedRavenClusterUrls` containing the URLs, separated by commas, to connect to a RavenDB cluster to run cluster-wide transaction tests. The second one named `RavenSingleNodeUrl` containing the URL of a single node RavenDB instance to run non-cluster-wide tests. The tests can be run with RavenDB servers hosted on a Docker container.
