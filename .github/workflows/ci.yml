@@ -82,7 +82,6 @@ jobs:
 
           @($fqdnRavenDB.keys) | ForEach-Object -Parallel {
               $hashTable = $using:fqdnRavenDB;
-              echo "::add-mask::$hashTable[$_]"
               $tcpClient = New-Object Net.Sockets.TcpClient
               echo "Verifying connection $_"
               do
@@ -117,11 +116,9 @@ jobs:
 
           $singlenodeurl = "http://$($fqdnRavenDB['singlenode']):8080"
           echo "::set-output name=singlenodeurl::$singlenodeurl"
-          echo "::add-mask::$singlenodeurl"
 
           $clusterurl = "http://$($fqdnRavenDB['leader']):8080,http://$($fqdnRavenDB['follower1']):8080,http://$($fqdnRavenDB['follower2']):8080"
           echo "::set-output name=clusterurl::$clusterurl"
-          echo "::add-mask::$clusterurl"
 
   build:
     name: ${{ matrix.name }}
