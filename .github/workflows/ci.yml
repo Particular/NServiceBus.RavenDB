@@ -172,7 +172,7 @@ jobs:
         uses: Particular/run-tests-action@v1.0.0
 
   cleanup:
-    runs-on: ubuntu-20.4
+    runs-on: ubuntu-20.04
     if: ${{ always() }}
     needs: [setup, build]
     steps:
