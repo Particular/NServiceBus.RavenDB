@@ -115,7 +115,7 @@ jobs:
               $function:NewRavenDBNode = $using:NewRavenDBNodeDef
               $region = $using:region;
               $prefix = $using:prefix;
-              $detail = NewRavenDBNode $region $prefix $_ ${{ runner.os }} ${GITHUB_SHA}
+              $detail = NewRavenDBNode $region $prefix $_ ${{ runner.os }} ${{ github.sha }}
               $arr = $using:fqdnRavenDB;
               $arr[$_] = $detail
           }
