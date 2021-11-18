@@ -167,11 +167,10 @@ jobs:
           path: nugets/
           retention-days: 7
       - name: Prepare for tests
-        shell: pwsh
         run: |
-          $singlenodeurl = "${{ needs.setup.outputs.singlenodeurl }}"
+          singlenodeurl = "${{ needs.setup.outputs.singlenodeurl }}"
           echo "::add-mask::$singlenodeurl"
-          $clusterurl = "${{ needs.setup.outputs.clusterurl }}"
+          clusterurl = "${{ needs.setup.outputs.clusterurl }}"
           echo "::add-mask::$clusterurl"
       - name: Run tests
         env:
