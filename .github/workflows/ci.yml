@@ -14,13 +14,128 @@ on:
 env:
   DOTNET_NOLOGO: true
 jobs:
-  build:
+  setup:
     if:
       (github.event_name == 'pull_request_target' && github.event.pull_request.user.login == 'dependabot[bot]') ||
       (github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]') ||
       github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    name: Setup RavenDB Nodes
+    runs-on: ubuntu-20.04
+    outputs:
+      prefix: ${{ steps.setup-ravendb.outputs.prefix }}
+    steps:
+      - name: Azure login
+        uses: azure/login@v1.4.1
+        with:
+          creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
+          enable-AzPSSession: true
+      - name: Setup RavenDB
+        id: setup-ravendb
+        shell: pwsh
+        run: |
+          $hostInfo = curl -H Metadata:true "169.254.169.254/metadata/instance?api-version=2017-08-01" | ConvertFrom-Json
+          $region = $hostInfo.compute.location
+          $license = '${{ secrets.RAVENDB_LICENSE }}'
+
+          function NewRavenDBNode {
+              param (
+                  $region,
+                  $prefix,
+                  $instanceId,
+                  $runnerOs,
+                  $commit
+              )
+
+              $hostname = "$prefix-$instanceId"
+
+              # echo will mess up the return value
+              Write-Debug "Creating RavenDB container $hostname in $region (This can take a while.)"
+
+              $details = az container create --image ravendb/ravendb:5.2-ubuntu-latest --name $hostname --location $region --dns-name-label $hostname --resource-group GitHubActions-RG --cpu 4 --memory 8 --ports 8080 38888 --ip-address public --environment-variables RAVEN_ServerUrl="http://0.0.0.0:8080" RAVEN_ServerUrl_Tcp="tcp://0.0.0.0:38888" RAVEN_PublicServerUrl="http://$($hostname).$($region).azurecontainer.io:8080" RAVEN_PublicServerUrl_Tcp="tcp://$($hostname).$($region).azurecontainer.io:38888" RAVEN_Setup_Mode="None" RAVEN_License_Eula_Accepted="true" RAVEN_Security_UnsecuredAccessAllowed="PublicNetwork" | ConvertFrom-Json
+              
+              # echo will mess up the return value
+              Write-Debug "Tagging container image"
+              $dateTag = "Created=$(Get-Date -Format "yyyy-MM-dd")"
+              $ignore = az tag create --resource-id $details.id --tags Package=RavenPersistence RunnerOS=$runnerOs Commit=$commit $dateTag
+
+              return $details.ipAddress.fqdn
+          }
+
+          $prefix = "psw-ravendb-$(Get-Random)"
+
+          echo "::set-output name=prefix::$prefix"
+
+          $fqdnRavenDB = @{ singlenode = ""; leader = ""; follower1 = ""; follower2 = "" }
+
+          $NewRavenDBNodeDef = $function:NewRavenDBNode.ToString()
+
+          @($fqdnRavenDB.keys) | ForEach-Object -Parallel {
+              $function:NewRavenDBNode = $using:NewRavenDBNodeDef
+              $region = $using:region;
+              $prefix = $using:prefix;
+              $detail = NewRavenDBNode $region $prefix $_ ${{ runner.os }} ${{ github.sha }}
+              $hashTable = $using:fqdnRavenDB;
+              $hashTable[$_] = $detail
+          }
+
+          @($fqdnRavenDB.keys) | ForEach-Object -Parallel {
+              $hashTable = $using:fqdnRavenDB;
+              $tcpClient = New-Object Net.Sockets.TcpClient
+              echo "Verifying connection $_"
+              do
+              {
+                  try
+                  {
+                      echo "Trying to connect to $_"
+                      $tcpClient.Connect($hashTable[$_], 8080)
+                      echo "Connection to $_ successful"
+                  } catch 
+                  {
+                      Start-Sleep -Seconds 2
+                  }
+              } While($tcpClient.Connected -ne "True")
+              $tcpClient.Close()
+              echo "Connection to $_ verified"
+          }
+
+          # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
+          echo "Activating license on singlenode"
+          curl "http://$($fqdnRavenDB['singlenode']):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
+
+          # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
+          echo "Activating license on leader"
+          curl "http://$($fqdnRavenDB['leader']):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
+
+          curl "http://$($fqdnRavenDB['leader']):8080/admin/license/set-limit?nodeTag=A&newAssignedCores=1" -X POST -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
+          $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB['follower1']):8080") 
+          curl "http://$($fqdnRavenDB['leader']):8080/admin/cluster/node?url=$($encodedURL)&tag=B&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
+          $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB['follower2']):8080")
+          curl "http://$($fqdnRavenDB['leader']):8080/admin/cluster/node?url=$($encodedURL)&tag=C&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
+
+          $singlenodeurl = "http://$($fqdnRavenDB['singlenode']):8080"
+          echo "::set-output name=singlenodeurl::$singlenodeurl"
+          echo "::add-mask::$singlenodeurl"
+
+          $clusterurl = "http://$($fqdnRavenDB['leader']):8080,http://$($fqdnRavenDB['follower1']):8080,http://$($fqdnRavenDB['follower2']):8080"
+          echo "::set-output name=clusterurl::$clusterurl"
+          echo "::add-mask::$clusterurl"
+      - name: Encrypt Urls
+        run: |
+          # Unfortunately masking breaks job outputs so we go the extra mile
+          echo ${{ steps.setup-ravendb.outputs.singlenodeurl }} | gpg --quiet --symmetric --cipher-algo AES256 --batch --yes --passphrase '${{ secrets.PASSPHRASE }}' --output singlenodeurl.txt.gpg
+          echo ${{ steps.setup-ravendb.outputs.clusterurl }} | gpg --quiet --symmetric --cipher-algo AES256 --batch --yes --passphrase '${{ secrets.PASSPHRASE }}' --output clusterurl.txt.gpg
+      - name: Upload Urls
+        uses: actions/upload-artifact@v2
+        with:
+          name: ravendburls
+          path: |
+            singlenodeurl.txt.gpg
+            clusterurl.txt.gpg
+          retention-days: 1
+  build:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    needs: setup
     strategy:
       matrix:
         include:
@@ -63,102 +178,42 @@ jobs:
           name: NuGet packages
           path: nugets/
           retention-days: 7
+      - name: Download Urls
+        uses: actions/download-artifact@v2
+        with:
+          name: ravendburls
+      - name: Prepare for tests
+        id: prepare
+        shell: pwsh
+        run: |
+          # Unfortunately masking breaks job outputs so we go the extra mile
+          gpg --quiet --batch --yes --decrypt --passphrase='${{ secrets.PASSPHRASE }}' --output singlenodeurl.txt singlenodeurl.txt.gpg
+          gpg --quiet --batch --yes --decrypt --passphrase='${{ secrets.PASSPHRASE }}' --output clusterurl.txt clusterurl.txt.gpg
+          $singlenodeurl = cat singlenodeurl.txt
+          echo "::add-mask::$singlenodeurl"
+          echo "::set-output name=singlenodeurl::$singlenodeurl"
+          $clusterurl = cat clusterurl.txt
+          echo "::add-mask::$clusterurl"
+          echo "::set-output name=clusterurl::$clusterurl"
+      - name: Run tests
+        env:
+          RavenSingleNodeUrl: ${{ steps.prepare.outputs.singlenodeurl }}
+          CommaSeparatedRavenClusterUrls: ${{ steps.prepare.outputs.clusterurl }}
+        uses: Particular/run-tests-action@v1.0.0
+
+  cleanup:
+    runs-on: ubuntu-20.04
+    if: ${{ always() }}
+    needs: [setup, build]
+    steps:
       - name: Azure login
         uses: azure/login@v1.4.1
         with:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
           enable-AzPSSession: true
-      - name: Setup RavenDB
-        id: setup-ravendb
-        shell: pwsh
-        run: |
-          $hostInfo = curl -H Metadata:true "169.254.169.254/metadata/instance?api-version=2017-08-01" | ConvertFrom-Json
-          $region = $hostInfo.compute.location
-          $license = '${{ secrets.RAVENDB_LICENSE }}'
-
-          function NewRavenDBNode {
-              param (
-                  $region,
-                  $prefix,
-                  $instanceId,
-                  $runnerOs,
-                  $commit
-              )
-
-              $hostname = "$prefix-$instanceId"
-
-              # echo will mess up the return value
-              Write-Debug "Creating RavenDB container $hostname in $region (This can take a while.)"
-
-              $details = az container create --image ravendb/ravendb:5.2-ubuntu-latest --name $hostname --location $region --dns-name-label $hostname --resource-group GitHubActions-RG --cpu 4 --memory 8 --ports 8080 38888 --ip-address public --environment-variables RAVEN_ServerUrl="http://0.0.0.0:8080" RAVEN_ServerUrl_Tcp="tcp://0.0.0.0:38888" RAVEN_PublicServerUrl="http://$($hostname).$($region).azurecontainer.io:8080" RAVEN_PublicServerUrl_Tcp="tcp://$($hostname).$($region).azurecontainer.io:38888" RAVEN_Setup_Mode="None" RAVEN_License_Eula_Accepted="true" RAVEN_Security_UnsecuredAccessAllowed="PublicNetwork" | ConvertFrom-Json
-              
-              # echo will mess up the return value
-              Write-Debug "Tagging container image"
-              $dateTag = "Created=$(Get-Date -Format "yyyy-MM-dd")"
-              $ignore = az tag create --resource-id $details.id --tags Package=RavenPersistence RunnerOS=$runnerOs Commit=$commit $dateTag
-
-              return $details.ipAddress.fqdn
-          }
-
-          $prefix = "psw-ravendb-$(Get-Random)"
-
-          echo "::set-output name=prefix::$prefix"
-
-          $fqdnRavenDB = @(0, 1, 2, 3)
-
-          $NewRavenDBNodeDef = $function:NewRavenDBNode.ToString()
-
-          $fqdnRavenDB | ForEach-Object -Parallel {
-              $function:NewRavenDBNode = $using:NewRavenDBNodeDef
-              $region = $using:region;
-              $prefix = $using:prefix;
-              $detail = NewRavenDBNode $region $prefix $_ ${{ runner.os }} ${{ github.sha }}
-              $arr = $using:fqdnRavenDB;
-              $arr[$_] = $detail
-          }
-
-          $fqdnRavenDB | ForEach-Object -Parallel {
-              echo "::add-mask::$_"
-              $tcpClient = New-Object Net.Sockets.TcpClient
-              echo "Verifying connection $_"
-              do
-              {
-                  try
-                  {
-                      echo "Trying to connect to $_"
-                      $tcpClient.Connect($_, 8080)
-                      echo "Connection to $_ successful"
-                  } catch 
-                  {
-                      Start-Sleep -Seconds 2
-                  }
-              } While($tcpClient.Connected -ne "True")
-              $tcpClient.Close()
-              echo "Connection to $_ verified"
-          }
-
-          # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
-          echo "Activating license on $($fqdnRavenDB[0])"
-          curl "http://$($fqdnRavenDB[0]):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
-
-          # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
-          echo "Activating license on $($fqdnRavenDB[1])"
-          curl "http://$($fqdnRavenDB[1]):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
-
-          curl "http://$($fqdnRavenDB[1]):8080/admin/license/set-limit?nodeTag=A&newAssignedCores=1" -X POST -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
-          $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB[2]):8080") 
-          curl "http://$($fqdnRavenDB[1]):8080/admin/cluster/node?url=$($encodedURL)&tag=B&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
-          $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB[3]):8080")
-          curl "http://$($fqdnRavenDB[1]):8080/admin/cluster/node?url=$($encodedURL)&tag=C&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
-
-          echo "RavenSingleNodeUrl=http://$($fqdnRavenDB[0]):8080" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-          echo "CommaSeparatedRavenClusterUrls=http://$($fqdnRavenDB[1]):8080,http://$($fqdnRavenDB[2]):8080,http://$($fqdnRavenDB[3]):8080" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-
-      - name: Run tests
-        uses: Particular/run-tests-action@v1.0.0
       - name: Teardown RavenDB
         if: ${{ always() }}
         uses: Azure/powershell@v1
         with:
-          inlineScript: Get-AzContainerGroup -ResourceGroupName GitHubActions-RG | Where-Object { $_.Name -like "${{ steps.setup-ravendb.outputs.prefix }}*" } | Remove-AzContainerGroup | Out-Null
+          inlineScript: Get-AzContainerGroup -ResourceGroupName GitHubActions-RG | Where-Object { $_.Name -like "${{ needs.setup.outputs.prefix }}*" } | Remove-AzContainerGroup | Out-Null
           azPSVersion: latest      
