@@ -81,11 +81,8 @@
             var serverVersion = await documentStore.Maintenance.Server.SendAsync(new GetBuildNumberOperation(), cancellationToken).ConfigureAwait(false);
             var fullVersion = new Version(serverVersion.FullVersion);
 
-            if (fullVersion.Major < requiredVersion.Major)
-            {
-                throw new Exception($"We detected that the server is running on version {serverVersion.FullVersion}. RavenDB persistence requires RavenDB server 5.2 or higher");
-            }
-            if (fullVersion.Major == requiredVersion.Major && fullVersion.Minor < requiredVersion.Minor)
+            if (fullVersion.Major < requiredVersion.Major ||
+                (fullVersion.Major == requiredVersion.Major && fullVersion.Minor < requiredVersion.Minor))
             {
                 throw new Exception($"We detected that the server is running on version {serverVersion.FullVersion}. RavenDB persistence requires RavenDB server 5.2 or higher");
             }
