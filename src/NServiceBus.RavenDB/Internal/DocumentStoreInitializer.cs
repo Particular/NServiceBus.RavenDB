@@ -2,8 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using NServiceBus.ConsistencyGuarantees;
-    using NServiceBus.Settings;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using ConsistencyGuarantees;
+    using Settings;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Indexes;
     using Raven.Client.Documents.Operations.Indexes;
@@ -63,7 +65,7 @@
                 ApplyConventions(settings);
 
                 docStore.Initialize();
-                EnsureCompatibleServerVersion(docStore);
+                EnsureCompatibleServerVersion(docStore, CancellationToken.None).GetAwaiter().GetResult();
                 EnsureClusterConfiguration(docStore);
 
                 CreateIndexes(docStore);
@@ -73,10 +75,10 @@
             return docStore;
         }
 
-        void EnsureCompatibleServerVersion(IDocumentStore documentStore)
+        async Task EnsureCompatibleServerVersion(IDocumentStore documentStore, CancellationToken cancellationToken)
         {
             var requiredVersion = new Version(5, 2);
-            var serverVersion = documentStore.Maintenance.Server.Send(new GetBuildNumberOperation());
+            var serverVersion = await documentStore.Maintenance.Server.SendAsync(new GetBuildNumberOperation(), cancellationToken).ConfigureAwait(false);
             var fullVersion = new Version(serverVersion.FullVersion);
 
             if (fullVersion.Major < requiredVersion.Major)
