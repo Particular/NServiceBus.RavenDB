@@ -5,6 +5,6 @@
 
     interface IOpenTenantAwareRavenSessions
     {
-        IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders);
+        IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders, SessionOptions sessionOptions);
     }
 }

@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration.AdvancedExtensibility;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.Persistence;
@@ -13,6 +14,7 @@
     using Raven.Client.Documents;
     using Raven.Client.ServerWide;
     using Raven.Client.ServerWide.Operations;
+    using Settings;
 
     public partial class PersistenceTestsConfiguration
     {
@@ -22,14 +24,21 @@
             optimisticConcurrencyConfiguration.UseOptimisticLocking();
             var pessimisticLockingConfiguration = new SagaPersistenceConfiguration();
 
+            var doNotClusterWideTx = new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder());
+            var useClusterWideTx = new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder());
+            useClusterWideTx.UseClusterWideTransactions();
+
             SagaVariants = new[]
             {
-                new TestVariant(optimisticConcurrencyConfiguration),
-                new TestVariant(pessimisticLockingConfiguration)
+                new TestVariant(optimisticConcurrencyConfiguration, doNotClusterWideTx),
+                new TestVariant(pessimisticLockingConfiguration, doNotClusterWideTx),
+                new TestVariant(optimisticConcurrencyConfiguration, useClusterWideTx),
+                new TestVariant(pessimisticLockingConfiguration, useClusterWideTx),
             };
             OutboxVariants = new[]
             {
-                new TestVariant(optimisticConcurrencyConfiguration)
+                new TestVariant(optimisticConcurrencyConfiguration, doNotClusterWideTx),
+                new TestVariant(optimisticConcurrencyConfiguration, useClusterWideTx)
             };
         }
 
@@ -71,6 +80,10 @@
             }
             SagaStorage = new SagaPersister(sagaPersistenceConfiguration);
 
+            var ravenConfiguration = Variant.Values[1] as PersistenceExtensions<RavenDBPersistence>;
+            var settings = ravenConfiguration.GetSettings();
+            var useClusterWideTx = settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
+
             var dbName = Guid.NewGuid().ToString();
             var urls = Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
             documentStore = new DocumentStore
@@ -83,10 +96,10 @@
             await documentStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord), cancellationToken);
 
             IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore));
-            SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator, null);
+            SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator, null, useClusterWideTx);
             SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter(null);
 
-            OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault);
+            OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault, useClusterWideTx);
         }
 
         public async Task Cleanup(CancellationToken cancellationToken = default)

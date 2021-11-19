@@ -12,13 +12,15 @@
             this.getDatabaseName = getDatabaseName ?? (context => string.Empty);
         }
 
-        public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
+        public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders, SessionOptions sessionOptions)
         {
             var databaseName = getDatabaseName(messageHeaders);
-            var documentSession = string.IsNullOrEmpty(databaseName)
-                ? documentStoreWrapper.DocumentStore.OpenAsyncSession()
-                : documentStoreWrapper.DocumentStore.OpenAsyncSession(databaseName);
+            if (!string.IsNullOrEmpty(databaseName))
+            {
+                sessionOptions.Database = databaseName;
+            }
 
+            var documentSession = documentStoreWrapper.DocumentStore.OpenAsyncSession(sessionOptions);
             documentSession.Advanced.UseOptimisticConcurrency = true;
 
             return documentSession;

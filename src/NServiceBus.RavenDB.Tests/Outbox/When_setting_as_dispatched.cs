@@ -20,11 +20,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
-        [Test]
-        public async Task Should_set_outbox_record_as_dispatched()
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_set_outbox_record_as_dispatched(bool useClusterWideTransactions)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
@@ -59,11 +60,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [Test]
-        public async Task Should_store_schema_version_in_metadata()
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_store_schema_version_in_metadata(bool useClusterWideTransactions)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
@@ -88,12 +90,13 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [Test]
-        public async Task Should_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_finite()
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_finite(bool useClusterWideTransactions)
         {
             // arrange
             var timeToKeepDeduplicationData = TimeSpan.FromSeconds(60);
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), timeToKeepDeduplicationData);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), timeToKeepDeduplicationData, useClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
@@ -122,11 +125,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [Test]
-        public async Task Should__not_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_infinite()
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should__not_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_infinite(bool useClusterWideTransactions)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), Timeout.InfiniteTimeSpan);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), Timeout.InfiniteTimeSpan, useClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;

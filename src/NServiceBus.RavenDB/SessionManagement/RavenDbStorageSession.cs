@@ -12,6 +12,8 @@
         {
             // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
             var getAsyncSessionFunc = context.Settings.GetOrDefault<Func<IDictionary<string, string>, IAsyncDocumentSession>>(SharedAsyncSession);
+            var useClusterWideTransactions = context.Settings.GetOrDefault<bool>(UseClusterWideTransactions);
+
             if (getAsyncSessionFunc != null)
             {
                 IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc);
@@ -46,12 +48,13 @@
             var sessionHolder = new CurrentSessionHolder();
             context.Services.AddScoped(_ => sessionHolder.Current);
             context.Pipeline.Register(new CurrentSessionBehavior(sessionHolder), "Manages the lifecycle of the current session holder.");
-            context.Services.AddSingleton<ISynchronizedStorage, RavenDBSynchronizedStorage>(provider => new RavenDBSynchronizedStorage(provider.GetService<IOpenTenantAwareRavenSessions>(), sessionHolder));
+            context.Services.AddSingleton<ISynchronizedStorage, RavenDBSynchronizedStorage>(provider => new RavenDBSynchronizedStorage(provider.GetService<IOpenTenantAwareRavenSessions>(), sessionHolder, useClusterWideTransactions));
             context.Services.AddSingleton<ISynchronizedStorageAdapter>(new RavenDBSynchronizedStorageAdapter(sessionHolder));
         }
 
         internal const string SharedAsyncSession = "RavenDbSharedAsyncSession";
         internal const string MessageToDatabaseMappingConvention = "RavenDB.SetMessageToDatabaseMappingConvention";
-        const string StartupDiagnosticsSectionName = "NServiceBus.Persistence.RavenDB.StorageSession";
+        internal const string StartupDiagnosticsSectionName = "NServiceBus.Persistence.RavenDB.StorageSession";
+        internal const string UseClusterWideTransactions = "NServiceBus.Persistence.RavenDB.UseClusterWideTransactions";
     }
 }
