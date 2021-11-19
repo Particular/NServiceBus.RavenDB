@@ -8,6 +8,7 @@
     using Raven.Client.Documents.Indexes;
     using Raven.Client.Documents.Operations.Indexes;
     using Raven.Client.ServerWide.Commands;
+    using Raven.Client.ServerWide.Operations;
 
     class DocumentStoreInitializer
     {
@@ -62,6 +63,7 @@
                 ApplyConventions(settings);
 
                 docStore.Initialize();
+                EnsureCompatibleServerVersion(docStore);
                 EnsureClusterConfiguration(docStore);
 
                 CreateIndexes(docStore);
@@ -69,6 +71,19 @@
 
             isInitialized = true;
             return docStore;
+        }
+
+        void EnsureCompatibleServerVersion(IDocumentStore documentStore)
+        {
+            var requiredVersion = new Version(5, 2);
+            var serverVersion = documentStore.Maintenance.Server.Send(new GetBuildNumberOperation());
+            var fullVersion = new Version(serverVersion.FullVersion);
+
+            if (fullVersion.Major < requiredVersion.Major ||
+                (fullVersion.Major == requiredVersion.Major && fullVersion.Minor < requiredVersion.Minor))
+            {
+                throw new Exception($"We detected that the server is running on version {serverVersion.FullVersion}. RavenDB persistence requires RavenDB server 5.2 or higher");
+            }
         }
 
         void EnsureDocStoreCreated(IReadOnlySettings settings, IServiceProvider builder)
