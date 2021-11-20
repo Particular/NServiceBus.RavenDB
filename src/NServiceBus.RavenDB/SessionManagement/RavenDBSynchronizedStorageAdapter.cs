@@ -15,11 +15,11 @@
 
         public Task<ICompletableSynchronizedStorageSession> TryAdapt(IOutboxTransaction transaction, ContextBag context, CancellationToken cancellationToken = default)
         {
-            if (transaction is RavenDBOutboxTransaction IOutboxTransaction)
+            if (transaction is RavenDBOutboxTransaction outboxTransaction)
             {
-                sessionHolder?.SetCurrentSession(IOutboxTransaction.AsyncSession);
+                sessionHolder?.SetCurrentSession(outboxTransaction.AsyncSession);
                 return Task.FromResult<ICompletableSynchronizedStorageSession>(
-                    new RavenDBSynchronizedStorageSession(IOutboxTransaction.AsyncSession, context, false));
+                    new RavenDBSynchronizedStorageSession(outboxTransaction.AsyncSession, context, false));
             }
 
             return EmptyResult;

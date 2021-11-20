@@ -17,11 +17,11 @@
         {
             var message = context.Get<IncomingMessage>();
             var session = sessionCreator.OpenSession(message.Headers);
-            var ISynchronizedStorageSession = new RavenDBSynchronizedStorageSession(session, context, true);
+            var synchronizedStorageSession = new RavenDBSynchronizedStorageSession(session, context, true);
 
             sessionHolder?.SetCurrentSession(session);
 
-            return Task.FromResult((ICompletableSynchronizedStorageSession)ISynchronizedStorageSession);
+            return Task.FromResult((ICompletableSynchronizedStorageSession)synchronizedStorageSession);
         }
 
         IOpenTenantAwareRavenSessions sessionCreator;
