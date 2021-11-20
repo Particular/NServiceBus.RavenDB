@@ -17,7 +17,7 @@
         /// <param name="session">The storage session.</param>
         public static IAsyncDocumentSession RavenSession(this ISynchronizedStorageSession session) => session switch
         {
-            RavenDBSynchronizedStorageSession ISynchronizedStorageSession => ISynchronizedStorageSession.Session,
+            RavenDBSynchronizedStorageSession synchronizedStorageSession => synchronizedStorageSession.Session,
             TestableRavenStorageSession testableStorageSession => testableStorageSession.Session,
             _ => throw new InvalidOperationException("It was not possible to retrieve a RavenDB session.")
         };
