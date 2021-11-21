@@ -8,3 +8,18 @@ dotnet_diagnostic.PS0004.severity = none
 
 # Justification: Tests don't support cancellation and don't need to forward IMessageHandlerContext.CancellationToken
 dotnet_diagnostic.NSB0002.severity = suggestion
+
+# Allows test classes to use underscores as separators
+dotnet_naming_rule.types_should_be_test_class_case.severity = suggestion
+dotnet_naming_rule.types_should_be_test_class_case.symbols = types
+dotnet_naming_rule.types_should_be_test_class_case.style = test_class_case
+
+dotnet_naming_symbols.types.applicable_kinds = class, struct, interface, enum
+dotnet_naming_symbols.types.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.types.required_modifiers =
+
+# Naming styles for test classes
+dotnet_naming_style.test_class_case.required_prefix =
+dotnet_naming_style.test_class_case.required_suffix =
+dotnet_naming_style.test_class_case.word_separator = _
+dotnet_naming_style.test_class_case.capitalization = first_word_upper
