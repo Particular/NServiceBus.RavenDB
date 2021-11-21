@@ -78,10 +78,10 @@
 
                 public Task Handle(ContinueMsg message, IMessageHandlerContext context)
                 {
-                    this.Data.ContinueCount++;
-                    this.Data.CollectedIndexes.Add(message.Index);
+                    Data.ContinueCount++;
+                    Data.CollectedIndexes.Add(message.Index);
 
-                    if (this.Data.ContinueCount == 3)
+                    if (Data.ContinueCount == 3)
                     {
                         return context.SendLocal(new FinishMsg { OrderId = message.OrderId });
                     }
@@ -91,8 +91,8 @@
 
                 public Task Handle(FinishMsg message, IMessageHandlerContext context)
                 {
-                    this.MarkAsComplete();
-                    testContext.SagaData = this.Data;
+                    MarkAsComplete();
+                    testContext.SagaData = Data;
                     return Task.CompletedTask;
                 }
             }
