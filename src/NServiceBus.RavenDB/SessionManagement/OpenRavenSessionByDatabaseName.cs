@@ -16,10 +16,13 @@
         public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
         {
             var databaseName = getDatabaseName(messageHeaders);
-            var documentSession = string.IsNullOrEmpty(databaseName)
-                ? documentStoreWrapper.DocumentStore.OpenAsyncSession()
-                : documentStoreWrapper.DocumentStore.OpenAsyncSession(databaseName);
+            var sessionOptions = new SessionOptions
+            {
+                Database = databaseName,
+                TransactionMode = useClusterWideTransactions  ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
 
+            var documentSession = documentStoreWrapper.DocumentStore.OpenAsyncSession(sessionOptions);
             if (!useClusterWideTransactions)
             {
                 documentSession.Advanced.UseOptimisticConcurrency = true;
