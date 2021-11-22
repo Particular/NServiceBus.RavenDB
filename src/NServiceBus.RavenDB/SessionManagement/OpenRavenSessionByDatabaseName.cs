@@ -6,27 +6,30 @@
 
     class OpenRavenSessionByDatabaseName : IOpenTenantAwareRavenSessions
     {
-        public OpenRavenSessionByDatabaseName(IDocumentStoreWrapper documentStoreWrapper, Func<IDictionary<string, string>, string> getDatabaseName = null)
+        public OpenRavenSessionByDatabaseName(IDocumentStoreWrapper documentStoreWrapper, bool useClusterWideTransactions, Func<IDictionary<string, string>, string> getDatabaseName = null)
         {
             this.documentStoreWrapper = documentStoreWrapper;
             this.getDatabaseName = getDatabaseName ?? (context => string.Empty);
+            this.useClusterWideTransactions = useClusterWideTransactions;
         }
 
-        public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders, SessionOptions sessionOptions)
+        public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
         {
             var databaseName = getDatabaseName(messageHeaders);
-            if (!string.IsNullOrEmpty(databaseName))
-            {
-                sessionOptions.Database = databaseName;
-            }
+            var documentSession = string.IsNullOrEmpty(databaseName)
+                ? documentStoreWrapper.DocumentStore.OpenAsyncSession()
+                : documentStoreWrapper.DocumentStore.OpenAsyncSession(databaseName);
 
-            var documentSession = documentStoreWrapper.DocumentStore.OpenAsyncSession(sessionOptions);
-            documentSession.Advanced.UseOptimisticConcurrency = true;
+            if (!useClusterWideTransactions)
+            {
+                documentSession.Advanced.UseOptimisticConcurrency = true;
+            }
 
             return documentSession;
         }
 
         IDocumentStoreWrapper documentStoreWrapper;
+        bool useClusterWideTransactions;
         Func<IDictionary<string, string>, string> getDatabaseName;
     }
 }

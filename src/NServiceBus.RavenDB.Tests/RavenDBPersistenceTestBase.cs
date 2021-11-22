@@ -82,8 +82,7 @@
 
             public TestOpenSessionsInPipeline(IDocumentStore store) => this.store = store;
 
-            public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders, SessionOptions sessionOptions) =>
-                store.OpenAsyncSession(sessionOptions);
+            public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders) => store.OpenAsyncSession();
         }
     }
 }

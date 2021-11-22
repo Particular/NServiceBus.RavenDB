@@ -30,7 +30,7 @@
                     new ExpirationConfiguration { Disabled = false, DeleteFrequencyInSec = 1, }));
 
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), TimeSpan.FromSeconds(1), useClusterWideTransactions);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), TimeSpan.FromSeconds(1));
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);

@@ -33,7 +33,7 @@
                     var store = DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(context.Settings, sp);
                     var storeWrapper = new DocumentStoreWrapper(store);
                     var dbNameConvention = context.Settings.GetOrDefault<Func<IDictionary<string, string>, string>>(MessageToDatabaseMappingConvention);
-                    return new OpenRavenSessionByDatabaseName(storeWrapper, dbNameConvention);
+                    return new OpenRavenSessionByDatabaseName(storeWrapper, useClusterWideTransactions, dbNameConvention);
                 });
 
                 context.Settings.AddStartupDiagnosticsSection(
@@ -48,7 +48,7 @@
             var sessionHolder = new CurrentSessionHolder();
             context.Services.AddScoped(_ => sessionHolder.Current);
             context.Pipeline.Register(new CurrentSessionBehavior(sessionHolder), "Manages the lifecycle of the current session holder.");
-            context.Services.AddSingleton<ISynchronizedStorage, RavenDBSynchronizedStorage>(provider => new RavenDBSynchronizedStorage(provider.GetService<IOpenTenantAwareRavenSessions>(), sessionHolder, useClusterWideTransactions));
+            context.Services.AddSingleton<ISynchronizedStorage, RavenDBSynchronizedStorage>(provider => new RavenDBSynchronizedStorage(provider.GetService<IOpenTenantAwareRavenSessions>(), sessionHolder));
             context.Services.AddSingleton<ISynchronizedStorageAdapter>(new RavenDBSynchronizedStorageAdapter(sessionHolder));
         }
 

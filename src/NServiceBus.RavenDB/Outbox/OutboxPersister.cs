@@ -15,12 +15,11 @@
 
     class OutboxPersister : IOutboxStorage
     {
-        public OutboxPersister(string endpointName, IOpenTenantAwareRavenSessions sessionCreator, TimeSpan timeToKeepDeduplicationData, bool useClusterWideTransactions)
+        public OutboxPersister(string endpointName, IOpenTenantAwareRavenSessions sessionCreator, TimeSpan timeToKeepDeduplicationData)
         {
             this.endpointName = endpointName;
             this.sessionCreator = sessionCreator;
             this.timeToKeepDeduplicationData = timeToKeepDeduplicationData;
-            this.useClusterWideTransactions = useClusterWideTransactions;
         }
 
         public async Task<OutboxMessage> Get(string messageId, ContextBag options, CancellationToken cancellationToken = default)
@@ -140,10 +139,7 @@ metadata['{Constants.Documents.Metadata.Expires}'] = args.Expire.At;",
         {
             var message = context.Get<IncomingMessage>();
 
-            return sessionCreator.OpenSession(message.Headers, new SessionOptions
-            {
-                TransactionMode = useClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
-            });
+            return sessionCreator.OpenSession(message.Headers);
         }
 
         string GetOutboxRecordId(string messageId) => $"Outbox/{endpointName}/{messageId.Replace('\\', '_')}";
@@ -152,6 +148,5 @@ metadata['{Constants.Documents.Metadata.Expires}'] = args.Expire.At;",
         TransportOperation[] emptyTransportOperations = new TransportOperation[0];
         IOpenTenantAwareRavenSessions sessionCreator;
         TimeSpan timeToKeepDeduplicationData;
-        bool useClusterWideTransactions;
     }
 }

@@ -25,7 +25,7 @@
             var useClusterWideTx = context.Settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
 
             context.Services.AddTransient<IOutboxStorage>(
-                sp => new OutboxPersister(context.Settings.EndpointName(), sp.GetRequiredService<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData, useClusterWideTx));
+                sp => new OutboxPersister(context.Settings.EndpointName(), sp.GetRequiredService<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData));
 
             var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? TimeSpan.FromMinutes(1);
 

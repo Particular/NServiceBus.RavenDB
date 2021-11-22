@@ -25,7 +25,7 @@
         public async Task Should_delete_all_dispatched_outbox_records(bool useClusterWideTransactions)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTransactions);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);

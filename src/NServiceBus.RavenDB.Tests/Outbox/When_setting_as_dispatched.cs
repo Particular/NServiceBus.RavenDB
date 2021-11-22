@@ -25,7 +25,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_set_outbox_record_as_dispatched(bool useClusterWideTransactions)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTransactions);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
@@ -65,7 +65,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_store_schema_version_in_metadata(bool useClusterWideTransactions)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTransactions);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
@@ -96,7 +96,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         {
             // arrange
             var timeToKeepDeduplicationData = TimeSpan.FromSeconds(60);
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), timeToKeepDeduplicationData, useClusterWideTransactions);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), timeToKeepDeduplicationData);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
@@ -130,7 +130,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should__not_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_infinite(bool useClusterWideTransactions)
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), Timeout.InfiniteTimeSpan, useClusterWideTransactions);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), Timeout.InfiniteTimeSpan);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;

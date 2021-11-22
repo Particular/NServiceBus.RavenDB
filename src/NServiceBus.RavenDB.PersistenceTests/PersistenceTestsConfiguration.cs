@@ -95,11 +95,11 @@
             var dbRecord = new DatabaseRecord(dbName);
             await documentStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord), cancellationToken);
 
-            IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore));
-            SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator, null, useClusterWideTx);
+            IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore), useClusterWideTx);
+            SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator, null);
             SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter(null);
 
-            OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault, useClusterWideTx);
+            OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault);
         }
 
         public async Task Cleanup(CancellationToken cancellationToken = default)
