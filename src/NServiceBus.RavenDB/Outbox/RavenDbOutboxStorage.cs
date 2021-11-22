@@ -22,7 +22,6 @@
                 .CreateIndexOnInitialization(new OutboxRecordsIndex());
 
             var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? DeduplicationDataTTLDefault;
-            var useClusterWideTx = context.Settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
 
             context.Services.AddTransient<IOutboxStorage>(
                 sp => new OutboxPersister(context.Settings.EndpointName(), sp.GetRequiredService<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData));
@@ -41,6 +40,14 @@
                 {
                     FrequencyToRunDeduplicationDataCleanup = frequencyToRunDeduplicationDataCleanup,
                     TimeToKeepDeduplicationData = timeToKeepDeduplicationData,
+                });
+
+            var useClusterWideTx = context.Settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
+            context.Settings.AddStartupDiagnosticsSection(
+                "NServiceBus.Persistence.RavenDB.ClusterMode",
+                new
+                {
+                    UseClusterWideTransactions = useClusterWideTx
                 });
         }
 
