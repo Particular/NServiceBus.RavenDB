@@ -16,6 +16,6 @@ This assumes docker and docker-compose are properly setup.
 
 1. [Acquire a developer license](https://ravendb.net/license/request/dev)
 1. [Convert](https://tools.knowledgewalls.com/online-multiline-to-single-line-converter) the multi-line license JSON to a single line JSON
-1. Inside the root directory of the repository issue the following command: `export LICENSE='PASTE_THE_SINGLE_LINE_LICENSE_HERE' && docker-compose up`
+1. Inside the root directory of the repository issue the following command: `export LICENSE='PASTE_THE_SINGLE_LINE_LICENSE_HERE' && docker-compose up`. Alternatively the license can be set using [an `.env` file](https://docs.docker.com/compose/environment-variables/).
 
 The single node server is reachable under [`http://localhost:8080`](http://localhost:8080). The cluster leader is reachable under [`http://localhost:8081`](http://localhost:8081).
