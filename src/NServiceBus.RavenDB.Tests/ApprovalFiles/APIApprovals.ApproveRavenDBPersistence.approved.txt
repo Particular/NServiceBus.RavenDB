@@ -53,12 +53,12 @@ namespace NServiceBus
     }
     public static class RavenDbSettingsExtensions
     {
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> EnableClusterWideTransactions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> config) { }
         public static NServiceBus.Persistence.RavenDB.SagaPersistenceConfiguration Sagas(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.Documents.IDocumentStore documentStore) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.IReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetDefaultDocumentStore(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.IReadOnlySettings, System.IServiceProvider, Raven.Client.Documents.IDocumentStore> storeCreator) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> SetMessageToDatabaseMappingConvention(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<System.Collections.Generic.IDictionary<string, string>, string> convention) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseClusterWideTransactions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> config) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseSharedAsyncSession(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<System.Collections.Generic.IDictionary<string, string>, Raven.Client.Documents.Session.IAsyncDocumentSession> getAsyncSessionFunc) { }
     }
     public static class RavenDbSubscriptionSettingsExtensions
