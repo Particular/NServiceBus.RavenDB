@@ -22,9 +22,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id_in_the_same_transaction(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id_in_the_same_transaction()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
@@ -48,9 +47,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             Assert.NotNull(exception);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_throw_if_trying_to_insert_two_messages_with_the_same_id()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
@@ -79,9 +77,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             Assert.NotNull(exception);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_store_outbox_record_as_not_dispatched(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_store_outbox_record_as_not_dispatched()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
@@ -110,9 +107,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_store_schema_version_in_metadata(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_store_schema_version_in_metadata()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
@@ -139,9 +135,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_filter_invalid_docid_character(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_filter_invalid_docid_character()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
