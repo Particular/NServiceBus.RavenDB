@@ -33,7 +33,7 @@ jobs:
         id: setup-ravendb
         shell: pwsh
         run: |
-          $hostInfo = curl -H Metadata:true "169.254.169.254/metadata/instance?api-version=2017-08-01" | ConvertFrom-Json
+          $hostInfo = curl -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | ConvertFrom-Json
           $region = $hostInfo.compute.location
           $license = '${{ secrets.RAVENDB_LICENSE }}'
 
