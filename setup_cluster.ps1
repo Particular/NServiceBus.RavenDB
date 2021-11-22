@@ -1,3 +1,5 @@
+$license=$args[0]
+Write-Output $license 
 $fqdnRavenDB = @{ leader = "172.29.1.1"; follower1 = "172.29.1.2"; follower2 = "172.29.1.3" }
 @($fqdnRavenDB.keys) | ForEach-Object -Parallel {
     $hashTable = $using:fqdnRavenDB;

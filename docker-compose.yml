@@ -77,7 +77,7 @@ services:
     image: mcr.microsoft.com/powershell:latest
     volumes:
       - ./setup_cluster.ps1:/var/ravendb/setup_cluster.ps1
-    entrypoint: ["pwsh", "-command", "&./var/ravendb/setup_cluster.ps1"]
+    entrypoint: ["pwsh", "-command", "&./var/ravendb/setup_cluster.ps1", "'${LICENSE}'"]
     restart: "no" 
     depends_on:
       - leader
