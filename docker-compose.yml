@@ -17,6 +17,17 @@ services:
     networks:
         singlenode_network:
             ipv4_address: 172.28.1.1
+  singlenodesetup:
+    container_name: singlenodesetup
+    image: mcr.microsoft.com/powershell:latest
+    volumes:
+      - ./setup_singlenode.ps1:/var/ravendb/setup_singlenode.ps1
+    entrypoint: ["pwsh", "-command", "&./var/ravendb/setup_singlenode.ps1", "'${LICENSE}'"]
+    restart: "no" 
+    depends_on:
+      - singlenode
+    networks:
+        - singlenode_network
   leader:
     container_name: leader
     image: ravendb/ravendb:5.2-ubuntu-latest
@@ -83,6 +94,8 @@ services:
       - leader
       - follower1
       - follower2
+    networks:
+        - cluster_network
 networks:
     singlenode_network:
         ipam:
