@@ -37,6 +37,8 @@ services:
   follower1:
     container_name: follower1
     image: ravendb/ravendb:5.2-ubuntu-latest
+    depends_on:
+      - leader
     ports:
       - 8082:8080
       - 38890:38888
@@ -54,6 +56,8 @@ services:
   follower2:
     container_name: follower2
     image: ravendb/ravendb:5.2-ubuntu-latest
+    depends_on:
+      - leader
     ports:
       - 8083:8080
       - 38891:38888
@@ -67,7 +71,18 @@ services:
       - "RAVEN_PublicServerUrl_Tcp=tcp://172.29.1.3:38888"
     networks:
         cluster_network:
-            ipv4_address: 172.29.1.3      
+            ipv4_address: 172.29.1.3
+  clustersetup:
+    container_name: clustersetup
+    image: mcr.microsoft.com/powershell:latest
+    volumes:
+      - ./setup_cluster.ps1:/var/ravendb/setup_cluster.ps1
+    entrypoint: ["pwsh", "-command", "&./var/ravendb/setup_cluster.ps1"]
+    restart: "no" 
+    depends_on:
+      - leader
+      - follower1
+      - follower2
 networks:
     singlenode_network:
         ipam:
