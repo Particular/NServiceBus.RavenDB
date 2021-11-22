@@ -55,6 +55,6 @@
         internal const string SharedAsyncSession = "RavenDbSharedAsyncSession";
         internal const string MessageToDatabaseMappingConvention = "RavenDB.SetMessageToDatabaseMappingConvention";
         internal const string StartupDiagnosticsSectionName = "NServiceBus.Persistence.RavenDB.StorageSession";
-        internal const string UseClusterWideTransactions = "NServiceBus.Persistence.RavenDB.UseClusterWideTransactions";
+        internal const string UseClusterWideTransactions = "NServiceBus.Persistence.RavenDB.EnableClusterWideTransactions";
     }
 }

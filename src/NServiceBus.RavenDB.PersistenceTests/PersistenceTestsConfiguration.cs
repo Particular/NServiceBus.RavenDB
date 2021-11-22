@@ -26,7 +26,7 @@
 
             var doNotClusterWideTx = new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder());
             var useClusterWideTx = new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder());
-            useClusterWideTx.UseClusterWideTransactions();
+            useClusterWideTx.EnableClusterWideTransactions();
 
             SagaVariants = new[]
             {
