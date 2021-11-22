@@ -19,7 +19,7 @@
             var sessionOptions = new SessionOptions
             {
                 Database = databaseName,
-                TransactionMode = useClusterWideTransactions  ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+                TransactionMode = useClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
             };
 
             var documentSession = documentStoreWrapper.DocumentStore.OpenAsyncSession(sessionOptions);
