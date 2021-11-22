@@ -20,9 +20,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_set_outbox_record_as_dispatched(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_set_outbox_record_as_dispatched()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
@@ -60,9 +59,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_store_schema_version_in_metadata(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_store_schema_version_in_metadata()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
@@ -90,9 +88,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_finite(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_finite()
         {
             // arrange
             var timeToKeepDeduplicationData = TimeSpan.FromSeconds(60);
@@ -125,9 +122,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should__not_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_infinite(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should__not_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_infinite()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), Timeout.InfiniteTimeSpan);

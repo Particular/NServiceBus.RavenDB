@@ -20,9 +20,8 @@
             await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_delete_all_dispatched_outbox_records(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_delete_all_dispatched_outbox_records()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);

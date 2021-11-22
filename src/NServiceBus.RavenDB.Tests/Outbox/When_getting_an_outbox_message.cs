@@ -17,9 +17,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_get_the_message(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_get_the_message()
         {
             // arrange
             var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);

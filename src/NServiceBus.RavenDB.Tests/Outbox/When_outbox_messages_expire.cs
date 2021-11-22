@@ -21,9 +21,8 @@
             await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_be_deleted(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_be_deleted()
         {
             await store.Maintenance.SendAsync(
                 new ConfigureExpirationOperation(
