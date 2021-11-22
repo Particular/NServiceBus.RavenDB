@@ -9,3 +9,13 @@ If you are interested in contributing, please follow the instructions [here.](ht
 ## Running the tests
 
 Running the tests requires RavenDB 5.2 and two environment variables. One named `CommaSeparatedRavenClusterUrls` containing the URLs, separated by commas, to connect to a RavenDB cluster to run cluster-wide transaction tests. The second one named `RavenSingleNodeUrl` containing the URL of a single node RavenDB instance to run non-cluster-wide tests. The tests can be run with RavenDB servers hosted on a Docker container.
+
+### Spinning up the necessary infrastructure
+
+This assumes docker and docker-compose are properly setup.
+
+1. [Acquire a developer license](https://ravendb.net/license/request/dev)
+1. [Convert](https://tools.knowledgewalls.com/online-multiline-to-single-line-converter) the multi-line license JSON to a single line JSON
+1. Inside the root directory of the repository issue the following command: `export LICENSE='PASTE_THE_SINGLE_LINE_LICENSE_HERE' && docker-compose up`
+
+The single node server is reachable under [`http://localhost:8080`](http://localhost:8080). The cluster leader is reachable under [`http://localhost:8081`](http://localhost:8081).
