@@ -10,10 +10,10 @@ services:
       - RAVEN_Security_UnsecuredAccessAllowed=PublicNetwork
       - RAVEN_Setup_Mode=None
       - RAVEN_License_Eula_Accepted=true
-      - "RAVEN_ServerUrl=http://0.0.0.0:8080"
-      - "RAVEN_PublicServerUrl=http://172.28.1.1:8080"
-      - "RAVEN_ServerUrl_Tcp=tcp://0.0.0.0:38888"
-      - "RAVEN_PublicServerUrl_Tcp=tcp://172.28.1.1:38888"
+      - "RAVEN_ServerUrl=http://172.28.1.1:8080"
+      - "RAVEN_PublicServerUrl=http://192.168.24.1:8080"
+      - "RAVEN_ServerUrl_Tcp=tcp://172.28.1.1:38888"
+      - "RAVEN_PublicServerUrl_Tcp=tcp://192.168.24.1:38888"
     networks:
         singlenode_network:
             ipv4_address: 172.28.1.1
@@ -38,10 +38,10 @@ services:
       - RAVEN_Security_UnsecuredAccessAllowed=PublicNetwork
       - RAVEN_Setup_Mode=None
       - RAVEN_License_Eula_Accepted=true
-      - "RAVEN_ServerUrl=http://0.0.0.0:8080"
-      - "RAVEN_PublicServerUrl=http://172.29.1.1:8080"
-      - "RAVEN_ServerUrl_Tcp=tcp://0.0.0.0:38888"
-      - "RAVEN_PublicServerUrl_Tcp=tcp://172.29.1.1:38888"
+      - "RAVEN_ServerUrl=http://172.29.1.1:8080"
+      - "RAVEN_PublicServerUrl=http://192.168.24.1:8081"
+      - "RAVEN_ServerUrl_Tcp=tcp://172.29.1.1:38888"
+      - "RAVEN_PublicServerUrl_Tcp=tcp://192.168.24.1:38889"
     networks:
         cluster_network:
             ipv4_address: 172.29.1.1
@@ -57,10 +57,10 @@ services:
       - RAVEN_Security_UnsecuredAccessAllowed=PublicNetwork
       - RAVEN_Setup_Mode=None
       - RAVEN_License_Eula_Accepted=true
-      - "RAVEN_ServerUrl=http://0.0.0.0:8080"
-      - "RAVEN_PublicServerUrl=http://172.29.1.2:8080"
-      - "RAVEN_ServerUrl_Tcp=tcp://0.0.0.0:38888"
-      - "RAVEN_PublicServerUrl_Tcp=tcp://172.29.1.2:38888"
+      - "RAVEN_ServerUrl=http://172.29.1.2:8080"
+      - "RAVEN_PublicServerUrl=http://192.168.24.1:8082"
+      - "RAVEN_ServerUrl_Tcp=tcp://172.29.1.2:38888"
+      - "RAVEN_PublicServerUrl_Tcp=tcp://192.168.24.1:38890"
     networks:
         cluster_network:
             ipv4_address: 172.29.1.2
@@ -76,10 +76,10 @@ services:
       - RAVEN_Security_UnsecuredAccessAllowed=PublicNetwork
       - RAVEN_Setup_Mode=None
       - RAVEN_License_Eula_Accepted=true
-      - "RAVEN_ServerUrl=http://0.0.0.0:8080"
-      - "RAVEN_PublicServerUrl=http://172.29.1.3:8080"
-      - "RAVEN_ServerUrl_Tcp=tcp://0.0.0.0:38888"
-      - "RAVEN_PublicServerUrl_Tcp=tcp://172.29.1.3:38888"
+      - "RAVEN_ServerUrl=http://172.29.1.3:8080"
+      - "RAVEN_PublicServerUrl=http://192.168.24.1:8083"
+      - "RAVEN_ServerUrl_Tcp=tcp://172.29.1.3:38888"
+      - "RAVEN_PublicServerUrl_Tcp=tcp://192.168.24.1:38891"
     networks:
         cluster_network:
             ipv4_address: 172.29.1.3
