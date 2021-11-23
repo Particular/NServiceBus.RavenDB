@@ -15,11 +15,12 @@
 
     class OutboxPersister : IOutboxStorage
     {
-        public OutboxPersister(string endpointName, IOpenTenantAwareRavenSessions sessionCreator, TimeSpan timeToKeepDeduplicationData)
+        public OutboxPersister(string endpointName, IOpenTenantAwareRavenSessions sessionCreator, TimeSpan timeToKeepDeduplicationData, bool useClusterWideTransactions)
         {
             this.endpointName = endpointName;
             this.sessionCreator = sessionCreator;
             this.timeToKeepDeduplicationData = timeToKeepDeduplicationData;
+            this.useClusterWideTransactions = useClusterWideTransactions;
         }
 
         public async Task<OutboxMessage> Get(string messageId, ContextBag options, CancellationToken cancellationToken = default)
@@ -59,7 +60,10 @@
         {
             var session = GetSession(context);
 
-            session.Advanced.UseOptimisticConcurrency = true;
+            if (!useClusterWideTransactions)
+            {
+                session.Advanced.UseOptimisticConcurrency = true;
+            }
 
             var transaction = new RavenDBOutboxTransaction(session);
             return Task.FromResult<IOutboxTransaction>(transaction);
@@ -148,5 +152,6 @@ metadata['{Constants.Documents.Metadata.Expires}'] = args.Expire.At;",
         TransportOperation[] emptyTransportOperations = new TransportOperation[0];
         IOpenTenantAwareRavenSessions sessionCreator;
         TimeSpan timeToKeepDeduplicationData;
+        bool useClusterWideTransactions;
     }
 }
