@@ -18,9 +18,12 @@
             var databaseName = getDatabaseName(messageHeaders);
             var sessionOptions = new SessionOptions
             {
-                Database = databaseName,
                 TransactionMode = useClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
             };
+            if (!string.IsNullOrEmpty(databaseName))
+            {
+                sessionOptions.Database = databaseName;
+            }
 
             var documentSession = documentStoreWrapper.DocumentStore.OpenAsyncSession(sessionOptions);
             if (!useClusterWideTransactions)
