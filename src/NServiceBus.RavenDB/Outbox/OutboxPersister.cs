@@ -103,37 +103,54 @@
         {
             using (var session = GetSession(options))
             {
-                // to avoid loading the whole document we directly patch the document atomically
-                session.Advanced.Defer(new PatchCommandData(
-                    id: GetOutboxRecordId(messageId),
-                    changeVector: null,
-                    patch: new PatchRequest
+                // to avoid loading the whole document we directly patch the document atomically, but this only works for single-node environments
+                if (useClusterWideTransactions)
+                {
+                    var record = await session.LoadAsync<OutboxRecord>(GetOutboxRecordId(messageId), cancellationToken).ConfigureAwait(false);
+                    if (!record.Dispatched)
                     {
-                        Script =
-$@"if(this.Dispatched === true)
-  return;
-this.Dispatched = true;
-this.DispatchedAt = args.DispatchedAt.Now;
-this.TransportOperations = [];
-var metadata = this['@metadata'];
-metadata['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey}'] = args.SchemaVersion.Version;
-if(args.Expire.Should === false)
-  return;
-metadata['{Constants.Documents.Metadata.Expires}'] = args.Expire.At;",
-                        Values =
+                        record.Dispatched = true;
+                        record.DispatchedAt = DateTime.UtcNow;
+                        record.TransportOperations = Array.Empty<OutboxRecord.OutboxOperation>();
+
+                        var metadata = session.Advanced.GetMetadataFor(record);
+                        metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey] = OutboxRecord.SchemaVersion;
+                        metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
+                    }
+                }
+                else
+                {
+                    session.Advanced.Defer(new PatchCommandData(
+                        id: GetOutboxRecordId(messageId),
+                        changeVector: null,
+                        patch: new PatchRequest
                         {
+                            Script =
+    $@"if(this.Dispatched === true)
+      return;
+    this.Dispatched = true;
+    this.DispatchedAt = args.DispatchedAt.Now;
+    this.TransportOperations = [];
+    var metadata = this['@metadata'];
+    metadata['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey}'] = args.SchemaVersion.Version;
+    if(args.Expire.Should === false)
+      return;
+    metadata['{Constants.Documents.Metadata.Expires}'] = args.Expire.At;",
+                            Values =
                             {
-                                "DispatchedAt", new { Now = DateTime.UtcNow }
-                            },
-                            {
-                                "SchemaVersion", new { Version = OutboxRecord.SchemaVersion }
-                            },
-                            {
-                                "Expire", new { Should = timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) }
+                                {
+                                    "DispatchedAt", new { Now = DateTime.UtcNow }
+                                },
+                                {
+                                    "SchemaVersion", new { Version = OutboxRecord.SchemaVersion }
+                                },
+                                {
+                                    "Expire", new { Should = timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) }
+                                }
                             }
-                        }
-                    },
-                    patchIfMissing: null));
+                        },
+                        patchIfMissing: null));
+                }
 
                 await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
