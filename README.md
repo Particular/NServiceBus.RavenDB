@@ -12,7 +12,7 @@ Running the tests requires RavenDB 5.2 and two environment variables. One named 
 
 ### Spinning up the necessary infrastructure
 
-This assumes docker and docker-compose are properly setup.
+This assumes docker and docker-compose are properly setup. It works currently on Windows with Docker Desktop but not on docker hosted in WSL2 only.
 
 1. [Acquire a developer license](https://ravendb.net/license/request/dev)
 1. Convert the multi-line license JSON to a single line JSON and set the `LICENSE` variable. Alternatively the license can be set using [an `.env` file](https://docs.docker.com/compose/environment-variables/).
