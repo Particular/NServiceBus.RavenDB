@@ -16,6 +16,6 @@ This assumes docker and docker-compose are properly setup.
 
 1. [Acquire a developer license](https://ravendb.net/license/request/dev)
 1. Convert the multi-line license JSON to a single line JSON and set the `LICENSE` variable. Alternatively the license can be set using [an `.env` file](https://docs.docker.com/compose/environment-variables/).
-1. Inside the root directory of the repository issue the following command: `docker-compose up`.
+1. Inside the root directory of the repository issue the following command: `docker-compose up -d`.
 
 The single node server is reachable under [`http://localhost:8080`](http://localhost:8080). The cluster leader is reachable under [`http://localhost:8081`](http://localhost:8081).
