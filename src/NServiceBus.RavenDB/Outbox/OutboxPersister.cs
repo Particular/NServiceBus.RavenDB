@@ -10,6 +10,7 @@
     using Raven.Client;
     using Raven.Client.Documents.Commands.Batches;
     using Raven.Client.Documents.Operations;
+    using Raven.Client.Documents.Operations.CompareExchange;
     using Raven.Client.Documents.Session;
     using TransportOperation = Outbox.TransportOperation;
 
@@ -104,9 +105,20 @@
             using (var session = GetSession(options))
             {
                 // to avoid loading the whole document we directly patch the document atomically, but this only works for single-node environments
+                string outboxRecordId = GetOutboxRecordId(messageId);
                 if (useClusterWideTransactions)
                 {
-                    var record = await session.LoadAsync<OutboxRecord>(GetOutboxRecordId(messageId), cancellationToken).ConfigureAwait(false);
+                    string cevKey = $"rvn-atomic/{outboxRecordId}";
+                    var record = await session.LoadAsync<OutboxRecord>(outboxRecordId, includes => includes.IncludeCompareExchangeValue(outboxRecordId), cancellationToken).ConfigureAwait(false);
+                    var cev = await session.Advanced.ClusterTransaction
+                                     .GetCompareExchangeValueAsync<CompareExchangeValue<string>>(cevKey,
+                                         cancellationToken).ConfigureAwait(false);
+
+                    if (cev == null)
+                    {
+                        throw new Exception("The compare exchange value for the outbox could not be found.");
+                    }
+
                     if (!record.Dispatched)
                     {
                         record.Dispatched = true;
@@ -116,12 +128,14 @@
                         var metadata = session.Advanced.GetMetadataFor(record);
                         metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey] = OutboxRecord.SchemaVersion;
                         metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
+
+                        cev.Metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
                     }
                 }
                 else
                 {
                     session.Advanced.Defer(new PatchCommandData(
-                        id: GetOutboxRecordId(messageId),
+                        id: outboxRecordId,
                         changeVector: null,
                         patch: new PatchRequest
                         {
