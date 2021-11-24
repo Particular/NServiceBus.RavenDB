@@ -1,6 +1,8 @@
 $license=$args[0]
 Write-Output $license 
-$fqdnRavenDB = @{ singlenode = "172.28.1.1"; }
+$hostip=$args[1]
+Write-Output $hostip 
+$fqdnRavenDB = @{ singlenode = "$($hostip)"; }
 $tcpClient = New-Object Net.Sockets.TcpClient
 Write-Output "Verifying connection the single node"
 do
