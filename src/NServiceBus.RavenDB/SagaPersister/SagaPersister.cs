@@ -43,7 +43,7 @@ namespace NServiceBus.Persistence.RavenDB
                 IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value),
             };
 
-            await documentSession.StoreAsync(container, string.Empty, container.Id, cancellationToken).ConfigureAwait(false);
+            await documentSession.StoreAsync(container, null, container.Id, cancellationToken).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(container);
 
             var sagaUniqueIdentity = new SagaUniqueIdentity
@@ -54,7 +54,7 @@ namespace NServiceBus.Persistence.RavenDB
                 SagaDocId = container.Id
             };
 
-            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: string.Empty, id: container.IdentityDocId, token: cancellationToken).ConfigureAwait(false);
+            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: null, id: container.IdentityDocId, token: cancellationToken).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
         }
 
