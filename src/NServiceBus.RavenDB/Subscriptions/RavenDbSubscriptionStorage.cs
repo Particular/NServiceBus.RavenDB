@@ -28,7 +28,8 @@
             {
                 var store = DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(context.Settings, builder);
 
-                return new SubscriptionPersister(store)
+                var useClusterWideTx = context.Settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
+                return new SubscriptionPersister(store, useClusterWideTx)
                 {
                     DisableAggressiveCaching = doNotCacheSubscriptions,
                     AggressiveCacheDuration = cacheSubscriptionsFor,

@@ -18,9 +18,10 @@ namespace NServiceBus.Persistence.RavenDB
 
     class SubscriptionPersister : ISubscriptionStorage
     {
-        public SubscriptionPersister(IDocumentStore store)
+        public SubscriptionPersister(IDocumentStore store, bool useClusterWideTransactions)
         {
             documentStore = store;
+            this.useClusterWideTransactions = useClusterWideTransactions;
         }
 
         public TimeSpan AggressiveCacheDuration { get; set; }
@@ -167,11 +168,16 @@ namespace NServiceBus.Persistence.RavenDB
         IAsyncDocumentSession OpenAsyncSession()
         {
             var session = documentStore.OpenAsyncSession();
-            session.Advanced.UseOptimisticConcurrency = true;
+            if (!useClusterWideTransactions)
+            {
+                session.Advanced.UseOptimisticConcurrency = true;
+            }
+
             return session;
         }
 
         IDocumentStore documentStore;
+        bool useClusterWideTransactions;
 
         sealed class EmptyDisposable : IDisposable
         {

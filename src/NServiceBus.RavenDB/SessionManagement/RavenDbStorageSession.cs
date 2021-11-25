@@ -16,7 +16,7 @@
 
             if (getAsyncSessionFunc != null)
             {
-                IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc);
+                IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByCustomDelegate(getAsyncSessionFunc, useClusterWideTransactions);
                 context.Services.AddSingleton(sessionCreator);
 
                 context.Settings.AddStartupDiagnosticsSection(

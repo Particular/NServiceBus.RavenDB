@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using Logging;
     using NServiceBus.ConsistencyGuarantees;
     using NServiceBus.Settings;
     using Raven.Client.Documents;
@@ -64,7 +65,8 @@
 
                 docStore.Initialize();
                 EnsureCompatibleServerVersion(docStore);
-                EnsureClusterConfiguration(docStore);
+                var useClusterWideTx = settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
+                EnsureClusterConfiguration(docStore, useClusterWideTx);
 
                 CreateIndexes(docStore);
             }
@@ -116,17 +118,22 @@
             }
         }
 
-        static void EnsureClusterConfiguration(IDocumentStore store)
+        static void EnsureClusterConfiguration(IDocumentStore store, bool useClusterWideTransactions)
         {
             using (var s = store.OpenSession())
             {
-                var getTopologyCmd = new GetDatabaseTopologyCommand();
-                s.Advanced.RequestExecutor.Execute(getTopologyCmd, s.Advanced.Context);
+                var databaseTopology = new GetDatabaseTopologyCommand();
+                s.Advanced.RequestExecutor.Execute(databaseTopology, s.Advanced.Context);
+                var clusterTopology = new GetClusterTopologyCommand();
+                s.Advanced.RequestExecutor.Execute(clusterTopology, s.Advanced.Context);
 
-                // Currently do not support clusters.
-                if (getTopologyCmd.Result.Nodes.Count != 1)
+                if (useClusterWideTransactions && databaseTopology.Result.Nodes.Count == 1 && clusterTopology.Result.Topology.AllNodes.Count > 1)
                 {
-                    throw new InvalidOperationException("RavenDB Persistence does not support database groups with multiple database nodes. Only single-node configurations are supported.");
+                    Logger.Warn($"The replication factor of the configured database is 1, while more nodes were detected in the cluster. If the intent is to keep the replication factor as configured, do not enable {nameof(RavenDbSettingsExtensions.EnableClusterWideTransactions)} on the persistence configuration");
+                }
+                else if (!useClusterWideTransactions && databaseTopology.Result.Nodes.Count > 1)
+                {
+                    throw new Exception($"The configured database is replicated across multiple nodes, in order to continue, use {nameof(RavenDbSettingsExtensions.EnableClusterWideTransactions)} on the persistence configuration.");
                 }
             }
         }
@@ -135,5 +142,6 @@
         Func<IReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator;
         IDocumentStore docStore;
         bool isInitialized;
+        static readonly ILog Logger = LogManager.GetLogger(typeof(DocumentStoreInitializer));
     }
 }
