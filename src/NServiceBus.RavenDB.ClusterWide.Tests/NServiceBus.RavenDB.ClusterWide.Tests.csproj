@@ -1,0 +1,69 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net472;netcoreapp3.1;net5.0</TargetFrameworks>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="GitHubActionsTestLogger" Version="1.2.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+        <PackageReference Include="NServiceBus" Version="8.0.0-alpha.1897" />
+        <PackageReference Include="NUnit" Version="3.13.2" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
+        <PackageReference Include="Particular.Approvals" Version="0.3.0" />
+        <PackageReference Include="PublicApiGenerator" Version="10.2.0" />
+        <PackageReference Include="RavenDB.Client" Version="5.2.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+
+        <Compile Include="..\NServiceBus.RavenDB.Tests\Infrastructure\IReusableDB.cs">
+            <Link>Infrastructure\IReusableDB.cs</Link>
+        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\Infrastructure\ReusableDB.cs">
+            <Link>Infrastructure\ReusableDB.cs</Link>
+        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\Infrastructure\StoreSnooper.cs">
+            <Link>Infrastructure\StoreSnooper.cs</Link>
+        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\Outbox\*.cs">
+            <Link>Outbox\*.cs</Link>
+        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\Persistence\*.cs">
+            <Link>Persistence\*.cs</Link>
+        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\SagaPersister\*.cs">
+            <Link>SagaPersister\*.cs</Link>
+        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\SubscriptionStorage\*.cs">
+            <Link>SubscriptionStorage\*.cs</Link>
+        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\SynchronizedStorage\*.cs">
+            <Link>SynchronizedStorage\*.cs</Link>
+        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\AsyncDocumentSessionExtensions.cs">
+            <Link>AsyncDocumentSessionExtensions.cs</Link>
+        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\RavenDBPersistenceTestBase.cs">
+            <Link>RavenDBPersistenceTestBase.cs</Link>
+        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\RavenDBPersistenceTestBaseExtensions.cs">
+            <Link>RavenDBPersistenceTestBaseExtensions.cs</Link>
+        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\StartSaga.cs">
+            <Link>StartSaga.cs</Link>
+        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\When_providing_a_custom_document_store.cs">
+            <Link>When_providing_a_custom_document_store.cs</Link>
+        </Compile>
+    </ItemGroup>
+
+</Project>

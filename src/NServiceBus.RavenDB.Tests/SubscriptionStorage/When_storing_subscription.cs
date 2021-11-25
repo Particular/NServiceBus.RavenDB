@@ -16,7 +16,7 @@ public class When_storing_subscription : RavenDBPersistenceTestBase
     {
         // arrange
         var subscriber = new Subscriber("SomeTransportAddress", "SomeEndpoint");
-        var storage = new SubscriptionPersister(store);
+        var storage = new SubscriptionPersister(store, UseClusterWideTransactions);
 
         // act
         await storage.Subscribe(subscriber, new MessageType("MessageType1", "1.0.0.0"), new ContextBag());

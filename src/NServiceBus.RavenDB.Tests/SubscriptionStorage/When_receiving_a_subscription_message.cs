@@ -16,7 +16,7 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
     {
         var clientEndpoint = new Subscriber("TestEndpoint", "TestEndpoint");
 
-        var storage = new SubscriptionPersister(store);
+        var storage = new SubscriptionPersister(store, UseClusterWideTransactions);
 
         await storage.Subscribe(clientEndpoint, new MessageType("MessageType1", "1.0.0.0"), new ContextBag());
 

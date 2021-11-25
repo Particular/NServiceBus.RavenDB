@@ -13,7 +13,7 @@
 
     public abstract class RavenDBPersistenceTestBase
     {
-        ReusableDB db;
+        IReusableDB db;
 
         protected IDocumentStore store;
 
@@ -41,6 +41,8 @@
 
         protected Task WaitForIndexing(CancellationToken cancellationToken = default) =>
             db.WaitForIndexing(store, cancellationToken);
+
+        protected bool UseClusterWideTransactions => db.GetTransactionMode;
 
         /// <summary>
         ///     This helper is necessary because RavenTestBase doesn't like Assert.Throws, Assert.That... with async void methods.
@@ -74,15 +76,23 @@
             return incomingMessage;
         }
 
-        internal IOpenTenantAwareRavenSessions CreateTestSessionOpener() => new TestOpenSessionsInPipeline(store);
+        internal IOpenTenantAwareRavenSessions CreateTestSessionOpener() => new TestOpenSessionsInPipeline(store, UseClusterWideTransactions);
 
         class TestOpenSessionsInPipeline : IOpenTenantAwareRavenSessions
         {
+            readonly bool useClusterWideTx;
             readonly IDocumentStore store;
 
-            public TestOpenSessionsInPipeline(IDocumentStore store) => this.store = store;
+            public TestOpenSessionsInPipeline(IDocumentStore store, bool useClusterWideTx)
+            {
+                this.store = store;
+                this.useClusterWideTx = useClusterWideTx;
+            }
 
-            public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders) => store.OpenAsyncSession();
+            public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders) => store.OpenAsyncSession(new SessionOptions
+            {
+                TransactionMode = useClusterWideTx ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            });
         }
     }
 }

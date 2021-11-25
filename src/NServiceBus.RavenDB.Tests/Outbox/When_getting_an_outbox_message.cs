@@ -6,6 +6,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
+    using Raven.Client.Documents.Session;
 
     [TestFixture]
     public class When_getting_an_outbox_message : RavenDBPersistenceTestBase
@@ -17,12 +18,11 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_get_the_message(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_get_the_message()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTransactions);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, UseClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxOperation = new OutboxRecord.OutboxOperation
@@ -34,7 +34,11 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             };
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            var sessionOptions = new SessionOptions
+            {
+                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
+            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
             {
                 var outboxRecord = new OutboxRecord
                 {

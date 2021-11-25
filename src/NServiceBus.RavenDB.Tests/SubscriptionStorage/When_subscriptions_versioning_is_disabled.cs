@@ -20,7 +20,7 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
         var subscriber_v1 = new Subscriber(subscriberAddress_v1, "some_endpoint_name");
         var subscriber_v2 = new Subscriber(subscriberAddress_v2, "another_endpoint_name");
 
-        var storage = new SubscriptionPersister(store)
+        var storage = new SubscriptionPersister(store, UseClusterWideTransactions)
         {
             DisableAggressiveCaching = true
         };
@@ -52,7 +52,7 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
         var subscriber_v1 = new Subscriber(subscriberAddress, endpointName);
         var subscriber_v2 = new Subscriber(subscriberAddress, endpointName);
 
-        var storage = new SubscriptionPersister(store)
+        var storage = new SubscriptionPersister(store, UseClusterWideTransactions)
         {
             DisableAggressiveCaching = true
         };

@@ -9,6 +9,7 @@
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
     using Raven.Client.Documents;
+    using Raven.Client.Documents.Session;
 
     [TestFixture]
     public class When_cleaning_outbox_messages : RavenDBPersistenceTestBase
@@ -20,12 +21,11 @@
             await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_delete_all_dispatched_outbox_records(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_delete_all_dispatched_outbox_records()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTransactions);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, UseClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
@@ -49,7 +49,11 @@
             await cleaner.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));
 
             // assert
-            using (var session = store.OpenAsyncSession())
+            var sessionOptions = new SessionOptions
+            {
+                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
+            using (var session = store.OpenAsyncSession(sessionOptions))
             {
                 var outboxRecords = await session.Query<OutboxRecord>().ToListAsync();
 

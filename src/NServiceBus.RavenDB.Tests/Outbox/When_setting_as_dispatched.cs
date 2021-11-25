@@ -9,6 +9,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
     using Raven.Client;
+    using Raven.Client.Documents.Session;
 
     [TestFixture]
     public class When_setting_as_dispatched : RavenDBPersistenceTestBase
@@ -20,18 +21,21 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_set_outbox_record_as_dispatched(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_set_outbox_record_as_dispatched()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTransactions);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, UseClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            var sessionOptions = new SessionOptions
+            {
+                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
+            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
             {
                 await session.StoreAsync(
                     new OutboxRecord
@@ -49,7 +53,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await persister.SetAsDispatched(incomingMessageId, context);
 
             // assert
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
 
@@ -60,18 +64,21 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_store_schema_version_in_metadata(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_store_schema_version_in_metadata()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, useClusterWideTransactions);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, UseClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            var sessionOptions = new SessionOptions
+            {
+                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
+            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
             {
                 await session.StoreAsync(new OutboxRecord { MessageId = incomingMessageId, Dispatched = false, }, outboxRecordId);
                 await session.SaveChangesAsync();
@@ -81,7 +88,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await persister.SetAsDispatched(incomingMessageId, context);
 
             // assert
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
@@ -90,19 +97,22 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_finite(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_finite()
         {
             // arrange
             var timeToKeepDeduplicationData = TimeSpan.FromSeconds(60);
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), timeToKeepDeduplicationData, useClusterWideTransactions);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), timeToKeepDeduplicationData, UseClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            var sessionOptions = new SessionOptions
+            {
+                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
+            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
             {
                 await session.StoreAsync(new OutboxRecord { MessageId = incomingMessageId, Dispatched = false, }, outboxRecordId);
                 await session.SaveChangesAsync();
@@ -115,7 +125,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await persister.SetAsDispatched(incomingMessageId, context);
 
             // assert
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
@@ -125,18 +135,21 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Should__not_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_infinite(bool useClusterWideTransactions)
+        [Test]
+        public async Task Should__not_store_expiry_in_metadata_if_time_to_keep_deduplication_data_is_infinite()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), Timeout.InfiniteTimeSpan, useClusterWideTransactions);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), Timeout.InfiniteTimeSpan, UseClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxRecordId = "Outbox/TestEndpoint/" + incomingMessageId;
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            var sessionOptions = new SessionOptions
+            {
+                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
+            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
             {
                 await session.StoreAsync(new OutboxRecord { MessageId = incomingMessageId, Dispatched = false, }, outboxRecordId);
                 await session.SaveChangesAsync();
@@ -146,7 +159,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await persister.SetAsDispatched(incomingMessageId, context);
 
             // assert
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
