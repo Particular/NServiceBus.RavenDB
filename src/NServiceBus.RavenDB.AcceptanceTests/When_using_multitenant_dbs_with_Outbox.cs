@@ -29,7 +29,17 @@
         {
             await RunTest(cfg =>
             {
-                cfg.PersistenceExtensions.UseSharedAsyncSession(headers => cfg.DefaultStore.OpenAsyncSession(headers["RavenDatabaseName"]));
+                cfg.PersistenceExtensions.UseSharedAsyncSession(headers =>
+                {
+                    var useClusterWideTx = cfg.PersistenceExtensions.GetSettings().GetOrDefault<bool>("NServiceBus.Persistence.RavenDB.EnableClusterWideTransactions");
+                    var sessionOptions = new SessionOptions
+                    {
+                        Database = headers["RavenDatabaseName"],
+                        TransactionMode =
+                            useClusterWideTx ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+                    };
+                    return cfg.DefaultStore.OpenAsyncSession(sessionOptions);
+                });
             });
         }
 
