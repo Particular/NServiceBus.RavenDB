@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using NServiceBus;
@@ -64,8 +65,12 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     public static Task CreateDatabase(IDocumentStore defaultStore, string dbName, CancellationToken cancellationToken = default)
     {
-        var dbRecord = new DatabaseRecord(dbName);
-        return defaultStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord), cancellationToken);
+        var dbRecord = new DatabaseRecord(dbName)
+        {
+            Topology = new DatabaseTopology { Members = new List<string> { "A", "B", "C" } }
+        };
+
+        return defaultStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord, 3), cancellationToken);
     }
 
     public static async Task DeleteDatabase(string dbName, CancellationToken cancellationToken = default)
@@ -106,27 +111,4 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     public static PersistenceExtensions<RavenDBPersistence> GetDefaultPersistenceExtensions(IReadOnlySettings settings)
         => settings.Get<PersistenceExtensions<RavenDBPersistence>>(DefaultPersistenceExtensionsKey);
-}
-
-public static class TestConfigurationExtensions
-{
-    public static PersistenceExtensions<RavenDBPersistence> ResetDocumentStoreSettings(this PersistenceExtensions<RavenDBPersistence> cfg, out TestDatabaseInfo dbInfo)
-    {
-        var settings = cfg.GetSettings();
-        var docStore = ConfigureEndpointRavenDBPersistence.GetDefaultDocumentStore(settings);
-
-        settings.Set("RavenDbDocumentStore", null);
-        dbInfo = new TestDatabaseInfo
-        {
-            Urls = docStore.Urls,
-            Database = docStore.Database
-        };
-        return cfg;
-    }
-}
-
-public class TestDatabaseInfo
-{
-    public string[] Urls { get; set; }
-    public string Database { get; set; }
 }

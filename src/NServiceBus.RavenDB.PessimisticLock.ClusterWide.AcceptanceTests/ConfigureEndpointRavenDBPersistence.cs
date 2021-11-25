@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using NServiceBus;
@@ -63,8 +64,12 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     public static Task CreateDatabase(IDocumentStore defaultStore, string dbName, CancellationToken cancellationToken = default)
     {
-        var dbRecord = new DatabaseRecord(dbName);
-        return defaultStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord), cancellationToken);
+        var dbRecord = new DatabaseRecord(dbName)
+        {
+            Topology = new DatabaseTopology { Members = new List<string> { "A", "B", "C" } }
+        };
+
+        return defaultStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord, 3), cancellationToken);
     }
 
     public static async Task DeleteDatabase(string dbName, CancellationToken cancellationToken = default)
