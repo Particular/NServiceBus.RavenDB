@@ -42,7 +42,7 @@
         protected Task WaitForIndexing(CancellationToken cancellationToken = default) =>
             db.WaitForIndexing(store, cancellationToken);
 
-        protected bool UseClusterWideTransactions => db.GetTransactionMode;
+        protected bool UseClusterWideTransactions => db.UseClusterWideTransactions;
 
         /// <summary>
         ///     This helper is necessary because RavenTestBase doesn't like Assert.Throws, Assert.That... with async void methods.

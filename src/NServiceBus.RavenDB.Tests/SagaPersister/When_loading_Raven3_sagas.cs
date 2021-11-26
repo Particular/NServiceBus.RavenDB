@@ -40,7 +40,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
 
         using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var context = new ContextBag();
             context.Set(session);
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, context);

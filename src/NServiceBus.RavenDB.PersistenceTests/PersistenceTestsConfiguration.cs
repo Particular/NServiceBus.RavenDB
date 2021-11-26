@@ -71,6 +71,10 @@
                 return context;
             };
 
+            var ravenConfiguration = Variant.Values[1] as PersistenceExtensions<RavenDBPersistence>;
+            var settings = ravenConfiguration.GetSettings();
+            var useClusterWideTx = settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
+
             SagaIdGenerator = new DefaultSagaIdGenerator();
             var sagaPersistenceConfiguration = Variant.Values[0] as SagaPersistenceConfiguration;
             SupportsPessimisticConcurrency = sagaPersistenceConfiguration.EnablePessimisticLocking;
@@ -78,11 +82,7 @@
             {
                 sagaPersistenceConfiguration.SetPessimisticLeaseLockAcquisitionTimeout(SessionTimeout.Value);
             }
-            SagaStorage = new SagaPersister(sagaPersistenceConfiguration);
-
-            var ravenConfiguration = Variant.Values[1] as PersistenceExtensions<RavenDBPersistence>;
-            var settings = ravenConfiguration.GetSettings();
-            var useClusterWideTx = settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
+            SagaStorage = new SagaPersister(sagaPersistenceConfiguration, useClusterWideTx);
 
             var dbName = Guid.NewGuid().ToString();
             var urls = Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";

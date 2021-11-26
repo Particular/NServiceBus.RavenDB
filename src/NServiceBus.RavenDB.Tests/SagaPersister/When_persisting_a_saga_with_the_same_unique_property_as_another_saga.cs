@@ -14,7 +14,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
     [Test]
     public async Task It_should_enforce_uniqueness()
     {
-        var persister = new SagaPersister(new SagaPersistenceConfiguration());
+        var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
         var uniqueString = Guid.NewGuid().ToString();
         var sessionOptions = new SessionOptions
         {

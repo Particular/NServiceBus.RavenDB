@@ -14,8 +14,9 @@ namespace NServiceBus.Persistence.RavenDB
 
     class SagaPersister : ISagaPersister
     {
-        public SagaPersister(SagaPersistenceConfiguration options)
+        public SagaPersister(SagaPersistenceConfiguration options, bool useClusterWideTransactions)
         {
+            this.useClusterWideTransactions = useClusterWideTransactions;
             leaseLockTime = options.LeaseLockTime;
             enablePessimisticLocking = options.EnablePessimisticLocking;
             acquireLeaseLockRefreshMaximumDelayTicks = (int)options.LeaseLockAcquisitionMaximumRefreshDelay.Ticks;
@@ -43,7 +44,8 @@ namespace NServiceBus.Persistence.RavenDB
                 IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value),
             };
 
-            await documentSession.StoreAsync(container, null, container.Id, cancellationToken).ConfigureAwait(false);
+            string changeVector = useClusterWideTransactions ? null : string.Empty;
+            await documentSession.StoreAsync(container, changeVector, container.Id, cancellationToken).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(container);
 
             var sagaUniqueIdentity = new SagaUniqueIdentity
@@ -54,7 +56,7 @@ namespace NServiceBus.Persistence.RavenDB
                 SagaDocId = container.Id
             };
 
-            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: null, id: container.IdentityDocId, token: cancellationToken).ConfigureAwait(false);
+            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: changeVector, id: container.IdentityDocId, token: cancellationToken).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
         }
 
@@ -241,6 +243,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         readonly bool enablePessimisticLocking;
         readonly int acquireLeaseLockRefreshMaximumDelayTicks;
+        readonly bool useClusterWideTransactions;
 
         TimeSpan leaseLockTime;
         TimeSpan acquireLeaseLockTimeout;

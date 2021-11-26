@@ -19,6 +19,6 @@ namespace NServiceBus.RavenDB.Tests
             Console.WriteLine($"Provisioned new Raven database name {databaseName}");
         }
 
-        public bool GetTransactionMode => false;
+        public bool UseClusterWideTransactions => false;
     }
 }

@@ -7,7 +7,7 @@ namespace NServiceBus.RavenDB.Tests
     interface IReusableDB
     {
         Task EnsureDatabaseExists(IDocumentStore store, CancellationToken cancellationToken = default);
-        bool GetTransactionMode { get; }
+        bool UseClusterWideTransactions { get; }
         IDocumentStore NewStore(string identifier = null);
         IDocumentStore CreateStore();
         Task WaitForIndexing(IDocumentStore store, CancellationToken cancellationToken = default);
