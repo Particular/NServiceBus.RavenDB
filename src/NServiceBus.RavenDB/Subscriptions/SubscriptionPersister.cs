@@ -167,7 +167,11 @@ namespace NServiceBus.Persistence.RavenDB
 
         IAsyncDocumentSession OpenAsyncSession()
         {
-            var session = documentStore.OpenAsyncSession();
+            var sessionOptions = new SessionOptions
+            {
+                TransactionMode = useClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
+            var session = documentStore.OpenAsyncSession(sessionOptions);
             if (!useClusterWideTransactions)
             {
                 session.Advanced.UseOptimisticConcurrency = true;
