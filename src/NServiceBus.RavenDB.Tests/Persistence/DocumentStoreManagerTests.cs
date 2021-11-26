@@ -22,6 +22,11 @@
                 cfg.SendOnly();
 
                 var persistence = cfg.UsePersistence<RavenDBPersistence>();
+                if (db.UseClusterWideTransactions)
+                {
+                    persistence.EnableClusterWideTransactions();
+                }
+
                 var settings = persistence.GetSettings();
 
                 DocumentStoreManager.SetDocumentStore<StorageType.Outbox>(settings, db.NewStore("Outbox"));
