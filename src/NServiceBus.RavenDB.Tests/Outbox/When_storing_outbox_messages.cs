@@ -9,7 +9,6 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
     using Raven.Client.Documents;
-    using Raven.Client.Documents.Session;
     using Raven.Client.Exceptions;
     using Raven.Client.Exceptions.Documents.Session;
 
@@ -96,11 +95,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             }
 
             // assert
-            var sessionOptions = new SessionOptions
-            {
-                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
-            };
-            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             {
                 var outboxRecord = await session.Query<OutboxRecord>().SingleAsync(record => record.MessageId == incomingMessageId);
 
@@ -131,11 +126,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             await WaitForIndexing();
 
             // assert
-            var sessionOptions = new SessionOptions
-            {
-                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
-            };
-            using (var session = store.OpenAsyncSession(sessionOptions))
+            using (var session = store.OpenAsyncSession(GetSessionOptions()))
             {
                 var outboxRecord = await session.Query<OutboxRecord>().SingleAsync(record => record.MessageId == incomingMessageId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);

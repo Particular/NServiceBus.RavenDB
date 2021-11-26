@@ -5,7 +5,6 @@ using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
-using Raven.Client.Documents.Session;
 using Raven.Client.Exceptions;
 
 [TestFixture]
@@ -16,12 +15,8 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
     {
         var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
         var uniqueString = Guid.NewGuid().ToString();
-        var sessionOptions = new SessionOptions
-        {
-            TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
-        };
 
-        using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
             var saga1 = new SagaData
             {
@@ -37,7 +32,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
 
         var exception = await Catch<ConcurrencyException>(async cancellationToken =>
         {
-            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency().InContext(out var options))
+            using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
             {
                 var saga2 = new SagaData
                 {

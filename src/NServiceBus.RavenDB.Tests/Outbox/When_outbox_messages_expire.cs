@@ -10,7 +10,6 @@
     using NUnit.Framework;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Operations.Expiration;
-    using Raven.Client.Documents.Session;
 
     [TestFixture]
     public class When_outbox_messages_expire : RavenDBPersistenceTestBase
@@ -51,11 +50,7 @@
             await WaitForIndexing();
 
             // assert
-            var sessionOptions = new SessionOptions
-            {
-                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
-            };
-            using (var session = store.OpenAsyncSession(sessionOptions))
+            using (var session = store.OpenAsyncSession(GetSessionOptions()))
             {
                 var outboxRecords = await session.Query<OutboxRecord>().ToListAsync();
 

@@ -9,7 +9,6 @@
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
     using Raven.Client.Documents;
-    using Raven.Client.Documents.Session;
 
     [TestFixture]
     public class When_cleaning_outbox_messages : RavenDBPersistenceTestBase
@@ -49,11 +48,7 @@
             await cleaner.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));
 
             // assert
-            var sessionOptions = new SessionOptions
-            {
-                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
-            };
-            using (var session = store.OpenAsyncSession(sessionOptions))
+            using (var session = store.OpenAsyncSession(GetSessionOptions()))
             {
                 var outboxRecords = await session.Query<OutboxRecord>().ToListAsync();
 

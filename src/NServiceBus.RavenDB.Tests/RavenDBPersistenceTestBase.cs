@@ -16,6 +16,7 @@
         IReusableDB db;
 
         protected IDocumentStore store;
+        SessionOptions sessionOptions;
 
         [SetUp]
         public virtual async Task SetUp()
@@ -26,6 +27,10 @@
             docStore.Initialize();
             await db.EnsureDatabaseExists(docStore);
             store = docStore;
+            sessionOptions = new SessionOptions
+            {
+                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
         }
 
         protected virtual void CustomizeDocumentStore(IDocumentStore docStore)
@@ -46,10 +51,6 @@
 
         protected SessionOptions GetSessionOptions()
         {
-            var sessionOptions = new SessionOptions
-            {
-                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
-            };
             return sessionOptions;
         }
 

@@ -38,11 +38,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     {
         var sagaId = StoreSagaDocuments();
 
-        var sessionOptions = new SessionOptions
-        {
-            TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
-        };
-        using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var context = new ContextBag();
@@ -58,7 +54,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             await session.SaveChangesAsync(cancellationToken);
         }
 
-        using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
         {
             var dataDocs = await session.Advanced.LoadStartingWithAsync<SagaDataContainer>("CountingSagaDatas/", token: cancellationToken);
             var uniqueDocs = await session.Advanced.LoadStartingWithAsync<SagaUniqueIdentity>("Raven3Sagas-", token: cancellationToken);

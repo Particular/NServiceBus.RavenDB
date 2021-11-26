@@ -6,7 +6,6 @@ namespace NServiceBus.RavenDB.Tests.Outbox
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.RavenDB.Outbox;
     using NUnit.Framework;
-    using Raven.Client.Documents.Session;
 
     [TestFixture]
     public class When_getting_an_outbox_message : RavenDBPersistenceTestBase
@@ -34,11 +33,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             };
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            var sessionOptions = new SessionOptions
-            {
-                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
-            };
-            using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             {
                 var outboxRecord = new OutboxRecord
                 {
