@@ -127,9 +127,12 @@
 
                         var metadata = session.Advanced.GetMetadataFor(record);
                         metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey] = OutboxRecord.SchemaVersion;
-                        metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
 
-                        cev.Metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
+                        if (timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan)
+                        {
+                            metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
+                            cev.Metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
+                        }
                     }
                 }
                 else
