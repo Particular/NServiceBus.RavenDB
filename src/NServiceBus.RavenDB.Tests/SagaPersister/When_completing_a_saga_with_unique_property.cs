@@ -6,6 +6,7 @@ using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTestBase
@@ -15,7 +16,7 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
     {
         var sagaId = Guid.NewGuid();
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var entity = new SagaData

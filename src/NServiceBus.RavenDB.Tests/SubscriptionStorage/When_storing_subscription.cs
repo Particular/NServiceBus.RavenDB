@@ -23,7 +23,7 @@ public class When_storing_subscription : RavenDBPersistenceTestBase
         await WaitForIndexing();
 
         // assert
-        using (var session = store.OpenAsyncSession())
+        using (var session = store.OpenAsyncSession(GetSessionOptions()))
         {
             var subscription = await session
                 .Query<Subscription>()

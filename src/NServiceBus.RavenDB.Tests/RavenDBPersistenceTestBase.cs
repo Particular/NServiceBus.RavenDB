@@ -44,6 +44,15 @@
 
         protected bool UseClusterWideTransactions => db.UseClusterWideTransactions;
 
+        protected SessionOptions GetSessionOptions()
+        {
+            var sessionOptions = new SessionOptions
+            {
+                TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
+            return sessionOptions;
+        }
+
         /// <summary>
         ///     This helper is necessary because RavenTestBase doesn't like Assert.Throws, Assert.That... with async void methods.
         /// </summary>

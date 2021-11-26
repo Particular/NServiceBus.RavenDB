@@ -11,7 +11,7 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
     [Test]
     public async Task Inherited_property_classes_should_be_persisted()
     {
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var entity = new SagaData

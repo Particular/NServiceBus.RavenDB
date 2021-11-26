@@ -14,7 +14,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
         var saga1Id = Guid.NewGuid();
         var uniqueString = Guid.NewGuid().ToString();
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var saga1 = new SagaData
@@ -29,7 +29,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
             await session.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
@@ -39,7 +39,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed
             await session.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);

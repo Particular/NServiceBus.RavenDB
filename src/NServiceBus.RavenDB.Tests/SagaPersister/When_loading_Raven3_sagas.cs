@@ -38,7 +38,11 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     {
         var sagaId = StoreSagaDocuments();
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+        var sessionOptions = new SessionOptions
+        {
+            TransactionMode = UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+        };
+        using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var context = new ContextBag();
@@ -54,7 +58,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             await session.SaveChangesAsync(cancellationToken);
         }
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+        using (var session = store.OpenAsyncSession(sessionOptions).UsingOptimisticConcurrency())
         {
             var dataDocs = await session.Advanced.LoadStartingWithAsync<SagaDataContainer>("CountingSagaDatas/", token: cancellationToken);
             var uniqueDocs = await session.Advanced.LoadStartingWithAsync<SagaUniqueIdentity>("Raven3Sagas-", token: cancellationToken);
@@ -90,7 +94,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             UniqueValue = "Alpha"
         };
 
-        StoreSaga(store, sagaDocId, oldData, "CountingSagaDatas", typeName, uniqueDocId);
+        StoreSaga(store, GetSessionOptions(), sagaDocId, oldData, "CountingSagaDatas", typeName, uniqueDocId);
         StoreUniqueDoc(store, uniqueDocId, uniqueDoc);
         return sagaId;
     }
@@ -121,7 +125,9 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         public string Name { get; set; }
     }
 
-    static void StoreSaga(IDocumentStore store, string id, object document, string entityName, string typeName, string uniqueDocId)
+    static void StoreSaga(IDocumentStore store, SessionOptions sessionOptions, string id, object document,
+                          string entityName, string typeName,
+                          string uniqueDocId)
     {
         var documentInfo = new DocumentInfo
         {
@@ -133,7 +139,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         documentInfo.MetadataInstance[Constants.Documents.Metadata.Collection] = entityName;
 
         Console.WriteLine($"Creating {entityName}: {id}");
-        using (var session = store.OpenSession())
+        using (var session = store.OpenSession(sessionOptions))
         {
             var blittableDoc = session.Advanced.JsonConverter.ToBlittable(document, documentInfo);
             var command = new PutDocumentCommand(id, string.Empty, blittableDoc);
