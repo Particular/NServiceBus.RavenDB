@@ -94,8 +94,7 @@ jobs:
                   {
                       if($startDate.AddSeconds(60) -lt (Get-Date)) 
                       {
-                        echo "Unable to connect to $_"
-                        exit
+                        throw "Unable to connect to $_"
                       }
                       Start-Sleep -Seconds 2
                   }
