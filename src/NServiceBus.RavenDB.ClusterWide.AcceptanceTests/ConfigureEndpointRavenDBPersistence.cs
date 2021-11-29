@@ -27,7 +27,6 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
             .DoNotCacheSubscriptions()
             .SetDefaultDocumentStore(documentStore);
 
-        persistenceExtensions.Sagas().UseOptimisticLocking();
         persistenceExtensions.EnableClusterWideTransactions();
 
         configuration.GetSettings().Set(DefaultPersistenceExtensionsKey, persistenceExtensions);

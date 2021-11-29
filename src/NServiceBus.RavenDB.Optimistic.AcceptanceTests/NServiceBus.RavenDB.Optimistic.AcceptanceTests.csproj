@@ -21,10 +21,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\**\*.cs" Exclude="**\obj\**"/>
+    <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\**\*.cs" Exclude="**\obj\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\When_storing_saga_with_high_contention.cs" />
     <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\ConfigureEndpointRavenDBPersistence.cs" />
     <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\TestSuiteConstraints.cs" />
   </ItemGroup>
