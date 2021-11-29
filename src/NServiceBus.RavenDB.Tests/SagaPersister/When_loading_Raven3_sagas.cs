@@ -71,7 +71,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         var sagaId = Guid.NewGuid();
         var sagaDocId = $"CountingSagaDatas/{sagaId}";
         var uniqueDocId = "Raven3Sagas-CountingSagaData/Name/5f293261-55cf-fb70-8b0a-944ef322a598"; // Guid is hash of "Alpha"
-        var typeName = "Raven3Sagas+CountingSagaData, NServiceBus.RavenDB.Tests";
+        var typeName = $"Raven3Sagas+CountingSagaData, {GetType().Assembly.GetName().Name}";
 
         var oldData = new CountingSagaData
         {
