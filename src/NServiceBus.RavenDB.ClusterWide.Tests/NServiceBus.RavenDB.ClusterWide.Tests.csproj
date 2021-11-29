@@ -24,46 +24,13 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="..\NServiceBus.RavenDB.Tests\**\*.cs" Exclude="**\obj\**"/>
+    </ItemGroup>
 
-        <Compile Include="..\NServiceBus.RavenDB.Tests\Infrastructure\IReusableDB.cs">
-            <Link>Infrastructure\IReusableDB.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.Tests\Infrastructure\ReusableDB.cs">
-            <Link>Infrastructure\ReusableDB.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.Tests\Infrastructure\StoreSnooper.cs">
-            <Link>Infrastructure\StoreSnooper.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.Tests\Outbox\*.cs">
-            <Link>Outbox\*.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.Tests\Persistence\*.cs">
-            <Link>Persistence\*.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.Tests\SagaPersister\*.cs">
-            <Link>SagaPersister\*.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.Tests\SubscriptionStorage\*.cs">
-            <Link>SubscriptionStorage\*.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.Tests\SynchronizedStorage\*.cs">
-            <Link>SynchronizedStorage\*.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.Tests\AsyncDocumentSessionExtensions.cs">
-            <Link>AsyncDocumentSessionExtensions.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.Tests\RavenDBPersistenceTestBase.cs">
-            <Link>RavenDBPersistenceTestBase.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.Tests\RavenDBPersistenceTestBaseExtensions.cs">
-            <Link>RavenDBPersistenceTestBaseExtensions.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.Tests\StartSaga.cs">
-            <Link>StartSaga.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.Tests\When_providing_a_custom_document_store.cs">
-            <Link>When_providing_a_custom_document_store.cs</Link>
-        </Compile>
+    <ItemGroup>
+        <Compile Remove="..\NServiceBus.RavenDB.Tests\API\*.cs" />
+        <Compile Remove="..\NServiceBus.RavenDB.Tests\ReusableDbConfig.cs" />
+        <Compile Remove="..\NServiceBus.RavenDB.Tests\TestConstants.cs" />
     </ItemGroup>
 
 </Project>
