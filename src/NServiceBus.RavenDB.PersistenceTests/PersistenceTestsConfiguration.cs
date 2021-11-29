@@ -11,6 +11,7 @@
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Sagas;
     using NServiceBus.Transport;
+    using NUnit.Framework;
     using Raven.Client.Documents;
     using Raven.Client.ServerWide;
     using Raven.Client.ServerWide.Operations;
@@ -30,15 +31,15 @@
 
             SagaVariants = new[]
             {
-                new TestVariant(optimisticConcurrencyConfiguration, doNotClusterWideTx),
-                new TestVariant(pessimisticLockingConfiguration, doNotClusterWideTx),
-                new TestVariant(optimisticConcurrencyConfiguration, useClusterWideTx),
-                new TestVariant(pessimisticLockingConfiguration, useClusterWideTx),
+                new TestFixtureData(new TestVariant(optimisticConcurrencyConfiguration, doNotClusterWideTx)).SetArgDisplayNames("Optimistic", "NoClusterWideTx"),
+                new TestFixtureData(new TestVariant(pessimisticLockingConfiguration, doNotClusterWideTx)).SetArgDisplayNames("Pessimistic", "NoClusterWideTx"),
+                new TestFixtureData(new TestVariant(optimisticConcurrencyConfiguration, useClusterWideTx)).SetArgDisplayNames("Optimistic", "ClusterWideTx"),
+                new TestFixtureData(new TestVariant(pessimisticLockingConfiguration, useClusterWideTx)).SetArgDisplayNames("Pessimistic", "ClusterWideTx"),
             };
             OutboxVariants = new[]
             {
-                new TestVariant(optimisticConcurrencyConfiguration, doNotClusterWideTx),
-                new TestVariant(optimisticConcurrencyConfiguration, useClusterWideTx)
+                new TestFixtureData(new TestVariant(optimisticConcurrencyConfiguration, doNotClusterWideTx)).SetArgDisplayNames("Optimistic", "NoClusterWideTx"),
+                new TestFixtureData(new TestVariant(optimisticConcurrencyConfiguration, useClusterWideTx)).SetArgDisplayNames("Optimistic", "ClusterWideTx")
             };
         }
 
