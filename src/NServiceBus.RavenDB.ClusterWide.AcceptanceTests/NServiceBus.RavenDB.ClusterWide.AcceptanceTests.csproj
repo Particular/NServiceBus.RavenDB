@@ -20,7 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\*.cs" />
+        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\**\*.cs" Exclude="**\obj\**"/>
     </ItemGroup>
 
     <ItemGroup>
