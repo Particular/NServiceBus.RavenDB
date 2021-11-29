@@ -27,9 +27,15 @@
                         .WithEndpoint<SharedRavenSessionExtensions>(b =>
                             b.CustomConfig(config =>
                                 {
-                                    config.UsePersistence<RavenDBPersistence>().UseSharedAsyncSession(_ =>
+                                    var persistence = config.UsePersistence<RavenDBPersistence>();
+                                    persistence.UseSharedAsyncSession(_ =>
                                     {
-                                        var session = documentStore.OpenAsyncSession();
+                                        var useClusterWideTx = persistence.GetSettings().GetOrDefault<bool>("NServiceBus.Persistence.RavenDB.EnableClusterWideTransactions");
+                                        var sessionOptions = new SessionOptions
+                                        {
+                                            TransactionMode = useClusterWideTx ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+                                        };
+                                        var session = documentStore.OpenAsyncSession(sessionOptions);
                                         createdSessions.Add(session);
                                         return session;
                                     });

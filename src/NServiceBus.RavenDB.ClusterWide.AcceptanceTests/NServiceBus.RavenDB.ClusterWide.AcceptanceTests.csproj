@@ -20,33 +20,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\HasUnwrappedSagaListenerRegistered.cs">
-            <Link>HasUnwrappedSagaListenerRegistered.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\SagaAndOutbox.cs">
-            <Link>SagaAndOutbox.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\When_accessing_raven_session_from_handler_with_outbox.cs">
-            <Link>When_accessing_raven_session_from_handler_with_outbox.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\When_accessing_raven_session_from_handler_with_saga.cs">
-            <Link>When_accessing_raven_session_from_handler_with_saga.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\When_detecting_a_saga_with_multiple_corr_props.cs">
-            <Link>When_detecting_a_saga_with_multiple_corr_props.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\When_mixing_persistence_with_other_persistence_for_sagas_and_outbox.cs">
-            <Link>When_mixing_persistence_with_other_persistence_for_sagas_and_outbox.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\When_raven_session_is_provided.cs">
-            <Link>When_raven_session_is_provided.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\When_using_a_sagafinder.cs">
-            <Link>When_using_a_sagafinder.cs</Link>
-        </Compile>
-        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\When_using_multitenant_dbs_with_Outbox.cs">
-            <Link>When_using_multitenant_dbs_with_Outbox.cs</Link>
-        </Compile>
+        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\*.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\ConfigureEndpointRavenDBPersistence.cs" />
+        <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\TestSuiteConstraints.cs" />
     </ItemGroup>
 
 </Project>
