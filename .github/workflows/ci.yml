@@ -79,6 +79,7 @@ jobs:
           }
 
           @($fqdnRavenDB.keys) | ForEach-Object -Parallel {
+              $startDate = Get-Date
               $hashTable = $using:fqdnRavenDB;
               $tcpClient = New-Object Net.Sockets.TcpClient
               echo "Verifying connection $_"
@@ -91,6 +92,11 @@ jobs:
                       echo "Connection to $_ successful"
                   } catch 
                   {
+                      if($startDate.AddSeconds(60) -lt (Get-Date)) 
+                      {
+                        echo "Unable to connect to $_"
+                        exit
+                      }
                       Start-Sleep -Seconds 2
                   }
               } While($tcpClient.Connected -ne "True")
