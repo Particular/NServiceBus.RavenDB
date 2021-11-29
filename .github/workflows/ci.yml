@@ -82,25 +82,26 @@ jobs:
               $startDate = Get-Date
               $hashTable = $using:fqdnRavenDB;
               $tcpClient = New-Object Net.Sockets.TcpClient
-              echo "Verifying connection $_"
+              $nodeName = $_;
+              echo "Verifying connection $nodeName"
               do
               {
                   try
                   {
-                      echo "Trying to connect to $_"
-                      $tcpClient.Connect($hashTable[$_], 8080)
-                      echo "Connection to $_ successful"
+                      echo "Trying to connect to $nodeName"
+                      $tcpClient.Connect($hashTable[$nodeName], 8080)
+                      echo "Connection to $nodeName successful"
                   } catch 
                   {
                       if($startDate.AddSeconds(60) -lt (Get-Date)) 
                       {
-                        throw "Unable to connect to $_"
+                        throw "Unable to connect to $nodeName"
                       }
                       Start-Sleep -Seconds 2
                   }
               } While($tcpClient.Connected -ne "True")
               $tcpClient.Close()
-              echo "Connection to $_ verified"
+              echo "Connection to $nodeName verified"
           }
 
           # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
