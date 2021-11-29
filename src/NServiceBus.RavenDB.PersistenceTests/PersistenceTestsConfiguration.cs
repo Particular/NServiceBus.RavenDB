@@ -85,7 +85,9 @@
             SagaStorage = new SagaPersister(sagaPersistenceConfiguration, useClusterWideTx);
 
             var dbName = Guid.NewGuid().ToString();
-            var urls = Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
+            string urls = useClusterWideTx
+                ? Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls") ?? "http://localhost:8081,http://localhost:8082,http://localhost:8083"
+                : Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
             documentStore = new DocumentStore
             {
                 Urls = urls.Split(','),
