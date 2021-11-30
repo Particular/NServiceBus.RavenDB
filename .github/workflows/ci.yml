@@ -33,7 +33,7 @@ jobs:
         id: setup-ravendb
         shell: pwsh
         run: |
-          $hostInfo = curl -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01&format=json" | ConvertFrom-Json
+          $hostInfo = curl -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | ConvertFrom-Json
           $region = $hostInfo.compute.location
           $license = '${{ secrets.RAVENDB_LICENSE }}'
 
@@ -71,18 +71,18 @@ jobs:
 
           @($fqdnRavenDB.keys) | ForEach-Object -Parallel {
               $function:NewRavenDBNode = $using:NewRavenDBNodeDef
-              $region = $using:region;
-              $prefix = $using:prefix;
+              $region = $using:region
+              $prefix = $using:prefix
               $detail = NewRavenDBNode $region $prefix $_ ${{ runner.os }} ${{ github.sha }}
-              $hashTable = $using:fqdnRavenDB;
+              $hashTable = $using:fqdnRavenDB
               $hashTable[$_] = $detail
           }
 
           @($fqdnRavenDB.keys) | ForEach-Object -Parallel {
               $startDate = Get-Date
-              $hashTable = $using:fqdnRavenDB;
+              $hashTable = $using:fqdnRavenDB
               $tcpClient = New-Object Net.Sockets.TcpClient
-              $nodeName = $_;
+              $nodeName = $_
               echo "Verifying connection $nodeName"
               do
               {
