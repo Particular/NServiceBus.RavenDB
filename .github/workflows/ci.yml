@@ -51,7 +51,7 @@ jobs:
               # echo will mess up the return value
               Write-Debug "Creating RavenDB container $hostname in $region (This can take a while.)"
 
-              $details = az container create --image ravendb/ravendb:5.2-ubuntu-latest --name $hostname --location $region --dns-name-label $hostname --resource-group GitHubActions-RG --cpu 4 --memory 8 --ports 8080 38888 --ip-address public --environment-variables RAVEN_ServerUrl="http://0.0.0.0:8080" RAVEN_ServerUrl_Tcp="tcp://0.0.0.0:38888" RAVEN_PublicServerUrl="http://$($hostname).$($region).azurecontainer.io:8080" RAVEN_PublicServerUrl_Tcp="tcp://$($hostname).$($region).azurecontainer.io:38888" RAVEN_Setup_Mode="None" RAVEN_License_Eula_Accepted="true" RAVEN_Security_UnsecuredAccessAllowed="PublicNetwork" | ConvertFrom-Json
+              $details = az container create --image ravendb/ravendb:5.3-ubuntu-latest --name $hostname --location $region --dns-name-label $hostname --resource-group GitHubActions-RG --cpu 4 --memory 8 --ports 8080 38888 --ip-address public --environment-variables RAVEN_ServerUrl="http://0.0.0.0:8080" RAVEN_ServerUrl_Tcp="tcp://0.0.0.0:38888" RAVEN_PublicServerUrl="http://$($hostname).$($region).azurecontainer.io:8080" RAVEN_PublicServerUrl_Tcp="tcp://$($hostname).$($region).azurecontainer.io:38888" RAVEN_Setup_Mode="None" RAVEN_License_Eula_Accepted="true" RAVEN_Security_UnsecuredAccessAllowed="PublicNetwork" | ConvertFrom-Json
               
               # echo will mess up the return value
               Write-Debug "Tagging container image"
