@@ -42,13 +42,6 @@
                     FrequencyToRunDeduplicationDataCleanup = frequencyToRunDeduplicationDataCleanup,
                     TimeToKeepDeduplicationData = timeToKeepDeduplicationData,
                 });
-
-            context.Settings.AddStartupDiagnosticsSection(
-                "NServiceBus.Persistence.RavenDB.ClusterMode",
-                new
-                {
-                    UseClusterWideTransactions = useClusterWideTx
-                });
         }
 
         internal const string TimeToKeepDeduplicationData = "Outbox.TimeToKeepDeduplicationData";

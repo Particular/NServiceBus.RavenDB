@@ -24,6 +24,7 @@
                     new
                     {
                         HasSharedAsyncSession = true,
+                        ClusterWideTransactions = useClusterWideTransactions ? "Enabled" : "Disabled"
                     });
             }
             else
@@ -41,6 +42,7 @@
                     new
                     {
                         HasSharedAsyncSession = false,
+                        ClusterWideTransactions = useClusterWideTransactions ? "Enabled" : "Disabled",
                         HasMessageToDatabaseMappingConvention = context.Settings.HasSetting(MessageToDatabaseMappingConvention),
                     });
             }
