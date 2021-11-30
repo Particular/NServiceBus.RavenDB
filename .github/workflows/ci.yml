@@ -213,16 +213,14 @@ jobs:
     if: ${{ always() }}
     needs: [setup, build]
     steps:
-      - name: Check if cleanup is required
-        if: ${{ needs.setup.outputs.prefix == '' }}
-        shell: pwsh
-        run: exit 0
       - name: Azure login
+        if: ${{ needs.setup.outputs.prefix != '' }}
         uses: azure/login@v1.4.1
         with:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
           enable-AzPSSession: true
       - name: Teardown RavenDB
+        if: ${{ needs.setup.outputs.prefix != '' }}
         uses: Azure/powershell@v1
         with:
           inlineScript: Get-AzContainerGroup -ResourceGroupName GitHubActions-RG | Where-Object { $_.Name -like "${{ needs.setup.outputs.prefix }}*" } | Remove-AzContainerGroup | Out-Null
