@@ -104,39 +104,39 @@
         {
             using (var session = GetSession(options))
             {
-                // to avoid loading the whole document we directly patch the document atomically, but this only works for single-node environments
                 string outboxRecordId = GetOutboxRecordId(messageId);
                 if (useClusterWideTransactions)
                 {
-                    string cevKey = $"rvn-atomic/{outboxRecordId}";
-                    var record = await session.LoadAsync<OutboxRecord>(outboxRecordId, includes => includes.IncludeCompareExchangeValue(outboxRecordId), cancellationToken).ConfigureAwait(false);
-                    var cev = await session.Advanced.ClusterTransaction
-                                     .GetCompareExchangeValueAsync<CompareExchangeValue<string>>(cevKey,
-                                         cancellationToken).ConfigureAwait(false);
+                    string compareExchangeKey = $"rvn-atomic/{outboxRecordId}";
+                    var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId, includes => includes.IncludeCompareExchangeValue(outboxRecordId), cancellationToken)
+                        .ConfigureAwait(false);
+                    var compareExchangeValue = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<CompareExchangeValue<string>>(compareExchangeKey, cancellationToken)
+                        .ConfigureAwait(false);
 
-                    if (cev == null)
+                    if (compareExchangeValue == null)
                     {
                         throw new Exception("The compare exchange value for the outbox could not be found.");
                     }
 
-                    if (!record.Dispatched)
+                    if (!outboxRecord.Dispatched)
                     {
-                        record.Dispatched = true;
-                        record.DispatchedAt = DateTime.UtcNow;
-                        record.TransportOperations = Array.Empty<OutboxRecord.OutboxOperation>();
+                        outboxRecord.Dispatched = true;
+                        outboxRecord.DispatchedAt = DateTime.UtcNow;
+                        outboxRecord.TransportOperations = Array.Empty<OutboxRecord.OutboxOperation>();
 
-                        var metadata = session.Advanced.GetMetadataFor(record);
+                        var metadata = session.Advanced.GetMetadataFor(outboxRecord);
                         metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey] = OutboxRecord.SchemaVersion;
 
                         if (timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan)
                         {
                             metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
-                            cev.Metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
+                            compareExchangeValue.Metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
                         }
                     }
                 }
                 else
                 {
+                    // to avoid loading the whole document we directly patch the document atomically, this only works for single-node environments
                     session.Advanced.Defer(new PatchCommandData(
                         id: outboxRecordId,
                         changeVector: null,
