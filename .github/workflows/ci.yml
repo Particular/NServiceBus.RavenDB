@@ -33,7 +33,7 @@ jobs:
         id: setup-ravendb
         shell: pwsh
         run: |
-          $hostInfo = curl -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | ConvertFrom-Json
+          $hostInfo = curl -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01&format=json" | ConvertFrom-Json
           $region = $hostInfo.compute.location
           $license = '${{ secrets.RAVENDB_LICENSE }}'
 
@@ -93,7 +93,7 @@ jobs:
                       echo "Connection to $nodeName successful"
                   } catch 
                   {
-                      if($startDate.AddSeconds(60) -lt (Get-Date)) 
+                      if($startDate.AddMinutes(2) -lt (Get-Date)) 
                       {
                         throw "Unable to connect to $nodeName"
                       }
