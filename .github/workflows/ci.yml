@@ -24,6 +24,11 @@ jobs:
     outputs:
       prefix: ${{ steps.setup-ravendb.outputs.prefix }}
     steps:
+      - name: Check for secrets
+        env:
+          SECRETS_AVAILABLE: ${{ secrets.SECRETS_AVAILABLE }}
+        shell: pwsh
+        run: exit $(If ($env:SECRETS_AVAILABLE -eq 'true') { 0 } Else { 1 })
       - name: Azure login
         uses: azure/login@v1.4.1
         with:
@@ -152,11 +157,6 @@ jobs:
             name: Linux
       fail-fast: false
     steps:
-      - name: Check for secrets
-        env:
-          SECRETS_AVAILABLE: ${{ secrets.SECRETS_AVAILABLE }}
-        shell: pwsh
-        run: exit $(If ($env:SECRETS_AVAILABLE -eq 'true') { 0 } Else { 1 })
       - name: Checkout
         if: github.event_name != 'pull_request_target'
         uses: actions/checkout@v2.4.0
@@ -213,6 +213,10 @@ jobs:
     if: ${{ always() }}
     needs: [setup, build]
     steps:
+      - name: Check if cleanup is required
+        if: ${{ needs.setup.outputs.prefix == '' }}
+        shell: pwsh
+        run: exit 0
       - name: Azure login
         uses: azure/login@v1.4.1
         with:
