@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Configuration.AdvancedExtensibility;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
     using NServiceBus.Persistence;
@@ -15,32 +14,35 @@
     using Raven.Client.Documents;
     using Raven.Client.ServerWide;
     using Raven.Client.ServerWide.Operations;
-    using Settings;
 
     public partial class PersistenceTestsConfiguration
     {
         static PersistenceTestsConfiguration()
         {
-            var optimisticConcurrencyConfiguration = new SagaPersistenceConfiguration();
-            optimisticConcurrencyConfiguration.UseOptimisticLocking();
-            var pessimisticLockingConfiguration = new SagaPersistenceConfiguration();
-
-            var doNotClusterWideTx = new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder());
-            var useClusterWideTx = new PersistenceExtensions<RavenDBPersistence>(new SettingsHolder());
-            useClusterWideTx.EnableClusterWideTransactions();
-
             SagaVariants = new[]
             {
-                new TestFixtureData(new TestVariant(optimisticConcurrencyConfiguration, doNotClusterWideTx)).SetArgDisplayNames("Optimistic", "NoClusterWideTx"),
-                new TestFixtureData(new TestVariant(pessimisticLockingConfiguration, doNotClusterWideTx)).SetArgDisplayNames("Pessimistic", "NoClusterWideTx"),
-                new TestFixtureData(new TestVariant(optimisticConcurrencyConfiguration, useClusterWideTx)).SetArgDisplayNames("Optimistic", "ClusterWideTx"),
-                new TestFixtureData(new TestVariant(pessimisticLockingConfiguration, useClusterWideTx)).SetArgDisplayNames("Pessimistic", "ClusterWideTx"),
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: true, useClusterWideTransactions: false))).SetArgDisplayNames("Optimistic", "NoClusterWideTx"),
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: false, useClusterWideTransactions: false))).SetArgDisplayNames("Pessimistic", "NoClusterWideTx"),
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: true, useClusterWideTransactions: true))).SetArgDisplayNames("Optimistic", "ClusterWideTx"),
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: false, useClusterWideTransactions: true))).SetArgDisplayNames("Pessimistic", "ClusterWideTx"),
             };
             OutboxVariants = new[]
             {
-                new TestFixtureData(new TestVariant(optimisticConcurrencyConfiguration, doNotClusterWideTx)).SetArgDisplayNames("Optimistic", "NoClusterWideTx"),
-                new TestFixtureData(new TestVariant(optimisticConcurrencyConfiguration, useClusterWideTx)).SetArgDisplayNames("Optimistic", "ClusterWideTx")
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: true, useClusterWideTransactions: false))).SetArgDisplayNames("Optimistic", "NoClusterWideTx"),
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: true, useClusterWideTransactions: true))).SetArgDisplayNames("Optimistic", "ClusterWideTx")
             };
+        }
+
+        public class PersistenceConfiguration
+        {
+            public readonly bool UseOptimisticConcurrency;
+            public readonly bool UseClusterWideTransactions;
+
+            public PersistenceConfiguration(bool useOptimisticConcurrency, bool useClusterWideTransactions)
+            {
+                UseOptimisticConcurrency = useOptimisticConcurrency;
+                UseClusterWideTransactions = useClusterWideTransactions;
+            }
         }
 
         DocumentStore documentStore;
@@ -72,21 +74,23 @@
                 return context;
             };
 
-            var ravenConfiguration = Variant.Values[1] as PersistenceExtensions<RavenDBPersistence>;
-            var settings = ravenConfiguration.GetSettings();
-            var useClusterWideTx = settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
+            var persistenceConfiguration = (PersistenceConfiguration)Variant.Values[0];
 
             SagaIdGenerator = new DefaultSagaIdGenerator();
-            var sagaPersistenceConfiguration = Variant.Values[0] as SagaPersistenceConfiguration;
+            var sagaPersistenceConfiguration = new SagaPersistenceConfiguration();
+            if (persistenceConfiguration.UseOptimisticConcurrency)
+            {
+                sagaPersistenceConfiguration.UseOptimisticLocking();
+            }
             SupportsPessimisticConcurrency = sagaPersistenceConfiguration.EnablePessimisticLocking;
             if (SessionTimeout.HasValue)
             {
                 sagaPersistenceConfiguration.SetPessimisticLeaseLockAcquisitionTimeout(SessionTimeout.Value);
             }
-            SagaStorage = new SagaPersister(sagaPersistenceConfiguration, useClusterWideTx);
+            SagaStorage = new SagaPersister(sagaPersistenceConfiguration, persistenceConfiguration.UseClusterWideTransactions);
 
             var dbName = Guid.NewGuid().ToString();
-            string urls = useClusterWideTx
+            string urls = persistenceConfiguration.UseClusterWideTransactions
                 ? Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls") ?? "http://localhost:8081,http://localhost:8082,http://localhost:8083"
                 : Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
             documentStore = new DocumentStore
@@ -98,11 +102,11 @@
             var dbRecord = new DatabaseRecord(dbName);
             await documentStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord), cancellationToken);
 
-            IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore), useClusterWideTx);
+            IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore), persistenceConfiguration.UseClusterWideTransactions);
             SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator, null);
             SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter(null);
 
-            OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault, useClusterWideTx);
+            OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault, persistenceConfiguration.UseClusterWideTransactions);
         }
 
         public async Task Cleanup(CancellationToken cancellationToken = default)
