@@ -44,6 +44,9 @@ namespace NServiceBus.Persistence.RavenDB
                 IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value),
             };
 
+            // Optimistic concurrency can be turned on for a new document by passing string.Empty as a change vector value to Store
+            // method even when it is turned off for an entire session (or globally).
+            // It will cause to throw ConcurrencyException if the document already exists.
             string changeVector = useClusterWideTransactions ? null : string.Empty;
             await documentSession.StoreAsync(container, changeVector, container.Id, cancellationToken).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(container);
