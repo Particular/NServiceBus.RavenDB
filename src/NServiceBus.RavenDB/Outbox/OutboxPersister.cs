@@ -12,6 +12,7 @@
     using Raven.Client.Documents.Operations;
     using Raven.Client.Documents.Operations.CompareExchange;
     using Raven.Client.Documents.Session;
+    using Raven.Client.Exceptions;
     using TransportOperation = Outbox.TransportOperation;
 
     class OutboxPersister : IOutboxStorage
@@ -169,7 +170,16 @@
                         patchIfMissing: null));
                 }
 
-                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (ConcurrencyException) when(useClusterWideTransactions)
+                {
+                    // When cluster wide transactions are enabled and two concurrent operations try to set as dispatched 
+                    // it is OK to swallow the exception since the outcome is deterministic
+                    // patching for non cluster wide transactions would always work and never land here
+                }
             }
         }
 
