@@ -176,7 +176,7 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 var token = combinedTokenSource.Token;
 
-                while (!timedTokenSource.IsCancellationRequested)
+                while (!token.IsCancellationRequested)
                 {
                     try
                     {
