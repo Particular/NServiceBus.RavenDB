@@ -85,7 +85,7 @@
         }
 
         /// <summary>
-        /// Configures the persistence to make use of cluster wide transactions.
+        /// Configures the persistence to make use of cluster-wide transactions.
         /// </summary>
         public static PersistenceExtensions<RavenDBPersistence> EnableClusterWideTransactions(
             this PersistenceExtensions<RavenDBPersistence> config)

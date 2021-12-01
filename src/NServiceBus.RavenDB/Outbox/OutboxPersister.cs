@@ -105,10 +105,10 @@
         {
             using (var session = GetSession(options))
             {
-                string outboxRecordId = GetOutboxRecordId(messageId);
+                var outboxRecordId = GetOutboxRecordId(messageId);
                 if (useClusterWideTransactions)
                 {
-                    string compareExchangeKey = $"rvn-atomic/{outboxRecordId}";
+                    var compareExchangeKey = $"rvn-atomic/{outboxRecordId}";
                     var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId, includes => includes.IncludeCompareExchangeValue(outboxRecordId), cancellationToken)
                         .ConfigureAwait(false);
                     var compareExchangeValue = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<CompareExchangeValue<string>>(compareExchangeKey, cancellationToken)
