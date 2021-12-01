@@ -18,10 +18,17 @@
         protected override void Setup(FeatureConfigurationContext context)
         {
             var options = context.Settings.GetOrDefault<SagaPersistenceConfiguration>() ?? new SagaPersistenceConfiguration();
-            var useClusterWideTx = context.Settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
-            var sagaPersister = new SagaPersister(options, useClusterWideTx);
+            var useClusterWideTransactions = context.Settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
+            var sagaPersister = new SagaPersister(options, useClusterWideTransactions);
             context.Services.AddSingleton<ISagaPersister>(sagaPersister);
 
+            context.Settings.AddStartupDiagnosticsSection(
+                "NServiceBus.Persistence.RavenDB.Sagas",
+                new
+                {
+                    ClusterWideTransactions = useClusterWideTransactions ? "Enabled" : "Disabled",
+                });
+            
             if (!context.Settings.TryGet(out SagaMetadataCollection allSagas))
             {
                 return;
