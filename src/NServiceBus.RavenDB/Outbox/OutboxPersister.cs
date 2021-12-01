@@ -174,7 +174,7 @@
                 {
                     await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-                catch (ConcurrencyException) when(useClusterWideTransactions)
+                catch (ConcurrencyException) when (useClusterWideTransactions)
                 {
                     // When cluster wide transactions are enabled and two concurrent operations try to set as dispatched 
                     // it is OK to swallow the exception since the outcome is deterministic

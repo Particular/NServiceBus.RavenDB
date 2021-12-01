@@ -28,7 +28,7 @@
                 {
                     ClusterWideTransactions = useClusterWideTransactions ? "Enabled" : "Disabled",
                 });
-            
+
             if (!context.Settings.TryGet(out SagaMetadataCollection allSagas))
             {
                 return;
