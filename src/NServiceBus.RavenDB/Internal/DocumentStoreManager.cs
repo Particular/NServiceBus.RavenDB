@@ -15,6 +15,7 @@
                 {typeof(StorageType.Subscriptions), "RavenDbDocumentStore/Subscription"},
                 {typeof(StorageType.Outbox), "RavenDbDocumentStore/Outbox"},
                 {typeof(StorageType.Sagas), "RavenDbDocumentStore/Saga"},
+                {typeof(StorageType.Timeouts), "RavenDbDocumentStore/Timeouts"}
             };
         }
 
