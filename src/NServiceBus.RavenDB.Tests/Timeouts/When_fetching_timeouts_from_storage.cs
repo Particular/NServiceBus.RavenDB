@@ -18,7 +18,7 @@
 
             await new TimeoutsIndex().ExecuteAsync(store);
 
-            persister = new TimeoutPersister(store);
+            persister = new TimeoutPersister(store, UseClusterWideTransactions);
             query = new QueryTimeouts(store, "MyTestEndpoint");
         }
 

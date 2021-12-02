@@ -14,7 +14,7 @@
         [Test]
         public async Task Add_WhenNoIdProvided_ShouldSetDbGeneratedTimeoutId()
         {
-            var persister = new TimeoutPersister(store);
+            var persister = new TimeoutPersister(store, UseClusterWideTransactions);
             var timeout = new CoreTimeoutData { Id = null };
 
             await persister.Add(timeout, new ContextBag());
@@ -27,7 +27,7 @@
         [Test]
         public async Task Add_WhenIdProvided_ShouldOverrideGivenId()
         {
-            var persister = new TimeoutPersister(store);
+            var persister = new TimeoutPersister(store, UseClusterWideTransactions);
 
             var timeoutId = Guid.NewGuid().ToString();
             var timeout = new CoreTimeoutData { Id = timeoutId };
@@ -42,7 +42,7 @@
         [Test]
         public async Task Add_ShouldStoreSchemaVersion()
         {
-            var persister = new TimeoutPersister(store);
+            var persister = new TimeoutPersister(store, UseClusterWideTransactions);
 
             var timeoutId = Guid.NewGuid().ToString();
             var timeout = new CoreTimeoutData { Id = timeoutId };
