@@ -14,8 +14,9 @@ namespace NServiceBus.Persistence.RavenDB
 
     class SagaPersister : ISagaPersister
     {
-        public SagaPersister(SagaPersistenceConfiguration options)
+        public SagaPersister(SagaPersistenceConfiguration options, bool useClusterWideTransactions)
         {
+            this.useClusterWideTransactions = useClusterWideTransactions;
             leaseLockTime = options.LeaseLockTime;
             enablePessimisticLocking = options.EnablePessimisticLocking;
             acquireLeaseLockRefreshMaximumDelayTicks = (int)options.LeaseLockAcquisitionMaximumRefreshDelay.Ticks;
@@ -43,7 +44,11 @@ namespace NServiceBus.Persistence.RavenDB
                 IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value),
             };
 
-            await documentSession.StoreAsync(container, string.Empty, container.Id, cancellationToken).ConfigureAwait(false);
+            // Optimistic concurrency can be turned on for a new document by passing string.Empty as a change vector value to Store
+            // method even when it is turned off for an entire session (or globally).
+            // It will cause to throw ConcurrencyException if the document already exists.
+            string changeVector = useClusterWideTransactions ? null : string.Empty;
+            await documentSession.StoreAsync(container, changeVector, container.Id, cancellationToken).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(container);
 
             var sagaUniqueIdentity = new SagaUniqueIdentity
@@ -54,7 +59,7 @@ namespace NServiceBus.Persistence.RavenDB
                 SagaDocId = container.Id
             };
 
-            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: string.Empty, id: container.IdentityDocId, token: cancellationToken).ConfigureAwait(false);
+            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: changeVector, id: container.IdentityDocId, token: cancellationToken).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
         }
 
@@ -171,7 +176,7 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 var token = combinedTokenSource.Token;
 
-                while (!timedTokenSource.IsCancellationRequested)
+                while (!token.IsCancellationRequested)
                 {
                     try
                     {
@@ -241,6 +246,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         readonly bool enablePessimisticLocking;
         readonly int acquireLeaseLockRefreshMaximumDelayTicks;
+        readonly bool useClusterWideTransactions;
 
         TimeSpan leaseLockTime;
         TimeSpan acquireLeaseLockTimeout;

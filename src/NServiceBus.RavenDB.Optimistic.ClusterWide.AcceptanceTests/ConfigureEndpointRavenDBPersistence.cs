@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using NServiceBus;
@@ -26,6 +27,9 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
             .DoNotCacheSubscriptions()
             .SetDefaultDocumentStore(documentStore);
 
+        persistenceExtensions.Sagas().UseOptimisticLocking();
+        persistenceExtensions.EnableClusterWideTransactions();
+
         configuration.GetSettings().Set(DefaultPersistenceExtensionsKey, persistenceExtensions);
 
         Console.WriteLine("Created '{0}' database", documentStore.Database);
@@ -46,7 +50,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     internal static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
     {
-        var urls = Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
+        var urls = Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls") ?? "http://localhost:8081,http://localhost:8082,http://localhost:8083";
 
         var documentStore = new DocumentStore
         {
@@ -61,8 +65,12 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
 
     public static Task CreateDatabase(IDocumentStore defaultStore, string dbName, CancellationToken cancellationToken = default)
     {
-        var dbRecord = new DatabaseRecord(dbName);
-        return defaultStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord), cancellationToken);
+        var dbRecord = new DatabaseRecord(dbName)
+        {
+            Topology = new DatabaseTopology { Members = new List<string> { "A", "B", "C" } }
+        };
+
+        return defaultStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord, 3), cancellationToken);
     }
 
     public static async Task DeleteDatabase(string dbName, CancellationToken cancellationToken = default)

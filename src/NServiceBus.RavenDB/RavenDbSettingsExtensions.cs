@@ -83,5 +83,15 @@
         {
             return cfg.GetSettings().GetOrCreate<SagaPersistenceConfiguration>();
         }
+
+        /// <summary>
+        /// Configures the persistence to make use of cluster-wide transactions.
+        /// </summary>
+        public static PersistenceExtensions<RavenDBPersistence> EnableClusterWideTransactions(
+            this PersistenceExtensions<RavenDBPersistence> config)
+        {
+            config.GetSettings().Set(RavenDbStorageSession.UseClusterWideTransactions, true);
+            return config;
+        }
     }
 }

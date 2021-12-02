@@ -5,6 +5,7 @@
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Testing;
     using NUnit.Framework;
+    using Raven.Client.Documents.Session;
 
     public class RavenSessionExtensionTests
     {
@@ -16,7 +17,11 @@
             {
                 await db.EnsureDatabaseExists(store);
 
-                var session = store.OpenAsyncSession();
+                var sessionOptions = new SessionOptions
+                {
+                    TransactionMode = db.UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+                };
+                var session = store.OpenAsyncSession(sessionOptions);
 
                 var storageSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
 
@@ -34,7 +39,11 @@
             {
                 await db.EnsureDatabaseExists(store);
 
-                var session = store.OpenAsyncSession();
+                var sessionOptions = new SessionOptions
+                {
+                    TransactionMode = db.UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+                };
+                var session = store.OpenAsyncSession(sessionOptions);
 
                 var storageSession = new TestableRavenStorageSession(session);
 

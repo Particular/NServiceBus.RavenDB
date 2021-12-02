@@ -24,7 +24,7 @@
         public async Task Should_delete_all_dispatched_outbox_records()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, UseClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
@@ -48,7 +48,7 @@
             await cleaner.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));
 
             // assert
-            using (var session = store.OpenAsyncSession())
+            using (var session = store.OpenAsyncSession(GetSessionOptions()))
             {
                 var outboxRecords = await session.Query<OutboxRecord>().ToListAsync();
 

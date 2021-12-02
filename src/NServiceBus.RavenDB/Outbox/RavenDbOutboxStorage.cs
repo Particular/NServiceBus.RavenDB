@@ -22,9 +22,10 @@
                 .CreateIndexOnInitialization(new OutboxRecordsIndex());
 
             var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? DeduplicationDataTTLDefault;
+            var useClusterWideTransactions = context.Settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
 
             context.Services.AddTransient<IOutboxStorage>(
-                sp => new OutboxPersister(context.Settings.EndpointName(), sp.GetRequiredService<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData));
+                sp => new OutboxPersister(context.Settings.EndpointName(), sp.GetRequiredService<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData, useClusterWideTransactions));
 
             var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? TimeSpan.FromMinutes(1);
 
@@ -40,6 +41,7 @@
                 {
                     FrequencyToRunDeduplicationDataCleanup = frequencyToRunDeduplicationDataCleanup,
                     TimeToKeepDeduplicationData = timeToKeepDeduplicationData,
+                    ClusterWideTransactions = useClusterWideTransactions ? "Enabled" : "Disabled",
                 });
         }
 
@@ -89,7 +91,7 @@
                 if (finishedTask == timeoutTask)
                 {
                     // Was the result of the pre-existing 30s timeout
-                    logger.Error("RavenOutboxCleaner failed to stop within the maximum time allowed (30s).");
+                    Logger.Error("RavenOutboxCleaner failed to stop within the maximum time allowed (30s).");
                 }
             }
 
@@ -113,12 +115,12 @@
                     catch (Exception ex) when (ex.IsCausedBy(cancellationToken))
                     {
                         // private token, cleaner is being stopped, log exception in case the stack trace is ever needed for debugging
-                        logger.Debug("Operation canceled while stopping outbox cleaner.", ex);
+                        Logger.Debug("Operation canceled while stopping outbox cleaner.", ex);
                         break;
                     }
                     catch (Exception ex)
                     {
-                        logger.Error("Unable to remove expired Outbox records from Raven database.", ex);
+                        Logger.Error("Unable to remove expired Outbox records from Raven database.", ex);
                     }
                 }
             }
@@ -129,7 +131,7 @@
             TimeSpan frequencyToRunDeduplicationDataCleanup;
             CancellationTokenSource cleanupCancellationTokenSource;
 
-            static readonly ILog logger = LogManager.GetLogger<OutboxCleaner>();
+            static readonly ILog Logger = LogManager.GetLogger<OutboxCleaner>();
         }
     }
 }

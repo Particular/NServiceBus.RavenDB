@@ -21,7 +21,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
         public async Task Should_get_the_message()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, UseClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var outboxOperation = new OutboxRecord.OutboxOperation
@@ -33,7 +33,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             };
 
             //manually store an OutboxRecord to control the OutboxRecordId format
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+            using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             {
                 var outboxRecord = new OutboxRecord
                 {

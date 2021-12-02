@@ -13,10 +13,10 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
     [Test]
     public async Task It_should_enforce_uniqueness()
     {
-        var persister = new SagaPersister(new SagaPersistenceConfiguration());
+        var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
         var uniqueString = Guid.NewGuid().ToString();
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
             var saga1 = new SagaData
             {
@@ -32,7 +32,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
 
         var exception = await Catch<ConcurrencyException>(async cancellationToken =>
         {
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+            using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
             {
                 var saga2 = new SagaData
                 {

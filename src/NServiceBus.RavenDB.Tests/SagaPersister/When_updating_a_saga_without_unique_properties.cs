@@ -11,9 +11,9 @@ public class When_updating_a_saga_without_unique_properties : RavenDBPersistence
     [Test]
     public async Task It_should_persist_successfully()
     {
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var uniqueString = Guid.NewGuid().ToString();
             var anotherUniqueString = Guid.NewGuid().ToString();
 

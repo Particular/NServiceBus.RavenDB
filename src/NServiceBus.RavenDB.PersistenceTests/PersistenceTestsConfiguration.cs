@@ -10,6 +10,7 @@
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Sagas;
     using NServiceBus.Transport;
+    using NUnit.Framework;
     using Raven.Client.Documents;
     using Raven.Client.ServerWide;
     using Raven.Client.ServerWide.Operations;
@@ -18,19 +19,30 @@
     {
         static PersistenceTestsConfiguration()
         {
-            var optimisticConcurrencyConfiguration = new SagaPersistenceConfiguration();
-            optimisticConcurrencyConfiguration.UseOptimisticLocking();
-            var pessimisticLockingConfiguration = new SagaPersistenceConfiguration();
-
             SagaVariants = new[]
             {
-                new TestVariant(optimisticConcurrencyConfiguration),
-                new TestVariant(pessimisticLockingConfiguration)
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: true, useClusterWideTransactions: false))).SetArgDisplayNames("Optimistic", "NoClusterWideTx"),
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: false, useClusterWideTransactions: false))).SetArgDisplayNames("Pessimistic", "NoClusterWideTx"),
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: true, useClusterWideTransactions: true))).SetArgDisplayNames("Optimistic", "ClusterWideTx"),
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: false, useClusterWideTransactions: true))).SetArgDisplayNames("Pessimistic", "ClusterWideTx"),
             };
             OutboxVariants = new[]
             {
-                new TestVariant(optimisticConcurrencyConfiguration)
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: true, useClusterWideTransactions: false))).SetArgDisplayNames("Optimistic", "NoClusterWideTx"),
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: true, useClusterWideTransactions: true))).SetArgDisplayNames("Optimistic", "ClusterWideTx")
             };
+        }
+
+        public class PersistenceConfiguration
+        {
+            public readonly bool UseOptimisticConcurrency;
+            public readonly bool UseClusterWideTransactions;
+
+            public PersistenceConfiguration(bool useOptimisticConcurrency, bool useClusterWideTransactions)
+            {
+                UseOptimisticConcurrency = useOptimisticConcurrency;
+                UseClusterWideTransactions = useClusterWideTransactions;
+            }
         }
 
         DocumentStore documentStore;
@@ -62,17 +74,25 @@
                 return context;
             };
 
+            var persistenceConfiguration = (PersistenceConfiguration)Variant.Values[0];
+
             SagaIdGenerator = new DefaultSagaIdGenerator();
-            var sagaPersistenceConfiguration = Variant.Values[0] as SagaPersistenceConfiguration;
+            var sagaPersistenceConfiguration = new SagaPersistenceConfiguration();
+            if (persistenceConfiguration.UseOptimisticConcurrency)
+            {
+                sagaPersistenceConfiguration.UseOptimisticLocking();
+            }
             SupportsPessimisticConcurrency = sagaPersistenceConfiguration.EnablePessimisticLocking;
             if (SessionTimeout.HasValue)
             {
                 sagaPersistenceConfiguration.SetPessimisticLeaseLockAcquisitionTimeout(SessionTimeout.Value);
             }
-            SagaStorage = new SagaPersister(sagaPersistenceConfiguration);
+            SagaStorage = new SagaPersister(sagaPersistenceConfiguration, persistenceConfiguration.UseClusterWideTransactions);
 
             var dbName = Guid.NewGuid().ToString();
-            var urls = Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
+            string urls = persistenceConfiguration.UseClusterWideTransactions
+                ? Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls") ?? "http://localhost:8081,http://localhost:8082,http://localhost:8083"
+                : Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
             documentStore = new DocumentStore
             {
                 Urls = urls.Split(','),
@@ -82,11 +102,11 @@
             var dbRecord = new DatabaseRecord(dbName);
             await documentStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord), cancellationToken);
 
-            IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore));
+            IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore), persistenceConfiguration.UseClusterWideTransactions);
             SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator, null);
             SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter(null);
 
-            OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault);
+            OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault, persistenceConfiguration.UseClusterWideTransactions);
         }
 
         public async Task Cleanup(CancellationToken cancellationToken = default)
