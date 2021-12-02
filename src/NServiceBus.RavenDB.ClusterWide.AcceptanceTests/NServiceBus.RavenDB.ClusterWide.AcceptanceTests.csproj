@@ -37,7 +37,6 @@
     <Compile Remove="\**\Pipeline\*.*"/>
     <Compile Remove="\**\Recoverability\*.*"/>
     <Compile Remove="\**\Routing\NativePublishSubscribe\*.*"/>
-    <Compile Remove="\**\Routing\*.*"/>
     <Compile Remove="\**\Satellites\*.*"/>
     <Compile Remove="\**\Scheduling\*.*"/>
     <Compile Remove="\**\SelfVerification\*.*"/>
