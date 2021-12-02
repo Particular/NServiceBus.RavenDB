@@ -7,16 +7,40 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj" />
+    <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GitHubActionsTestLogger" Version="1.2.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-    <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="8.0.0-alpha.1900" />
-    <PackageReference Include="NUnit" Version="3.13.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
-    <PackageReference Include="RavenDB.Client" Version="5.3.0" />
+    <PackageReference Include="GitHubActionsTestLogger" Version="1.2.0"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0"/>
+    <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="8.0.0-alpha.1900"/>
+    <PackageReference Include="NUnit" Version="3.13.2"/>
+    <PackageReference Include="NUnit3TestAdapter" Version="4.1.0"/>
+    <PackageReference Include="RavenDB.Client" Version="5.3.0"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="\**\ConfigureEndpointInMemoryPersistence.cs"/>
+    <Compile Remove="\**\ConfigureEndpointLearningPersistence.cs"/>
+    <Compile Remove="\**\ConventionEnforcementTests.cs"/>
+    <Compile Remove="\**\DeterministicGuid.cs"/>
+    <Compile Remove="\**\Audit\*.*"/>
+    <Compile Remove="\**\Correlation\*.*"/>
+    <Compile Remove="\**\DataBus\*.*"/>
+    <Compile Remove="\**\DelayedDelivery\*.*"/>
+    <Compile Remove="\**\Forwarding\*.*"/>
+    <Compile Remove="\**\MessageId\*.*"/>
+    <Compile Remove="\**\Pipeline\*.*"/>
+    <Compile Remove="\**\Recoverability\*.*"/>
+    <Compile Remove="\**\Routing\NativePublishSubscribe\*.*"/>
+    <Compile Remove="\**\Routing\*.*"/>
+    <Compile Remove="\**\Satellites\*.*"/>
+    <Compile Remove="\**\Scheduling\*.*"/>
+    <Compile Remove="\**\SelfVerification\*.*"/>
+    <Compile Remove="\**\Serialization\*.*"/>
+    <Compile Remove="\**\TimeToBeReceived\*.*"/>
+    <Compile Remove="\**\Tx\**\*.*"/>
+    <Compile Remove="\**\Versioning\*.*"/>
   </ItemGroup>
 
 </Project>
