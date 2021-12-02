@@ -23,7 +23,7 @@ namespace NServiceBus.Persistence.RavenDB
             acquireLeaseLockTimeout = options.LeaseLockAcquisitionTimeout;
         }
 
-        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag contex)
+        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
             var documentSession = session.RavenSession();
 
