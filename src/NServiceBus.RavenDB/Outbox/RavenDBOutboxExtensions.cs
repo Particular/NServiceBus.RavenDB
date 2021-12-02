@@ -20,22 +20,6 @@
         public static void SetTimeToKeepDeduplicationData(this OutboxSettings configuration, TimeSpan timeToKeepDeduplicationData) =>
             configuration.GetSettings().SetTimeToKeepDeduplicationData(timeToKeepDeduplicationData);
 
-        /// <summary>
-        /// Sets the <see cref="TimeSpan" /> to keep deduplication data.
-        /// </summary>
-        /// <param name="configuration">The <see cref="EndpointConfiguration" /> being extended.</param>
-        /// <param name="timeToKeepDeduplicationData">A positive <see cref="TimeSpan" /> to keep deduplication data.</param>
-        /// <returns>The <see cref="EndpointConfiguration" /> being extended.</returns>
-        /// <remarks>By default, deduplication data is kept for seven days.</remarks>
-        [ObsoleteEx(
-            Message = "Use `SetTimeToKeepDeduplicationData` available on the `OutboxSettings` instead.",
-            RemoveInVersion = "7.0.0")]
-        public static EndpointConfiguration SetTimeToKeepDeduplicationData(this EndpointConfiguration configuration, TimeSpan timeToKeepDeduplicationData)
-        {
-            configuration.GetSettings().SetTimeToKeepDeduplicationData(timeToKeepDeduplicationData);
-            return configuration;
-        }
-
         static void SetTimeToKeepDeduplicationData(this SettingsHolder settings, TimeSpan timeToKeepDeduplicationData)
         {
             var now = DateTime.UtcNow;
@@ -63,30 +47,6 @@
         /// </remarks>
         public static void SetFrequencyToRunDeduplicationDataCleanup(this OutboxSettings configuration, TimeSpan frequencyToRunDeduplicationDataCleanup) =>
             configuration.GetSettings().SetFrequencyToRunDeduplicationDataCleanup(frequencyToRunDeduplicationDataCleanup);
-
-        /// <summary>
-        /// Sets the frequency to clean up deduplication data.
-        /// </summary>
-        /// <param name="configuration">The <see cref="EndpointConfiguration" /> being extended.</param>
-        /// <param name="frequencyToRunDeduplicationDataCleanup">
-        /// A positive <see cref="TimeSpan" /> representing the frequency to clean up deduplication data,
-        /// or <see cref="System.Threading.Timeout.InfiniteTimeSpan" /> (-1 milliseconds) to disable deduplication data clean up.
-        /// </param>
-        /// <returns>The <see cref="EndpointConfiguration" /> being extended.</returns>
-        /// <remarks>By default, deduplication data is cleaned up every 60 seconds.</remarks>
-        /// <remarks>
-        /// When document expiration is enabled on the database, it is recommended to disable deduplication data clean up
-        /// by specifying <see cref="System.Threading.Timeout.InfiniteTimeSpan" /> for
-        /// <paramref name="frequencyToRunDeduplicationDataCleanup" />.
-        /// </remarks>
-        [ObsoleteEx(
-            Message = "Use `SetFrequencyToRunDeduplicationDataCleanup` available on the `OutboxSettings` instead.",
-            RemoveInVersion = "7.0.0")]
-        public static EndpointConfiguration SetFrequencyToRunDeduplicationDataCleanup(this EndpointConfiguration configuration, TimeSpan frequencyToRunDeduplicationDataCleanup)
-        {
-            configuration.GetSettings().SetFrequencyToRunDeduplicationDataCleanup(frequencyToRunDeduplicationDataCleanup);
-            return configuration;
-        }
 
         static void SetFrequencyToRunDeduplicationDataCleanup(this SettingsHolder settings, TimeSpan frequencyToRunDeduplicationDataCleanup)
         {

@@ -13,10 +13,10 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
     [Test]
     public async Task It_should_enforce_uniqueness()
     {
-        var persister = new SagaPersister(new SagaPersistenceConfiguration());
+        var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
         var uniqueString = Guid.NewGuid().ToString();
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
             var saga1 = new SagaData
             {
@@ -30,9 +30,9 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
             await session.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        var exception = await Catch<ConcurrencyException>(async () =>
+        var exception = await Catch<ConcurrencyException>(async cancellationToken =>
         {
-            using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+            using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
             {
                 var saga2 = new SagaData
                 {
@@ -43,7 +43,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
                 var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
 
                 await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), synchronizedSession, options);
-                await session.SaveChangesAsync().ConfigureAwait(false);
+                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         });
 
@@ -65,7 +65,6 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
 
     class SagaData : IContainSagaData
     {
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
         public Guid Id { get; set; }
         public string Originator { get; set; }

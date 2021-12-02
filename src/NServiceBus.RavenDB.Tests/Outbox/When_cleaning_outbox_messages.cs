@@ -14,17 +14,17 @@
     public class When_cleaning_outbox_messages : RavenDBPersistenceTestBase
     {
         [SetUp]
-        public override void SetUp()
+        public override async Task SetUp()
         {
-            base.SetUp();
-            new OutboxRecordsIndex().Execute(store);
+            await base.SetUp();
+            await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
         [Test]
         public async Task Should_delete_all_dispatched_outbox_records()
         {
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default);
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), default, UseClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
@@ -40,7 +40,7 @@
             await persister.SetAsDispatched(dispatchedOutboxMessage.MessageId, context);
             await Task.Delay(TimeSpan.FromSeconds(1)); // wait for dispatch logic to finish
 
-            WaitForIndexing();
+            await WaitForIndexing();
 
             var cleaner = new OutboxRecordsCleaner(store);
 
@@ -48,7 +48,7 @@
             await cleaner.RemoveEntriesOlderThan(DateTime.UtcNow.AddMinutes(1));
 
             // assert
-            using (var session = store.OpenAsyncSession())
+            using (var session = store.OpenAsyncSession(GetSessionOptions()))
             {
                 var outboxRecords = await session.Query<OutboxRecord>().ToListAsync();
 

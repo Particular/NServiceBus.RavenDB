@@ -15,10 +15,10 @@
     public class When_outbox_messages_expire : RavenDBPersistenceTestBase
     {
         [SetUp]
-        public override void SetUp()
+        public override async Task SetUp()
         {
-            base.SetUp();
-            new OutboxRecordsIndex().Execute(store);
+            await base.SetUp();
+            await new OutboxRecordsIndex().ExecuteAsync(store);
         }
 
         [Test]
@@ -29,7 +29,7 @@
                     new ExpirationConfiguration { Disabled = false, DeleteFrequencyInSec = 1, }));
 
             // arrange
-            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), TimeSpan.FromSeconds(1));
+            var persister = new OutboxPersister("TestEndpoint", CreateTestSessionOpener(), TimeSpan.FromSeconds(1), UseClusterWideTransactions);
             var context = new ContextBag();
             var incomingMessageId = SimulateIncomingMessage(context).MessageId;
             var dispatchedOutboxMessage = new OutboxMessage(incomingMessageId, new TransportOperation[0]);
@@ -47,10 +47,10 @@
             // act
             // wait for dispatch logic and expiry to finish, not ideal but polling on BASE index is also not great
             await Task.Delay(TimeSpan.FromSeconds(3));
-            WaitForIndexing();
+            await WaitForIndexing();
 
             // assert
-            using (var session = store.OpenAsyncSession())
+            using (var session = store.OpenAsyncSession(GetSessionOptions()))
             {
                 var outboxRecords = await session.Query<OutboxRecord>().ToListAsync();
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Extensibility;
@@ -24,22 +25,22 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     [Test]
     public Task CanLoadAndRemoveByCorrelation()
     {
-        return RunTestUsing((persister, sagaId, syncSession, context) => persister.Get<CountingSagaData>("Name", "Alpha", syncSession, context));
+        return RunTestUsing((persister, sagaId, syncSession, context, cancellationToken) => persister.Get<CountingSagaData>("Name", "Alpha", syncSession, context));
     }
 
     [Test]
     public Task CanLoadAndRemoveById()
     {
-        return RunTestUsing((persister, sagaId, syncSession, context) => persister.Get<CountingSagaData>(sagaId, syncSession, context));
+        return RunTestUsing((persister, sagaId, syncSession, context, cancellationToken) => persister.Get<CountingSagaData>(sagaId, syncSession, context));
     }
 
     async Task RunTestUsing(GetSagaDelegate getSaga)
     {
         var sagaId = StoreSagaDocuments();
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var context = new ContextBag();
             context.Set(session);
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, context);
@@ -53,7 +54,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             await session.SaveChangesAsync();
         }
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency())
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
         {
             var dataDocs = await session.Advanced.LoadStartingWithAsync<SagaDataContainer>("CountingSagaDatas/");
             var uniqueDocs = await session.Advanced.LoadStartingWithAsync<SagaUniqueIdentity>("Raven3Sagas-");
@@ -63,14 +64,14 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         }
     }
 
-    delegate Task<CountingSagaData> GetSagaDelegate(SagaPersister persister, Guid sagaId, RavenDBSynchronizedStorageSession syncSession, ContextBag context);
+    delegate Task<CountingSagaData> GetSagaDelegate(SagaPersister persister, Guid sagaId, RavenDBSynchronizedStorageSession syncSession, ContextBag context, CancellationToken cancellationToken = default);
 
     Guid StoreSagaDocuments()
     {
         var sagaId = Guid.NewGuid();
         var sagaDocId = $"CountingSagaDatas/{sagaId}";
         var uniqueDocId = "Raven3Sagas-CountingSagaData/Name/5f293261-55cf-fb70-8b0a-944ef322a598"; // Guid is hash of "Alpha"
-        var typeName = "Raven3Sagas+CountingSagaData, NServiceBus.RavenDB.Tests";
+        var typeName = $"Raven3Sagas+CountingSagaData, {GetType().Assembly.GetName().Name}";
 
         var oldData = new CountingSagaData
         {
@@ -89,7 +90,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             UniqueValue = "Alpha"
         };
 
-        StoreSaga(store, sagaDocId, oldData, "CountingSagaDatas", typeName, uniqueDocId);
+        StoreSaga(store, GetSessionOptions(), sagaDocId, oldData, "CountingSagaDatas", typeName, uniqueDocId);
         StoreUniqueDoc(store, uniqueDocId, uniqueDoc);
         return sagaId;
     }
@@ -120,7 +121,9 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         public string Name { get; set; }
     }
 
-    static void StoreSaga(IDocumentStore store, string id, object document, string entityName, string typeName, string uniqueDocId)
+    static void StoreSaga(IDocumentStore store, SessionOptions sessionOptions, string id, object document,
+                          string entityName, string typeName,
+                          string uniqueDocId)
     {
         var documentInfo = new DocumentInfo
         {
@@ -132,9 +135,9 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         documentInfo.MetadataInstance[Constants.Documents.Metadata.Collection] = entityName;
 
         Console.WriteLine($"Creating {entityName}: {id}");
-        using (var session = store.OpenSession())
+        using (var session = store.OpenSession(sessionOptions))
         {
-            var blittableDoc = session.Advanced.EntityToBlittable.ConvertEntityToBlittable(document, documentInfo);
+            var blittableDoc = session.Advanced.JsonConverter.ToBlittable(document, documentInfo);
             var command = new PutDocumentCommand(id, string.Empty, blittableDoc);
             session.Advanced.RequestExecutor.Execute(command, session.Advanced.Context);
             session.SaveChanges();
@@ -154,11 +157,10 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         Console.WriteLine($"Creating unique identity: {id}");
         using (var session = store.OpenSession())
         {
-            var blittableDoc = session.Advanced.EntityToBlittable.ConvertEntityToBlittable(document, documentInfo);
+            var blittableDoc = session.Advanced.JsonConverter.ToBlittable(document, documentInfo);
             var command = new PutDocumentCommand(id, string.Empty, blittableDoc);
             session.Advanced.RequestExecutor.Execute(command, session.Advanced.Context);
             session.SaveChanges();
         }
     }
 }
-

@@ -7,7 +7,11 @@
     {
         public static IAsyncDocumentSession UsingOptimisticConcurrency(this IAsyncDocumentSession session)
         {
-            session.Advanced.UseOptimisticConcurrency = true;
+            if (((AsyncDocumentSession)session).TransactionMode == TransactionMode.SingleNode)
+            {
+                session.Advanced.UseOptimisticConcurrency = true;
+            }
+
             return session;
         }
 

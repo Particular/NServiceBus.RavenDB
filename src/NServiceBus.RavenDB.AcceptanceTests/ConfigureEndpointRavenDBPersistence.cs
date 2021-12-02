@@ -1,9 +1,10 @@
-﻿using NServiceBus;
-using NServiceBus.AcceptanceTesting.Support;
-using NServiceBus.Settings;
-using System;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using NServiceBus;
+using NServiceBus.AcceptanceTesting.Support;
 using NServiceBus.Configuration.AdvancedExtensibility;
+using NServiceBus.Settings;
 using Raven.Client.Documents;
 using Raven.Client.ServerWide;
 using Raven.Client.ServerWide.Operations;
@@ -13,9 +14,9 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
     const string DefaultDocumentStoreKey = "$.ConfigureEndpointRavenDBPersistence.DefaultDocumentStore";
     const string DefaultPersistenceExtensionsKey = "$.ConfigureRavenDBPersistence.DefaultPersistenceExtensions";
 
-    public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings, PublisherMetadata publisherMetadata)
+    public async Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings, PublisherMetadata publisherMetadata)
     {
-        var documentStore = GetDocumentStore();
+        var documentStore = await GetDocumentStore();
 
         databaseName = documentStore.Database;
 
@@ -28,29 +29,24 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
         configuration.GetSettings().Set(DefaultPersistenceExtensionsKey, persistenceExtensions);
 
         Console.WriteLine("Created '{0}' database", documentStore.Database);
-
-        return Task.FromResult(0);
     }
 
-    public Task Cleanup()
-    {
-        return DeleteDatabase(databaseName);
-    }
+    public Task Cleanup() => DeleteDatabase(databaseName);
 
-    public static DocumentStore GetDocumentStore()
+    public static async Task<DocumentStore> GetDocumentStore()
     {
-        var dbName = Guid.NewGuid().ToString();
+        var dbName = Guid.NewGuid().ToString("N");
 
         var documentStore = GetInitializedDocumentStore(dbName);
 
-        CreateDatabase(documentStore, dbName);
+        await CreateDatabase(documentStore, dbName);
 
         return documentStore;
     }
 
     internal static DocumentStore GetInitializedDocumentStore(string defaultDatabase)
     {
-        var urls = Environment.GetEnvironmentVariable("CommaSeparatedRavenClusterUrls") ?? "http://localhost:8080";
+        var urls = Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
 
         var documentStore = new DocumentStore
         {
@@ -63,13 +59,13 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
         return documentStore;
     }
 
-    public static void CreateDatabase(IDocumentStore defaultStore, string dbName)
+    public static Task CreateDatabase(IDocumentStore defaultStore, string dbName, CancellationToken cancellationToken = default)
     {
         var dbRecord = new DatabaseRecord(dbName);
-        defaultStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
+        return defaultStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord), cancellationToken);
     }
 
-    public static async Task DeleteDatabase(string dbName)
+    public static async Task DeleteDatabase(string dbName, CancellationToken cancellationToken = default)
     {
         // Periodically the delete will throw an exception because Raven has the database locked
         // To solve this we have a retry loop with a delay
@@ -82,18 +78,20 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
                 // We are using a new store because the global one is disposed of before cleanup
                 using (var storeForDeletion = GetInitializedDocumentStore(dbName))
                 {
-                    storeForDeletion.Maintenance.Server.Send(new DeleteDatabasesOperation(storeForDeletion.Database, hardDelete: true));
+                    await storeForDeletion.Maintenance.Server.SendAsync(new DeleteDatabasesOperation(storeForDeletion.Database, hardDelete: true), cancellationToken);
                     break;
                 }
             }
-            catch
+#pragma warning disable IDE0083
+            catch (Exception ex) when (!(ex is OperationCanceledException) || !cancellationToken.IsCancellationRequested)
+#pragma warning restore IDE0083
             {
                 if (triesLeft == 0)
                 {
                     throw;
                 }
 
-                await Task.Delay(250);
+                await Task.Delay(250, cancellationToken);
             }
         }
 
@@ -103,14 +101,10 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
     string databaseName;
 
     public static DocumentStore GetDefaultDocumentStore(ReadOnlySettings settings)
-    {
-        return settings.Get<DocumentStore>(DefaultDocumentStoreKey);
-    }
+        => settings.Get<DocumentStore>(DefaultDocumentStoreKey);
 
     public static PersistenceExtensions<RavenDBPersistence> GetDefaultPersistenceExtensions(ReadOnlySettings settings)
-    {
-        return settings.Get<PersistenceExtensions<RavenDBPersistence>>(DefaultPersistenceExtensionsKey);
-    }
+        => settings.Get<PersistenceExtensions<RavenDBPersistence>>(DefaultPersistenceExtensionsKey);
 }
 
 public static class TestConfigurationExtensions

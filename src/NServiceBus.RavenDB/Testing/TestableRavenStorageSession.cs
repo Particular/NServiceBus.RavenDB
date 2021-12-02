@@ -12,7 +12,6 @@
         /// Creates a new instance of <see cref="TestableRavenStorageSession" />
         /// using the provided <see cref="IAsyncDocumentSession" />.
         /// </summary>
-        /// <param name="session"></param>
         public TestableRavenStorageSession(IAsyncDocumentSession session)
         {
             Session = session;

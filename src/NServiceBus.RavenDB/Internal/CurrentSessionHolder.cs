@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Persistence.RavenDB
+namespace NServiceBus.Persistence.RavenDB
 {
     using System;
     using System.Threading;

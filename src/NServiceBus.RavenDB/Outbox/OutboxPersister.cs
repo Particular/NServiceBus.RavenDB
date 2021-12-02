@@ -10,16 +10,19 @@
     using Raven.Client;
     using Raven.Client.Documents.Commands.Batches;
     using Raven.Client.Documents.Operations;
+    using Raven.Client.Documents.Operations.CompareExchange;
     using Raven.Client.Documents.Session;
+    using Raven.Client.Exceptions;
     using TransportOperation = Outbox.TransportOperation;
 
     class OutboxPersister : IOutboxStorage
     {
-        public OutboxPersister(string endpointName, IOpenTenantAwareRavenSessions sessionCreator, TimeSpan timeToKeepDeduplicationData)
+        public OutboxPersister(string endpointName, IOpenTenantAwareRavenSessions sessionCreator, TimeSpan timeToKeepDeduplicationData, bool useClusterWideTransactions)
         {
             this.endpointName = endpointName;
             this.sessionCreator = sessionCreator;
             this.timeToKeepDeduplicationData = timeToKeepDeduplicationData;
+            this.useClusterWideTransactions = useClusterWideTransactions;
         }
 
         public async Task<OutboxMessage> Get(string messageId, ContextBag options)
@@ -58,7 +61,10 @@
         {
             var session = GetSession(context);
 
-            session.Advanced.UseOptimisticConcurrency = true;
+            if (!useClusterWideTransactions)
+            {
+                session.Advanced.UseOptimisticConcurrency = true;
+            }
 
             var transaction = new RavenDBOutboxTransaction(session);
             return Task.FromResult<OutboxTransaction>(transaction);
@@ -98,38 +104,81 @@
         {
             using (var session = GetSession(options))
             {
-                // to avoid loading the whole document we directly patch the document atomically
-                session.Advanced.Defer(new PatchCommandData(
-                    id: GetOutboxRecordId(messageId),
-                    changeVector: null,
-                    patch: new PatchRequest
-                    {
-                        Script =
-$@"if(this.Dispatched === true)
-  return;
-this.Dispatched = true
-this.DispatchedAt = args.DispatchedAt.Now
-this.TransportOperations = []
-this['@metadata']['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey}'] = args.SchemaVersion.Version
-if(args.Expire.Should === false)
-  return;
-this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
-                        Values =
-                        {
-                            {
-                                "DispatchedAt", new { Now = DateTime.UtcNow }
-                            },
-                            {
-                                "SchemaVersion", new { Version = OutboxRecord.SchemaVersion }
-                            },
-                            {
-                                "Expire", new { Should = timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) }
-                            }
-                        }
-                    },
-                    patchIfMissing: null));
+                var outboxRecordId = GetOutboxRecordId(messageId);
+                if (useClusterWideTransactions)
+                {
+                    var compareExchangeKey = $"rvn-atomic/{outboxRecordId}";
+                    var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId, includes => includes.IncludeCompareExchangeValue(outboxRecordId))
+                        .ConfigureAwait(false);
+                    var compareExchangeValue = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<CompareExchangeValue<string>>(compareExchangeKey)
+                        .ConfigureAwait(false);
 
-                await session.SaveChangesAsync().ConfigureAwait(false);
+                    if (compareExchangeValue == null)
+                    {
+                        throw new Exception("The compare exchange value for the outbox could not be found.");
+                    }
+
+                    if (!outboxRecord.Dispatched)
+                    {
+                        outboxRecord.Dispatched = true;
+                        outboxRecord.DispatchedAt = DateTime.UtcNow;
+                        outboxRecord.TransportOperations = Array.Empty<OutboxRecord.OutboxOperation>();
+
+                        var metadata = session.Advanced.GetMetadataFor(outboxRecord);
+                        metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey] = OutboxRecord.SchemaVersion;
+
+                        if (timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan)
+                        {
+                            metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
+                            compareExchangeValue.Metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
+                        }
+                    }
+                }
+                else
+                {
+                    // to avoid loading the whole document we directly patch the document atomically, this only works for single-node environments
+                    session.Advanced.Defer(new PatchCommandData(
+                        id: outboxRecordId,
+                        changeVector: null,
+                        patch: new PatchRequest
+                        {
+                            Script =
+    $@"if(this.Dispatched === true)
+      return;
+    this.Dispatched = true;
+    this.DispatchedAt = args.DispatchedAt.Now;
+    this.TransportOperations = [];
+    var metadata = this['@metadata'];
+    metadata['{SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey}'] = args.SchemaVersion.Version;
+    if(args.Expire.Should === false)
+      return;
+    metadata['{Constants.Documents.Metadata.Expires}'] = args.Expire.At;",
+                            Values =
+                            {
+                                {
+                                    "DispatchedAt", new { Now = DateTime.UtcNow }
+                                },
+                                {
+                                    "SchemaVersion", new { Version = OutboxRecord.SchemaVersion }
+                                },
+                                {
+                                    "Expire", new { Should = timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan, At = DateTime.UtcNow.Add(timeToKeepDeduplicationData) }
+                                }
+                            }
+                        },
+                        patchIfMissing: null));
+                }
+
+                try
+                {
+                    await session.SaveChangesAsync().ConfigureAwait(false);
+                }
+                catch (ConcurrencyException) when (useClusterWideTransactions)
+                {
+                    // When cluster wide transactions are enabled and two concurrent operations try to set as dispatched 
+                    // it is OK to swallow the exception since the outcome is deterministic
+                    // patching for non cluster wide transactions would always work and never land here
+                }
             }
         }
 
@@ -146,5 +195,6 @@ this['@metadata']['{Constants.Documents.Metadata.Expires}'] = args.Expire.At",
         TransportOperation[] emptyTransportOperations = new TransportOperation[0];
         IOpenTenantAwareRavenSessions sessionCreator;
         TimeSpan timeToKeepDeduplicationData;
+        bool useClusterWideTransactions;
     }
 }

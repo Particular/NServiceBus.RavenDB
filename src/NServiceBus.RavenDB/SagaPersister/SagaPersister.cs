@@ -4,6 +4,7 @@ namespace NServiceBus.Persistence.RavenDB
     using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
+    using NServiceBus.Logging;
     using NServiceBus.RavenDB.Persistence.SagaPersister;
     using NServiceBus.Sagas;
     using Raven.Client.Documents;
@@ -13,15 +14,16 @@ namespace NServiceBus.Persistence.RavenDB
 
     class SagaPersister : ISagaPersister
     {
-        public SagaPersister(SagaPersistenceConfiguration options)
+        public SagaPersister(SagaPersistenceConfiguration options, bool useClusterWideTransactions)
         {
+            this.useClusterWideTransactions = useClusterWideTransactions;
             leaseLockTime = options.LeaseLockTime;
             enablePessimisticLocking = options.EnablePessimisticLocking;
             acquireLeaseLockRefreshMaximumDelayTicks = (int)options.LeaseLockAcquisitionMaximumRefreshDelay.Ticks;
             acquireLeaseLockTimeout = options.LeaseLockAcquisitionTimeout;
         }
 
-        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
+        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag contex)
         {
             var documentSession = session.RavenSession();
 
@@ -42,7 +44,11 @@ namespace NServiceBus.Persistence.RavenDB
                 IdentityDocId = SagaUniqueIdentity.FormatId(sagaData.GetType(), correlationProperty.Name, correlationProperty.Value),
             };
 
-            await documentSession.StoreAsync(container, string.Empty, container.Id).ConfigureAwait(false);
+            // Optimistic concurrency can be turned on for a new document by passing string.Empty as a change vector value to Store
+            // method even when it is turned off for an entire session (or globally).
+            // It will cause to throw ConcurrencyException if the document already exists.
+            string changeVector = useClusterWideTransactions ? null : string.Empty;
+            await documentSession.StoreAsync(container, changeVector, container.Id).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(container);
 
             var sagaUniqueIdentity = new SagaUniqueIdentity
@@ -53,7 +59,7 @@ namespace NServiceBus.Persistence.RavenDB
                 SagaDocId = container.Id
             };
 
-            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: string.Empty, id: container.IdentityDocId).ConfigureAwait(false);
+            await documentSession.StoreAsync(sagaUniqueIdentity, changeVector: changeVector, id: container.IdentityDocId).ConfigureAwait(false);
             documentSession.StoreSchemaVersionInMetadata(sagaUniqueIdentity);
         }
 
@@ -108,15 +114,15 @@ namespace NServiceBus.Persistence.RavenDB
                 // if this is locked and need to acquire the lock
                 // first and then document.
                 lookup = await documentSession
-                .LoadAsync<SagaUniqueIdentity>(lookupId)
-                .ConfigureAwait(false);
+                    .LoadAsync<SagaUniqueIdentity>(lookupId)
+                    .ConfigureAwait(false);
             }
             else
             {
                 lookup = await documentSession
-                .Include(nameof(SagaUniqueIdentity.SagaDocId))
-                .LoadAsync<SagaUniqueIdentity>(lookupId)
-                .ConfigureAwait(false);
+                    .Include(nameof(SagaUniqueIdentity.SagaDocId))
+                    .LoadAsync<SagaUniqueIdentity>(lookupId)
+                    .ConfigureAwait(false);
             }
 
             if (lookup == null)
@@ -165,13 +171,16 @@ namespace NServiceBus.Persistence.RavenDB
 
         async Task<long> AcquireLease(IDocumentStore store, string sagaDataDocId)
         {
-            using (var cancellationTokenSource = new CancellationTokenSource(acquireLeaseLockTimeout))
+            using (var timedTokenSource = new CancellationTokenSource(acquireLeaseLockTimeout))
             {
-                var token = cancellationTokenSource.Token;
+                var token = timedTokenSource.Token;
+
                 while (!token.IsCancellationRequested)
                 {
                     try
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var lease = new SagaDataLease(DateTime.UtcNow.Add(leaseLockTime));
 
                         var saveResult = await store.Operations.SendAsync(
@@ -200,8 +209,15 @@ namespace NServiceBus.Persistence.RavenDB
 
                         await Task.Delay(TimeSpan.FromTicks(5 + random.Next(acquireLeaseLockRefreshMaximumDelayTicks)), token).ConfigureAwait(false);
                     }
-                    catch (OperationCanceledException)
+#pragma warning disable PS0019 // When catching System.Exception, cancellation needs to be properly accounted for - justification:
+                    // Cancellation is properly accounted for. In this case, we only want to catch cancellation by one of the tokens used to create the combined token.
+                    catch (Exception ex) when (ex.IsCausedBy(timedTokenSource.Token))
+#pragma warning restore PS0019 // When catching System.Exception, cancellation needs to be properly accounted for
                     {
+                        // Timed token source triggering breaks and results in TimeoutException
+                        // Passed in cancellationToken triggering will throw out of this method to be handled by caller
+                        // log the exception in case the stack trace is ever needed for debugging
+                        log.Debug("Operation canceled when time out exhausted for acquiring exclusive write lock.", ex);
                         break;
                     }
                 }
@@ -223,11 +239,15 @@ namespace NServiceBus.Persistence.RavenDB
         }
 
         const string SagaContainerContextKeyPrefix = "SagaDataContainer:";
-        static Random random = new Random();
+
+        static readonly ILog log = LogManager.GetLogger<SagaPersister>();
+        static readonly Random random = new Random();
+
+        readonly bool enablePessimisticLocking;
+        readonly int acquireLeaseLockRefreshMaximumDelayTicks;
+        readonly bool useClusterWideTransactions;
 
         TimeSpan leaseLockTime;
-        bool enablePessimisticLocking;
-        int acquireLeaseLockRefreshMaximumDelayTicks;
         TimeSpan acquireLeaseLockTimeout;
     }
 }

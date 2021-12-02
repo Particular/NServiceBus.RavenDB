@@ -2,12 +2,12 @@
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Operations;
-    using Raven.Client.ServerWide;
     using Raven.Client.ServerWide.Operations;
 
-    class ReusableDB : IDisposable
+    partial class ReusableDB : IReusableDB, IDisposable
     {
         readonly string databaseName;
         readonly bool deleteOnCompletion;
@@ -16,19 +16,6 @@
         {
             this.deleteOnCompletion = deleteOnCompletion;
             databaseName = Guid.NewGuid().ToString("N");
-
-            // The Raven client does this as a courtesy but may fail. During tests a race condition could
-            // prevent it from existing in time. So we are forcing the issue. In real life, every connection
-            // to the server ever attempting to ensure its existence means we can rely on it.
-            using (var initStore = CreateStore())
-            {
-                initStore.Initialize();
-
-                var dbRecord = new DatabaseRecord(databaseName);
-                initStore.Maintenance.Server.Send(new CreateDatabaseOperation(dbRecord));
-            }
-
-            Console.WriteLine($"Provisioned new Raven database name {databaseName}");
         }
 
         public IDocumentStore NewStore(string identifier = null)
@@ -45,23 +32,21 @@
             return store;
         }
 
-        IDocumentStore CreateStore()
-        {
-            return new DocumentStore
+        public IDocumentStore CreateStore() =>
+            new DocumentStore
             {
                 Urls = TestConstants.RavenUrls,
                 Database = databaseName
             };
-        }
 
-        public void WaitForIndexing(IDocumentStore store)
+        public async Task WaitForIndexing(IDocumentStore store, CancellationToken cancellationToken = default)
         {
-            while (store.Maintenance.Send(new GetStatisticsOperation()).StaleIndexes.Length != 0)
+            while ((await store.Maintenance.SendAsync(new GetStatisticsOperation(), cancellationToken)).StaleIndexes.Length != 0)
             {
-                Thread.Sleep(250);
+                await Task.Delay(250, cancellationToken);
             }
 
-            Thread.Sleep(100);
+            await Task.Delay(100, cancellationToken);
         }
 
         public void Dispose()

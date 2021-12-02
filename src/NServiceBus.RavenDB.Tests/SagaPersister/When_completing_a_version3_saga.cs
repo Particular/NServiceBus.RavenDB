@@ -6,6 +6,7 @@ using NServiceBus.RavenDB.Persistence.SagaPersister;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
@@ -14,10 +15,9 @@ public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
     public async Task Should_delete_the_unique_doc_properly()
     {
         var sagaId = Guid.NewGuid();
-
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
 
             var sagaEntity = new SagaData
             {

@@ -20,19 +20,24 @@
             var createdSessions = new List<IAsyncDocumentSession>();
             try
             {
-                documentStore = ConfigureEndpointRavenDBPersistence.GetDocumentStore();
+                documentStore = await ConfigureEndpointRavenDBPersistence.GetDocumentStore();
 
                 RavenSessionTestContext context =
                     await Scenario.Define<RavenSessionTestContext>()
                         .WithEndpoint<SharedRavenSessionExtensions>(b =>
                             b.CustomConfig(config =>
                                 {
-                                    config.UsePersistence<RavenDBPersistence>().UseSharedAsyncSession(_ =>
+                                    var persistence = config.UsePersistence<RavenDBPersistence>();
+                                    persistence.UseSharedAsyncSession(_ =>
                                     {
-                                        var session = documentStore.OpenAsyncSession();
+                                        var useClusterWideTx = persistence.GetSettings().GetOrDefault<bool>("NServiceBus.Persistence.RavenDB.EnableClusterWideTransactions");
+                                        var sessionOptions = new SessionOptions
+                                        {
+                                            TransactionMode = useClusterWideTx ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+                                        };
+                                        var session = documentStore.OpenAsyncSession(sessionOptions);
                                         createdSessions.Add(session);
                                         return session;
-
                                     });
                                 })
                                 .When((bus, c) =>
@@ -49,7 +54,6 @@
                 var injectedSessionId = ((InMemoryDocumentSessionOperations)context.RavenSessionFromHandler).Id;
                 var found = createdSessions.Cast<InMemoryDocumentSessionOperations>().Any(session => session.Id == injectedSessionId);
                 Assert.IsTrue(found);
-
             }
             finally
             {
@@ -57,7 +61,6 @@
                 {
                     session.Dispose();
                 }
-
 
                 if (documentStore != null)
                 {
@@ -72,7 +75,7 @@
             DocumentStore documentStore = null;
             try
             {
-                documentStore = ConfigureEndpointRavenDBPersistence.GetDocumentStore();
+                documentStore = await ConfigureEndpointRavenDBPersistence.GetDocumentStore();
 
                 RavenSessionTestContext context =
                     await Scenario.Define<RavenSessionTestContext>(testContext => { })
@@ -100,6 +103,7 @@
 
         public class RavenSessionTestContext : ScenarioContext
         {
+            public IAsyncDocumentSession RavenSessionFromTest { get; set; }
             public IAsyncDocumentSession RavenSessionFromHandler { get; set; }
             public bool HandlerWasHit { get; set; }
         }
@@ -108,10 +112,10 @@
         {
             public SharedRavenSessionExtensions()
             {
-                EndpointSetup<DefaultServer>(endpointConfiguration =>
+                EndpointSetup<DefaultServer>((config, context) =>
                 {
-                    endpointConfiguration.GetSettings().Set("DisableOutboxTransportCheck", true);
-                    endpointConfiguration.EnableOutbox();
+                    config.GetSettings().Set("DisableOutboxTransportCheck", true);
+                    config.EnableOutbox();
                 });
             }
 

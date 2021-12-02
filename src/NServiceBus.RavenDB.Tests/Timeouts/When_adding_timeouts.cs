@@ -49,7 +49,7 @@
 
             await persister.Add(timeout, new ContextBag());
 
-            WaitForIndexing();
+            await WaitForIndexing();
 
             using (var session = store.OpenAsyncSession())
             {
