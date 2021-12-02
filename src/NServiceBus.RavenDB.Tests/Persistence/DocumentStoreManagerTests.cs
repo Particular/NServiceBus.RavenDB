@@ -32,6 +32,7 @@
                 DocumentStoreManager.SetDocumentStore<StorageType.Outbox>(settings, db.NewStore("Outbox"));
                 DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(settings, db.NewStore("Sagas"));
                 DocumentStoreManager.SetDocumentStore<StorageType.Subscriptions>(settings, db.NewStore("Subscriptions"));
+                DocumentStoreManager.SetDocumentStore<StorageType.Timeouts>(settings, db.NewStore("Timeouts"));
                 DocumentStoreManager.SetDefaultStore(settings, db.NewStore("Default"));
 
                 var readOnly = (ReadOnlySettings)settings;
@@ -39,6 +40,7 @@
                 Assert.AreEqual("Outbox", DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(readOnly, null).Identifier);
                 Assert.AreEqual("Sagas", DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(readOnly, null).Identifier);
                 Assert.AreEqual("Subscriptions", DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(readOnly, null).Identifier);
+                Assert.AreEqual("Timeouts", DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(readOnly, null).Identifier);
             }
         }
     }
