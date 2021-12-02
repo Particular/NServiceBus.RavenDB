@@ -1,34 +1,54 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>net472;netcoreapp3.1;net5.0</TargetFrameworks>
-        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-        <RootNamespace>NServiceBus.RavenDB.AcceptanceTests</RootNamespace>
-        <LangVersion>8.0</LangVersion>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net472;netcoreapp3.1;net5.0</TargetFrameworks>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RootNamespace>NServiceBus.RavenDB.AcceptanceTests</RootNamespace>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj"/>
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="GitHubActionsTestLogger" Version="1.2.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-        <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="8.0.0-alpha.1900" />
-        <PackageReference Include="NUnit" Version="3.13.2" />
-        <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
-        <PackageReference Include="RavenDB.Client" Version="5.3.0" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="GitHubActionsTestLogger" Version="1.2.0"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0"/>
+    <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="8.0.0-alpha.1900"/>
+    <PackageReference Include="NUnit" Version="3.13.2"/>
+    <PackageReference Include="NUnit3TestAdapter" Version="4.1.0"/>
+    <PackageReference Include="RavenDB.Client" Version="5.3.0"/>
+  </ItemGroup>
 
-    <ItemGroup>
-        <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\**\*.cs" Exclude="**\obj\**"/>
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\**\*.cs" Exclude="**\obj\**"/>
+  </ItemGroup>
 
-    <ItemGroup>
-        <!-- The high contention test is only relevant for pessimistic concurrency control -->
-        <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\When_storing_saga_with_high_contention.cs" />
-        <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\ConfigureEndpointRavenDBPersistence.cs" />
-        <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\TestSuiteConstraints.cs" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="\**\ConfigureEndpointInMemoryPersistence.cs"/>
+    <Compile Remove="\**\ConfigureEndpointLearningPersistence.cs"/>
+    <Compile Remove="\**\ConventionEnforcementTests.cs"/>
+    <Compile Remove="\**\DeterministicGuid.cs"/>
+    <Compile Remove="\**\Audit\*.*"/>
+    <Compile Remove="\**\Correlation\*.*"/>
+    <Compile Remove="\**\DataBus\*.*"/>
+    <Compile Remove="\**\DelayedDelivery\*.*"/>
+    <Compile Remove="\**\Forwarding\*.*"/>
+    <Compile Remove="\**\MessageId\*.*"/>
+    <Compile Remove="\**\Pipeline\*.*"/>
+    <Compile Remove="\**\Recoverability\*.*"/>
+    <Compile Remove="\**\Routing\NativePublishSubscribe\*.*"/>
+    <Compile Remove="\**\Satellites\*.*"/>
+    <Compile Remove="\**\Scheduling\*.*"/>
+    <Compile Remove="\**\SelfVerification\*.*"/>
+    <Compile Remove="\**\Serialization\*.*"/>
+    <Compile Remove="\**\TimeToBeReceived\*.*"/>
+    <Compile Remove="\**\Tx\**\*.*"/>
+    <Compile Remove="\**\Versioning\*.*"/>
+
+    <!-- The high contention test is only relevant for pessimistic concurrency control -->
+    <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\When_storing_saga_with_high_contention.cs"/>
+    <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\ConfigureEndpointRavenDBPersistence.cs"/>
+    <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\TestSuiteConstraints.cs"/>
+  </ItemGroup>
 
 </Project>

@@ -123,7 +123,9 @@
                     documentStore.Dispose();
                     break;
                 }
+#pragma warning disable IDE0083
                 catch (Exception ex) when (!(ex is OperationCanceledException) || !cancellationToken.IsCancellationRequested)
+#pragma warning restore IDE0083
                 {
                     if (triesLeft == 0)
                     {
