@@ -64,11 +64,14 @@
             {
                 var eventField = typeof(DocumentStoreBase).GetField("OnBeforeConversionToEntity", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetField);
 
-
+#pragma warning disable IDE0078
+#pragma warning disable IDE0083
                 if (!(eventField.GetValue(store) is EventHandler<BeforeConversionToEntityEventArgs> eventDelegate))
                 {
                     return false;
                 }
+#pragma warning restore IDE0083     
+#pragma warning restore IDE0078
 
                 foreach (var existingHandler in eventDelegate.GetInvocationList())
                 {
