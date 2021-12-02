@@ -15,9 +15,6 @@ namespace NServiceBus.Persistence.RavenDB
         public void SetPessimisticLeaseLockAcquisitionTimeout(System.TimeSpan value) { }
         public void SetPessimisticLeaseLockTime(System.TimeSpan value) { }
         public void UseOptimisticLocking() { }
-        [System.Obsolete("Pessimistic locking is now the default, to enable optimistic locking, use UseOpti" +
-            "misticLocking(). Will be removed in version 8.0.0.", true)]
-        public void UsePessimisticLocking(bool value = true) { }
     }
 }
 namespace NServiceBus
@@ -30,21 +27,6 @@ namespace NServiceBus
     public class RavenDBPersistence : NServiceBus.Persistence.PersistenceDefinition
     {
         public RavenDBPersistence() { }
-    }
-    public static class RavenDbGatewayDeduplicationSettingsExtensions
-    {
-        [System.Obsolete("RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB ded" +
-            "icated package. The member currently throws a NotImplementedException. Will be r" +
-            "emoved in version 8.0.0.", true)]
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.Documents.IDocumentStore documentStore) { }
-        [System.Obsolete("RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB ded" +
-            "icated package. The member currently throws a NotImplementedException. Will be r" +
-            "emoved in version 8.0.0.", true)]
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.IReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
-        [System.Obsolete("RavenDB gateway persistence has been moved to the NServiceBus.Gateway.RavenDB ded" +
-            "icated package. The member currently throws a NotImplementedException. Will be r" +
-            "emoved in version 8.0.0.", true)]
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForGatewayDeduplication(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.IReadOnlySettings, System.IServiceProvider, Raven.Client.Documents.IDocumentStore> storeCreator) { }
     }
     public static class RavenDbSagaSettingsExtensions
     {
@@ -69,14 +51,6 @@ namespace NServiceBus
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.Documents.IDocumentStore documentStore) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.IReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForSubscriptions(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.IReadOnlySettings, System.IServiceProvider, Raven.Client.Documents.IDocumentStore> storeCreator) { }
-    }
-    [System.Obsolete("Timeout manager removed. Timeout storage configuration can be removed. Will be re" +
-        "moved in version 8.0.0.", true)]
-    public static class RavenDbTimeoutSettingsExtensions
-    {
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForTimeouts(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, Raven.Client.Documents.IDocumentStore documentStore) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForTimeouts(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.IReadOnlySettings, Raven.Client.Documents.IDocumentStore> storeCreator) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> UseDocumentStoreForTimeouts(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> cfg, System.Func<NServiceBus.Settings.IReadOnlySettings, System.IServiceProvider, Raven.Client.Documents.IDocumentStore> storeCreator) { }
     }
     public static class RavenSessionExtension
     {
