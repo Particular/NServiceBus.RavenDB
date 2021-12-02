@@ -28,7 +28,7 @@
             {
                 var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings, b);
                 return new TimeoutPersister(store, useClusterWideTransactions);
-            }, DependencyLifecycle.InstancePerCall);
+            }, DependencyLifecycle.SingleInstance);
 
             context.Container.ConfigureComponent(b =>
             {
