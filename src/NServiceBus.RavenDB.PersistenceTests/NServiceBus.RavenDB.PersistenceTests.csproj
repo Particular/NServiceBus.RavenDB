@@ -14,15 +14,15 @@
   <ItemGroup>
     <PackageReference Include="GitHubActionsTestLogger" Version="1.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-    <PackageReference Include="NServiceBus.PersistenceTests.Sources" Version="7.5.0" />
+    <PackageReference Include="NServiceBus.PersistenceTests.Sources" Version="7.5.0" GeneratePathProperty="true" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
     <PackageReference Include="RavenDB.Client" Version="5.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Until core is fixed -->
-    <Compile Remove="\**\Sagas\When_concurrent_update_exceed_lock_request_timeout_pessimistic.cs" />
+    <!-- Remove once https://github.com/Particular/NServiceBus/pull/6210 is merged and new version released -->
+    <Compile Remove="$(PkgNServiceBus_PersistenceTests_Sources)\**\Sagas\When_concurrent_update_exceed_lock_request_timeout_pessimistic.cs" />
   </ItemGroup>
 
 </Project>
