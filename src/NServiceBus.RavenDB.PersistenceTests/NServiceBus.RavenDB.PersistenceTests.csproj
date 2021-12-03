@@ -20,4 +20,9 @@
     <PackageReference Include="RavenDB.Client" Version="5.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Until core is fixed -->
+    <Compile Remove="\**\Sagas\When_concurrent_update_exceed_lock_request_timeout_pessimistic.cs" />
+  </ItemGroup>
+
 </Project>
