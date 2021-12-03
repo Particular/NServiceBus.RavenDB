@@ -5,6 +5,7 @@ using NServiceBus.Extensibility;
 using NServiceBus.Persistence.RavenDB;
 using NServiceBus.RavenDB.Tests;
 using NUnit.Framework;
+using Raven.Client.Documents.Session;
 
 [TestFixture]
 public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
@@ -18,15 +19,15 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
             UniqueString = null
         };
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var context))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var context))
         {
             var ravenSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
 
-            var exception = await Catch<ArgumentNullException>(async () =>
+            var exception = await Catch<ArgumentNullException>(async cancellationToken =>
             {
                 await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), ravenSession, context);
-                await session.SaveChangesAsync().ConfigureAwait(false);
+                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             });
 
             Assert.IsNotNull(exception);
@@ -48,7 +49,6 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
 
     class SagaData : IContainSagaData
     {
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
         public Guid Id { get; set; }
         public string Originator { get; set; }

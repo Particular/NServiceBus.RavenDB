@@ -1,8 +1,8 @@
 ﻿namespace NServiceBus.Persistence.RavenDB
 {
     using System.Threading.Tasks;
-    using NServiceBus.Extensibility;
-    using NServiceBus.Transport;
+    using Extensibility;
+    using Transport;
 
     class RavenDBSynchronizedStorage : ISynchronizedStorage
     {
@@ -17,6 +17,7 @@
             var message = context.Get<IncomingMessage>();
             var session = sessionCreator.OpenSession(message.Headers);
             var synchronizedStorageSession = new RavenDBSynchronizedStorageSession(session, context, true);
+
             sessionHolder?.SetCurrentSession(session);
 
             return Task.FromResult((CompletableSynchronizedStorageSession)synchronizedStorageSession);

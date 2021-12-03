@@ -101,7 +101,9 @@ namespace NServiceBus.Persistence.RavenDB
                     .Select(to => new { to.Id, to.Time }); // Must be anonymous type so Raven server can understand
 
 
-                using (var enumerator = await session.Advanced.StreamAsync(query, shutdownTokenSource.Token).ConfigureAwait(false))
+#pragma warning disable CA2007
+                await using (var enumerator = await session.Advanced.StreamAsync(query, shutdownTokenSource.Token).ConfigureAwait(false))
+#pragma warning restore CA2007
                 {
                     while (await enumerator.MoveNextAsync().ConfigureAwait(false))
                     {
@@ -204,6 +206,6 @@ namespace NServiceBus.Persistence.RavenDB
         ILog logger;
         TimeSpan _triggerCleanupEvery;
         TimeSpan _cleanupGapFromTimeslice;
-        static TimeoutsChunk.Timeout[] EmptyTimeouts = new TimeoutsChunk.Timeout[0];
+        static TimeoutsChunk.Timeout[] EmptyTimeouts = Array.Empty<TimeoutsChunk.Timeout>();
     }
 }

@@ -18,9 +18,9 @@ public class When_persisting_a_saga_entity_with_a_DateTime_property : RavenDBPer
             DateTimeProperty = DateTime.Parse("12/02/2010 12:00:00.01")
         };
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 
             await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);

@@ -6,20 +6,25 @@
 
     class OpenRavenSessionByCustomDelegate : IOpenTenantAwareRavenSessions
     {
-        public OpenRavenSessionByCustomDelegate(Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSession)
+        public OpenRavenSessionByCustomDelegate(Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSession, bool useClusterWideTransactions)
         {
             getAsyncSessionUsingHeaders = getAsyncSession;
+            this.useClusterWideTransactions = useClusterWideTransactions;
         }
 
         public IAsyncDocumentSession OpenSession(IDictionary<string, string> messageHeaders)
         {
             var session = getAsyncSessionUsingHeaders(messageHeaders);
 
-            session.Advanced.UseOptimisticConcurrency = true;
+            if (!useClusterWideTransactions)
+            {
+                session.Advanced.UseOptimisticConcurrency = true;
+            }
 
             return session;
         }
 
         Func<IDictionary<string, string>, IAsyncDocumentSession> getAsyncSessionUsingHeaders;
+        readonly bool useClusterWideTransactions;
     }
 }

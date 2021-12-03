@@ -12,13 +12,13 @@
 
     public class When_fetching_timeouts_from_storage : RavenDBPersistenceTestBase
     {
-        public override void SetUp()
+        public override async Task SetUp()
         {
-            base.SetUp();
+            await base.SetUp();
 
-            new TimeoutsIndex().Execute(store);
+            await new TimeoutsIndex().ExecuteAsync(store);
 
-            persister = new TimeoutPersister(store);
+            persister = new TimeoutPersister(store, UseClusterWideTransactions);
             query = new QueryTimeouts(store, "MyTestEndpoint");
         }
 
@@ -50,7 +50,7 @@
                 }, context);
             }
 
-            WaitForIndexing();
+            await WaitForIndexing();
 
             Assert.AreEqual(numberOfTimeoutsToAdd, (await query.GetNextChunk(DateTime.UtcNow.AddYears(-3))).DueTimeouts.Count());
         }
@@ -84,7 +84,7 @@
                 OwningTimeoutManager = "MyTestEndpoint"
             }, context);
 
-            WaitForIndexing();
+            await WaitForIndexing();
 
             var nextTimeToRunQuery = (await query.GetNextChunk(DateTime.UtcNow.AddYears(-3))).NextTimeToQuery;
 

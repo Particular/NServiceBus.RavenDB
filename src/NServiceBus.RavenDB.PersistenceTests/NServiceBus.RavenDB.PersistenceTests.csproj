@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net461;netcoreapp3.1;net5.0</TargetFrameworks>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\Test.snk</AssemblyOriginatorKeyFile>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GitHubActionsTestLogger" Version="1.2.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+    <PackageReference Include="NServiceBus.PersistenceTests.Sources" Version="7.5.0" GeneratePathProperty="true" />
+    <PackageReference Include="NUnit" Version="3.13.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
+    <PackageReference Include="RavenDB.Client" Version="5.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Remove once https://github.com/Particular/NServiceBus/pull/6210 is merged and new version released -->
+    <Compile Remove="$(PkgNServiceBus_PersistenceTests_Sources)\**\Sagas\When_concurrent_update_exceed_lock_request_timeout_pessimistic.cs" />
+  </ItemGroup>
+
+</Project>

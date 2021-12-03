@@ -11,9 +11,9 @@ public class When_updating_a_saga_without_unique_properties : RavenDBPersistence
     [Test]
     public async Task It_should_persist_successfully()
     {
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var uniqueString = Guid.NewGuid().ToString();
             var anotherUniqueString = Guid.NewGuid().ToString();
 
@@ -52,9 +52,7 @@ public class When_updating_a_saga_without_unique_properties : RavenDBPersistence
 
     class SagaData : IContainSagaData
     {
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UniqueString { get; set; }
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string NonUniqueString { get; set; }
         public Guid Id { get; set; }
         public string Originator { get; set; }

@@ -19,11 +19,12 @@
             DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Outbox>(context.Settings)
                 .CreateIndexOnInitialization(new OutboxRecordsIndex());
 
-            var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? TimeSpan.FromDays(7);
+            var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? DeduplicationDataTTLDefault;
+            var useClusterWideTransactions = context.Settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
 
             context.Container.ConfigureComponent(
-                builder => new OutboxPersister(context.Settings.EndpointName(), builder.Build<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData),
-                DependencyLifecycle.InstancePerCall);
+                builder => new OutboxPersister(context.Settings.EndpointName(), builder.Build<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData, useClusterWideTransactions),
+                DependencyLifecycle.SingleInstance);
 
             var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? TimeSpan.FromMinutes(1);
 
@@ -39,11 +40,13 @@
                 {
                     FrequencyToRunDeduplicationDataCleanup = frequencyToRunDeduplicationDataCleanup,
                     TimeToKeepDeduplicationData = timeToKeepDeduplicationData,
+                    ClusterWideTransactions = useClusterWideTransactions ? "Enabled" : "Disabled",
                 });
         }
 
         internal const string TimeToKeepDeduplicationData = "Outbox.TimeToKeepDeduplicationData";
         internal const string FrequencyToRunDeduplicationDataCleanup = "Outbox.FrequencyToRunDeduplicationDataCleanup";
+        internal static readonly TimeSpan DeduplicationDataTTLDefault = TimeSpan.FromDays(7);
 
         class OutboxCleaner : FeatureStartupTask
         {
@@ -61,34 +64,37 @@
                     return Task.CompletedTask;
                 }
 
-                cancellationTokenSource = new CancellationTokenSource();
-                cancellationToken = cancellationTokenSource.Token;
+                cleanupCancellationTokenSource = new CancellationTokenSource();
 
-                cleanupTask = Task.Run(() => PerformCleanup(), CancellationToken.None);
+                // Task.Run() so the call returns immediately instead of waiting for the first await or return down the call stack
+                cleanupTask = Task.Run(() => PerformCleanupAndSwallowExceptions(cleanupCancellationTokenSource.Token), CancellationToken.None);
 
                 return Task.CompletedTask;
             }
 
             protected override async Task OnStop(IMessageSession session)
             {
-                cancellationTokenSource.Cancel();
+                cleanupCancellationTokenSource.Cancel();
 
                 if (cleanupTask == null)
                 {
                     return;
                 }
 
-                // ReSharper disable once MethodSupportsCancellation
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30));
                 var finishedTask = await Task.WhenAny(cleanupTask, timeoutTask).ConfigureAwait(false);
 
+                // This will throw OperationCanceledException if invoked because of the cancellationToken
+                await finishedTask.ConfigureAwait(false);
+
                 if (finishedTask == timeoutTask)
                 {
-                    logger.Error("RavenOutboxCleaner failed to stop within the time allowed (30s).");
+                    // Was the result of the pre-existing 30s timeout
+                    Logger.Error("RavenOutboxCleaner failed to stop within the maximum time allowed (30s).");
                 }
             }
 
-            async Task PerformCleanup()
+            async Task PerformCleanupAndSwallowExceptions(CancellationToken cancellationToken)
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
@@ -105,13 +111,15 @@
                             await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
                         }
                     }
-                    catch (OperationCanceledException)
+                    catch (Exception ex) when (ex.IsCausedBy(cancellationToken))
                     {
-                        // Graceful shutdown
+                        // private token, cleaner is being stopped, log exception in case the stack trace is ever needed for debugging
+                        Logger.Debug("Operation canceled while stopping outbox cleaner.", ex);
+                        break;
                     }
                     catch (Exception ex)
                     {
-                        logger.Error("Unable to remove expired Outbox records from Raven database.", ex);
+                        Logger.Error("Unable to remove expired Outbox records from Raven database.", ex);
                     }
                 }
             }
@@ -120,10 +128,9 @@
             Task cleanupTask;
             TimeSpan timeToKeepDeduplicationData;
             TimeSpan frequencyToRunDeduplicationDataCleanup;
-            CancellationTokenSource cancellationTokenSource;
-            CancellationToken cancellationToken;
+            CancellationTokenSource cleanupCancellationTokenSource;
 
-            static readonly ILog logger = LogManager.GetLogger<OutboxCleaner>();
+            static readonly ILog Logger = LogManager.GetLogger<OutboxCleaner>();
         }
     }
 }

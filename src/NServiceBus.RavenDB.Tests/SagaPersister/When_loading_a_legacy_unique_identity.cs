@@ -25,11 +25,11 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
     {
         var unique = Guid.NewGuid().ToString();
 
-        CreateLegacySagaDocuments(store, unique);
+        CreateLegacySagaDocuments(store, GetSessionOptions(), unique);
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
 
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 
@@ -74,16 +74,16 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
             UniqueValue = uniqueString
         };
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var _))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var _))
         {
             await session.StoreAsync(sagaContainer);
             await session.StoreAsync(uniqueIdentity);
             await session.SaveChangesAsync();
         }
 
-        using (var session = store.OpenAsyncSession().UsingOptimisticConcurrency().InContext(out var options))
+        using (var session = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency().InContext(out var options))
         {
-            var persister = new SagaPersister(new SagaPersistenceConfiguration());
+            var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
 
             var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
 
@@ -103,7 +103,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         public string UniqueString { get; set; }
     }
 
-    static void CreateLegacySagaDocuments(IDocumentStore store, string unique)
+    static void CreateLegacySagaDocuments(IDocumentStore store, SessionOptions sessionOptions, string unique)
     {
         var sagaId = Guid.NewGuid();
 
@@ -116,7 +116,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         var sagaDocId = $"SagaWithUniqueProperty/{sagaId}";
         var typeName = Regex.Replace(typeof(SagaWithUniqueProperty).AssemblyQualifiedName, ", Version=.*", "");
 
-        DirectStore(store, sagaDocId, saga, "SagaWithUniqueProperty", typeName, unique);
+        DirectStore(store, sessionOptions, sagaDocId, saga, "SagaWithUniqueProperty", typeName, unique);
 
         var uniqueIdentity = new SagaUniqueIdentity
         {
@@ -126,10 +126,10 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
             UniqueValue = unique
         };
 
-        DirectStore(store, uniqueIdentity.Id, uniqueIdentity, "SagaUniqueIdentity", "NServiceBus.Persistence.Raven.SagaPersister.SagaUniqueIdentity, NServiceBus.Core");
+        DirectStore(store, sessionOptions, uniqueIdentity.Id, uniqueIdentity, "SagaUniqueIdentity", "NServiceBus.Persistence.Raven.SagaPersister.SagaUniqueIdentity, NServiceBus.Core");
     }
 
-    static void DirectStore(IDocumentStore store, string id, object document, string entityName, string typeName, string uniqueValue = null)
+    static void DirectStore(IDocumentStore store, SessionOptions sessionOptions, string id, object document, string entityName, string typeName, string uniqueValue = null)
     {
         var documentInfo = new DocumentInfo
         {
@@ -144,9 +144,9 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         }
 
         Console.WriteLine($"Creating {entityName}: {id}");
-        using (var session = store.OpenSession())
+        using (var session = store.OpenSession(sessionOptions))
         {
-            var blittableDoc = session.Advanced.EntityToBlittable.ConvertEntityToBlittable(document, documentInfo);
+            var blittableDoc = session.Advanced.JsonConverter.ToBlittable(document, documentInfo);
             var command = new PutDocumentCommand(id, string.Empty, blittableDoc);
             session.Advanced.RequestExecutor.Execute(command, session.Advanced.Context);
             session.SaveChanges();

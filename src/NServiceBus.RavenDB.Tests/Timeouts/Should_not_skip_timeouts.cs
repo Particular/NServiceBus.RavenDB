@@ -16,9 +16,10 @@
     [TestFixture]
     public class Should_not_skip_timeouts
     {
-        [TestCase]
+        [TestCase(false)]
+        [TestCase(true)]
         [Ignore("Run manually")]
-        public async Task Never_ever()
+        public async Task Never_ever(bool useClusterWideTransactions)
         {
             var db = Guid.NewGuid().ToString();
             using (var documentStore = new DocumentStore
@@ -27,13 +28,13 @@
                 Database = db
             }.Initialize())
             {
-                new TimeoutsIndex().Execute(documentStore);
+                await new TimeoutsIndex().ExecuteAsync(documentStore);
 
                 var query = new QueryTimeouts(documentStore, "foo")
                 {
                     TriggerCleanupEvery = TimeSpan.FromHours(1) // Make sure cleanup doesn't run automatically
                 };
-                var persister = new TimeoutPersister(documentStore);
+                var persister = new TimeoutPersister(documentStore, useClusterWideTransactions);
                 var context = new ContextBag();
 
                 var startSlice = DateTime.UtcNow.AddYears(-10);
@@ -112,9 +113,10 @@
             }
         }
 
-        [TestCase]
+        [TestCase(false)]
+        [TestCase(true)]
         [Ignore("Run manually")]
-        public async Task Should_not_skip_timeouts_also_with_multiple_clients_adding_timeouts()
+        public async Task Should_not_skip_timeouts_also_with_multiple_clients_adding_timeouts(bool useClusterWideTransactions)
         {
             var db = Guid.NewGuid().ToString();
             using (var documentStore = new DocumentStore
@@ -123,13 +125,13 @@
                 Database = db
             }.Initialize())
             {
-                new TimeoutsIndex().Execute(documentStore);
+                await new TimeoutsIndex().ExecuteAsync(documentStore);
 
                 var query = new QueryTimeouts(documentStore, "foo")
                 {
                     TriggerCleanupEvery = TimeSpan.FromDays(1) // Make sure cleanup doesn't run automatically
                 };
-                var persister = new TimeoutPersister(documentStore);
+                var persister = new TimeoutPersister(documentStore, useClusterWideTransactions);
                 var context = new ContextBag();
 
                 var startSlice = DateTime.UtcNow.AddYears(-10);
@@ -170,7 +172,7 @@
                         Database = db
                     }.Initialize())
                     {
-                        var persister2 = new TimeoutPersister(store);
+                        var persister2 = new TimeoutPersister(store, useClusterWideTransactions);
 
                         var sagaId = Guid.NewGuid();
                         for (var i = 0; i < insertsPerThread; i++)

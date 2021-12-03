@@ -16,17 +16,11 @@
         /// </summary>
         /// <param name="session">The storage session.</param>
         /// <returns></returns>
-        public static IAsyncDocumentSession RavenSession(this SynchronizedStorageSession session)
+        public static IAsyncDocumentSession RavenSession(this SynchronizedStorageSession session) => session switch
         {
-            switch (session)
-            {
-                case RavenDBSynchronizedStorageSession synchronizedStorageSession:
-                    return synchronizedStorageSession.Session;
-                case TestableRavenStorageSession testableStorageSession:
-                    return testableStorageSession.Session;
-                default:
-                    throw new InvalidOperationException("It was not possible to retrieve a RavenDB session.");
-            }
-        }
+            RavenDBSynchronizedStorageSession synchronizedStorageSession => synchronizedStorageSession.Session,
+            TestableRavenStorageSession testableStorageSession => testableStorageSession.Session,
+            _ => throw new InvalidOperationException("It was not possible to retrieve a RavenDB session.")
+        };
     }
 }

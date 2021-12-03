@@ -16,11 +16,11 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
     {
         var clientEndpoint = new Subscriber("TestEndpoint", "TestEndpoint");
 
-        var storage = new SubscriptionPersister(store);
+        var storage = new SubscriptionPersister(store, UseClusterWideTransactions);
 
         await storage.Subscribe(clientEndpoint, new MessageType("MessageType1", "1.0.0.0"), new ContextBag());
 
-        using (var session = store.OpenAsyncSession())
+        using (var session = store.OpenAsyncSession(GetSessionOptions()))
         {
             var subscriptions = await session
                 .Query<Subscription>()

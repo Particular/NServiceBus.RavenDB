@@ -12,15 +12,23 @@
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            //var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings);
             DocumentStoreManager.GetUninitializedDocumentStore<StorageType.Timeouts>(context.Settings)
                 .CreateIndexOnInitialization(new TimeoutsIndex());
+
+            var useClusterWideTransactions = context.Settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
+
+            context.Settings.AddStartupDiagnosticsSection(
+                StartupDiagnosticsSectionName,
+                new
+                {
+                    ClusterWideTransactions = useClusterWideTransactions ? "Enabled" : "Disabled"
+                });
 
             context.Container.ConfigureComponent(b =>
             {
                 var store = DocumentStoreManager.GetDocumentStore<StorageType.Timeouts>(context.Settings, b);
-                return new TimeoutPersister(store);
-            }, DependencyLifecycle.InstancePerCall);
+                return new TimeoutPersister(store, useClusterWideTransactions);
+            }, DependencyLifecycle.SingleInstance);
 
             context.Container.ConfigureComponent(b =>
             {
@@ -31,6 +39,8 @@
             context.Container.ConfigureComponent(typeof(QueryCanceller), DependencyLifecycle.InstancePerCall);
             context.RegisterStartupTask(b => b.Build<QueryCanceller>());
         }
+
+        internal const string StartupDiagnosticsSectionName = "NServiceBus.Persistence.RavenDB.Timeouts";
 
         class QueryCanceller : FeatureStartupTask
         {

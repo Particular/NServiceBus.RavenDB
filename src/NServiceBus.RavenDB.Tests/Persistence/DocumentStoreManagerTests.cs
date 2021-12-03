@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.RavenDB.Tests.Persistence
 {
-    using System;
+    using System.Threading.Tasks;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using NServiceBus.Persistence.RavenDB;
     using NServiceBus.Settings;
     using NUnit.Framework;
@@ -9,31 +10,33 @@
     public class DocumentStoreManagerTests
     {
         [Test]
-        public void Specific_stores_should_mask_default()
+        public async Task Specific_stores_should_mask_default()
         {
             using (var db = new ReusableDB())
+            using (var store = db.NewStore().Initialize())
             {
-                var settings = new SettingsHolder();
-                settings.Set("Transactions.SuppressDistributedTransactions", true);
-                settings.Set("TypesToScan", new Type[0]);
-                settings.Set("NServiceBus.Routing.EndpointName", "FakeEndpoint");
-                settings.Set("NServiceBus.Transport.TransportInfrastructure", new FakeRavenDBTransportInfrastructure(TransportTransactionMode.None));
-                settings.Set("Endpoint.SendOnly", true);
+                await db.EnsureDatabaseExists(store);
 
-#pragma warning disable 618
-                DocumentStoreManager.SetDocumentStore<StorageType.GatewayDeduplication>(settings, db.NewStore("GatewayDeduplication"));
-#pragma warning restore 618
+                var cfg = new EndpointConfiguration("FakeEndpoint");
+                cfg.UseTransport<LearningTransport>();
+                cfg.SendOnly();
+
+                var persistence = cfg.UsePersistence<RavenDBPersistence>();
+                if (db.UseClusterWideTransactions)
+                {
+                    persistence.EnableClusterWideTransactions();
+                }
+
+                var settings = persistence.GetSettings();
+
                 DocumentStoreManager.SetDocumentStore<StorageType.Outbox>(settings, db.NewStore("Outbox"));
                 DocumentStoreManager.SetDocumentStore<StorageType.Sagas>(settings, db.NewStore("Sagas"));
                 DocumentStoreManager.SetDocumentStore<StorageType.Subscriptions>(settings, db.NewStore("Subscriptions"));
                 DocumentStoreManager.SetDocumentStore<StorageType.Timeouts>(settings, db.NewStore("Timeouts"));
                 DocumentStoreManager.SetDefaultStore(settings, db.NewStore("Default"));
 
-                var readOnly = settings as ReadOnlySettings;
+                var readOnly = (ReadOnlySettings)settings;
 
-#pragma warning disable 618
-                Assert.AreEqual("GatewayDeduplication", DocumentStoreManager.GetDocumentStore<StorageType.GatewayDeduplication>(readOnly, null).Identifier);
-#pragma warning restore 618
                 Assert.AreEqual("Outbox", DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(readOnly, null).Identifier);
                 Assert.AreEqual("Sagas", DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(readOnly, null).Identifier);
                 Assert.AreEqual("Subscriptions", DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(readOnly, null).Identifier);

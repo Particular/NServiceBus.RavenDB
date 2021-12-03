@@ -2,8 +2,8 @@
 {
     using System;
     using System.Threading.Tasks;
-    using NUnit.Framework;
     using NServiceBus.ObjectBuilder;
+    using NUnit.Framework;
 
     [TestFixture]
     public class When_providing_a_custom_document_store
@@ -13,7 +13,7 @@
         {
             var endpointConfiguration = new EndpointConfiguration("custom-docstore-endpoint");
 
-            endpointConfiguration.AssemblyScanner().ExcludeAssemblies("NServiceBus.RavenDB.Tests");
+            endpointConfiguration.AssemblyScanner().ExcludeAssemblies($"{GetType().Assembly.GetName().Name}");
             endpointConfiguration.UseTransport<LearningTransport>();
             endpointConfiguration.EnableOutbox();
 
