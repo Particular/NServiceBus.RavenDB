@@ -74,12 +74,12 @@
 
             protected override async Task OnStop(IMessageSession session)
             {
-                cleanupCancellationTokenSource.Cancel();
-
-                if (cleanupTask == null)
+                if (frequencyToRunDeduplicationDataCleanup == Timeout.InfiniteTimeSpan)
                 {
                     return;
                 }
+
+                cleanupCancellationTokenSource.Cancel();
 
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30));
                 var finishedTask = await Task.WhenAny(cleanupTask, timeoutTask).ConfigureAwait(false);
