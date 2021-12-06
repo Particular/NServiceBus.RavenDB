@@ -12,7 +12,6 @@
         {
             featureSettingsKeys = new Dictionary<Type, string>
             {
-                {typeof(StorageType.GatewayDeduplication), "RavenDbDocumentStore/GatewayDeduplication"},
                 {typeof(StorageType.Subscriptions), "RavenDbDocumentStore/Subscription"},
                 {typeof(StorageType.Outbox), "RavenDbDocumentStore/Outbox"},
                 {typeof(StorageType.Sagas), "RavenDbDocumentStore/Saga"},

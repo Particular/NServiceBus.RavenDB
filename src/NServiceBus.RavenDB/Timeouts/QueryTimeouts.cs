@@ -93,21 +93,19 @@ namespace NServiceBus.Persistence.RavenDB
                     .Select(to => new { to.Id, to.Time }); // Must be anonymous type so Raven server can understand
 
 
-                using (var enumerator = await session.Advanced.StreamAsync(query, shutdownTokenSource.Token).ConfigureAwait(false))
+                var enumerator = await session.Advanced.StreamAsync(query, shutdownTokenSource.Token).ConfigureAwait(false);
+                while (await enumerator.MoveNextAsync().ConfigureAwait(false))
                 {
-                    while (await enumerator.MoveNextAsync().ConfigureAwait(false))
+                    var timeoutId = enumerator.Current.Document.Id;
+                    var time = enumerator.Current.Document.Time;
+
+                    // Don't include a result already retrieved via a Cleanup run
+                    if (idDedupe != null && idDedupe.Contains(timeoutId))
                     {
-                        var timeoutId = enumerator.Current.Document.Id;
-                        var time = enumerator.Current.Document.Time;
-
-                        // Don't include a result already retrieved via a Cleanup run
-                        if (idDedupe != null && idDedupe.Contains(timeoutId))
-                        {
-                            continue;
-                        }
-
-                        results.Add(new TimeoutsChunk.Timeout(timeoutId, time));
+                        continue;
                     }
+
+                    results.Add(new TimeoutsChunk.Timeout(timeoutId, time));
                 }
 
                 if (CancellationRequested())
