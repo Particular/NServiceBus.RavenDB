@@ -26,7 +26,7 @@
                 builder => new OutboxPersister(context.Settings.EndpointName(), builder.Build<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData, useClusterWideTransactions),
                 DependencyLifecycle.SingleInstance);
 
-            var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? TimeSpan.FromMinutes(1);
+            var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? Timeout.InfiniteTimeSpan;
 
             context.RegisterStartupTask(builder =>
             {
