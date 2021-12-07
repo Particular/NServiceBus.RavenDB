@@ -39,7 +39,7 @@
         /// A positive <see cref="TimeSpan" /> representing the frequency to clean up deduplication data,
         /// or <see cref="System.Threading.Timeout.InfiniteTimeSpan" /> (-1 milliseconds) to disable deduplication data clean up.
         /// </param>
-        /// <remarks>By default, deduplication data is clean up is disabled assuming document expiration is enabled on the database.</remarks>
+        /// <remarks>By default, deduplication data clean up is disabled assuming document expiration is enabled on the database.</remarks>
         /// <remarks>
         /// When document expiration is enabled on the database, it is recommended to disable deduplication data clean up
         /// by specifying <see cref="System.Threading.Timeout.InfiniteTimeSpan" /> for
