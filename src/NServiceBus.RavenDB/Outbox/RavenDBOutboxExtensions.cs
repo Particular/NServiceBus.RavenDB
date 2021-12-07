@@ -1,10 +1,10 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using NServiceBus.Configuration.AdvancedExtensibility;
-    using NServiceBus.Outbox;
+    using Configuration.AdvancedExtensibility;
+    using Outbox;
     using NServiceBus.Persistence.RavenDB;
-    using NServiceBus.Settings;
+    using Settings;
 
     /// <summary>
     /// Contains extensions methods for RavenDB-specific outbox configuration.
@@ -39,7 +39,7 @@
         /// A positive <see cref="TimeSpan" /> representing the frequency to clean up deduplication data,
         /// or <see cref="System.Threading.Timeout.InfiniteTimeSpan" /> (-1 milliseconds) to disable deduplication data clean up.
         /// </param>
-        /// <remarks>By default, deduplication data is cleaned up every 60 seconds.</remarks>
+        /// <remarks>By default, deduplication data is clean up is disabled assuming document expiration is enabled on the database.</remarks>
         /// <remarks>
         /// When document expiration is enabled on the database, it is recommended to disable deduplication data clean up
         /// by specifying <see cref="System.Threading.Timeout.InfiniteTimeSpan" /> for
