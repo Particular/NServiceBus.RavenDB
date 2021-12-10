@@ -24,6 +24,11 @@ jobs:
     outputs:
       prefix: ${{ steps.setup-ravendb.outputs.prefix }}
     steps:
+      - name: Checkout
+        if: github.event_name != 'pull_request_target'
+        uses: actions/checkout@v2.4.0
+        with:
+          fetch-depth: 0    
       - name: Check for secrets
         env:
           SECRETS_AVAILABLE: ${{ secrets.SECRETS_AVAILABLE }}
@@ -42,47 +47,34 @@ jobs:
           $region = $hostInfo.compute.location
           $license = '${{ secrets.RAVENDB_LICENSE }}'
 
-          function NewRavenDBNode {
+          function NewRavenDB {
               param (
                   $region,
                   $prefix,
-                  $instanceId,
                   $runnerOs,
                   $commit
               )
 
-              $hostname = "$prefix-$instanceId"
-
-              # echo will mess up the return value
-              Write-Debug "Creating RavenDB container $hostname in $region (This can take a while.)"
+              echo "Creating RavenDB container group $prefix in $region (This can take a while.)"
 
               $containerImage = "ravendb/ravendb:5.3-ubuntu-latest"
-              $details = az container create --image $containerImage --name $hostname --location $region --dns-name-label $hostname --resource-group GitHubActions-RG --cpu 4 --memory 8 --ports 8080 38888 --ip-address public --environment-variables RAVEN_ServerUrl="http://0.0.0.0:8080" RAVEN_ServerUrl_Tcp="tcp://0.0.0.0:38888" RAVEN_PublicServerUrl="http://$($hostname).$($region).azurecontainer.io:8080" RAVEN_PublicServerUrl_Tcp="tcp://$($hostname).$($region).azurecontainer.io:38888" RAVEN_Setup_Mode="None" RAVEN_License_Eula_Accepted="true" RAVEN_Security_UnsecuredAccessAllowed="PublicNetwork" | ConvertFrom-Json
+              (Get-Content cluster.yml).replace('__NAME__', $prefix).replace('__REGION__', $region) | Set-Content cluster.replace.yml | Out-Null
+              $details = az container create --resource-group GitHubActions-RG --file cluster.replace.yml | ConvertFrom-Json
               
-              # echo will mess up the return value
-              Write-Debug "Tagging container image"
+              echo "Tagging container image"
               $dateTag = "Created=$(Get-Date -Format "yyyy-MM-dd")"
-              $ignore = az tag create --resource-id $details.id --tags Package=RavenPersistence RunnerOS=$runnerOs Commit=$commit $dateTag
-
-              return $details.ipAddress.fqdn
+              az tag create --resource-id $details.id --tags Package=RavenGatewayPersistence RunnerOS=$runnerOs Commit=$commit $dateTag | Out-Null
           }
 
           $prefix = "psw-ravendb-$(Get-Random)"
 
           echo "::set-output name=prefix::$prefix"
 
-          $fqdnRavenDB = @{ singlenode = ""; leader = ""; follower1 = ""; follower2 = "" }
+          NewRavenDB $region $prefix ${{ runner.os }} ${{ github.sha }}
 
-          $NewRavenDBNodeDef = $function:NewRavenDBNode.ToString()
+          $fqdn = "$prefix.$region.azurecontainer.io"
 
-          @($fqdnRavenDB.keys) | ForEach-Object -Parallel {
-              $function:NewRavenDBNode = $using:NewRavenDBNodeDef
-              $region = $using:region
-              $prefix = $using:prefix
-              $detail = NewRavenDBNode $region $prefix $_ ${{ runner.os }} ${{ github.sha }}
-              $hashTable = $using:fqdnRavenDB
-              $hashTable[$_] = $detail
-          }
+          $fqdnRavenDB = @{ singlenode = "$($fqdn):8080"; leader = "$($fqdn):8081"; follower1 = "$($fqdn):8082"; follower2 = "$($fqdn):8083" }
 
           @($fqdnRavenDB.keys) | ForEach-Object -Parallel {
               $startDate = Get-Date
@@ -95,7 +87,8 @@ jobs:
                   try
                   {
                       echo "Trying to connect to $nodeName"
-                      $tcpClient.Connect($hashTable[$nodeName], 8080)
+                      $fqdnAndPort = $hashTable[$nodeName].Split(":")
+                      $tcpClient.Connect($fqdnAndPort[0], $fqdnAndPort[1])
                       echo "Connection to $nodeName successful"
                   } catch 
                   {
@@ -112,23 +105,23 @@ jobs:
 
           # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
           echo "Activating license on singlenode"
-          curl "http://$($fqdnRavenDB['singlenode']):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
+          curl "http://$($fqdnRavenDB['singlenode'])/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
 
           # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
           echo "Activating license on leader"
-          curl "http://$($fqdnRavenDB['leader']):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
+          curl "http://$($fqdnRavenDB['leader'])/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
 
-          curl "http://$($fqdnRavenDB['leader']):8080/admin/license/set-limit?nodeTag=A&newAssignedCores=1" -X POST -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
-          $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB['follower1']):8080") 
-          curl "http://$($fqdnRavenDB['leader']):8080/admin/cluster/node?url=$($encodedURL)&tag=B&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
-          $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB['follower2']):8080")
-          curl "http://$($fqdnRavenDB['leader']):8080/admin/cluster/node?url=$($encodedURL)&tag=C&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
+          curl "http://$($fqdnRavenDB['leader'])/admin/license/set-limit?nodeTag=A&newAssignedCores=1" -X POST -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
+          $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB['follower1'])") 
+          curl "http://$($fqdnRavenDB['leader'])/admin/cluster/node?url=$($encodedURL)&tag=B&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
+          $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB['follower2'])")
+          curl "http://$($fqdnRavenDB['leader'])/admin/cluster/node?url=$($encodedURL)&tag=C&watcher=true&assignedCores=1" -X PUT -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
 
-          $singlenodeurl = "http://$($fqdnRavenDB['singlenode']):8080"
+          $singlenodeurl = "http://$($fqdnRavenDB['singlenode'])"
           echo "::set-output name=singlenodeurl::$singlenodeurl"
           echo "::add-mask::$singlenodeurl"
 
-          $clusterurl = "http://$($fqdnRavenDB['leader']):8080,http://$($fqdnRavenDB['follower1']):8080,http://$($fqdnRavenDB['follower2']):8080"
+          $clusterurl = "http://$($fqdnRavenDB['leader']),http://$($fqdnRavenDB['follower1']),http://$($fqdnRavenDB['follower2'])"
           echo "::set-output name=clusterurl::$clusterurl"
           echo "::add-mask::$clusterurl"
       - name: Encrypt Urls

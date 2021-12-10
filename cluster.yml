@@ -1,0 +1,79 @@
+apiVersion: 2019-12-01
+location: __REGION__
+name: __NAME__
+properties:
+  containers:
+  - name: singlenode
+    properties:
+      image: ravendb/ravendb:5.3-ubuntu-latest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 4
+      ports:
+      - port: 8080
+      - port: 38888
+      environmentVariables:
+      - name: RAVEN_ARGS
+        value: "--License.Eula.Accepted=true --Setup.Mode=None --Security.UnsecuredAccessAllowed=PublicNetwork --ServerUrl=http://0.0.0.0:8080 --PublicServerUrl=http://__NAME__.__REGION__.azurecontainer.io:8080 --ServerUrl.Tcp=tcp://0.0.0.0:38888 --PublicServerUrl.Tcp=tcp://__NAME__.__REGION__.azurecontainer.io:38888"
+  - name: leader
+    properties:
+      image: ravendb/ravendb:5.3-ubuntu-latest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 4
+      ports:
+      - port: 8081
+      - port: 38890
+      environmentVariables:
+      - name: RAVEN_ARGS
+        value: "--License.Eula.Accepted=true --Setup.Mode=None --Security.UnsecuredAccessAllowed=PublicNetwork --ServerUrl=http://0.0.0.0:8081 --PublicServerUrl=http://__NAME__.__REGION__.azurecontainer.io:8081 --ServerUrl.Tcp=tcp://0.0.0.0:38890 --PublicServerUrl.Tcp=tcp://__NAME__.__REGION__.azurecontainer.io:38890"
+  - name: follower1
+    properties:
+      image: ravendb/ravendb:5.3-ubuntu-latest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 4
+      ports:
+      - port: 8082
+      - port: 38891
+      environmentVariables:
+      - name: RAVEN_ARGS
+        value: "--License.Eula.Accepted=true --Setup.Mode=None --Security.UnsecuredAccessAllowed=PublicNetwork --ServerUrl=http://0.0.0.0:8082 --PublicServerUrl=http://__NAME__.__REGION__.azurecontainer.io:8082 --ServerUrl.Tcp=tcp://0.0.0.0:38891 --PublicServerUrl.Tcp=tcp://__NAME__.__REGION__.azurecontainer.io:38891"   
+  - name: follower2
+    properties:
+      image: ravendb/ravendb:5.3-ubuntu-latest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 4
+      ports:
+      - port: 8083
+      - port: 38892
+      environmentVariables:
+      - name: RAVEN_ARGS
+        value: "--License.Eula.Accepted=true --Setup.Mode=None --Security.UnsecuredAccessAllowed=PublicNetwork --ServerUrl=http://0.0.0.0:8083 --PublicServerUrl=http://__NAME__.__REGION__.azurecontainer.io:8083 --ServerUrl.Tcp=tcp://0.0.0.0:38892 --PublicServerUrl.Tcp=tcp://__NAME__.__REGION__.azurecontainer.io:38892"   
+  osType: Linux
+  ipAddress:
+    type: Public
+    ports:
+    - protocol: tcp
+      port: 8080
+    - protocol: tcp
+      port: 8081      
+    - protocol: tcp
+      port: 8082
+    - protocol: tcp
+      port: 8083            
+    - protocol: tcp    
+      port: 38888
+    - protocol: tcp
+      port: 38890
+    - protocol: tcp
+      port: 38891
+    - protocol: tcp
+      port: 38892                     
+    dnsNameLabel: __NAME__
+type: Microsoft.ContainerInstance/containerGroups
