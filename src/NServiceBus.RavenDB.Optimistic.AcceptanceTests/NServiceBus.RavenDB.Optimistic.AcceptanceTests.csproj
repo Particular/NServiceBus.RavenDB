@@ -4,6 +4,7 @@
     <TargetFrameworks>net461;netcoreapp3.1;net6.0</TargetFrameworks>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <RootNamespace>NServiceBus.RavenDB.AcceptanceTests</RootNamespace>
+    <NoWarn>$(NoWarn);SYSLIB0021</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
