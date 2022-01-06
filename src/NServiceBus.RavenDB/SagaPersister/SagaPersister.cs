@@ -208,7 +208,7 @@ namespace NServiceBus.Persistence.RavenDB
                             }
                         }
 
-                        await Task.Delay(TimeSpan.FromTicks(5 + random.Next(acquireLeaseLockRefreshMaximumDelayTicks)), token).ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromTicks(5 * TimeSpan.TicksPerMillisecond + random.Next(acquireLeaseLockRefreshMaximumDelayTicks)), token).ConfigureAwait(false);
                     }
 #pragma warning disable PS0019 // When catching System.Exception, cancellation needs to be properly accounted for - justification:
                     // Cancellation is properly accounted for. In this case, we only want to catch cancellation by one of the tokens used to create the combined token.
