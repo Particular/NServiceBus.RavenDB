@@ -19,8 +19,8 @@ namespace NServiceBus.Persistence.RavenDB
             this.useClusterWideTransactions = useClusterWideTransactions;
             leaseLockTime = options.LeaseLockTime;
             enablePessimisticLocking = options.EnablePessimisticLocking;
-            acquireLeaseLockRefreshMaximumDelayMillisecondsWithoutFractions = Convert.ToInt32(options.LeaseLockAcquisitionMaximumRefreshDelay.TotalMilliseconds);
-            acquireLeaseLockRefreshMinimumDelayMillisecondsWithoutFractions = 5;
+            acquireLeaseLockRefreshMaximumDelayMilliseconds = Convert.ToInt32(options.LeaseLockAcquisitionMaximumRefreshDelay.TotalMilliseconds);
+            acquireLeaseLockRefreshMinimumDelayMilliseconds = 5;
             acquireLeaseLockTimeout = options.LeaseLockAcquisitionTimeout;
         }
 
