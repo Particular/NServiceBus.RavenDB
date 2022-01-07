@@ -19,7 +19,8 @@ namespace NServiceBus.Persistence.RavenDB
             this.useClusterWideTransactions = useClusterWideTransactions;
             leaseLockTime = options.LeaseLockTime;
             enablePessimisticLocking = options.EnablePessimisticLocking;
-            acquireLeaseLockRefreshMaximumDelayTicks = (int)options.LeaseLockAcquisitionMaximumRefreshDelay.Ticks;
+            acquireLeaseLockRefreshMaximumDelayMillisecondsWithoutFractions = Convert.ToInt32(options.LeaseLockAcquisitionMaximumRefreshDelay.TotalMilliseconds);
+            acquireLeaseLockRefreshMinimumDelayMillisecondsWithoutFractions = Convert.ToInt32(TimeSpan.FromMilliseconds(5).TotalMilliseconds);
             acquireLeaseLockTimeout = options.LeaseLockAcquisitionTimeout;
         }
 
@@ -208,7 +209,7 @@ namespace NServiceBus.Persistence.RavenDB
                             }
                         }
 
-                        await Task.Delay(TimeSpan.FromTicks(5 + random.Next(acquireLeaseLockRefreshMaximumDelayTicks)), token).ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromMilliseconds(random.Next(acquireLeaseLockRefreshMinimumDelayMillisecondsWithoutFractions, acquireLeaseLockRefreshMaximumDelayMillisecondsWithoutFractions)), token).ConfigureAwait(false);
                     }
 #pragma warning disable PS0019 // When catching System.Exception, cancellation needs to be properly accounted for - justification:
                     // Cancellation is properly accounted for. In this case, we only want to catch cancellation by one of the tokens used to create the combined token.
@@ -245,7 +246,8 @@ namespace NServiceBus.Persistence.RavenDB
         static readonly Random random = new Random();
 
         readonly bool enablePessimisticLocking;
-        readonly int acquireLeaseLockRefreshMaximumDelayTicks;
+        readonly int acquireLeaseLockRefreshMaximumDelayMillisecondsWithoutFractions;
+        readonly int acquireLeaseLockRefreshMinimumDelayMillisecondsWithoutFractions;
         readonly bool useClusterWideTransactions;
 
         TimeSpan leaseLockTime;
