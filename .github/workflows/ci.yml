@@ -47,13 +47,11 @@ jobs:
           ref: 'refs/pull/${{ github.event.number }}/merge'
           fetch-depth: 0
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v1.7.2
+        uses: actions/setup-dotnet@v1.9.0
         with:
-          dotnet-version: 5.0.x
-      - name: Setup .NET Core 3.1 runtime
-        uses: actions/setup-dotnet@v1.7.2
-        with:
-          dotnet-version: 3.1.x
+          dotnet-version: |
+            6.0.x
+            3.1.x   
       - name: Build
         run: dotnet build src --configuration Release
       - name: Upload packages
@@ -88,16 +86,8 @@ jobs:
           $ignore = az tag create --resource-id $details.id --tags Package=RavenPersistence RunnerOS=${{ runner.os }} $dateTag
 
           echo "CommaSeparatedRavenClusterUrls=http://$($fqdn):8080" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-      - name: Run Windows tests
-        if: matrix.name == 'Windows'
-        # -m:1 parameter prevents test projects from being run in parallel, which could cause conflicts since PessimisticLocks project shares same tests
-        run: dotnet test src --configuration Release --no-build --logger "GitHubActions;report-warnings=false" -m:1
-      - name: Run Linux tests
-        if: matrix.name == 'Linux'
-        # -m:1 parameter prevents test projects from being run in parallel, which could cause conflicts since PessimisticLocks project shares same tests
-        run: |
-          dotnet test src --configuration Release --no-build --framework netcoreapp3.1 --logger "GitHubActions;report-warnings=false" -m:1
-          dotnet test src --configuration Release --no-build --framework net5.0 --logger "GitHubActions;report-warnings=false" -m:1
+      - name: Run  tests
+        uses: Particular/run-tests-action@v1.0.0
       - name: Teardown RavenDB
         if: ${{ always() }}
         uses: Azure/powershell@v1
