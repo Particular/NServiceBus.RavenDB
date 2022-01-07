@@ -22,9 +22,9 @@
             SagaVariants = new[]
             {
                 new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: true, useClusterWideTransactions: false))).SetArgDisplayNames("Optimistic", "NoClusterWideTx"),
-                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: false, useClusterWideTransactions: false))).SetArgDisplayNames("Pessimistic", "NoClusterWideTx"),
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: false, useClusterWideTransactions: false)) { SessionTimeout = TimeSpan.FromMilliseconds(2000) }).SetArgDisplayNames("Pessimistic", "NoClusterWideTx"),
                 new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: true, useClusterWideTransactions: true))).SetArgDisplayNames("Optimistic", "ClusterWideTx"),
-                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: false, useClusterWideTransactions: true))).SetArgDisplayNames("Pessimistic", "ClusterWideTx"),
+                new TestFixtureData(new TestVariant(new PersistenceConfiguration(useOptimisticConcurrency: false, useClusterWideTransactions: true)) { SessionTimeout = TimeSpan.FromMilliseconds(2000) }).SetArgDisplayNames("Pessimistic", "ClusterWideTx"),
             };
             OutboxVariants = new[]
             {
@@ -70,7 +70,7 @@
             GetContextBagForOutbox = GetContextBagForSagaStorage = () =>
             {
                 var context = new ContextBag();
-                context.Set(new IncomingMessage("native id", new Dictionary<string, string>(), new byte[0]));
+                context.Set(new IncomingMessage("native id", new Dictionary<string, string>(), Array.Empty<byte>()));
                 return context;
             };
 
