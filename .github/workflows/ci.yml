@@ -204,7 +204,7 @@ jobs:
         env:
           RavenSingleNodeUrl: ${{ steps.prepare.outputs.singlenodeurl }}
           CommaSeparatedRavenClusterUrls: ${{ steps.prepare.outputs.clusterurl }}
-        uses: Particular/run-tests-action@v1.1.0
+        uses: Particular/run-tests-action@v1.2.0
 
   cleanup:
     runs-on: ubuntu-20.04
