@@ -7,18 +7,11 @@ on:
   pull_request:
     branches-ignore:
       - release-[0-4].*
-  pull_request_target:
-    branches-ignore:
-      - release-[0-4].*
   workflow_dispatch:
 env:
   DOTNET_NOLOGO: true
 jobs:
   setup:
-    if:
-      (github.event_name == 'pull_request_target' && github.event.pull_request.user.login == 'dependabot[bot]') ||
-      (github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     name: Setup RavenDB Nodes
     runs-on: ubuntu-20.04
     outputs:
@@ -99,7 +92,7 @@ jobs:
                       echo "Connection to $nodeName successful"
                   } catch 
                   {
-                      if($startDate.AddMinutes(3) -lt (Get-Date)) 
+                      if($startDate.AddMinutes(5) -lt (Get-Date)) 
                       {
                         throw "Unable to connect to $nodeName"
                       }
@@ -158,15 +151,8 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout
-        if: github.event_name != 'pull_request_target'
         uses: actions/checkout@v2.4.0
         with:
-          fetch-depth: 0
-      - name: Checkout for Dependabot
-        if: github.event_name == 'pull_request_target'
-        uses: actions/checkout@v2.4.0
-        with:
-          ref: 'refs/pull/${{ github.event.number }}/merge'
           fetch-depth: 0
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v1.9.0
@@ -204,7 +190,7 @@ jobs:
         env:
           RavenSingleNodeUrl: ${{ steps.prepare.outputs.singlenodeurl }}
           CommaSeparatedRavenClusterUrls: ${{ steps.prepare.outputs.clusterurl }}
-        uses: Particular/run-tests-action@v1.1.0
+        uses: Particular/run-tests-action@v1.2.0
 
   cleanup:
     runs-on: ubuntu-20.04
@@ -221,5 +207,5 @@ jobs:
         if: ${{ needs.setup.outputs.prefix != '' }}
         uses: Azure/powershell@v1
         with:
-          inlineScript: Get-AzContainerGroup -ResourceGroupName GitHubActions-RG | Where-Object { $_.Name -like "${{ needs.setup.outputs.prefix }}*" } | Remove-AzContainerGroup | Out-Null
+          inlineScript: Get-AzContainerGroup -ResourceGroupName GitHubActions-RG | Where-Object { $_.Name -like "${{ needs.setup.outputs.prefix }}*" } | Remove-AzContainerGroup
           azPSVersion: latest      
