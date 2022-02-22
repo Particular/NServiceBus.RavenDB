@@ -33,7 +33,6 @@ jobs:
         run: |
           $hostInfo = curl -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | ConvertFrom-Json
           $region = $hostInfo.compute.location
-          $license = '${{ secrets.RAVENDB_LICENSE }}'
 
           function NewRavenDBNode {
               param (
@@ -105,11 +104,11 @@ jobs:
 
           # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
           echo "Activating license on singlenode"
-          curl "http://$($fqdnRavenDB['singlenode']):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
+          curl "http://$($fqdnRavenDB['singlenode']):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d '${{ secrets.RAVENDB_LICENSE }}'
 
           # Once you set the license on a node, it assumes the node to be a cluster, so only set the license on the leader
           echo "Activating license on leader"
-          curl "http://$($fqdnRavenDB['leader']):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d "$($license)"
+          curl "http://$($fqdnRavenDB['leader']):8080/admin/license/activate" -H 'Content-Type: application/json; charset=UTF-8' -d '${{ secrets.RAVENDB_LICENSE }}'
 
           curl "http://$($fqdnRavenDB['leader']):8080/admin/license/set-limit?nodeTag=A&newAssignedCores=1" -X POST -H 'Content-Type: application/json; charset=utf-8' -H 'Content-Length: 0'
           $encodedURL = [System.Web.HttpUtility]::UrlEncode("http://$($fqdnRavenDB['follower1']):8080") 
