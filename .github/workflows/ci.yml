@@ -92,7 +92,7 @@ jobs:
                       echo "Connection to $nodeName successful"
                   } catch 
                   {
-                      if($startDate.AddMinutes(3) -lt (Get-Date)) 
+                      if($startDate.AddMinutes(5) -lt (Get-Date)) 
                       {
                         throw "Unable to connect to $nodeName"
                       }
@@ -207,5 +207,5 @@ jobs:
         if: ${{ needs.setup.outputs.prefix != '' }}
         uses: Azure/powershell@v1
         with:
-          inlineScript: Get-AzContainerGroup -ResourceGroupName GitHubActions-RG | Where-Object { $_.Name -like "${{ needs.setup.outputs.prefix }}*" } | Remove-AzContainerGroup | Out-Null
+          inlineScript: Get-AzContainerGroup -ResourceGroupName GitHubActions-RG | Where-Object { $_.Name -like "${{ needs.setup.outputs.prefix }}*" } | Remove-AzContainerGroup
           azPSVersion: latest      
