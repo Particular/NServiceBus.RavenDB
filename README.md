@@ -14,7 +14,7 @@ Running the tests requires RavenDB 5.2 and two environment variables. One named 
 
 The [CI workflow](/.github/workflows/ci.yml) requires two secrets unique to RavenDB to be defined both as Actions and Dependabot secrets:
 
-* RAVENDB_LICENSE: A RavenDB development license, expressed as JSON, but all on one line
+* RAVENDB_LICENSE: A RavenDB development license, expressed as JSON, but all on one line, with escaped quotes `\"`
 * PASSPHRASE: Any phrase used to encrypt the connection information between steps in the CI
 
 The values used by Particular are both stored in a secure note called "RavenDB CI Secrets".
