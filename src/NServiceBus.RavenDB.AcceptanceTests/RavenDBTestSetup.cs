@@ -2,7 +2,7 @@
 using NUnit.Framework;
 
 [SetUpFixture]
-public class TestSetup
+public class RavenDBTestSetup
 {
     [OneTimeSetUp]
     public void SetUp()
