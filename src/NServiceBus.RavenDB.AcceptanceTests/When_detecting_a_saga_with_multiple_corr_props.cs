@@ -10,26 +10,16 @@
     public class When_detecting_a_saga_with_multiple_corr_props : NServiceBusAcceptanceTest
     {
         [Test]
-        public async Task Should_blow_up()
+        public void Should_blow_up()
         {
-            Exception exceptionToVerify = null;
-
-            try
-            {
+            Exception exceptionToVerify = Assert.ThrowsAsync<Exception>(async () =>
                 await Scenario.Define<Context>()
                     .WithEndpoint<MultiPropEndpoint>(e => e.DoNotFailOnErrorMessages())
                     .Done(c => c.EndpointsStarted)
-                    .Run();
-            }
-            catch (Exception ex)
-            {
-                exceptionToVerify = ex;
-            }
-            Assert.IsNotNull(exceptionToVerify);
+                    .Run());
 
             const string expectedMessage = "Sagas can only have mappings that correlate on a single saga property. Use custom finders to correlate";
-
-            Assert.True(exceptionToVerify.Message.Contains(expectedMessage), "Should tell user to use a single correlation property or custom finders");
+            StringAssert.Contains(expectedMessage, exceptionToVerify.Message, "Should tell user to use a single correlation property or custom finders");
         }
 
         public class Context : ScenarioContext
