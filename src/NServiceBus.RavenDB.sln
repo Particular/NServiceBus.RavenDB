@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.Accepta
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CB700990-944C-4B38-9ABF-D00EC464A5E2}"
 	ProjectSection(SolutionItems) = preProject
-		Directory.Build.props = Directory.Build.props
+		Custom.Build.props = Custom.Build.props
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.PessimisticLock.AcceptanceTests", "NServiceBus.RavenDB.PessimisticLock.AcceptanceTests\NServiceBus.RavenDB.PessimisticLock.AcceptanceTests.csproj", "{57785D1B-193C-4B59-86C2-F8E1E6B50A0E}"
