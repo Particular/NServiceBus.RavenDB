@@ -170,7 +170,7 @@ jobs:
           path: nugets/
           retention-days: 7
       - name: Download Urls
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: ravendburls
       - name: Prepare for tests
