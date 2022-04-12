@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30309.148
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 15.0.26430.12
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB", "NServiceBus.RavenDB\NServiceBus.RavenDB.csproj", "{281646E3-32E0-4F4D-BCF6-1DC5EFC6C268}"
 EndProject
@@ -11,19 +11,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.Accepta
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CB700990-944C-4B38-9ABF-D00EC464A5E2}"
 	ProjectSection(SolutionItems) = preProject
-		Directory.Build.props = Directory.Build.props
-		..\GitVersion.yml = ..\GitVersion.yml
+		Custom.Build.props = Custom.Build.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.Optimistic.AcceptanceTests", "NServiceBus.RavenDB.Optimistic.AcceptanceTests\NServiceBus.RavenDB.Optimistic.AcceptanceTests.csproj", "{57785D1B-193C-4B59-86C2-F8E1E6B50A0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.Optimistic.AcceptanceTests", "NServiceBus.RavenDB.Optimistic.AcceptanceTests\NServiceBus.RavenDB.Optimistic.AcceptanceTests.csproj", "{57785D1B-193C-4B59-86C2-F8E1E6B50A0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.PersistenceTests", "NServiceBus.RavenDB.PersistenceTests\NServiceBus.RavenDB.PersistenceTests.csproj", "{D4632C6A-F916-4107-9A76-EC66B3978BF8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.PersistenceTests", "NServiceBus.RavenDB.PersistenceTests\NServiceBus.RavenDB.PersistenceTests.csproj", "{D4632C6A-F916-4107-9A76-EC66B3978BF8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.ClusterWide.AcceptanceTests", "NServiceBus.RavenDB.ClusterWide.AcceptanceTests\NServiceBus.RavenDB.ClusterWide.AcceptanceTests.csproj", "{9398C6DE-E01F-4A91-AFBC-B113B855AA7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.ClusterWide.AcceptanceTests", "NServiceBus.RavenDB.ClusterWide.AcceptanceTests\NServiceBus.RavenDB.ClusterWide.AcceptanceTests.csproj", "{9398C6DE-E01F-4A91-AFBC-B113B855AA7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.Optimistic.ClusterWide.AcceptanceTests", "NServiceBus.RavenDB.Optimistic.ClusterWide.AcceptanceTests\NServiceBus.RavenDB.Optimistic.ClusterWide.AcceptanceTests.csproj", "{D599636B-1F7A-4CB2-B2F0-B0949718FA16}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.Optimistic.ClusterWide.AcceptanceTests", "NServiceBus.RavenDB.Optimistic.ClusterWide.AcceptanceTests\NServiceBus.RavenDB.Optimistic.ClusterWide.AcceptanceTests.csproj", "{D599636B-1F7A-4CB2-B2F0-B0949718FA16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.RavenDB.ClusterWide.Tests", "NServiceBus.RavenDB.ClusterWide.Tests\NServiceBus.RavenDB.ClusterWide.Tests.csproj", "{16B37694-8ACE-4704-8736-EA84B5CE6BAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.RavenDB.ClusterWide.Tests", "NServiceBus.RavenDB.ClusterWide.Tests\NServiceBus.RavenDB.ClusterWide.Tests.csproj", "{16B37694-8ACE-4704-8736-EA84B5CE6BAE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AcceptanceTests", "AcceptanceTests", "{42A47462-8EE0-43E0-B729-1E68C0AFA3B4}"
 EndProject
@@ -71,16 +70,16 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7F6284D7-8DBE-44D3-875C-C59FC7489287} = {B1AD16CA-050B-4BE6-A25E-DB00A067DE26}
+		{4238BEB3-9860-47FF-862C-9EFB5061DC12} = {42A47462-8EE0-43E0-B729-1E68C0AFA3B4}
+		{57785D1B-193C-4B59-86C2-F8E1E6B50A0E} = {42A47462-8EE0-43E0-B729-1E68C0AFA3B4}
+		{D4632C6A-F916-4107-9A76-EC66B3978BF8} = {B1AD16CA-050B-4BE6-A25E-DB00A067DE26}
+		{9398C6DE-E01F-4A91-AFBC-B113B855AA7B} = {42A47462-8EE0-43E0-B729-1E68C0AFA3B4}
+		{D599636B-1F7A-4CB2-B2F0-B0949718FA16} = {42A47462-8EE0-43E0-B729-1E68C0AFA3B4}
+		{16B37694-8ACE-4704-8736-EA84B5CE6BAE} = {B1AD16CA-050B-4BE6-A25E-DB00A067DE26}
+	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2805161C-B6B9-4930-AD94-FB9910BBAFC3}
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{4238BEB3-9860-47FF-862C-9EFB5061DC12} = {42A47462-8EE0-43E0-B729-1E68C0AFA3B4}
-		{9398C6DE-E01F-4A91-AFBC-B113B855AA7B} = {42A47462-8EE0-43E0-B729-1E68C0AFA3B4}
-		{57785D1B-193C-4B59-86C2-F8E1E6B50A0E} = {42A47462-8EE0-43E0-B729-1E68C0AFA3B4}
-		{D599636B-1F7A-4CB2-B2F0-B0949718FA16} = {42A47462-8EE0-43E0-B729-1E68C0AFA3B4}
-		{7F6284D7-8DBE-44D3-875C-C59FC7489287} = {B1AD16CA-050B-4BE6-A25E-DB00A067DE26}
-		{16B37694-8ACE-4704-8736-EA84B5CE6BAE} = {B1AD16CA-050B-4BE6-A25E-DB00A067DE26}
-		{D4632C6A-F916-4107-9A76-EC66B3978BF8} = {B1AD16CA-050B-4BE6-A25E-DB00A067DE26}
 	EndGlobalSection
 EndGlobal
