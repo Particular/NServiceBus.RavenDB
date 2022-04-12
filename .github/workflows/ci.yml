@@ -130,7 +130,7 @@ jobs:
           echo ${{ steps.setup-ravendb.outputs.singlenodeurl }} | gpg --quiet --symmetric --cipher-algo AES256 --batch --yes --passphrase '${{ secrets.PASSPHRASE }}' --output singlenodeurl.txt.gpg
           echo ${{ steps.setup-ravendb.outputs.clusterurl }} | gpg --quiet --symmetric --cipher-algo AES256 --batch --yes --passphrase '${{ secrets.PASSPHRASE }}' --output clusterurl.txt.gpg
       - name: Upload Urls
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ravendburls
           path: |
@@ -164,7 +164,7 @@ jobs:
         run: dotnet build src --configuration Release
       - name: Upload packages
         if: matrix.name == 'Windows'
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         with:
           name: NuGet packages
           path: nugets/
