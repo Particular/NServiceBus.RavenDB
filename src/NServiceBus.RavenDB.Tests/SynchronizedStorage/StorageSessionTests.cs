@@ -22,7 +22,9 @@
             var newDocument = new TestDocument { Value = "42" };
             using (var writeSession = new RavenDBSynchronizedStorageSession(CreateTestSessionOpener()))
             {
-                await writeSession.Open(new ContextBag()); //Owns the session so CompleteAsync commits the transaction
+                var contextBag = new ContextBag();
+                SimulateIncomingMessage(contextBag);
+                await writeSession.Open(contextBag); //Owns the session so CompleteAsync commits the transaction
                 await writeSession.Session.StoreAsync(newDocument);
                 await writeSession.CompleteAsync();
             }
@@ -42,7 +44,9 @@
             var documentId = Guid.NewGuid().ToString();
             using (var writeSession = new RavenDBSynchronizedStorageSession(CreateTestSessionOpener()))
             {
-                await writeSession.Open(new ContextBag());
+                var contextBag = new ContextBag();
+                SimulateIncomingMessage(contextBag);
+                await writeSession.Open(contextBag);
                 await writeSession.Session.StoreAsync(new TestDocument { Value = "43" }, documentId);
                 // do not call CompleteAsync.
             }
@@ -62,7 +66,9 @@
             using (var writeDocSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             using (var writeSession = new RavenDBSynchronizedStorageSession(CreateTestSessionOpener()))
             {
-                await writeSession.TryOpen(new RavenDBOutboxTransaction(writeDocSession), new ContextBag()); //Does not own the RavenDB session so CompleteAsync is NOOP
+                var contextBag = new ContextBag();
+                SimulateIncomingMessage(contextBag);
+                await writeSession.TryOpen(new RavenDBOutboxTransaction(writeDocSession), contextBag); //Does not own the RavenDB session so CompleteAsync is NOOP
                 await writeSession.Session.StoreAsync(new TestDocument { Value = "43" }, documentId);
                 await writeSession.CompleteAsync();
             }
