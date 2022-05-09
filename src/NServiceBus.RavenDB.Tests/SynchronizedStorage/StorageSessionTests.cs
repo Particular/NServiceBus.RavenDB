@@ -20,9 +20,9 @@
         public async Task CompleteAsync_with_savechanges_enabled_completes_transaction()
         {
             var newDocument = new TestDocument { Value = "42" };
-            using (var writeDocSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
-            using (var writeSession = new RavenDBSynchronizedStorageSession(writeDocSession, new ContextBag(), true))
+            using (var writeSession = new RavenDBSynchronizedStorageSession(CreateTestSessionOpener()))
             {
+                await writeSession.Open(new ContextBag()); //Owns the session so CompleteAsync commits the transaction
                 await writeSession.Session.StoreAsync(newDocument);
                 await writeSession.CompleteAsync();
             }
@@ -40,11 +40,11 @@
         public async Task Dispose_without_complete_rolls_back()
         {
             var documentId = Guid.NewGuid().ToString();
-            using (var writeDocSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
-            using (var writeSession = new RavenDBSynchronizedStorageSession(writeDocSession, new ContextBag(), true))
+            using (var writeSession = new RavenDBSynchronizedStorageSession(CreateTestSessionOpener()))
             {
+                await writeSession.Open(new ContextBag());
                 await writeSession.Session.StoreAsync(new TestDocument { Value = "43" }, documentId);
-                // do not call CompleteAsync
+                // do not call CompleteAsync.
             }
 
             using (var readSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
@@ -60,8 +60,9 @@
         {
             var documentId = Guid.NewGuid().ToString();
             using (var writeDocSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
-            using (var writeSession = new RavenDBSynchronizedStorageSession(writeDocSession, new ContextBag(), false))
+            using (var writeSession = new RavenDBSynchronizedStorageSession(CreateTestSessionOpener()))
             {
+                await writeSession.TryOpen(new RavenDBOutboxTransaction(writeDocSession), new ContextBag()); //Does not own the RavenDB session so CompleteAsync is NOOP
                 await writeSession.Session.StoreAsync(new TestDocument { Value = "43" }, documentId);
                 await writeSession.CompleteAsync();
             }

@@ -23,7 +23,7 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
                     SomeInt = 9
                 }
             };
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
+            var synchronizedSession = await session.CreateSynchronizedSession(options);
 
             await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
             await session.SaveChangesAsync().ConfigureAwait(false);

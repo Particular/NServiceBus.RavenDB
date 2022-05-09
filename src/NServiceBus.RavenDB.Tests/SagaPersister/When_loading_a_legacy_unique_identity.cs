@@ -31,7 +31,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
 
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
+            var synchronizedSession = await session.CreateSynchronizedSession(options);
 
             var saga = await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options);
 
@@ -85,7 +85,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         {
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
 
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, options);
+            var synchronizedSession = await session.CreateSynchronizedSession(options);
 
             var loadedSaga = await persister.Get<SagaWithUniqueProperty>("UniqueString", uniqueString, synchronizedSession, options);
 
