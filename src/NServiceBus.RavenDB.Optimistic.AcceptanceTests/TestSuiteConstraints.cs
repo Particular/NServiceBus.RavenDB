@@ -16,7 +16,7 @@
 
         public bool SupportsPurgeOnStartup => true;
 
-        public IConfigureEndpointTestExecution CreateTransportConfiguration() => new ConfigureEndpointAcceptanceTestingTransport(SupportsNativePubSub, SupportsDelayedDelivery);
+        public IConfigureEndpointTestExecution CreateTransportConfiguration() => new ConfigureEndpointAcceptanceTestingTransport(SupportsNativePubSub, SupportsDelayedDelivery, TransportTransactionMode.ReceiveOnly);
 
         public IConfigureEndpointTestExecution CreatePersistenceConfiguration() => new ConfigureEndpointRavenDBPersistence();
     }
