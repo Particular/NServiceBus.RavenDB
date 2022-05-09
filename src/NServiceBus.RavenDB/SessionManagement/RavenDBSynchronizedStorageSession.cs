@@ -15,20 +15,14 @@ namespace NServiceBus.Persistence.RavenDB
             this.sessionCreator = sessionCreator;
         }
 
-        //public RavenDBSynchronizedStorageSession(IAsyncDocumentSession session, ContextBag context, bool callSaveChanges = true)
-        //{
-        //    this.callSaveChanges = callSaveChanges;
-        //    this.context = context;
-        //    Session = session;
-
-        //    // In order to make sure due to parent/child context inheritance for the holder to be retrievable we need to add it here
-        //    this.context.Set(new SagaDataLeaseHolder());
-        //}
-
         public IAsyncDocumentSession Session { get; private set; }
 
         public void Dispose()
         {
+            if (context == null)
+            {
+                return;
+            }
             // Releasing locks here at the latest point possible to prevent issues with other pipeline resources depending on the lock.
             var holder = context.Get<SagaDataLeaseHolder>();
             foreach (var (DocumentId, Index) in holder.DocumentsIdsAndIndexes)
