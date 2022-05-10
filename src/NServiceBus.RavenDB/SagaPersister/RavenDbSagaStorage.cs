@@ -12,7 +12,9 @@
         internal RavenDbSagaStorage()
         {
             Defaults(s => s.EnableFeatureByDefault<RavenDbStorageSession>());
+
             DependsOn<Sagas>();
+            DependsOn<RavenDbStorageSession>();
         }
 
         protected override void Setup(FeatureConfigurationContext context)

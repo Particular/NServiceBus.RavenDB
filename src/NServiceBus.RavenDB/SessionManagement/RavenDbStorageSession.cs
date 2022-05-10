@@ -8,6 +8,8 @@
 
     class RavenDbStorageSession : Feature
     {
+        public RavenDbStorageSession() => DependsOn<SynchronizedStorage>();
+
         protected override void Setup(FeatureConfigurationContext context)
         {
             // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
