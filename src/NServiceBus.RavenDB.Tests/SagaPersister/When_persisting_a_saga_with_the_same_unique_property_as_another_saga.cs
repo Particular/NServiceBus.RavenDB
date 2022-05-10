@@ -40,7 +40,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
                     UniqueString = uniqueString
                 };
 
-                var synchronizedSession = await session.CreateSynchronizedSession(options);
+                var synchronizedSession = await session.CreateSynchronizedSession(options, cancellationToken);
 
                 await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), synchronizedSession, options, cancellationToken);
                 await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

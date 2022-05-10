@@ -43,7 +43,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             var persister = new SagaPersister(new SagaPersistenceConfiguration(), UseClusterWideTransactions);
             var context = new ContextBag();
             context.Set(session);
-            var synchronizedSession = await session.CreateSynchronizedSession(context);
+            var synchronizedSession = await session.CreateSynchronizedSession(context, cancellationToken);
             var sagaData = await getSaga(persister, sagaId, synchronizedSession, context, cancellationToken);
 
             Assert.IsNotNull(sagaData);
