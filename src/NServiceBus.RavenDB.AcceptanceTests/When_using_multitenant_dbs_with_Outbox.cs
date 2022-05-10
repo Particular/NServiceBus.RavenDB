@@ -64,6 +64,8 @@
                 {
                     b.CustomConfig((cfg, c) =>
                     {
+                        cfg.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
+
                         cfg.EnableOutbox();
                         cfg.LimitMessageProcessingConcurrencyTo(1);
                         cfg.Pipeline.Register(new MessageCountingBehavior(c), "Counts all messages processed");
@@ -137,10 +139,7 @@
 
         public class MultiTenantEndpoint : EndpointConfigurationBuilder
         {
-            public MultiTenantEndpoint()
-            {
-                EndpointSetup<DefaultServer>();
-            }
+            public MultiTenantEndpoint() => EndpointSetup<DefaultServer>();
 
             public class MTSaga : Saga<MTSagaData>,
                 IAmStartedByMessages<TestMsg>
@@ -152,10 +151,8 @@
                     this.testCtx = testCtx;
                 }
 
-                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<MTSagaData> mapper)
-                {
+                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<MTSagaData> mapper) =>
                     mapper.ConfigureMapping<TestMsg>(m => m.OrderId).ToSaga(s => s.OrderId);
-                }
 
                 public Task Handle(TestMsg message, IMessageHandlerContext context)
                 {
@@ -166,7 +163,7 @@
                         testCtx.ObservedDbs.Add(dbName);
                     }
                     Interlocked.Increment(ref testCtx.MessagesReceived);
-                    return Task.FromResult(0);
+                    return Task.CompletedTask;
                 }
             }
 
@@ -185,10 +182,7 @@
         {
             Context testContext;
 
-            public MessageCountingBehavior(Context testContext)
-            {
-                this.testContext = testContext;
-            }
+            public MessageCountingBehavior(Context testContext) => this.testContext = testContext;
 
             public async Task Invoke(ITransportReceiveContext context, Func<ITransportReceiveContext, Task> next)
             {

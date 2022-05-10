@@ -114,7 +114,7 @@
             {
                 EndpointSetup<DefaultServer>((config, context) =>
                 {
-                    config.GetSettings().Set("DisableOutboxTransportCheck", true);
+                    config.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
                     config.EnableOutbox();
                 });
             }

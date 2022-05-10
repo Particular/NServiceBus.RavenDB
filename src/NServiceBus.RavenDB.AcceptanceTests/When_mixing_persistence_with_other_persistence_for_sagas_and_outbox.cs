@@ -35,7 +35,9 @@ namespace NServiceBus.RavenDB.AcceptanceTests
             {
                 EndpointSetup<DefaultServer>(config =>
                 {
-                    // Mongo is configured by default, so we're adding the acceptancetestingpersistence mixed in
+                    config.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
+
+                    // RavenDB is configured by default, so we're adding the acceptancetestingpersistence mixed in
                     config.UsePersistence<AcceptanceTestingPersistence, StorageType.Sagas>();
                     config.UsePersistence<AcceptanceTestingPersistence, StorageType.Outbox>();
 
@@ -48,10 +50,7 @@ namespace NServiceBus.RavenDB.AcceptanceTests
             {
                 Context testContext;
 
-                public MySaga(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
+                public MySaga(Context testContext) => this.testContext = testContext;
 
                 public Task Handle(StartSaga message, IMessageHandlerContext context)
                 {
@@ -61,10 +60,8 @@ namespace NServiceBus.RavenDB.AcceptanceTests
                     return Task.CompletedTask;
                 }
 
-                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<MySagaData> mapper)
-                {
+                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<MySagaData> mapper) =>
                     mapper.ConfigureMapping<StartSaga>(m => m.DataId).ToSaga(s => s.DataId);
-                }
 
                 public class MySagaData : ContainSagaData
                 {
