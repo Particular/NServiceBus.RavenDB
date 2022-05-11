@@ -38,9 +38,9 @@
             }
 
             if (!args.Document.TryGetMember("@metadata", out var metadataObj) ||
-                !(metadataObj is BlittableJsonReaderObject metadata) ||
+                metadataObj is not BlittableJsonReaderObject metadata ||
                 !metadata.TryGetMember(Constants.Documents.Metadata.RavenClrType, out var lazyClrType) ||
-                !(lazyClrType is LazyStringValue clrType) ||
+                lazyClrType is not LazyStringValue clrType ||
                 clrType.ToString() == ContainerTypeName)
             {
                 return;
