@@ -13,7 +13,9 @@
         public RavenDbOutboxStorage()
         {
             Defaults(s => s.EnableFeatureByDefault<RavenDbStorageSession>());
+
             DependsOn<Outbox>();
+            DependsOn<RavenDbStorageSession>();
         }
 
         protected override void Setup(FeatureConfigurationContext context)

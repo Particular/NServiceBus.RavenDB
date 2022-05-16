@@ -42,7 +42,7 @@
             {
                 EndpointSetup<DefaultServer>((config, context) =>
                 {
-                    config.GetSettings().Set("DisableOutboxTransportCheck", true);
+                    config.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
                     config.EnableOutbox();
                 });
             }
@@ -51,10 +51,7 @@
             {
                 RavenSessionTestContext testContext;
 
-                public GenericMessageHandler(RavenSessionTestContext testContext)
-                {
-                    this.testContext = testContext;
-                }
+                public GenericMessageHandler(RavenSessionTestContext testContext) => this.testContext = testContext;
 
                 public Task Handle(GenericMessage message, IMessageHandlerContext context)
                 {

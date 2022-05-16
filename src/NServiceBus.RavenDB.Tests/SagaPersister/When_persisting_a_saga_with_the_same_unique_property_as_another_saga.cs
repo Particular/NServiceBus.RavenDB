@@ -24,7 +24,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
                 UniqueString = uniqueString
             };
 
-            var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
+            var synchronizedSession = await session.CreateSynchronizedSession(new ContextBag());
 
             await persister.Save(saga1, this.CreateMetadata<SomeSaga>(saga1), synchronizedSession, options);
             await session.SaveChangesAsync().ConfigureAwait(false);
@@ -40,7 +40,7 @@ public class When_persisting_a_saga_with_the_same_unique_property_as_another_sag
                     UniqueString = uniqueString
                 };
 
-                var synchronizedSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
+                var synchronizedSession = await session.CreateSynchronizedSession(options, cancellationToken);
 
                 await persister.Save(saga2, this.CreateMetadata<SomeSaga>(saga2), synchronizedSession, options, cancellationToken);
                 await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

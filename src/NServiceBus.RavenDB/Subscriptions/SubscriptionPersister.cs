@@ -139,7 +139,7 @@ namespace NServiceBus.Persistence.RavenDB
 
         static string GetDocumentIdForMessageType(MessageType messageType)
         {
-            using (var provider = new SHA1CryptoServiceProvider())
+            using (var provider = SHA1.Create())
             {
                 var inputBytes = Encoding.UTF8.GetBytes(messageType.TypeName);
                 var hashBytes = provider.ComputeHash(inputBytes);

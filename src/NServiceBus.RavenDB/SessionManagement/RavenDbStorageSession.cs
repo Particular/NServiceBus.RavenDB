@@ -8,6 +8,8 @@
 
     class RavenDbStorageSession : Feature
     {
+        public RavenDbStorageSession() => DependsOn<SynchronizedStorage>();
+
         protected override void Setup(FeatureConfigurationContext context)
         {
             // Check to see if the user provided us with a shared session to work with before we go and create our own to inject into the pipeline
@@ -47,11 +49,9 @@
                     });
             }
 
-            var sessionHolder = new CurrentSessionHolder();
-            context.Services.AddScoped(_ => sessionHolder.Current);
-            context.Pipeline.Register(new CurrentSessionBehavior(sessionHolder), "Manages the lifecycle of the current session holder.");
-            context.Services.AddSingleton<ISynchronizedStorage, RavenDBSynchronizedStorage>(provider => new RavenDBSynchronizedStorage(provider.GetService<IOpenTenantAwareRavenSessions>(), sessionHolder));
-            context.Services.AddSingleton<ISynchronizedStorageAdapter>(new RavenDBSynchronizedStorageAdapter(sessionHolder));
+            context.Services.AddScoped<ICompletableSynchronizedStorageSession, RavenDBSynchronizedStorageSession>();
+            context.Services.AddScoped(sp => sp.GetRequiredService<ICompletableSynchronizedStorageSession>().RavenSession());
+
         }
 
         internal const string SharedAsyncSession = "RavenDbSharedAsyncSession";

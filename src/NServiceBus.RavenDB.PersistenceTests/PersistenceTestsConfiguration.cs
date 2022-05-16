@@ -59,11 +59,9 @@
 
         public ISagaPersister SagaStorage { get; private set; }
 
-        public ISynchronizedStorage SynchronizedStorage { get; private set; }
-
-        public ISynchronizedStorageAdapter SynchronizedStorageAdapter { get; private set; }
-
         public IOutboxStorage OutboxStorage { get; private set; }
+
+        public Func<ICompletableSynchronizedStorageSession> CreateStorageSession { get; private set; }
 
         public async Task Configure(CancellationToken cancellationToken = default)
         {
@@ -103,8 +101,7 @@
             await documentStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord), cancellationToken);
 
             IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore), persistenceConfiguration.UseClusterWideTransactions);
-            SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator, null);
-            SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter(null);
+            CreateStorageSession = () => new RavenDBSynchronizedStorageSession(sessionCreator);
 
             OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault, persistenceConfiguration.UseClusterWideTransactions);
         }
@@ -123,9 +120,7 @@
                     documentStore.Dispose();
                     break;
                 }
-#pragma warning disable IDE0083
-                catch (Exception ex) when (!(ex is OperationCanceledException) || !cancellationToken.IsCancellationRequested)
-#pragma warning restore IDE0083
+                catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
                 {
                     if (triesLeft == 0)
                     {
@@ -136,5 +131,6 @@
                 }
             }
         }
+
     }
 }

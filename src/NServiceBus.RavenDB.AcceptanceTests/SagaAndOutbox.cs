@@ -19,6 +19,7 @@
                     b.DoNotFailOnErrorMessages();
                     b.CustomConfig(cfg =>
                     {
+                        cfg.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
                         cfg.EnableOutbox();
                         cfg.Recoverability().Immediate(x => x.NumberOfRetries(5));
                     });

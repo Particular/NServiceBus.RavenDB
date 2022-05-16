@@ -28,17 +28,11 @@
 
         public class MultiPropEndpoint : EndpointConfigurationBuilder
         {
-            public MultiPropEndpoint()
-            {
-                EndpointSetup<DefaultServer>();
-            }
+            public MultiPropEndpoint() => EndpointSetup<DefaultServer>();
 
             public class MultiPropSaga : Saga<MultiPropSagaData>, IAmStartedByMessages<StartSagaMessage>
             {
-                public Task Handle(StartSagaMessage message, IMessageHandlerContext context)
-                {
-                    return Task.FromResult(0);
-                }
+                public Task Handle(StartSagaMessage message, IMessageHandlerContext context) => Task.CompletedTask;
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<MultiPropSagaData> mapper)
                 {

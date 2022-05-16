@@ -23,7 +23,7 @@
                 };
                 var session = store.OpenAsyncSession(sessionOptions);
 
-                var storageSession = new RavenDBSynchronizedStorageSession(session, new ContextBag());
+                var storageSession = await session.CreateSynchronizedSession(new ContextBag());
 
                 var session2 = storageSession.RavenSession();
 

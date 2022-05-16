@@ -98,7 +98,7 @@
 
         void ApplyConventions(IReadOnlySettings settings)
         {
-            if (!(docStore is DocumentStore store))
+            if (docStore is not DocumentStore store)
             {
                 return;
             }
