@@ -103,11 +103,8 @@
             // First try to get a document store specific to a storage type (Subscriptions, Gateway, etc.)
             var docStoreInitializer = settings.GetOrDefault<DocumentStoreInitializer>(featureSettingsKeys[typeof(TStorageType)]);
 
-            // Next try finding a shared DocumentStore
-            if (docStoreInitializer == null)
-            {
-                docStoreInitializer = settings.GetOrDefault<DocumentStoreInitializer>(defaultDocStoreSettingsKey);
-            }
+            // Next try finding a shared DocumentStore                    
+            docStoreInitializer ??= settings.GetOrDefault<DocumentStoreInitializer>(defaultDocStoreSettingsKey);
 
             if (docStoreInitializer == null)
             {
