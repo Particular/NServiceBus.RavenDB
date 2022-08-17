@@ -91,10 +91,7 @@
 
         void EnsureDocStoreCreated(ReadOnlySettings settings, IBuilder builder)
         {
-            if (docStore == null)
-            {
-                docStore = storeCreator(settings, builder);
-            }
+            docStore ??= storeCreator(settings, builder);
         }
 
         void ApplyConventions(ReadOnlySettings settings)

@@ -106,10 +106,7 @@
             var docStoreInitializer = settings.GetOrDefault<DocumentStoreInitializer>(featureSettingsKeys[typeof(TStorageType)]);
 
             // Next try finding a shared DocumentStore
-            if (docStoreInitializer == null)
-            {
-                docStoreInitializer = settings.GetOrDefault<DocumentStoreInitializer>(defaultDocStoreSettingsKey);
-            }
+            docStoreInitializer ??= settings.GetOrDefault<DocumentStoreInitializer>(defaultDocStoreSettingsKey);
 
             if (docStoreInitializer == null)
             {
