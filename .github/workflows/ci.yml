@@ -3,10 +3,8 @@ on:
   push:
     branches:
       - master
-      - release-[5-9].*
+      - release-*
   pull_request:
-    branches-ignore:
-      - release-[0-4].*
   workflow_dispatch:
 env:
   DOTNET_NOLOGO: true
@@ -23,7 +21,7 @@ jobs:
         shell: pwsh
         run: exit $(If ($env:SECRETS_AVAILABLE -eq 'true') { 0 } Else { 1 })
       - name: Azure login
-        uses: azure/login@v1.4.1
+        uses: azure/login@v1.4.5
         with:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
           enable-AzPSSession: true
@@ -151,11 +149,11 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3.0.2
         with:
           fetch-depth: 0
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v1.9.0
+        uses: actions/setup-dotnet@v2.1.0
         with:
           dotnet-version: |
             6.0.x
@@ -164,13 +162,13 @@ jobs:
         run: dotnet build src --configuration Release
       - name: Upload packages
         if: matrix.name == 'Windows'
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3.1.0
         with:
           name: NuGet packages
           path: nugets/
           retention-days: 7
       - name: Download Urls
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3.0.0
         with:
           name: ravendburls
       - name: Prepare for tests
@@ -190,7 +188,7 @@ jobs:
         env:
           RavenSingleNodeUrl: ${{ steps.prepare.outputs.singlenodeurl }}
           CommaSeparatedRavenClusterUrls: ${{ steps.prepare.outputs.clusterurl }}
-        uses: Particular/run-tests-action@v1.2.0
+        uses: Particular/run-tests-action@v1.3.0
 
   cleanup:
     runs-on: ubuntu-20.04

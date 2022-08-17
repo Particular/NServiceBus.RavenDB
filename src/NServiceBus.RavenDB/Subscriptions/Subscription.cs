@@ -16,10 +16,8 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
         {
             get
             {
-                if (subscribers == null)
-                {
-                    subscribers = new List<SubscriptionClient>();
-                }
+                subscribers ??= new List<SubscriptionClient>();
+
                 return subscribers;
             }
 
