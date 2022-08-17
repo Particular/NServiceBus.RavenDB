@@ -90,10 +90,7 @@
 
         void EnsureDocStoreCreated(IReadOnlySettings settings, IServiceProvider builder)
         {
-            if (docStore == null)
-            {
-                docStore = storeCreator(settings, builder);
-            }
+            docStore ??= storeCreator(settings, builder);
         }
 
         void ApplyConventions(IReadOnlySettings settings)
