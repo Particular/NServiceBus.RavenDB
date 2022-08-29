@@ -5,39 +5,39 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj"/>
+    <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GitHubActionsTestLogger" Version="2.0.1"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0"/>
-    <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="8.0.0-beta.5" GeneratePathProperty="true"/>
-    <PackageReference Include="NUnit" Version="3.13.3"/>
-    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1"/>
-    <PackageReference Include="RavenDB.Client" Version="5.3.2"/>
+    <PackageReference Include="GitHubActionsTestLogger" Version="2.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="8.0.0-rc.1" GeneratePathProperty="true" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+    <PackageReference Include="RavenDB.Client" Version="5.3.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\ConfigureEndpointInMemoryPersistence.cs"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\ConfigureEndpointLearningPersistence.cs"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\ConventionEnforcementTests.cs"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\DeterministicGuid.cs"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Audit\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Correlation\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\DataBus\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\DelayedDelivery\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Forwarding\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\MessageId\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Pipeline\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Recoverability\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Routing\NativePublishSubscribe\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Satellites\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Scheduling\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\SelfVerification\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Serialization\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\TimeToBeReceived\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Tx\**\*.*"/>
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Versioning\*.*"/>
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\ConfigureEndpointInMemoryPersistence.cs" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\ConfigureEndpointLearningPersistence.cs" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\ConventionEnforcementTests.cs" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\DeterministicGuid.cs" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Audit\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Correlation\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\DataBus\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\DelayedDelivery\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Forwarding\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\MessageId\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Pipeline\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Recoverability\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Routing\NativePublishSubscribe\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Satellites\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Scheduling\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\SelfVerification\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Serialization\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\TimeToBeReceived\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Tx\**\*.*" />
+    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Versioning\*.*" />
   </ItemGroup>
 
 </Project>
