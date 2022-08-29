@@ -59,25 +59,5 @@ jobs:
           name: NuGet packages
           path: nugets/
           retention-days: 7
-      - name: Download Urls
-        uses: actions/download-artifact@v3.0.0
-        with:
-          name: ravendburls
-      - name: Prepare for tests
-        id: prepare
-        shell: pwsh
-        run: |
-          # Unfortunately masking breaks job outputs so we go the extra mile
-          gpg --quiet --batch --yes --decrypt --passphrase='${{ secrets.PASSPHRASE }}' --output singlenodeurl.txt singlenodeurl.txt.gpg
-          gpg --quiet --batch --yes --decrypt --passphrase='${{ secrets.PASSPHRASE }}' --output clusterurl.txt clusterurl.txt.gpg
-          $singlenodeurl = cat singlenodeurl.txt
-          echo "::add-mask::$singlenodeurl"
-          echo "::set-output name=singlenodeurl::$singlenodeurl"
-          $clusterurl = cat clusterurl.txt
-          echo "::add-mask::$clusterurl"
-          echo "::set-output name=clusterurl::$clusterurl"
       - name: Run tests
-        env:
-          RavenSingleNodeUrl: ${{ steps.prepare.outputs.singlenodeurl }}
-          CommaSeparatedRavenClusterUrls: ${{ steps.prepare.outputs.clusterurl }}
         uses: Particular/run-tests-action@v1.3.0   
