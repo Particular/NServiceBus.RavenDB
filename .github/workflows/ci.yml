@@ -56,6 +56,7 @@ jobs:
         uses: Particular/setup-ravendb-action@v1.0.0
         with:
             single-connection-string-name: CommaSeparatedRavenClusterUrls
+            cluster-connection-string-name: "CommaSeparatedRavenClusterUrlsNotUsed"
             ravendb-license: ${{ secrets.RAVENDB_LICENSE }}
             ravendb-mode: Single
             ravendb-version: "4.2"
