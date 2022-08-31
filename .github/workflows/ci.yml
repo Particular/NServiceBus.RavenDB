@@ -46,35 +46,20 @@ jobs:
           path: nugets/
           retention-days: 7
       - name: Azure login
+        if: matrix.name == 'Windows'
         uses: azure/login@v1.4.5
         with:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
           enable-AzPSSession: true
       - name: Setup RavenDB
         id: setup-ravendb
-        shell: pwsh
-        run: |
-          $hostInfo = curl -H Metadata:true "169.254.169.254/metadata/instance?api-version=2017-08-01" | ConvertFrom-Json
-          $region = $hostInfo.compute.location
-          
-          $hostname = "psw-ravendb-$(Get-Random)"
-          echo "::set-output name=hostname::$hostname"
-          echo "Creating RavenDB container $hostname in $region (This can take a while.)"
-          $details = az container create --image ravendb/ravendb:4.2-ubuntu-latest  --name $hostname --location $region --dns-name-label $hostname --resource-group GitHubActions-RG --cpu 4 --memory 16 --ports 8080 38888 --ip-address public -e RAVEN_ARGS='--ServerUrl=http://0.0.0.0:8080 --Setup.Mode=None --License.Eula.Accepted=true --Security.UnsecuredAccessAllowed=PublicNetwork' | ConvertFrom-Json
-
-          $fqdn=$details.ipAddress.fqdn
-          echo "::add-mask::$fqdn"
-
-          echo "Tagging container image"
-          $dateTag = "Created=$(Get-Date -Format "yyyy-MM-dd")"
-          $ignore = az tag create --resource-id $details.id --tags Package=RavenPersistence RunnerOS=${{ runner.os }} $dateTag
-
-          echo "CommaSeparatedRavenClusterUrls=http://$($fqdn):8080" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+        uses: Particular/setup-ravendb-action@v1.0.0
+        with:
+            single-connection-string-name: CommaSeparatedRavenClusterUrls
+            cluster-connection-string-name: "CommaSeparatedRavenClusterUrlsNotUsed"
+            ravendb-license: ${{ secrets.RAVENDB_LICENSE }}
+            ravendb-mode: Single
+            ravendb-version: "4.2"
+            tag: RavenDBPersistence
       - name: Run  tests
         uses: Particular/run-tests-action@v1.3.0
-      - name: Teardown RavenDB
-        if: ${{ always() }}
-        uses: Azure/powershell@v1.1.0
-        with:
-          inlineScript: Remove-AzContainerGroup -ResourceGroupName GitHubActions-RG -Name ${{ steps.setup-ravendb.outputs.hostname }}
-          azPSVersion: latest
