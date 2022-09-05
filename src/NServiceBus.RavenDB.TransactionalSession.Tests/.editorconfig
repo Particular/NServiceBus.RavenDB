@@ -1,0 +1,27 @@
+[*.cs]
+
+# Justification: Test project
+dotnet_diagnostic.CA2007.severity = none
+
+# PS0004: A parameter of type CancellationToken on a private delegate or method should be required
+dotnet_diagnostic.PS0004.severity = none
+
+# Justification: Tests don't support cancellation and don't need to forward IMessageHandlerContext.CancellationToken
+dotnet_diagnostic.NSB0002.severity = suggestion
+
+# Justification: Persistence library tests do not need saga analyzers
+dotnet_diagnostic.NSB0003.severity = none
+dotnet_diagnostic.NSB0004.severity = none
+dotnet_diagnostic.NSB0005.severity = none
+dotnet_diagnostic.NSB0006.severity = none
+dotnet_diagnostic.NSB0007.severity = none
+dotnet_diagnostic.NSB0008.severity = none
+dotnet_diagnostic.NSB0009.severity = none
+dotnet_diagnostic.NSB0010.severity = none
+dotnet_diagnostic.NSB0011.severity = none
+dotnet_diagnostic.NSB0012.severity = none
+dotnet_diagnostic.NSB0013.severity = none
+dotnet_diagnostic.NSB0014.severity = none
+dotnet_diagnostic.NSB0015.severity = none
+dotnet_diagnostic.NSB0016.severity = none
+dotnet_diagnostic.NSB0017.severity = none
