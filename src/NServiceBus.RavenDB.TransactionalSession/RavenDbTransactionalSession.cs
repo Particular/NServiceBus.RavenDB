@@ -1,17 +1,6 @@
 namespace NServiceBus.TransactionalSession
 {
-    using Features;
-
-    sealed class RavenDbTransactionalSession : Feature
+    sealed class RavenDbTransactionalSession : TransactionalSession
     {
-        public RavenDbTransactionalSession()
-        {
-            DependsOn<SynchronizedStorage>();
-            DependsOn<TransactionalSession>();
-        }
-
-        protected override void Setup(FeatureConfigurationContext context)
-        {
-        }
     }
 }

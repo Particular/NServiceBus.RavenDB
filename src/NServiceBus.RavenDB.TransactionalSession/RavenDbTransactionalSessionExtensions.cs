@@ -14,7 +14,6 @@ namespace NServiceBus.TransactionalSession
         public static PersistenceExtensions<RavenDBPersistence> EnableTransactionalSession(
             this PersistenceExtensions<RavenDBPersistence> persistenceExtensions)
         {
-            persistenceExtensions.GetSettings().EnableFeatureByDefault<TransactionalSession>();
             persistenceExtensions.GetSettings().EnableFeatureByDefault<RavenDbTransactionalSession>();
             return persistenceExtensions;
         }
