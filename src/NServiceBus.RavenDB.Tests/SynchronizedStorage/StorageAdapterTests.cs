@@ -13,7 +13,7 @@
         public async Task Should_use_existing_outbox_transaction()
         {
             var documentId = Guid.NewGuid().ToString("N");
-            var storageAdapter = new RavenDBSynchronizedStorageAdapter(null);
+            var storageAdapter = new RavenDBSynchronizedStorageAdapter();
             using (var outboxSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             using (var ravenDBOutboxTransaction = new RavenDBOutboxTransaction(outboxSession))
             using (var adaptedSession = await storageAdapter.TryAdapt(ravenDBOutboxTransaction, new ContextBag()))
@@ -38,7 +38,7 @@
         public async Task Should_roll_back_with_existing_outbox_transaction()
         {
             var documentId = Guid.NewGuid().ToString("N");
-            var storageAdapter = new RavenDBSynchronizedStorageAdapter(null);
+            var storageAdapter = new RavenDBSynchronizedStorageAdapter();
             using (var outboxSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             using (var ravenDBOutboxTransaction = new RavenDBOutboxTransaction(outboxSession))
             using (var adaptedSession = await storageAdapter.TryAdapt(ravenDBOutboxTransaction, new ContextBag()))
@@ -61,7 +61,7 @@
         public async Task Should_roll_back_with_existing_outbox_transaction_after_adapted_session_completed()
         {
             var documentId = Guid.NewGuid().ToString("N");
-            var storageAdapter = new RavenDBSynchronizedStorageAdapter(null);
+            var storageAdapter = new RavenDBSynchronizedStorageAdapter();
             using (var outboxSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             using (var ravenDBOutboxTransaction = new RavenDBOutboxTransaction(outboxSession))
             using (var adaptedSession = await storageAdapter.TryAdapt(ravenDBOutboxTransaction, new ContextBag()))

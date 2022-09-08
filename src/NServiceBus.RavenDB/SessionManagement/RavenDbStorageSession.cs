@@ -46,11 +46,9 @@
                     });
             }
 
-            var sessionHolder = new CurrentSessionHolder();
-            context.Container.ConfigureComponent(_ => sessionHolder.Current, DependencyLifecycle.InstancePerUnitOfWork);
-            context.Pipeline.Register(new CurrentSessionBehavior(sessionHolder), "Manages the lifecycle of the current session holder.");
-            context.Container.ConfigureComponent(_ => new RavenDBSynchronizedStorageAdapter(sessionHolder), DependencyLifecycle.SingleInstance);
-            context.Container.ConfigureComponent(provider => new RavenDBSynchronizedStorage(provider.Build<IOpenTenantAwareRavenSessions>(), sessionHolder), DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent(_ => new RavenDBSynchronizedStorageAdapter(), DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent(provider => new RavenDBSynchronizedStorage(provider.Build<IOpenTenantAwareRavenSessions>()), DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent(provider => provider.Build<CompletableSynchronizedStorageSessionAdapter>().AdaptedSession.RavenSession(), DependencyLifecycle.InstancePerUnitOfWork);
         }
 
         internal const string SharedAsyncSession = "RavenDbSharedAsyncSession";
