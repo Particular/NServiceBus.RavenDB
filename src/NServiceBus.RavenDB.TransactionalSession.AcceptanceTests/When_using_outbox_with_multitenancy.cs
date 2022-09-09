@@ -5,7 +5,7 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
     using System.Threading;
     using System.Threading.Tasks;
     using AcceptanceTesting;
-    using Microsoft.Extensions.DependencyInjection;
+    using NServiceBus.ObjectBuilder;
     using NUnit.Framework;
 
     public class When_using_outbox_with_multitenancy : NServiceBusAcceptanceTest
@@ -16,8 +16,8 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             var context = await Scenario.Define<Context>()
                 .WithEndpoint<MultitenantEndpoint>(s => s.When(async (_, ctx) =>
                 {
-                    using var scope = ctx.ServiceProvider.CreateScope();
-                    using var transactionalSession = scope.ServiceProvider.GetRequiredService<ITransactionalSession>();
+                    using var scope = ctx.Builder.CreateChildBuilder();
+                    using var transactionalSession = scope.Build<ITransactionalSession>();
 
                     await transactionalSession.Open(new RavenDbOpenSessionOptions(new Dictionary<string, string> { { "tenant-id", SetupFixture.TenantId } }));
                     ctx.SessionId = transactionalSession.SessionId;
@@ -39,9 +39,9 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             Assert.AreEqual(context.SessionId, context.Document.SessionId, "should have loaded the document from the correct tenant database");
         }
 
-        public class Context : ScenarioContext, IInjectServiceProvider
+        public class Context : ScenarioContext, IInjectBuilder
         {
-            public IServiceProvider ServiceProvider { get; set; }
+            public IBuilder Builder { get; set; }
 
             public bool MessageReceived { get; set; }
             public TestDocument Document { get; set; }

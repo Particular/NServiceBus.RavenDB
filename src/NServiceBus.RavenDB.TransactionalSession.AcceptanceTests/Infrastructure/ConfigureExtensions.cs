@@ -5,12 +5,12 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
 
     public static class ConfigureExtensions
     {
-        public static TransportDefinition ConfigureTransport(this EndpointConfiguration configuration) =>
-            configuration.GetSettings().Get<TransportDefinition>();
+        public static TransportExtensions ConfigureTransport(this EndpointConfiguration configuration) =>
+            new TransportExtensions(configuration.GetSettings());
 
-        public static TTransportDefinition ConfigureTransport<TTransportDefinition>(
+        public static TransportExtensions<TTransport> ConfigureTransport<TTransport>(
             this EndpointConfiguration configuration)
-            where TTransportDefinition : TransportDefinition =>
-            (TTransportDefinition)configuration.GetSettings().Get<TransportDefinition>();
+            where TTransport : TransportDefinition =>
+            new TransportExtensions<TTransport>(configuration.GetSettings());
     }
 }

@@ -3,15 +3,13 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
     using System;
     using System.IO;
     using System.Threading.Tasks;
-    using AcceptanceTesting;
     using AcceptanceTesting.Customization;
     using AcceptanceTesting.Support;
     using NUnit.Framework;
 
     public class TransactionSessionDefaultServer : IEndpointSetupTemplate
     {
-        public virtual async Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointCustomizationConfiguration endpointConfiguration,
-            Func<EndpointConfiguration, Task> configurationBuilderCustomization)
+        public virtual Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointCustomizationConfiguration endpointConfiguration, Action<EndpointConfiguration> configurationBuilderCustomization)
         {
             var builder = new EndpointConfiguration(endpointConfiguration.EndpointName);
             builder.EnableInstallers();
@@ -21,12 +19,8 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
                 .Immediate(immediate => immediate.NumberOfRetries(0));
             builder.SendFailedMessagesTo("error");
 
-            var storageDir = Path.Combine(Path.GetTempPath(), "learn", TestContext.CurrentContext.Test.ID);
-
-            builder.UseTransport(new AcceptanceTestingTransport
-            {
-                StorageLocation = storageDir
-            });
+            var transport = builder.UseTransport<AcceptanceTestingTransport>();
+            transport.StorageDirectory(Path.Combine(Path.GetTempPath(), "learn", TestContext.CurrentContext.Test.ID));
 
             var persistence = builder.UsePersistence<RavenDBPersistence>();
             persistence.EnableTransactionalSession();
@@ -41,14 +35,18 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
                 return SetupFixture.DefaultDatabaseName;
             });
 
-            builder.RegisterStartupTask(sp => new CaptureServiceProviderStartupTask(sp, runDescriptor.ScenarioContext));
+            builder.RegisterComponents(c => c.RegisterSingleton(runDescriptor.ScenarioContext)); // register base ScenarioContext type
+            builder.RegisterComponents(c => c.RegisterSingleton(runDescriptor.ScenarioContext.GetType(), runDescriptor.ScenarioContext)); // register specific implementation
 
-            await configurationBuilderCustomization(builder).ConfigureAwait(false);
+            endpointConfiguration.TypesToInclude.Add(typeof(CaptureBuilderFeature)); // required because the test assembly is excluded from scanning by default
+            builder.EnableFeature<CaptureBuilderFeature>();
+
+            configurationBuilderCustomization(builder);
 
             // scan types at the end so that all types used by the configuration have been loaded into the AppDomain
             builder.TypesToIncludeInScan(endpointConfiguration.GetTypesScopedByTestClass());
 
-            return builder;
+            return Task.FromResult(builder);
         }
     }
 }

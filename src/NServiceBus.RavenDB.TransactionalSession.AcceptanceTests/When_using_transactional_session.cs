@@ -1,11 +1,10 @@
 namespace NServiceBus.TransactionalSession.AcceptanceTests
 {
-    using System;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.DependencyInjection;
     using AcceptanceTesting;
+    using NServiceBus.ObjectBuilder;
     using NUnit.Framework;
     using Raven.Client.Documents.Session;
 
@@ -18,8 +17,8 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             var context = await Scenario.Define<Context>()
                 .WithEndpoint<AnEndpoint>(s => s.When(async (_, ctx) =>
                 {
-                    using var scope = ctx.ServiceProvider.CreateScope();
-                    using var transactionalSession = scope.ServiceProvider.GetRequiredService<ITransactionalSession>();
+                    using var scope = ctx.Builder.CreateChildBuilder();
+                    using var transactionalSession = scope.Build<ITransactionalSession>();
                     await transactionalSession.Open(new RavenDbOpenSessionOptions());
 
                     await transactionalSession.SendLocal(new SampleMessage(), CancellationToken.None);
@@ -46,13 +45,13 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             var context = await Scenario.Define<Context>()
                 .WithEndpoint<AnEndpoint>(s => s.When(async (_, ctx) =>
                 {
-                    using var scope = ctx.ServiceProvider.CreateScope();
-                    using var transactionalSession = scope.ServiceProvider.GetRequiredService<ITransactionalSession>();
+                    using var scope = ctx.Builder.CreateChildBuilder();
+                    using var transactionalSession = scope.Build<ITransactionalSession>();
                     await transactionalSession.Open(new RavenDbOpenSessionOptions());
 
                     await transactionalSession.SendLocal(new SampleMessage(), CancellationToken.None);
 
-                    var ravenSession = scope.ServiceProvider.GetRequiredService<IAsyncDocumentSession>();
+                    var ravenSession = scope.Build<IAsyncDocumentSession>();
                     var document = new TestDocument { Id = ctx.SessionId = transactionalSession.SessionId };
                     await ravenSession.StoreAsync(document);
 
@@ -74,8 +73,8 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             var context = await Scenario.Define<Context>()
                 .WithEndpoint<AnEndpoint>(s => s.When(async (statelessSession, ctx) =>
                 {
-                    using (var scope = ctx.ServiceProvider.CreateScope())
-                    using (var transactionalSession = scope.ServiceProvider.GetRequiredService<ITransactionalSession>())
+                    using var scope = ctx.Builder.CreateChildBuilder();
+                    using (var transactionalSession = scope.Build<ITransactionalSession>())
                     {
                         await transactionalSession.Open(new RavenDbOpenSessionOptions());
 
@@ -109,8 +108,8 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             var result = await Scenario.Define<Context>()
                 .WithEndpoint<AnEndpoint>(s => s.When(async (_, ctx) =>
                 {
-                    using var scope = ctx.ServiceProvider.CreateScope();
-                    using var transactionalSession = scope.ServiceProvider.GetRequiredService<ITransactionalSession>();
+                    using var scope = ctx.Builder.CreateChildBuilder();
+                    using var transactionalSession = scope.Build<ITransactionalSession>();
 
                     await transactionalSession.Open(new RavenDbOpenSessionOptions());
 
@@ -126,11 +125,11 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             Assert.True(result.MessageReceived);
         }
 
-        class Context : ScenarioContext, IInjectServiceProvider
+        class Context : ScenarioContext, IInjectBuilder
         {
             public bool MessageReceived { get; set; }
             public bool CompleteMessageReceived { get; set; }
-            public IServiceProvider ServiceProvider { get; set; }
+            public IBuilder Builder { get; set; }
             public string SessionId { get; set; }
         }
 

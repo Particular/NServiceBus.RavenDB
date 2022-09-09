@@ -7,14 +7,14 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
     public class TransactionSessionWithOutboxEndpoint : TransactionSessionDefaultServer
     {
         public override Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointCustomizationConfiguration endpointConfiguration,
-            Func<EndpointConfiguration, Task> configurationBuilderCustomization) =>
-            base.GetConfiguration(runDescriptor, endpointConfiguration, async configuration =>
+            Action<EndpointConfiguration> configurationBuilderCustomization) =>
+            base.GetConfiguration(runDescriptor, endpointConfiguration, configuration =>
             {
-                configuration.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
+                configuration.ConfigureTransport().Transactions(TransportTransactionMode.ReceiveOnly);
 
                 configuration.EnableOutbox();
 
-                await configurationBuilderCustomization(configuration);
+                configurationBuilderCustomization(configuration);
             });
     }
 }

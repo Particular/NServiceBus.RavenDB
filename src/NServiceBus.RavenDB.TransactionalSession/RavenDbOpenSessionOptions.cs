@@ -23,7 +23,7 @@ namespace NServiceBus.TransactionalSession
                 Metadata.Add(header.Key, header.Value);
             }
 
-            Extensions.Set(new IncomingMessage(SessionId, headers, ReadOnlyMemory<byte>.Empty));
+            Extensions.Set(new IncomingMessage(SessionId, headers, Array.Empty<byte>()));
         }
     }
 }
