@@ -1,0 +1,11 @@
+namespace NServiceBus.TransactionalSession
+{
+    public sealed class RavenDbOpenSessionOptions : NServiceBus.TransactionalSession.OpenSessionOptions
+    {
+        public RavenDbOpenSessionOptions(System.Collections.Generic.IDictionary<string, string> multiTenantConnectionContext = null) { }
+    }
+    public static class RavenDbTransactionalSessionExtensions
+    {
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> EnableTransactionalSession(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> persistenceExtensions) { }
+    }
+}

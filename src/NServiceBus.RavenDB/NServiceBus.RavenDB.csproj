@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Fody" Version="6.6.0" PrivateAssets="All" />
-    <PackageReference Include="NServiceBus" Version="[7.0.0, 8.0.0)" />
+    <PackageReference Include="NServiceBus" Version="[7.8.0, 8.0.0)" />
     <PackageReference Include="Obsolete.Fody" Version="5.2.1" PrivateAssets="All" />
     <PackageReference Include="Particular.Packaging" Version="2.0.0" PrivateAssets="All" />
     <PackageReference Include="RavenDB.Client" Version="[5.2.1, 6.0.0)" />

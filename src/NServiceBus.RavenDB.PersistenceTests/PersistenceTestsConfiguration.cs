@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
     using NServiceBus.Outbox;
@@ -103,8 +102,8 @@
             await documentStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord));
 
             IOpenTenantAwareRavenSessions sessionCreator = new OpenRavenSessionByDatabaseName(new DocumentStoreWrapper(documentStore), persistenceConfiguration.UseClusterWideTransactions);
-            SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator, null);
-            SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter(null);
+            SynchronizedStorage = new RavenDBSynchronizedStorage(sessionCreator);
+            SynchronizedStorageAdapter = new RavenDBSynchronizedStorageAdapter();
 
             OutboxStorage = new OutboxPersister(documentStore.Database, sessionCreator, RavenDbOutboxStorage.DeduplicationDataTTLDefault, persistenceConfiguration.UseClusterWideTransactions);
         }
