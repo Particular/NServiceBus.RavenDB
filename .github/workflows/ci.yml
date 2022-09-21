@@ -53,7 +53,7 @@ jobs:
           enable-AzPSSession: true
       - name: Setup RavenDB
         id: setup-ravendb
-        uses: Particular/setup-ravendb-action@v1.0.0
+        uses: Particular/setup-ravendb-action@v1.1.0
         with:
             single-connection-string-name: CommaSeparatedRavenClusterUrls
             cluster-connection-string-name: "CommaSeparatedRavenClusterUrlsNotUsed"
