@@ -1,6 +1,6 @@
 # NServiceBus.RavenDB
 
-The official [NServiceBus](https://github.com/Particular/NServiceBus) persistence implementation for [RavenDB.](https://ravendb.net/)
+official [NServiceBus](https://github.com/Particular/NServiceBus) persistence implementation for [RavenDB.](https://ravendb.net/)
 
 Learn more about NServiceBus.RavenDB through our [documentation.](http://docs.particular.net/nservicebus/ravendb/)
 
