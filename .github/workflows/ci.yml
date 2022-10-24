@@ -52,7 +52,7 @@ jobs:
             tag: RavenDBPersistence
       - name: Upload packages
         if: matrix.name == 'Windows'
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: NuGet packages
           path: nugets/
