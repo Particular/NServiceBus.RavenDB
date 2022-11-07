@@ -10,7 +10,6 @@
     using Raven.Client;
     using Raven.Client.Documents.Commands.Batches;
     using Raven.Client.Documents.Operations;
-    using Raven.Client.Documents.Operations.CompareExchange;
     using Raven.Client.Documents.Session;
     using Raven.Client.Exceptions;
     using TransportOperation = Outbox.TransportOperation;
@@ -110,9 +109,9 @@
                 {
                     var compareExchangeKey = $"rvn-atomic/{outboxRecordId}";
                     var outboxRecordLazy = session.Advanced.Lazily.LoadAsync<OutboxRecord>(outboxRecordId, cancellationToken);
-                    var cevLazy = session.Advanced.ClusterTransaction.Lazily.GetCompareExchangeValueAsync<string>(compareExchangeKey, cancellationToken);
+                    var compareExchangeValueLazy = session.Advanced.ClusterTransaction.Lazily.GetCompareExchangeValueAsync<string>(compareExchangeKey, cancellationToken);
 
-                    var compareExchangeValue = await cevLazy.Value.ConfigureAwait(false);
+                    var compareExchangeValue = await compareExchangeValueLazy.Value.ConfigureAwait(false);
                     if (compareExchangeValue == null)
                     {
                         throw new Exception("The compare exchange value for the outbox could not be found.");
