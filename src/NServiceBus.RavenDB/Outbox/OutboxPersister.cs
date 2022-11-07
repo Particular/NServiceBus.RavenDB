@@ -109,16 +109,16 @@
                 if (useClusterWideTransactions)
                 {
                     var compareExchangeKey = $"rvn-atomic/{outboxRecordId}";
-                    var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId, includes => includes.IncludeCompareExchangeValue(outboxRecordId), cancellationToken)
-                        .ConfigureAwait(false);
-                    var compareExchangeValue = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<CompareExchangeValue<string>>(compareExchangeKey, cancellationToken)
-                        .ConfigureAwait(false);
+                    var outboxRecordLazy = session.Advanced.Lazily.LoadAsync<OutboxRecord>(outboxRecordId, cancellationToken);
+                    var cevLazy = session.Advanced.ClusterTransaction.Lazily.GetCompareExchangeValueAsync<string>(compareExchangeKey, cancellationToken);
 
+                    var compareExchangeValue = await cevLazy.Value.ConfigureAwait(false);
                     if (compareExchangeValue == null)
                     {
                         throw new Exception("The compare exchange value for the outbox could not be found.");
                     }
 
+                    var outboxRecord = await outboxRecordLazy.Value.ConfigureAwait(false);
                     if (!outboxRecord.Dispatched)
                     {
                         outboxRecord.Dispatched = true;
