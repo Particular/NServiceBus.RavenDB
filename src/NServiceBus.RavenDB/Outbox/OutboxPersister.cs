@@ -107,12 +107,12 @@
                 var outboxRecordId = GetOutboxRecordId(messageId);
                 if (useClusterWideTransactions)
                 {
-                    var compareExchangeKey = $"rvn-atomic/{outboxRecordId}";
+                    var outboxLockCompareExchangeKey = $"rvn-atomic/{outboxRecordId}";
                     var outboxRecordLazy = session.Advanced.Lazily.LoadAsync<OutboxRecord>(outboxRecordId, cancellationToken);
-                    var compareExchangeValueLazy = session.Advanced.ClusterTransaction.Lazily.GetCompareExchangeValueAsync<string>(compareExchangeKey, cancellationToken);
+                    var outboxLockCompareExchangeValueLazy = session.Advanced.ClusterTransaction.Lazily.GetCompareExchangeValueAsync<string>(outboxLockCompareExchangeKey, cancellationToken);
 
-                    var compareExchangeValue = await compareExchangeValueLazy.Value.ConfigureAwait(false);
-                    if (compareExchangeValue == null)
+                    var outboxLockCompareExchangeValue = await outboxLockCompareExchangeValueLazy.Value.ConfigureAwait(false);
+                    if (outboxLockCompareExchangeValue == null)
                     {
                         throw new Exception("The compare exchange value for the outbox could not be found.");
                     }
@@ -130,7 +130,7 @@
                         if (timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan)
                         {
                             metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
-                            compareExchangeValue.Metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
+                            outboxLockCompareExchangeValue.Metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
                         }
                     }
                 }
