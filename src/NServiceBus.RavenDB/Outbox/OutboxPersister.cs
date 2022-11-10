@@ -107,16 +107,7 @@
                 var outboxRecordId = GetOutboxRecordId(messageId);
                 if (useClusterWideTransactions)
                 {
-                    var compareExchangeKey = $"rvn-atomic/{outboxRecordId}";
-                    var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId, includes => includes.IncludeCompareExchangeValue(outboxRecordId))
-                        .ConfigureAwait(false);
-                    var compareExchangeValue = await session.Advanced.ClusterTransaction.GetCompareExchangeValueAsync<CompareExchangeValue<string>>(compareExchangeKey)
-                        .ConfigureAwait(false);
-
-                    if (compareExchangeValue == null)
-                    {
-                        throw new Exception("The compare exchange value for the outbox could not be found.");
-                    }
+                    var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId, cancellationToken).ConfigureAwait(false);
 
                     if (!outboxRecord.Dispatched)
                     {
@@ -130,7 +121,6 @@
                         if (timeToKeepDeduplicationData != Timeout.InfiniteTimeSpan)
                         {
                             metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
-                            compareExchangeValue.Metadata.Add(Constants.Documents.Metadata.Expires, DateTime.UtcNow.Add(timeToKeepDeduplicationData));
                         }
                     }
                 }
