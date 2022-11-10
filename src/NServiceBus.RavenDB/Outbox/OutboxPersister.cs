@@ -10,7 +10,6 @@
     using Raven.Client;
     using Raven.Client.Documents.Commands.Batches;
     using Raven.Client.Documents.Operations;
-    using Raven.Client.Documents.Operations.CompareExchange;
     using Raven.Client.Documents.Session;
     using Raven.Client.Exceptions;
     using TransportOperation = Outbox.TransportOperation;
@@ -107,7 +106,7 @@
                 var outboxRecordId = GetOutboxRecordId(messageId);
                 if (useClusterWideTransactions)
                 {
-                    var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId, cancellationToken).ConfigureAwait(false);
+                    var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId).ConfigureAwait(false);
 
                     if (!outboxRecord.Dispatched)
                     {
@@ -165,7 +164,7 @@
                 }
                 catch (ConcurrencyException) when (useClusterWideTransactions)
                 {
-                    // When cluster wide transactions are enabled and two concurrent operations try to set as dispatched 
+                    // When cluster wide transactions are enabled and two concurrent operations try to set as dispatched
                     // it is OK to swallow the exception since the outcome is deterministic
                     // patching for non cluster wide transactions would always work and never land here
                 }
