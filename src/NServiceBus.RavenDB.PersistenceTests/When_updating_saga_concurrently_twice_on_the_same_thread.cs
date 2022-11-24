@@ -18,21 +18,19 @@ namespace NServiceBus.PersistenceTesting.Sagas
             await SaveSaga(saga);
 
             ContextBag losingContext1;
-            ICompletableSynchronizedStorageSession losingSaveSession1;
+            CompletableSynchronizedStorageSession losingSaveSession1;
             TestSagaData staleRecord1;
             var persister = configuration.SagaStorage;
 
             var winningContext1 = configuration.GetContextBagForSagaStorage();
-            var winningSaveSession1 = configuration.CreateStorageSession();
-            await winningSaveSession1.Open(winningContext1);
+            var winningSaveSession1 = await configuration.SynchronizedStorage.OpenSession(winningContext1);
 
             try
             {
                 var record1 = await persister.Get<TestSagaData>(saga.Id, winningSaveSession1, winningContext1);
 
                 losingContext1 = configuration.GetContextBagForSagaStorage();
-                losingSaveSession1 = configuration.CreateStorageSession();
-                await losingSaveSession1.Open(losingContext1);
+                losingSaveSession1 = await configuration.SynchronizedStorage.OpenSession(losingContext1);
 
                 staleRecord1 = await persister.Get<TestSagaData>("SomeId", correlationPropertyData, losingSaveSession1, losingContext1);
 
@@ -60,19 +58,17 @@ namespace NServiceBus.PersistenceTesting.Sagas
             }
 
             ContextBag losingContext2;
-            ICompletableSynchronizedStorageSession losingSaveSession2;
+            CompletableSynchronizedStorageSession losingSaveSession2;
             TestSagaData staleRecord2;
 
             var winningContext2 = configuration.GetContextBagForSagaStorage();
-            var winningSaveSession2 = configuration.CreateStorageSession();
-            await winningSaveSession2.Open(winningContext2);
+            var winningSaveSession2 = await configuration.SynchronizedStorage.OpenSession(winningContext2);
             try
             {
                 var record2 = await persister.Get<TestSagaData>(saga.Id, winningSaveSession2, winningContext2);
 
                 losingContext2 = configuration.GetContextBagForSagaStorage();
-                losingSaveSession2 = configuration.CreateStorageSession();
-                await losingSaveSession2.Open(losingContext2);
+                losingSaveSession2 = await configuration.SynchronizedStorage.OpenSession(losingContext2);
 
                 staleRecord2 = await persister.Get<TestSagaData>("SomeId", correlationPropertyData, losingSaveSession2, losingContext2);
 

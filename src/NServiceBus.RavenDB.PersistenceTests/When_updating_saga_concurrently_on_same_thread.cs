@@ -19,20 +19,17 @@ namespace NServiceBus.PersistenceTesting.Sagas
             var generatedSagaId = sagaData.Id;
 
             ContextBag losingContext;
-            ICompletableSynchronizedStorageSession losingSaveSession;
+            CompletableSynchronizedStorageSession losingSaveSession;
             TestSagaData staleRecord;
             var persister = configuration.SagaStorage;
 
             var winningContext = configuration.GetContextBagForSagaStorage();
-            using (var winningSaveSession = configuration.CreateStorageSession())
+            using (var winningSaveSession = await configuration.SynchronizedStorage.OpenSession(winningContext))
             {
-                await winningSaveSession.Open(winningContext);
-
                 var record = await persister.Get<TestSagaData>(generatedSagaId, winningSaveSession, winningContext);
 
                 losingContext = configuration.GetContextBagForSagaStorage();
-                losingSaveSession = configuration.CreateStorageSession();
-                await losingSaveSession.Open(losingContext);
+                losingSaveSession = await configuration.SynchronizedStorage.OpenSession(losingContext);
                 staleRecord = await persister.Get<TestSagaData>("SomeId", correlationPropertyData, losingSaveSession, losingContext);
 
                 record.DateTimeProperty = DateTime.UtcNow;
