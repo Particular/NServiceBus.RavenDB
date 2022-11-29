@@ -43,12 +43,11 @@ jobs:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
       - name: Setup RavenDB
         id: setup-ravendb
-        uses: Particular/setup-ravendb-action@9c75bdc4928eb588916329858caf532c64b8e575
+        uses: Particular/setup-ravendb-action@v1.3.0
         with:
             single-connection-string-name: RavenSingleNodeUrl
             cluster-connection-string-name: CommaSeparatedRavenClusterUrls
             ravendb-license: ${{ secrets.RAVENDB_LICENSE }}
-            ravendb-version: 5.4.5-ubuntu.20.04-x64
             ravendb-mode: Both
             tag: RavenDBPersistence
       - name: Upload packages
