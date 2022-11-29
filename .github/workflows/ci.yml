@@ -48,6 +48,7 @@ jobs:
             single-connection-string-name: RavenSingleNodeUrl
             cluster-connection-string-name: CommaSeparatedRavenClusterUrls
             ravendb-license: ${{ secrets.RAVENDB_LICENSE }}
+            ravendb-version: 5.4.5
             ravendb-mode: Both
             tag: RavenDBPersistence
       - name: Upload packages
