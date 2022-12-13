@@ -59,7 +59,7 @@ jobs:
             cluster-connection-string-name: "CommaSeparatedRavenClusterUrlsNotUsed"
             ravendb-license: ${{ secrets.RAVENDB_LICENSE }}
             ravendb-mode: Single
-            ravendb-version: "4.2"
+            ravendb-version: "4.2-ubuntu-latest"
             tag: RavenDBPersistence
       - name: Run  tests
         uses: Particular/run-tests-action@v1.4.0
