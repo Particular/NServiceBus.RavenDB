@@ -87,8 +87,6 @@ namespace NServiceBus.Persistence.RavenDB
 
         public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context, CancellationToken cancellationToken = default)
         {
-            var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint };
-
             using var session = OpenAsyncSession();
             var subscriptionDocId = GetDocumentIdForMessageType(messageType);
 
@@ -99,6 +97,7 @@ namespace NServiceBus.Persistence.RavenDB
                 return;
             }
 
+            var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint };
             if (subscription.Subscribers.Contains(subscriptionClient))
             {
                 subscription.Subscribers.Remove(subscriptionClient);
