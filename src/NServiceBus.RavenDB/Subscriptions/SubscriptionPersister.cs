@@ -169,8 +169,8 @@ namespace NServiceBus.Persistence.RavenDB
             return session;
         }
 
-        IDocumentStore documentStore;
-        bool useClusterWideTransactions;
+        readonly IDocumentStore documentStore;
+        readonly bool useClusterWideTransactions;
 
         sealed class EmptyDisposable : IDisposable
         {
