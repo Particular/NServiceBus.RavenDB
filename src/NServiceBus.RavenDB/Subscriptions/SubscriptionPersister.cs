@@ -120,7 +120,8 @@ namespace NServiceBus.Persistence.RavenDB
                 Subscriber[] subscribers;
                 using (var session = OpenAsyncSession())
                 {
-                    using (ConfigureAggressiveCaching(session))
+                    var aggressiveCachingScope = await ConfigureAggressiveCaching(session).ConfigureAwait(false);
+                    using (aggressiveCachingScope)
                     {
                         var subscriptions = await session.LoadAsync<Subscription>(ids, cancellationToken).ConfigureAwait(false);
 
@@ -158,12 +159,12 @@ namespace NServiceBus.Persistence.RavenDB
             }
         }
 
-        IDisposable ConfigureAggressiveCaching(IAsyncDocumentSession session)
-        {
-            return DisableAggressiveCaching
-                ? EmptyDisposable.Instance
-                : session.Advanced.DocumentStore.AggressivelyCacheFor(AggressiveCacheDuration);
-        }
+#pragma warning disable PS0018
+        ValueTask<IDisposable> ConfigureAggressiveCaching(IAsyncDocumentSession session) =>
+#pragma warning restore PS0018
+            DisableAggressiveCaching
+                ? new ValueTask<IDisposable>(EmptyDisposable.Instance)
+                : session.Advanced.DocumentStore.AggressivelyCacheForAsync(AggressiveCacheDuration);
 
         IAsyncDocumentSession OpenAsyncSession()
         {
