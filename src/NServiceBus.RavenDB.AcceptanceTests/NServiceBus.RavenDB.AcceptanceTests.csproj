@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net461;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net462;net6.0;net7.0</TargetFrameworks>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <NoWarn>$(NoWarn);SYSLIB0021</NoWarn>
   </PropertyGroup>
@@ -12,11 +12,11 @@
 
   <ItemGroup>
     <PackageReference Include="GitHubActionsTestLogger" Version="2.0.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
     <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="7.8.0" GeneratePathProperty="true" />
-    <PackageReference Include="NUnit" Version="3.13.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
-    <PackageReference Include="RavenDB.Client" Version="5.4.5" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.3.1" />
+    <PackageReference Include="RavenDB.Client" Version="5.4.100" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(PkgNServiceBus_AcceptanceTests_Sources)' != ''">

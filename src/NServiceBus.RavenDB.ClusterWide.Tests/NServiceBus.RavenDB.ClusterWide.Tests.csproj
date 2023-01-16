@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net461;net6.0;net7.0</TargetFrameworks>
+        <TargetFrameworks>net462;net6.0;net7.0</TargetFrameworks>
         <SignAssembly>true</SignAssembly>
         <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -14,13 +14,13 @@
     <ItemGroup>
         <PackageReference Include="GitHubActionsTestLogger" Version="2.0.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
         <PackageReference Include="NServiceBus" Version="7.8.0" />
-        <PackageReference Include="NUnit" Version="3.13.2" />
-        <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
+        <PackageReference Include="NUnit" Version="3.13.3" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.3.1" />
         <PackageReference Include="Particular.Approvals" Version="0.3.0" />
         <PackageReference Include="PublicApiGenerator" Version="10.2.0" />
-        <PackageReference Include="RavenDB.Client" Version="5.4.5" />
+        <PackageReference Include="RavenDB.Client" Version="5.4.100" />
     </ItemGroup>
 
     <ItemGroup>
