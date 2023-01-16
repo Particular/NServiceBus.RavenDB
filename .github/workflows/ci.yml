@@ -47,7 +47,7 @@ jobs:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
       - name: Setup RavenDB
         id: setup-ravendb
-        uses: Particular/setup-ravendb-action@023cf91c7eb2f679e57fa7d0adce6a7c41a3fff5
+        uses: Particular/setup-ravendb-action@73f15eb5a503b26323bbced635c582f7ab169124
         with:
             single-connection-string-name: RavenSingleNodeUrl
             cluster-connection-string-name: CommaSeparatedRavenClusterUrls
