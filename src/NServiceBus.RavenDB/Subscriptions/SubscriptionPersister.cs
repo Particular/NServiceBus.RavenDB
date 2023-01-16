@@ -42,40 +42,38 @@ namespace NServiceBus.Persistence.RavenDB
             {
                 try
                 {
-                    using (var session = OpenAsyncSession())
+                    using var session = OpenAsyncSession();
+                    var subscriptionDocId = GetDocumentIdForMessageType(messageType);
+
+                    var subscription = await session.LoadAsync<Subscription>(subscriptionDocId, cancellationToken).ConfigureAwait(false);
+
+                    if (subscription == null)
                     {
-                        var subscriptionDocId = GetDocumentIdForMessageType(messageType);
-
-                        var subscription = await session.LoadAsync<Subscription>(subscriptionDocId, cancellationToken).ConfigureAwait(false);
-
-                        if (subscription == null)
+                        subscription = new Subscription
                         {
-                            subscription = new Subscription
-                            {
-                                Id = subscriptionDocId,
-                                MessageType = messageType,
-                                Subscribers = new List<SubscriptionClient>()
-                            };
+                            Id = subscriptionDocId,
+                            MessageType = messageType,
+                            Subscribers = new List<SubscriptionClient>()
+                        };
 
-                            await session.StoreAsync(subscription, cancellationToken).ConfigureAwait(false);
-                            session.StoreSchemaVersionInMetadata(subscription);
-                        }
-
-                        if (!subscription.Subscribers.Contains(subscriptionClient))
-                        {
-                            subscription.Subscribers.Add(subscriptionClient);
-                        }
-                        else
-                        {
-                            var savedSubscription = subscription.Subscribers.Single(s => s.Equals(subscriptionClient));
-                            if (savedSubscription.Endpoint != subscriber.Endpoint)
-                            {
-                                savedSubscription.Endpoint = subscriber.Endpoint;
-                            }
-                        }
-
-                        await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        await session.StoreAsync(subscription, cancellationToken).ConfigureAwait(false);
+                        session.StoreSchemaVersionInMetadata(subscription);
                     }
+
+                    if (!subscription.Subscribers.Contains(subscriptionClient))
+                    {
+                        subscription.Subscribers.Add(subscriptionClient);
+                    }
+                    else
+                    {
+                        var savedSubscription = subscription.Subscribers.Single(s => s.Equals(subscriptionClient));
+                        if (savedSubscription.Endpoint != subscriber.Endpoint)
+                        {
+                            savedSubscription.Endpoint = subscriber.Endpoint;
+                        }
+                    }
+
+                    await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                     return;
                 }
@@ -89,81 +87,72 @@ namespace NServiceBus.Persistence.RavenDB
 
         public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context, CancellationToken cancellationToken = default)
         {
-            var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint };
+            using var session = OpenAsyncSession();
+            var subscriptionDocId = GetDocumentIdForMessageType(messageType);
 
-            using (var session = OpenAsyncSession())
+            var subscription = await session.LoadAsync<Subscription>(subscriptionDocId, cancellationToken).ConfigureAwait(false);
+
+            if (subscription == null)
             {
-                var subscriptionDocId = GetDocumentIdForMessageType(messageType);
-
-                var subscription = await session.LoadAsync<Subscription>(subscriptionDocId, cancellationToken).ConfigureAwait(false);
-
-                if (subscription == null)
-                {
-                    return;
-                }
-
-                if (subscription.Subscribers.Contains(subscriptionClient))
-                {
-                    subscription.Subscribers.Remove(subscriptionClient);
-                }
-
-                await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                return;
             }
+
+            var subscriptionClient = new SubscriptionClient { TransportAddress = subscriber.TransportAddress, Endpoint = subscriber.Endpoint };
+            if (subscription.Subscribers.Contains(subscriptionClient))
+            {
+                subscription.Subscribers.Remove(subscriptionClient);
+            }
+
+            await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context, CancellationToken cancellationToken = default)
         {
             var ids = messageTypes.Select(GetDocumentIdForMessageType).ToList();
 
-            using (var suppressTransaction = new TransactionScope(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled))
+            using var suppressTransaction = new TransactionScope(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled);
+            Subscriber[] subscribers;
+            using (var session = OpenAsyncSession())
             {
-                Subscriber[] subscribers;
-                using (var session = OpenAsyncSession())
-                {
-                    using (ConfigureAggressiveCaching(session))
-                    {
-                        var subscriptions = await session.LoadAsync<Subscription>(ids, cancellationToken).ConfigureAwait(false);
+                using IDisposable aggressiveCachingScope = await CreateAggressiveCachingScope(session).ConfigureAwait(false);
+                var subscriptions = await session.LoadAsync<Subscription>(ids, cancellationToken).ConfigureAwait(false);
 
-                        subscribers = subscriptions.Values.Where(s => s != null)
-                            .SelectMany(s => s.Subscribers)
-                            .Distinct()
-                            .Select(c => new Subscriber(c.TransportAddress, c.Endpoint))
-                            .ToArray();
-                    }
-                }
-
-                suppressTransaction.Complete();
-                return subscribers;
+                subscribers = subscriptions.Values.Where(s => s != null)
+                    .SelectMany(s => s.Subscribers)
+                    .Distinct()
+                    .Select(c => new Subscriber(c.TransportAddress, c.Endpoint))
+                    .ToArray();
             }
+
+            suppressTransaction.Complete();
+            return subscribers;
         }
 
         static string GetDocumentIdForMessageType(MessageType messageType)
         {
-            using (var provider = SHA1.Create())
+            using var provider = SHA1.Create();
+            var inputBytes = Encoding.UTF8.GetBytes(messageType.TypeName);
+            var hashBytes = provider.ComputeHash(inputBytes);
+
+            // 54ch for perf - "Subscriptions/" (14ch) + 40ch hash
+            var idBuilder = new StringBuilder(54);
+
+            idBuilder.Append("Subscriptions/");
+
+            for (var i = 0; i < hashBytes.Length; i++)
             {
-                var inputBytes = Encoding.UTF8.GetBytes(messageType.TypeName);
-                var hashBytes = provider.ComputeHash(inputBytes);
-
-                // 54ch for perf - "Subscriptions/" (14ch) + 40ch hash
-                var idBuilder = new StringBuilder(54);
-
-                idBuilder.Append("Subscriptions/");
-
-                for (var i = 0; i < hashBytes.Length; i++)
-                {
-                    idBuilder.Append(hashBytes[i].ToString("x2"));
-                }
-
-                return idBuilder.ToString();
+                idBuilder.Append(hashBytes[i].ToString("x2"));
             }
+
+            return idBuilder.ToString();
         }
 
-        IDisposable ConfigureAggressiveCaching(IAsyncDocumentSession session)
-        {
-            return DisableAggressiveCaching
-                ? EmptyDisposable.Instance
-                : session.Advanced.DocumentStore.AggressivelyCacheFor(AggressiveCacheDuration);
-        }
+#pragma warning disable PS0018
+        ValueTask<IDisposable> CreateAggressiveCachingScope(IAsyncDocumentSession session) =>
+#pragma warning restore PS0018
+            DisableAggressiveCaching
+                ? new ValueTask<IDisposable>(EmptyDisposable.Instance)
+                : session.Advanced.DocumentStore.AggressivelyCacheForAsync(AggressiveCacheDuration);
 
         IAsyncDocumentSession OpenAsyncSession()
         {
@@ -180,8 +169,8 @@ namespace NServiceBus.Persistence.RavenDB
             return session;
         }
 
-        IDocumentStore documentStore;
-        bool useClusterWideTransactions;
+        readonly IDocumentStore documentStore;
+        readonly bool useClusterWideTransactions;
 
         sealed class EmptyDisposable : IDisposable
         {
