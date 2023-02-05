@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
     using Logging;
     using NServiceBus.ConsistencyGuarantees;
     using NServiceBus.Settings;
@@ -13,6 +14,8 @@
 
     class DocumentStoreInitializer
     {
+        private static Regex _customBuildVersionRegex = new Regex(@"(.+)-custom-(.+)$", RegexOptions.Compiled);
+
         internal DocumentStoreInitializer(Func<IReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
         {
             this.storeCreator = storeCreator;
@@ -79,6 +82,11 @@
         {
             var requiredVersion = new Version(5, 2);
             var serverVersion = documentStore.Maintenance.Server.Send(new GetBuildNumberOperation());
+
+            var match = _customBuildVersionRegex.Match(serverVersion.FullVersion);
+            if (match.Success)
+                serverVersion.FullVersion = match.Groups[1].Value;
+
             var fullVersion = new Version(serverVersion.FullVersion);
 
             if (fullVersion.Major < requiredVersion.Major ||
