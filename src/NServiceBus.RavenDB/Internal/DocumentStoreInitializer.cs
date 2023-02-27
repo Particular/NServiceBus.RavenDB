@@ -14,7 +14,7 @@
 
     class DocumentStoreInitializer
     {
-        private static Regex _customBuildVersionRegex = new Regex(@"(.+)-custom-(.+)$", RegexOptions.Compiled);
+        private static Regex _customBuildVersionRegex = new Regex(@"(.+)-(custom|nightly)-(.+)$", RegexOptions.Compiled);
 
         internal DocumentStoreInitializer(Func<IReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator)
         {
@@ -85,7 +85,12 @@
 
             var match = _customBuildVersionRegex.Match(serverVersion.FullVersion);
             if (match.Success)
+            {
+                // handling full version in a different format for custom or nightly builds
+                // 5.4.103-custom-20230125-1235
+                // 5.4.102-nightly-20230225-0435
                 serverVersion.FullVersion = match.Groups[1].Value;
+            }
 
             var fullVersion = new Version(serverVersion.FullVersion);
 
