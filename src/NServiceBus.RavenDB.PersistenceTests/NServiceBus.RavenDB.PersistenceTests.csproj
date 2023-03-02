@@ -16,7 +16,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageReference Include="NServiceBus.PersistenceTests.Sources" Version="8.0.3" GeneratePathProperty="true" />
     <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.4.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
     <PackageReference Include="RavenDB.Client" Version="5.4.100" />
   </ItemGroup>
 
