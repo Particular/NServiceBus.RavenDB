@@ -5,6 +5,7 @@
     using Logging;
     using NServiceBus.ConsistencyGuarantees;
     using NServiceBus.Settings;
+    using NuGet.Versioning;
     using Raven.Client.Documents;
     using Raven.Client.Documents.Indexes;
     using Raven.Client.Documents.Operations.Indexes;
@@ -79,7 +80,7 @@
         {
             var requiredVersion = new Version(5, 2);
             var serverVersion = documentStore.Maintenance.Server.Send(new GetBuildNumberOperation());
-            var fullVersion = new Version(serverVersion.FullVersion);
+            var fullVersion = new NuGetVersion(serverVersion.FullVersion);
 
             if (fullVersion.Major < requiredVersion.Major ||
                 (fullVersion.Major == requiredVersion.Major && fullVersion.Minor < requiredVersion.Minor))
