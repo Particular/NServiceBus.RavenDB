@@ -3,7 +3,7 @@
 using System;
 using NuGet.Versioning;
 
-static class MinimumRequiredRavenDbVersion
+static class MinimumRequiredRavenDbServerVersion
 {
     static readonly string Version = "5.2.0";
 
