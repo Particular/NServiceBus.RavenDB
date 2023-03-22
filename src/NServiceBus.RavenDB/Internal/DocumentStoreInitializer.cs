@@ -79,7 +79,7 @@
         {
             var serverVersion = documentStore.Maintenance.Server.Send(new GetBuildNumberOperation());
 
-            MinimumRequiredRavenDbVersion.Validate(serverVersion.FullVersion);
+            MinimumRequiredRavenDbServerVersion.Validate(serverVersion.FullVersion);
         }
 
         void EnsureDocStoreCreated(IReadOnlySettings settings, IServiceProvider builder)
