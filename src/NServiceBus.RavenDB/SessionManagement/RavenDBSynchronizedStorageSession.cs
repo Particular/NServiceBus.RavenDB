@@ -19,10 +19,11 @@ namespace NServiceBus.Persistence.RavenDB
 
         public void Dispose()
         {
-            if (context == null)
+            if (context == null || disposed)
             {
                 return;
             }
+
             // Releasing locks here at the latest point possible to prevent issues with other pipeline resources depending on the lock.
             var holder = context.Get<SagaDataLeaseHolder>();
             foreach (var (DocumentId, Index) in holder.DocumentsIdsAndIndexes)
@@ -30,6 +31,8 @@ namespace NServiceBus.Persistence.RavenDB
                 // We are optimistic and fire-and-forget the releasing of the lock and just continue. In case this fails the next message that needs to acquire the lock wil have to wait.
                 _ = Session.Advanced.DocumentStore.Operations.SendAsync(new DeleteCompareExchangeValueOperation<SagaDataLease>(DocumentId, Index));
             }
+
+            disposed = true;
         }
 
         public ValueTask<bool> TryOpen(IOutboxTransaction transaction, ContextBag contextBag, CancellationToken cancellationToken = new CancellationToken())
@@ -74,5 +77,6 @@ namespace NServiceBus.Persistence.RavenDB
         readonly IOpenTenantAwareRavenSessions sessionCreator;
         bool callSaveChanges;
         ContextBag context;
+        bool disposed;
     }
 }
