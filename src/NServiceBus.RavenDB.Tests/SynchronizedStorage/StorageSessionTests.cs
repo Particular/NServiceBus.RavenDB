@@ -80,5 +80,30 @@
                 Assert.IsNull(storedDocument);
             }
         }
+
+        [Test]
+        public async Task Dispose_multiple_times_works()
+        {
+            var newDocument = new TestDocument { Value = "42" };
+            using (var writeSession = new RavenDBSynchronizedStorageSession(CreateTestSessionOpener()))
+            {
+                var contextBag = new ContextBag();
+                SimulateIncomingMessage(contextBag);
+                await writeSession.Open(contextBag); //Owns the session so CompleteAsync commits the transaction
+                await writeSession.Session.StoreAsync(newDocument);
+                await writeSession.CompleteAsync();
+
+                // disposing multiple times
+                writeSession.Dispose();
+            }
+
+            using (var readSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
+            {
+                var storedDocument = await readSession.LoadAsync<TestDocument>(newDocument.Id);
+
+                Assert.NotNull(storedDocument);
+                Assert.AreEqual(newDocument.Value, storedDocument.Value);
+            }
+        }
     }
 }

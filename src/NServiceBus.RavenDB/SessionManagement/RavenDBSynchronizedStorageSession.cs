@@ -8,21 +8,20 @@ namespace NServiceBus.Persistence.RavenDB
     using Raven.Client.Documents.Session;
     using Transport;
 
-    class RavenDBSynchronizedStorageSession : ICompletableSynchronizedStorageSession
+    sealed class RavenDBSynchronizedStorageSession : ICompletableSynchronizedStorageSession
     {
         public RavenDBSynchronizedStorageSession(IOpenTenantAwareRavenSessions sessionCreator)
-        {
-            this.sessionCreator = sessionCreator;
-        }
+            => this.sessionCreator = sessionCreator;
 
         public IAsyncDocumentSession Session { get; private set; }
 
         public void Dispose()
         {
-            if (context == null)
+            if (context == null || disposed)
             {
                 return;
             }
+
             // Releasing locks here at the latest point possible to prevent issues with other pipeline resources depending on the lock.
             var holder = context.Get<SagaDataLeaseHolder>();
             foreach (var (DocumentId, Index) in holder.DocumentsIdsAndIndexes)
@@ -30,9 +29,11 @@ namespace NServiceBus.Persistence.RavenDB
                 // We are optimistic and fire-and-forget the releasing of the lock and just continue. In case this fails the next message that needs to acquire the lock wil have to wait.
                 _ = Session.Advanced.DocumentStore.Operations.SendAsync(new DeleteCompareExchangeValueOperation<SagaDataLease>(DocumentId, Index));
             }
+
+            disposed = true;
         }
 
-        public ValueTask<bool> TryOpen(IOutboxTransaction transaction, ContextBag contextBag, CancellationToken cancellationToken = new CancellationToken())
+        public ValueTask<bool> TryOpen(IOutboxTransaction transaction, ContextBag contextBag, CancellationToken cancellationToken = default)
         {
             if (transaction is RavenDBOutboxTransaction outboxTransaction)
             {
@@ -46,13 +47,12 @@ namespace NServiceBus.Persistence.RavenDB
             return new ValueTask<bool>(false);
         }
 
-        public ValueTask<bool> TryOpen(TransportTransaction transportTransaction, ContextBag contextBag, CancellationToken cancellationToken = new CancellationToken())
-        {
+        public ValueTask<bool> TryOpen(TransportTransaction transportTransaction, ContextBag contextBag,
+            CancellationToken cancellationToken = default) =>
             // Since RavenDB doesn't support System.Transactions (or have transactions), there's no way to adapt anything out of the transport transaction.
-            return new ValueTask<bool>(false);
-        }
+            new(false);
 
-        public Task Open(ContextBag contextBag, CancellationToken cancellationToken = new CancellationToken())
+        public Task Open(ContextBag contextBag, CancellationToken cancellationToken = default)
         {
             var message = contextBag.Get<IncomingMessage>();
             Session = sessionCreator.OpenSession(message.Headers);
@@ -64,15 +64,14 @@ namespace NServiceBus.Persistence.RavenDB
             return Task.CompletedTask;
         }
 
-        public Task CompleteAsync(CancellationToken cancellationToken = default)
-        {
-            return callSaveChanges
+        public Task CompleteAsync(CancellationToken cancellationToken = default) =>
+            callSaveChanges
                 ? Session.SaveChangesAsync(cancellationToken)
                 : Task.CompletedTask;
-        }
 
         readonly IOpenTenantAwareRavenSessions sessionCreator;
         bool callSaveChanges;
         ContextBag context;
+        bool disposed;
     }
 }
