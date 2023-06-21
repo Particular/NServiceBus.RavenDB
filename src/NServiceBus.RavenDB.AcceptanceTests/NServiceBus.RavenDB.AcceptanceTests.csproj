@@ -14,7 +14,7 @@
     <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="8.0.3" GeneratePathProperty="true" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-    <PackageReference Include="RavenDB.Client" Version="5.4.104" />
+    <PackageReference Include="RavenDB.Client" Version="5.4.105" />
   </ItemGroup>
 
   <ItemGroup>
