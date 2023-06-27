@@ -50,7 +50,7 @@
             }
 
             context.Services.AddScoped<ICompletableSynchronizedStorageSession, RavenDBSynchronizedStorageSession>();
-            context.Services.AddScoped(sp => (sp.GetService<ISynchronizedStorageSession>() as RavenDBSynchronizedStorageSession)?.Session!);
+            context.Services.AddScoped(sp => (sp.GetService<ICompletableSynchronizedStorageSession>() as RavenDBSynchronizedStorageSession)?.Session!);
 
         }
 
