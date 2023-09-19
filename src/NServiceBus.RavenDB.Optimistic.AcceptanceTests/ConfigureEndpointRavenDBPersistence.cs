@@ -84,9 +84,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
                     break;
                 }
             }
-#pragma warning disable IDE0083
-            catch (Exception ex) when (!(ex is OperationCanceledException) || !cancellationToken.IsCancellationRequested)
-#pragma warning restore IDE0083
+            catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
             {
                 if (triesLeft == 0)
                 {
