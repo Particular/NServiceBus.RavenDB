@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\Test.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\NServiceBusTests.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,9 +19,4 @@
     <PackageReference Include="RavenDB.Client" Version="5.4.104" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- To remove when https://github.com/Particular/NServiceBus/pull/6603 is merged and released  -->
-    <Compile Remove="$(PkgNServiceBus_PersistenceTests_Sources)\**\When_updating_saga_concurrently_on_same_thread.cs" />
-    <Compile Remove="$(PkgNServiceBus_PersistenceTests_Sources)\**\When_updating_saga_concurrently_twice_on_the_same_thread.cs" />
-  </ItemGroup>
 </Project>
