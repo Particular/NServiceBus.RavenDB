@@ -53,7 +53,7 @@ namespace NServiceBus.Persistence.RavenDB
                         {
                             Id = subscriptionDocId,
                             MessageType = messageType,
-                            Subscribers = new List<SubscriptionClient>()
+                            Subscribers = []
                         };
 
                         await session.StoreAsync(subscription, cancellationToken).ConfigureAwait(false);

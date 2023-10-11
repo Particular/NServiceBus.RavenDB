@@ -17,7 +17,7 @@ namespace NServiceBus.RavenDB.Tests
             // to the server ever attempting to ensure its existence means we can rely on it.
             var dbRecord = new DatabaseRecord(databaseName)
             {
-                Topology = new DatabaseTopology() { Members = new List<string> { "A", "B", "C" } }
+                Topology = new DatabaseTopology() { Members = ["A", "B", "C"] }
             };
             await store.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord), cancellationToken);
             Console.WriteLine($"Provisioned new Raven database name {databaseName}");

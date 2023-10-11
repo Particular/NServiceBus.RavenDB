@@ -22,8 +22,8 @@ public class OutboxAprovals
                 {
                     MessageId = nameof(OutboxRecord.OutboxOperation.MessageId),
                     Message = Array.Empty<byte>(),
-                    Headers = new Dictionary<string, string>(),
-                    Options = new Dictionary<string, string>(),
+                    Headers = [],
+                    Options = [],
                 },
             },
         });

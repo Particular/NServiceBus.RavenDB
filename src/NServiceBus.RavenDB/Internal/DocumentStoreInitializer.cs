@@ -129,7 +129,7 @@
             }
         }
 
-        List<AbstractIndexCreationTask> indexesToCreate = new List<AbstractIndexCreationTask>();
+        List<AbstractIndexCreationTask> indexesToCreate = [];
         Func<IReadOnlySettings, IServiceProvider, IDocumentStore> storeCreator;
         IDocumentStore docStore;
         bool isInitialized;

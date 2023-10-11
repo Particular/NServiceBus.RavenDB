@@ -26,6 +26,6 @@
             return snooper;
         }
 
-        List<string> keysStored = new List<string>();
+        List<string> keysStored = [];
     }
 }
