@@ -67,7 +67,7 @@ public class ConfigureEndpointRavenDBPersistence : IConfigureEndpointTestExecuti
     {
         var dbRecord = new DatabaseRecord(dbName)
         {
-            Topology = new DatabaseTopology { Members = new List<string> { "A", "B", "C" } }
+            Topology = new DatabaseTopology { Members = ["A", "B", "C"] }
         };
 
         return defaultStore.Maintenance.Server.SendAsync(new CreateDatabaseOperation(dbRecord, 3), cancellationToken);

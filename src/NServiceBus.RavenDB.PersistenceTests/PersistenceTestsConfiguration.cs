@@ -68,7 +68,7 @@
             GetContextBagForOutbox = GetContextBagForSagaStorage = () =>
             {
                 var context = new ContextBag();
-                context.Set(new IncomingMessage("native id", new Dictionary<string, string>(), Array.Empty<byte>()));
+                context.Set(new IncomingMessage("native id", [], Array.Empty<byte>()));
                 return context;
             };
 

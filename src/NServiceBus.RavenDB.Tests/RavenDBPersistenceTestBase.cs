@@ -75,7 +75,7 @@
         {
             messageId ??= Guid.NewGuid().ToString("N");
 
-            var incomingMessage = new IncomingMessage(messageId, new Dictionary<string, string>(), new byte[0]);
+            var incomingMessage = new IncomingMessage(messageId, [], new byte[0]);
 
             context.Set(incomingMessage);
 

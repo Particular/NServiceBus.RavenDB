@@ -84,7 +84,7 @@
             {
                 public string OrderId { get; set; }
                 public int ContinueCount { get; set; }
-                public List<int> CollectedIndexes { get; set; } = new List<int>();
+                public List<int> CollectedIndexes { get; set; } = [];
             }
         }
 
