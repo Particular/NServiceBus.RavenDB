@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using NServiceBus.RavenDB.Persistence.SubscriptionStorage;
 using NServiceBus.Unicast.Subscriptions;
 using NUnit.Framework;
