@@ -38,7 +38,7 @@ jobs:
       - name: Build
         run: dotnet build src --configuration Release
       - name: Azure login
-        uses: azure/login@v1.4.7
+        uses: azure/login@v1.5.1
         if: matrix.name == 'Windows'
         with:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
