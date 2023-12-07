@@ -4,7 +4,7 @@ NServiceBus.RavenDB is the official NServiceBus persistence implementation for [
 
 It is part of the [Particular Service Platform](https://particular.net/service-platform), which includes [NServiceBus](https://particular.net/nservicebus) and tools to build, monitor, and debug distributed systems.
 
-## Official documentation
+## Documentation
 
 See the [RavenDB Persistence documentation](http://docs.particular.net/nservicebus/ravendb/) for more details on how to use it.
 
@@ -35,8 +35,3 @@ This assumes docker and docker-compose are properly setup. It currently works on
 1. Inside the root directory of the repository issue the following command: `docker-compose up -d`.
 
 The single node server is reachable under [`http://localhost:8080`](http://localhost:8080). The cluster leader is reachable under [`http://localhost:8081`](http://localhost:8081).
-
-## Contributing
-
-If you are interested in contributing, please follow the instructions on [How to contribute](https://docs.particular.net/platform/contributing).
-
