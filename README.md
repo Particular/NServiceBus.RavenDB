@@ -4,8 +4,6 @@ NServiceBus.RavenDB is the official NServiceBus persistence implementation for [
 
 It is part of the [Particular Service Platform](https://particular.net/service-platform), which includes [NServiceBus](https://particular.net/nservicebus) and tools to build, monitor, and debug distributed systems.
 
-## Documentation
-
 See the [RavenDB Persistence documentation](http://docs.particular.net/nservicebus/ravendb/) for more details on how to use it.
 
 ## Running tests locally
