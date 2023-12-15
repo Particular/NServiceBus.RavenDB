@@ -1,6 +1,6 @@
 # NServiceBus.RavenDB
 
-NServiceBus.RavenDB is the official NServiceBus persistence implementation for [RavenDB](https://ravendb.net/).
+NServiceBus.RavenDB is the official [NServiceBus](https://github.com/Particular/NServiceBus) persistence implementation for [RavenDB](https://ravendb.net/).
 
 It is part of the [Particular Service Platform](https://particular.net/service-platform), which includes [NServiceBus](https://particular.net/nservicebus) and tools to build, monitor, and debug distributed systems.
 
