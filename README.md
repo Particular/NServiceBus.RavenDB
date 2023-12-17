@@ -17,12 +17,11 @@ The tests can be run with RavenDB servers hosted on a Docker container.
 
 ## CI Workflow
 
-The [CI workflow](/.github/workflows/ci.yml) requires two secrets unique to RavenDB to be defined both as Actions and Dependabot secrets:
+The [CI workflow](/.github/workflows/ci.yml) requires the following secret, unique to RavenDB, to be defined both as an Actions and Dependabot secret:
 
 1. RAVENDB_LICENSE: A RavenDB development license, expressed as JSON, but all on one line, with escaped quotes `\"`
-1. PASSPHRASE: Any phrase used to encrypt the connection information between steps in the CI
 
-The values used by Particular are both stored in a secure note called "RavenDB CI Secrets".
+The value used by Particular is stored in a secure note called "RavenDB CI Secrets".
 
 ### Spinning up the necessary infrastructure
 
