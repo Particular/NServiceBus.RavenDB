@@ -17,7 +17,7 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="Particular.Approvals" Version="0.6.0" />
     <PackageReference Include="PublicApiGenerator" Version="11.1.0" />
-    <PackageReference Include="RavenDB.Client" Version="5.4.110" />
+    <PackageReference Include="RavenDB.Client" Version="6.0.2" />
   </ItemGroup>
 
 </Project>
