@@ -10,25 +10,26 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
 
     public class TransactionSessionDefaultServer : IEndpointSetupTemplate
     {
-        public virtual async Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointCustomizationConfiguration endpointConfiguration,
+        public virtual async Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointCustomizationConfiguration endpointCustomization,
             Func<EndpointConfiguration, Task> configurationBuilderCustomization)
         {
-            var builder = new EndpointConfiguration(endpointConfiguration.EndpointName);
-            builder.EnableInstallers();
+            var endpointConfiguration = new EndpointConfiguration(endpointCustomization.EndpointName);
 
-            builder.Recoverability()
+            endpointConfiguration.EnableInstallers();
+            endpointConfiguration.UseSerialization<SystemJsonSerializer>();
+            endpointConfiguration.Recoverability()
                 .Delayed(delayed => delayed.NumberOfRetries(0))
                 .Immediate(immediate => immediate.NumberOfRetries(0));
-            builder.SendFailedMessagesTo("error");
+            endpointConfiguration.SendFailedMessagesTo("error");
 
             var storageDir = Path.Combine(Path.GetTempPath(), "learn", TestContext.CurrentContext.Test.ID);
 
-            builder.UseTransport(new AcceptanceTestingTransport
+            endpointConfiguration.UseTransport(new AcceptanceTestingTransport
             {
                 StorageLocation = storageDir
             });
 
-            var persistence = builder.UsePersistence<RavenDBPersistence>();
+            var persistence = endpointConfiguration.UsePersistence<RavenDBPersistence>();
             persistence.EnableTransactionalSession();
             persistence.SetDefaultDocumentStore(SetupFixture.DocumentStore);
             persistence.SetMessageToDatabaseMappingConvention(headers =>
@@ -41,14 +42,14 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
                 return SetupFixture.DefaultDatabaseName;
             });
 
-            builder.RegisterStartupTask(sp => new CaptureServiceProviderStartupTask(sp, runDescriptor.ScenarioContext));
+            endpointConfiguration.RegisterStartupTask(sp => new CaptureServiceProviderStartupTask(sp, runDescriptor.ScenarioContext));
 
-            await configurationBuilderCustomization(builder).ConfigureAwait(false);
+            await configurationBuilderCustomization(endpointConfiguration).ConfigureAwait(false);
 
             // scan types at the end so that all types used by the configuration have been loaded into the AppDomain
-            builder.TypesToIncludeInScan(endpointConfiguration.GetTypesScopedByTestClass());
+            endpointConfiguration.TypesToIncludeInScan(endpointCustomization.GetTypesScopedByTestClass());
 
-            return builder;
+            return endpointConfiguration;
         }
     }
 }
