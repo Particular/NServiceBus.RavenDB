@@ -9,7 +9,7 @@
     using Raven.Client.Documents.Session;
 
     /// <summary>
-    /// Provides configurations methods for the Raven storage
+    /// Provides configurations methods for the RavenDB storage
     /// </summary>
     public static class RavenDbSettingsExtensions
     {
