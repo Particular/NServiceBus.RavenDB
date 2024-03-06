@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>NServiceBus.TransactionalSession</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
-    <Description>Transactional Session for the RavenDB persistence.</Description>
+    <Description>Transactional Session for the RavenDB persistence</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NServiceBus.TransactionalSession" Version="3.0.0-alpha.1" />
+    <PackageReference Include="NServiceBus.TransactionalSession" Version="[3.0.0, 4.0.0)" />
     <PackageReference Include="Particular.Packaging" Version="4.0.0" PrivateAssets="All" />
   </ItemGroup>
 

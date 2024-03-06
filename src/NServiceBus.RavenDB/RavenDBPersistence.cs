@@ -5,7 +5,7 @@
     using NServiceBus.Persistence.RavenDB;
 
     /// <summary>
-    /// Specifies the capabilities of the ravendb suite of storages
+    /// Specifies the capabilities of the RavenDB suite of storages
     /// </summary>
     public class RavenDBPersistence : PersistenceDefinition
     {

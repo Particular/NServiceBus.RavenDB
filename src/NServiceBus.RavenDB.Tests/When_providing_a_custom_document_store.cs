@@ -23,6 +23,7 @@
             transport.TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
             endpointConfiguration.UseTransport(transport);
             endpointConfiguration.EnableOutbox();
+            endpointConfiguration.UseSerialization<SystemJsonSerializer>();
 
             endpointConfiguration.UsePersistence<RavenDBPersistence>()
                     .SetDefaultDocumentStore((_, __) =>

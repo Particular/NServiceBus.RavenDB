@@ -15,7 +15,7 @@ namespace NServiceBus.TransactionalSession
         /// <param name="multiTenantConnectionContext">The connection context when multi-tenancy is used.</param>
         public RavenDbOpenSessionOptions(IDictionary<string, string> multiTenantConnectionContext = null)
         {
-            var headers = multiTenantConnectionContext != null ? new Dictionary<string, string>(multiTenantConnectionContext) : new Dictionary<string, string>(0);
+            var headers = multiTenantConnectionContext != null ? new Dictionary<string, string>(multiTenantConnectionContext) : [];
 
             // order matters because instantiating IncomingMessage is modifying the headers
             foreach (var header in headers)
