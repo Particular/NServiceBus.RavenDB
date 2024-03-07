@@ -40,13 +40,13 @@ jobs:
       - name: Build
         run: dotnet build src --configuration Release
       - name: Azure login
-        uses: azure/login@v1.4.5
+        uses: azure/login@v2
         if: matrix.name == 'Windows'
         with:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
       - name: Setup RavenDB
         id: setup-ravendb
-        uses: Particular/setup-ravendb-action@v1.5.0
+        uses: Particular/setup-ravendb-action@v1.6.0
         with:
             single-connection-string-name: RavenSingleNodeUrl
             cluster-connection-string-name: CommaSeparatedRavenClusterUrls
