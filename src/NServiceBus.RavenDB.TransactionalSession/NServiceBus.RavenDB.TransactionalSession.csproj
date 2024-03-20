@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Particular.Packaging" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Particular.Packaging" Version="2.3.0" PrivateAssets="All" />
     <PackageReference Include="NServiceBus.TransactionalSession" Version="[1.0.0, 2.0.0)" />
   </ItemGroup>
 
