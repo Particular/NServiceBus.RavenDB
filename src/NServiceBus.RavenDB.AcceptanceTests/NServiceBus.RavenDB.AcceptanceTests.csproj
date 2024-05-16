@@ -17,7 +17,7 @@
     <PackageReference Include="RavenDB.Client" Version="5.4.103" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(PkgNServiceBus_AcceptanceTests_Sources)' != ''">
     <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\ConfigureEndpointInMemoryPersistence.cs" />
     <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\ConfigureEndpointLearningPersistence.cs" />
     <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\ConventionEnforcementTests.cs" />
