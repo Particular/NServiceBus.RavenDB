@@ -16,7 +16,7 @@
     <PackageReference Include="NServiceBus.PersistenceTests.Sources" Version="9.0.0" />
     <PackageReference Include="NUnit" Version="3.14.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-    <PackageReference Include="RavenDB.Client" Version="5.4.116" />
+    <PackageReference Include="RavenDB.Client" Version="6.0.103" />
   </ItemGroup>
 
 </Project>
