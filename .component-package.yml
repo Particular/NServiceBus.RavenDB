@@ -1,4 +1,0 @@
-ComponentType: Persistence
-ComponentPackages:
-  - Name: NServiceBus.Persistence.RavenDB
-  - Name: NServiceBus.Persistence.RavenDB.TransactionalSession
