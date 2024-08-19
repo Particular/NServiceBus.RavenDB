@@ -26,7 +26,7 @@ public class When_persisting_a_saga_entity_with_a_DateTime_property : RavenDBPer
             await persister.Save(entity, this.CreateMetadata<SomeSaga>(entity), synchronizedSession, options);
             await session.SaveChangesAsync().ConfigureAwait(false);
             var savedEntity = await persister.Get<SagaData>(entity.Id, synchronizedSession, options);
-            Assert.AreEqual(entity.DateTimeProperty, savedEntity.DateTimeProperty);
+            Assert.That(savedEntity.DateTimeProperty, Is.EqualTo(entity.DateTimeProperty));
         }
     }
 

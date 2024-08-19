@@ -22,13 +22,13 @@ public class When_listing_subscribers_for_message_types : RavenDBPersistenceTest
 
         var subscriptionsForMessageType = await storage.GetSubscriberAddressesForMessage(new[] { MessageTypes.MessageA }, context);
 
-        Assert.AreEqual(2, subscriptionsForMessageType.Count());
+        Assert.That(subscriptionsForMessageType.Count(), Is.EqualTo(2));
 
-        Assert.AreEqual(TestClients.ClientA.TransportAddress, subscriptionsForMessageType.ElementAt(0).TransportAddress);
-        Assert.AreEqual(TestClients.ClientA.Endpoint, subscriptionsForMessageType.ElementAt(0).Endpoint);
+        Assert.That(subscriptionsForMessageType.ElementAt(0).TransportAddress, Is.EqualTo(TestClients.ClientA.TransportAddress));
+        Assert.That(subscriptionsForMessageType.ElementAt(0).Endpoint, Is.EqualTo(TestClients.ClientA.Endpoint));
 
-        Assert.AreEqual(TestClients.ClientB.TransportAddress, subscriptionsForMessageType.ElementAt(1).TransportAddress);
-        Assert.AreEqual(TestClients.ClientB.Endpoint, subscriptionsForMessageType.ElementAt(1).Endpoint);
+        Assert.That(subscriptionsForMessageType.ElementAt(1).TransportAddress, Is.EqualTo(TestClients.ClientB.TransportAddress));
+        Assert.That(subscriptionsForMessageType.ElementAt(1).Endpoint, Is.EqualTo(TestClients.ClientB.Endpoint));
     }
 
     [Test]
@@ -48,6 +48,6 @@ public class When_listing_subscribers_for_message_types : RavenDBPersistenceTest
                     new MessageType(typeof(ISomeInterface3))
                 }, context);
 
-        Assert.AreEqual(1, subscriptionsForMessageType.Count());
+        Assert.That(subscriptionsForMessageType.Count(), Is.EqualTo(1));
     }
 }

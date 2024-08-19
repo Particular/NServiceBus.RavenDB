@@ -36,7 +36,7 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             var documents = SetupFixture.DocumentStore.OpenSession(SetupFixture.DefaultDatabaseName)
                 .Query<TestDocument>()
                 .Where(d => d.Id == context.SessionId);
-            Assert.AreEqual(1, documents.Count());
+            Assert.That(documents.Count(), Is.EqualTo(1));
         }
 
         [TestCase(true)]
@@ -64,7 +64,7 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             var documents = SetupFixture.DocumentStore.OpenSession(SetupFixture.DefaultDatabaseName)
                 .Query<TestDocument>()
                 .Where(d => d.Id == context.SessionId);
-            Assert.AreEqual(1, documents.Count());
+            Assert.That(documents.Count(), Is.EqualTo(1));
         }
 
         [TestCase(true)]

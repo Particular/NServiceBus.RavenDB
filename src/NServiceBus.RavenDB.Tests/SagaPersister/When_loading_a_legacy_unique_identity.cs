@@ -91,7 +91,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
             Assert.IsNotNull(loadedSaga, "Saga is null");
             Assert.AreNotEqual(Guid.Empty, loadedSaga.Id, "Id is Guid.Empty");
-            Assert.AreEqual(sagaId, loadedSaga.Id, "Saga Id is not the correct value.");
+            Assert.That(loadedSaga.Id, Is.EqualTo(sagaId), "Saga Id is not the correct value.");
         }
     }
 

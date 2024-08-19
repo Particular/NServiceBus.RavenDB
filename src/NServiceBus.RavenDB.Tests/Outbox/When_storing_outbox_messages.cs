@@ -102,8 +102,8 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 Assert.NotNull(outboxRecord);
                 Assert.That(outboxRecord.Dispatched, Is.False);
                 Assert.Null(outboxRecord.DispatchedAt);
-                Assert.AreEqual(1, outboxRecord.TransportOperations.Length);
-                Assert.AreEqual(outgoingMessageId, outboxRecord.TransportOperations.Single().MessageId);
+                Assert.That(outboxRecord.TransportOperations.Length, Is.EqualTo(1));
+                Assert.That(outboxRecord.TransportOperations.Single().MessageId, Is.EqualTo(outgoingMessageId));
             }
         }
 
@@ -131,7 +131,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 var outboxRecord = await session.Query<OutboxRecord>().SingleAsync(record => record.MessageId == incomingMessageId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
 
-                Assert.AreEqual(OutboxRecord.SchemaVersion, metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey]);
+                Assert.That(metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey], Is.EqualTo(OutboxRecord.SchemaVersion));
             }
         }
 
@@ -157,9 +157,9 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             // assert
             var storedOutboxMessage = await persister.Get(incomingMessageId, context);
 
-            Assert.AreEqual(incomingMessageId, storedOutboxMessage.MessageId);
-            Assert.AreEqual(1, storedOutboxMessage.TransportOperations.Length);
-            Assert.AreEqual("test", storedOutboxMessage.TransportOperations[0].MessageId);
+            Assert.That(storedOutboxMessage.MessageId, Is.EqualTo(incomingMessageId));
+            Assert.That(storedOutboxMessage.TransportOperations.Length, Is.EqualTo(1));
+            Assert.That(storedOutboxMessage.TransportOperations[0].MessageId, Is.EqualTo("test"));
         }
     }
 }

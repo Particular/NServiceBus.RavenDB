@@ -84,7 +84,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
 
-                Assert.AreEqual(OutboxRecord.SchemaVersion, metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey]);
+                Assert.That(metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey], Is.EqualTo(OutboxRecord.SchemaVersion));
             }
         }
 

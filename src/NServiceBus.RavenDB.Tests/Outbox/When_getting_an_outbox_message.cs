@@ -53,14 +53,14 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
             // assert
             Assert.NotNull(outboxMessage);
-            Assert.AreEqual(incomingMessageId, outboxMessage.MessageId);
-            Assert.AreEqual(1, outboxMessage.TransportOperations.Length);
+            Assert.That(outboxMessage.MessageId, Is.EqualTo(incomingMessageId));
+            Assert.That(outboxMessage.TransportOperations.Length, Is.EqualTo(1));
 
             var outgoingMessage = outboxMessage.TransportOperations[0];
-            Assert.AreEqual(outboxOperation.MessageId, outgoingMessage.MessageId);
-            Assert.AreEqual(outboxOperation.Headers, outgoingMessage.Headers);
-            Assert.AreEqual(outboxOperation.Message, outgoingMessage.Body.ToArray());
-            Assert.AreEqual(outboxOperation.Options, outgoingMessage.Options);
+            Assert.That(outgoingMessage.MessageId, Is.EqualTo(outboxOperation.MessageId));
+            Assert.That(outgoingMessage.Headers, Is.EqualTo(outboxOperation.Headers));
+            Assert.That(outgoingMessage.Body.ToArray(), Is.EqualTo(outboxOperation.Message));
+            Assert.That(outgoingMessage.Options, Is.EqualTo(outboxOperation.Options));
         }
     }
 }

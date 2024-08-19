@@ -34,7 +34,7 @@
                 var storedDocument = await readSession.LoadAsync<TestDocument>(newDocument.Id);
 
                 Assert.NotNull(storedDocument);
-                Assert.AreEqual(newDocument.Value, storedDocument.Value);
+                Assert.That(storedDocument.Value, Is.EqualTo(newDocument.Value));
             }
         }
 
@@ -102,7 +102,7 @@
                 var storedDocument = await readSession.LoadAsync<TestDocument>(newDocument.Id);
 
                 Assert.NotNull(storedDocument);
-                Assert.AreEqual(newDocument.Value, storedDocument.Value);
+                Assert.That(storedDocument.Value, Is.EqualTo(newDocument.Value));
             }
         }
     }

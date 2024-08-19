@@ -14,6 +14,6 @@ public class When_listing_subscribers_for_a_non_existing_message_type : RavenDBP
         var persister = new SubscriptionPersister(store, UseClusterWideTransactions);
         var subscriptionsForMessageType = await persister.GetSubscriberAddressesForMessage(new[] { MessageTypes.MessageA }, new ContextBag());
 
-        Assert.AreEqual(0, subscriptionsForMessageType.Count());
+        Assert.That(subscriptionsForMessageType.Count(), Is.EqualTo(0));
     }
 }

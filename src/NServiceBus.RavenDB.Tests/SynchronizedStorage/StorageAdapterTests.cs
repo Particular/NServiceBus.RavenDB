@@ -30,7 +30,7 @@
             {
                 var document = await verificationSession.LoadAsync<StorageAdapterTestDocument>(documentId);
                 Assert.IsNotNull(document);
-                Assert.AreEqual(documentId, document.Id);
+                Assert.That(document.Id, Is.EqualTo(documentId));
             }
         }
 

@@ -31,7 +31,7 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
                 .Customize(c => c.WaitForNonStaleResults())
                 .CountAsync();
 
-            Assert.AreEqual(1, subscriptions);
+            Assert.That(subscriptions, Is.EqualTo(1));
         }
     }
 
@@ -56,8 +56,8 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
             messageType
         }, new ContextBag())).ToArray();
 
-        Assert.AreEqual(1, subscriber.Length);
-        Assert.AreEqual(subscriberAddress, subscriber[0].TransportAddress);
-        Assert.AreEqual("new_endpoint_name", subscriber[0].Endpoint);
+        Assert.That(subscriber.Length, Is.EqualTo(1));
+        Assert.That(subscriber[0].TransportAddress, Is.EqualTo(subscriberAddress));
+        Assert.That(subscriber[0].Endpoint, Is.EqualTo("new_endpoint_name"));
     }
 }

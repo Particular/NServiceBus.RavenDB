@@ -38,8 +38,8 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
             messageType_v2
         }, new ContextBag())).ToArray();
 
-        Assert.AreEqual(2, subscribers_looked_up_by_v1.Length);
-        Assert.AreEqual(2, subscribers_looked_up_by_v2.Length);
+        Assert.That(subscribers_looked_up_by_v1.Length, Is.EqualTo(2));
+        Assert.That(subscribers_looked_up_by_v2.Length, Is.EqualTo(2));
     }
 
     [Test]
@@ -64,7 +64,7 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
             messageType_v1
         }, new ContextBag())).ToArray();
 
-        Assert.AreEqual(1, subscribers.Length);
+        Assert.That(subscribers.Length, Is.EqualTo(1));
 
         await storage.Unsubscribe(subscriber_v2, messageType_v2, new ContextBag());
 
@@ -73,6 +73,6 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
             messageType_v1
         }, new ContextBag())).ToArray();
 
-        Assert.AreEqual(0, subscribers_looked_up_by_v1.Length);
+        Assert.That(subscribers_looked_up_by_v1.Length, Is.EqualTo(0));
     }
 }

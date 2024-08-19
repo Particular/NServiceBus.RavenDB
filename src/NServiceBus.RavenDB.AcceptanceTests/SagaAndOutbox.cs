@@ -33,7 +33,7 @@
                 .Run();
 
             Assert.IsNotNull(context.SagaData);
-            Assert.AreEqual(3, context.SagaData.ContinueCount);
+            Assert.That(context.SagaData.ContinueCount, Is.EqualTo(3));
             Assert.Contains(1, context.SagaData.CollectedIndexes);
             Assert.Contains(2, context.SagaData.CollectedIndexes);
             Assert.Contains(3, context.SagaData.CollectedIndexes);

@@ -36,9 +36,9 @@
 
                 var readOnly = (IReadOnlySettings)settings;
 
-                Assert.AreEqual("Outbox", DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(readOnly, null).Identifier);
-                Assert.AreEqual("Sagas", DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(readOnly, null).Identifier);
-                Assert.AreEqual("Subscriptions", DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(readOnly, null).Identifier);
+                Assert.That(DocumentStoreManager.GetDocumentStore<StorageType.Outbox>(readOnly, null).Identifier, Is.EqualTo("Outbox"));
+                Assert.That(DocumentStoreManager.GetDocumentStore<StorageType.Sagas>(readOnly, null).Identifier, Is.EqualTo("Sagas"));
+                Assert.That(DocumentStoreManager.GetDocumentStore<StorageType.Subscriptions>(readOnly, null).Identifier, Is.EqualTo("Subscriptions"));
             }
         }
     }

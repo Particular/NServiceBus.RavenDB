@@ -27,7 +27,7 @@ public class When_persisting_a_saga_entity_with_an_Enum_property : RavenDBPersis
             await session.SaveChangesAsync().ConfigureAwait(false);
 
             var savedEntity = await persister.Get<SagaData>(entity.Id, synchronizedSession, context);
-            Assert.AreEqual(entity.Status, savedEntity.Status);
+            Assert.That(savedEntity.Status, Is.EqualTo(entity.Status));
         }
     }
 
