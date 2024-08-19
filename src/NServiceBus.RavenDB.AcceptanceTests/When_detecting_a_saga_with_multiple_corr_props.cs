@@ -19,7 +19,7 @@
                     .Run());
 
             const string expectedMessage = "Sagas can only have mappings that correlate on a single saga property. Use custom finders to correlate";
-            StringAssert.Contains(expectedMessage, exceptionToVerify.Message, "Should tell user to use a single correlation property or custom finders");
+            Assert.That(exceptionToVerify.Message, Does.Contain(expectedMessage), "Should tell user to use a single correlation property or custom finders");
         }
 
         public class Context : ScenarioContext
