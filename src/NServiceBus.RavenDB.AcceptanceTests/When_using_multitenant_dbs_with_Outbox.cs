@@ -112,7 +112,7 @@
 
             Assert.AreEqual(4, context.MessagesObserved);
             Assert.AreEqual(2, context.ObservedDbs.Count);
-            Assert.IsFalse(context.ObservedDbs.Any(db => db == context.DefaultDb));
+            Assert.That(context.ObservedDbs.Any(db => db == context.DefaultDb), Is.False);
             Assert.Contains(context.Db1, context.ObservedDbs);
             Assert.Contains(context.Db2, context.ObservedDbs);
         }
