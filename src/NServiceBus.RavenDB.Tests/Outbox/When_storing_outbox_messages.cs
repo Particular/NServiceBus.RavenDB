@@ -100,7 +100,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 var outboxRecord = await session.Query<OutboxRecord>().SingleAsync(record => record.MessageId == incomingMessageId);
 
                 Assert.NotNull(outboxRecord);
-                Assert.False(outboxRecord.Dispatched);
+                Assert.That(outboxRecord.Dispatched, Is.False);
                 Assert.Null(outboxRecord.DispatchedAt);
                 Assert.AreEqual(1, outboxRecord.TransportOperations.Length);
                 Assert.AreEqual(outgoingMessageId, outboxRecord.TransportOperations.Single().MessageId);

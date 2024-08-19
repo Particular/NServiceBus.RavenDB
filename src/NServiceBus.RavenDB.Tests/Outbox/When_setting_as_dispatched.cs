@@ -147,7 +147,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
 
-                Assert.False(metadata.Keys.Contains(Constants.Documents.Metadata.Expires));
+                Assert.That(metadata.Keys.Contains(Constants.Documents.Metadata.Expires), Is.False);
             }
         }
     }

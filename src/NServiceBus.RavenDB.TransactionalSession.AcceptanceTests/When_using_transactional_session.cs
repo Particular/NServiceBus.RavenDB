@@ -93,7 +93,7 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
                 .Run();
 
             Assert.True(context.CompleteMessageReceived);
-            Assert.False(context.MessageReceived);
+            Assert.That(context.MessageReceived, Is.False);
 
             var documents = SetupFixture.DocumentStore.OpenSession(SetupFixture.DefaultDatabaseName)
                 .Query<TestDocument>()
