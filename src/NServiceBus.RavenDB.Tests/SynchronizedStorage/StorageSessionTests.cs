@@ -55,7 +55,7 @@
             {
                 var storedDocument = await readSession.LoadAsync<TestDocument>(documentId);
 
-                Assert.IsNull(storedDocument);
+                Assert.That(storedDocument, Is.Null);
             }
         }
 
@@ -77,7 +77,7 @@
             {
                 var storedDocument = await readSession.LoadAsync<TestDocument>(documentId);
 
-                Assert.IsNull(storedDocument);
+                Assert.That(storedDocument, Is.Null);
             }
         }
 

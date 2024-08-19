@@ -53,7 +53,7 @@
             using (var verificationSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             {
                 var document = await verificationSession.LoadAsync<StorageAdapterTestDocument>(documentId);
-                Assert.IsNull(document);
+                Assert.That(document, Is.Null);
             }
         }
 
@@ -78,7 +78,7 @@
             using (var verificationSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             {
                 var document = await verificationSession.LoadAsync<StorageAdapterTestDocument>(documentId);
-                Assert.IsNull(document);
+                Assert.That(document, Is.Null);
             }
         }
 
