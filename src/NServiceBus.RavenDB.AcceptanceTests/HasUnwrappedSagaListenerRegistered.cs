@@ -22,7 +22,7 @@
                 .Done(c => c.MessageReceived)
                 .Run();
 
-            Assert.IsTrue(context.IsRegistered, "Endpoint initialization is not registering UnwrappedSagaListener - sagas from before RavenDB 4.0 will not be able to be loaded.");
+            Assert.That(context.IsRegistered, Is.True, "Endpoint initialization is not registering UnwrappedSagaListener - sagas from before RavenDB 4.0 will not be able to be loaded.");
         }
 
         public class Context : ScenarioContext
