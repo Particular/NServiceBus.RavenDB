@@ -101,7 +101,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
 
                 Assert.NotNull(outboxRecord);
                 Assert.That(outboxRecord.Dispatched, Is.False);
-                Assert.Null(outboxRecord.DispatchedAt);
+                Assert.That(outboxRecord.DispatchedAt, Is.Null);
                 Assert.That(outboxRecord.TransportOperations.Length, Is.EqualTo(1));
                 Assert.That(outboxRecord.TransportOperations.Single().MessageId, Is.EqualTo(outgoingMessageId));
             }
