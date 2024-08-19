@@ -20,7 +20,7 @@
                 await adaptedSession.TryOpen(ravenDBOutboxTransaction, new ContextBag());
                 await adaptedSession.RavenSession().StoreAsync(new StorageAdapterTestDocument(), documentId);
 
-                Assert.AreSame(outboxSession, adaptedSession.RavenSession());
+                Assert.That(adaptedSession.RavenSession(), Is.SameAs(outboxSession));
                 //Core commits both adapted and outbox sessions:
                 await adaptedSession.CompleteAsync();
                 await ravenDBOutboxTransaction.Commit();
@@ -45,7 +45,7 @@
                 await adaptedSession.TryOpen(ravenDBOutboxTransaction, new ContextBag());
                 await adaptedSession.RavenSession().StoreAsync(new StorageAdapterTestDocument(), documentId);
 
-                Assert.AreSame(outboxSession, adaptedSession.RavenSession());
+                Assert.That(adaptedSession.RavenSession(), Is.SameAs(outboxSession));
                 //await adaptedSession.CompleteAsync();
                 //await ravenDBOutboxTransaction.Commit();
             }
@@ -68,7 +68,7 @@
                 await adaptedSession.TryOpen(ravenDBOutboxTransaction, new ContextBag());
                 await adaptedSession.RavenSession().StoreAsync(new StorageAdapterTestDocument(), documentId);
 
-                Assert.AreSame(outboxSession, adaptedSession.RavenSession());
+                Assert.That(adaptedSession.RavenSession(), Is.SameAs(outboxSession));
                 // The adapted session can complete but a failure can happen at a later point to cause
                 // the underlying outbox transaction to roll back
                 await adaptedSession.CompleteAsync();

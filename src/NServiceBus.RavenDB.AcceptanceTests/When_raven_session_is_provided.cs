@@ -33,7 +33,7 @@
                         .Done(c => c.HandlerWasHit)
                         .Run();
 
-                Assert.AreSame(session, context.RavenSessionFromHandler);
+                Assert.That(context.RavenSessionFromHandler, Is.SameAs(session));
             }
             finally
             {
