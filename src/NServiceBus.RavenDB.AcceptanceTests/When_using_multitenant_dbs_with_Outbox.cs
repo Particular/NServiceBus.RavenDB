@@ -113,8 +113,8 @@
             Assert.That(context.MessagesObserved, Is.EqualTo(4));
             Assert.That(context.ObservedDbs.Count, Is.EqualTo(2));
             Assert.That(context.ObservedDbs.Any(db => db == context.DefaultDb), Is.False);
-            Assert.Contains(context.Db1, context.ObservedDbs);
-            Assert.Contains(context.Db2, context.ObservedDbs);
+            Assert.That(context.ObservedDbs, Does.Contain(context.Db1));
+            Assert.That(context.ObservedDbs, Does.Contain(context.Db2));
         }
 
         public class Context : ScenarioContext
