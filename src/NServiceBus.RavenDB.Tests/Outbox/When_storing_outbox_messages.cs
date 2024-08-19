@@ -44,7 +44,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             });
 
             // asssert
-            Assert.NotNull(exception);
+            Assert.That(exception, Is.Not.Null);
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             });
 
             // assert
-            Assert.NotNull(exception);
+            Assert.That(exception, Is.Not.Null);
         }
 
         [Test]
@@ -99,7 +99,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             {
                 var outboxRecord = await session.Query<OutboxRecord>().SingleAsync(record => record.MessageId == incomingMessageId);
 
-                Assert.NotNull(outboxRecord);
+                Assert.That(outboxRecord, Is.Not.Null);
                 Assert.That(outboxRecord.Dispatched, Is.False);
                 Assert.That(outboxRecord.DispatchedAt, Is.Null);
                 Assert.That(outboxRecord.TransportOperations.Length, Is.EqualTo(1));

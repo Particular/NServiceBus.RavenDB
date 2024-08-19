@@ -35,7 +35,7 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
                 .Done(c => c.MessageReceived)
                 .Run();
 
-            Assert.NotNull(context.Document);
+            Assert.That(context.Document, Is.Not.Null);
             Assert.That(context.Document.SessionId, Is.EqualTo(context.SessionId), "should have loaded the document from the correct tenant database");
         }
 

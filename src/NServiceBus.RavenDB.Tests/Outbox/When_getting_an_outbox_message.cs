@@ -52,7 +52,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             var outboxMessage = await persister.Get(incomingMessageId, context);
 
             // assert
-            Assert.NotNull(outboxMessage);
+            Assert.That(outboxMessage, Is.Not.Null);
             Assert.That(outboxMessage.MessageId, Is.EqualTo(incomingMessageId));
             Assert.That(outboxMessage.TransportOperations.Length, Is.EqualTo(1));
 
