@@ -113,7 +113,7 @@
             Assert.Multiple(() =>
             {
                 Assert.That(context.MessagesObserved, Is.EqualTo(4));
-                Assert.That(context.ObservedDbs.Count, Is.EqualTo(2));
+                Assert.That(context.ObservedDbs, Has.Count.EqualTo(2));
             });
             Assert.Multiple(() =>
             {

@@ -52,7 +52,7 @@
             {
                 var outboxRecords = await session.Query<OutboxRecord>().ToListAsync();
 
-                Assert.That(outboxRecords.Count, Is.EqualTo(1));
+                Assert.That(outboxRecords, Has.Count.EqualTo(1));
                 Assert.That(outboxRecords.Single().MessageId, Is.EqualTo(notDispatchedOutgoingMessage.MessageId));
             }
         }

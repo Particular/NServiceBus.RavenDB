@@ -37,7 +37,7 @@
 
             // Distinct on different casings should result in 1 item
             var distinctList = list.Distinct().ToList();
-            Assert.That(distinctList.Count, Is.EqualTo(1));
+            Assert.That(distinctList, Has.Count.EqualTo(1));
         }
     }
 }
