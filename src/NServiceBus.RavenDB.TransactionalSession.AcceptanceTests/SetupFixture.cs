@@ -23,7 +23,7 @@
             DocumentStore = new DocumentStore
             {
                 Database = DefaultDatabaseName,
-                Urls = new[] { GetConnectionString() }
+                Urls = [GetConnectionString()]
             };
             DocumentStore.Initialize();
 
@@ -32,11 +32,12 @@
         }
 
         [OneTimeTearDown]
-        public async Task Teardown() =>
-            await DocumentStore.Maintenance.Server.SendAsync(new DeleteDatabasesOperation(new DeleteDatabasesOperation.Parameters
-            {
-                DatabaseNames = new[] { DefaultDatabaseName, TenantId }
-            }));
+        public async Task Teardown()
+        {
+            await DocumentStore.Maintenance.Server.SendAsync(new DeleteDatabasesOperation(
+                new DeleteDatabasesOperation.Parameters { DatabaseNames = [DefaultDatabaseName, TenantId] }));
+            DocumentStore.Dispose();
+        }
 
         static string GetConnectionString() => Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
     }
