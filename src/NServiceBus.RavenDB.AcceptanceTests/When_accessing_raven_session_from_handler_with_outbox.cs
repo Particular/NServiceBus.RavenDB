@@ -26,7 +26,7 @@
                     .Done(c => c.HandlerWasHit)
                     .Run();
 
-            Assert.IsNotNull(context.RavenSessionFromHandler);
+            Assert.That(context.RavenSessionFromHandler, Is.Not.Null);
         }
 
         public class RavenSessionTestContext : ScenarioContext

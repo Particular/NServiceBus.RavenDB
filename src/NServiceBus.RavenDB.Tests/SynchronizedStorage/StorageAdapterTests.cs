@@ -29,7 +29,7 @@
             using (var verificationSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             {
                 var document = await verificationSession.LoadAsync<StorageAdapterTestDocument>(documentId);
-                Assert.IsNotNull(document);
+                Assert.That(document, Is.Not.Null);
                 Assert.That(document.Id, Is.EqualTo(documentId));
             }
         }

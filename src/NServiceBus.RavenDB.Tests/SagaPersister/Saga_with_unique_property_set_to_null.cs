@@ -29,7 +29,7 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
                 await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             });
 
-            Assert.IsNotNull(exception);
+            Assert.That(exception, Is.Not.Null);
         }
     }
 

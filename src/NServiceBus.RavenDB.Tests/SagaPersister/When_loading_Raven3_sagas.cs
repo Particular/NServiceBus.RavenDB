@@ -46,7 +46,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             var synchronizedSession = await session.CreateSynchronizedSession(context, cancellationToken);
             var sagaData = await getSaga(persister, sagaId, synchronizedSession, context, cancellationToken);
 
-            Assert.IsNotNull(sagaData);
+            Assert.That(sagaData, Is.Not.Null);
             Assert.That(sagaData.Counter, Is.EqualTo(42));
             Assert.That(sagaData.Name, Is.EqualTo("Alpha"));
 
