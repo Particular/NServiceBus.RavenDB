@@ -53,7 +53,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
 
                 Assert.NotNull(outboxRecord);
-                Assert.True(outboxRecord.Dispatched);
+                Assert.That(outboxRecord.Dispatched, Is.True);
                 Assert.NotNull(outboxRecord.DispatchedAt);
                 Assert.IsEmpty(outboxRecord.TransportOperations);
             }
