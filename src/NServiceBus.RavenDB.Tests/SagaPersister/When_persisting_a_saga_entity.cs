@@ -38,8 +38,11 @@ public class When_persisting_a_saga_entity : RavenDBPersistenceTestBase
             var sagaUniqueIdentity = await session.LoadAsync<SagaUniqueIdentity>(sagaUniqueIdentityId);
             var sagaUniqueIdentityMetadata = session.Advanced.GetMetadataFor(sagaUniqueIdentity);
 
-            Assert.That(sagaDataContainerMetadata[SchemaVersionExtensions.SagaDataContainerSchemaVersionMetadataKey], Is.EqualTo(SagaDataContainer.SchemaVersion));
-            Assert.That(sagaUniqueIdentityMetadata[SchemaVersionExtensions.SagaUniqueIdentitySchemaVersionMetadataKey], Is.EqualTo(SagaUniqueIdentity.SchemaVersion));
+            Assert.Multiple(() =>
+            {
+                Assert.That(sagaDataContainerMetadata[SchemaVersionExtensions.SagaDataContainerSchemaVersionMetadataKey], Is.EqualTo(SagaDataContainer.SchemaVersion));
+                Assert.That(sagaUniqueIdentityMetadata[SchemaVersionExtensions.SagaUniqueIdentitySchemaVersionMetadataKey], Is.EqualTo(SagaUniqueIdentity.SchemaVersion));
+            });
         }
     }
 

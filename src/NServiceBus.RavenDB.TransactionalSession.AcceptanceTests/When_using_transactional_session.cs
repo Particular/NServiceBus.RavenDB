@@ -92,8 +92,11 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
                 .Done(c => c.CompleteMessageReceived)
                 .Run();
 
-            Assert.That(context.CompleteMessageReceived, Is.True);
-            Assert.That(context.MessageReceived, Is.False);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.CompleteMessageReceived, Is.True);
+                Assert.That(context.MessageReceived, Is.False);
+            });
 
             var documents = SetupFixture.DocumentStore.OpenSession(SetupFixture.DefaultDatabaseName)
                 .Query<TestDocument>()

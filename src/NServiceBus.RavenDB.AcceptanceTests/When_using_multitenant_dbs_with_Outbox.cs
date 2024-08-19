@@ -110,10 +110,16 @@
             await ConfigureEndpointRavenDBPersistence.DeleteDatabase(context.Db1);
             await ConfigureEndpointRavenDBPersistence.DeleteDatabase(context.Db2);
 
-            Assert.That(context.MessagesObserved, Is.EqualTo(4));
-            Assert.That(context.ObservedDbs.Count, Is.EqualTo(2));
-            Assert.That(context.ObservedDbs.Any(db => db == context.DefaultDb), Is.False);
-            Assert.That(context.ObservedDbs, Does.Contain(context.Db1));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.MessagesObserved, Is.EqualTo(4));
+                Assert.That(context.ObservedDbs.Count, Is.EqualTo(2));
+            });
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.ObservedDbs.Any(db => db == context.DefaultDb), Is.False);
+                Assert.That(context.ObservedDbs, Does.Contain(context.Db1));
+            });
             Assert.That(context.ObservedDbs, Does.Contain(context.Db2));
         }
 

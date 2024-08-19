@@ -33,8 +33,11 @@
                 .Run();
 
             Assert.That(context.SagaData, Is.Not.Null);
-            Assert.That(context.SagaData.ContinueCount, Is.EqualTo(3));
-            Assert.That(context.SagaData.CollectedIndexes, Does.Contain(1));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.SagaData.ContinueCount, Is.EqualTo(3));
+                Assert.That(context.SagaData.CollectedIndexes, Does.Contain(1));
+            });
             Assert.That(context.SagaData.CollectedIndexes, Does.Contain(2));
             Assert.That(context.SagaData.CollectedIndexes, Does.Contain(3));
         }

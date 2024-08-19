@@ -31,8 +31,11 @@ public class When_persisting_a_saga_entity_with_a_concrete_class_property : Rave
 
             var savedEntity = await persister.Get<SagaData>(entity.Id, synchronizedSession, options);
 
-            Assert.That(savedEntity.TestComponent.Property, Is.EqualTo(entity.TestComponent.Property));
-            Assert.That(savedEntity.TestComponent.AnotherProperty, Is.EqualTo(entity.TestComponent.AnotherProperty));
+            Assert.Multiple(() =>
+            {
+                Assert.That(savedEntity.TestComponent.Property, Is.EqualTo(entity.TestComponent.Property));
+                Assert.That(savedEntity.TestComponent.AnotherProperty, Is.EqualTo(entity.TestComponent.AnotherProperty));
+            });
         }
     }
 

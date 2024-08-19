@@ -38,8 +38,11 @@ public class When_subscriptions_versioning_is_disabled : RavenDBPersistenceTestB
             messageType_v2
         }, new ContextBag())).ToArray();
 
-        Assert.That(subscribers_looked_up_by_v1.Length, Is.EqualTo(2));
-        Assert.That(subscribers_looked_up_by_v2.Length, Is.EqualTo(2));
+        Assert.Multiple(() =>
+        {
+            Assert.That(subscribers_looked_up_by_v1.Length, Is.EqualTo(2));
+            Assert.That(subscribers_looked_up_by_v2.Length, Is.EqualTo(2));
+        });
     }
 
     [Test]

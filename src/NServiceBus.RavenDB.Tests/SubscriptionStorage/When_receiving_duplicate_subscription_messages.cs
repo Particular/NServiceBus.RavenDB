@@ -57,7 +57,10 @@ public class When_receiving_duplicate_subscription_messages : RavenDBPersistence
         }, new ContextBag())).ToArray();
 
         Assert.That(subscriber.Length, Is.EqualTo(1));
-        Assert.That(subscriber[0].TransportAddress, Is.EqualTo(subscriberAddress));
-        Assert.That(subscriber[0].Endpoint, Is.EqualTo("new_endpoint_name"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(subscriber[0].TransportAddress, Is.EqualTo(subscriberAddress));
+            Assert.That(subscriber[0].Endpoint, Is.EqualTo("new_endpoint_name"));
+        });
     }
 }

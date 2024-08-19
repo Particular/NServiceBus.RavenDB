@@ -100,9 +100,12 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 var outboxRecord = await session.Query<OutboxRecord>().SingleAsync(record => record.MessageId == incomingMessageId);
 
                 Assert.That(outboxRecord, Is.Not.Null);
-                Assert.That(outboxRecord.Dispatched, Is.False);
-                Assert.That(outboxRecord.DispatchedAt, Is.Null);
-                Assert.That(outboxRecord.TransportOperations.Length, Is.EqualTo(1));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(outboxRecord.Dispatched, Is.False);
+                    Assert.That(outboxRecord.DispatchedAt, Is.Null);
+                    Assert.That(outboxRecord.TransportOperations.Length, Is.EqualTo(1));
+                });
                 Assert.That(outboxRecord.TransportOperations.Single().MessageId, Is.EqualTo(outgoingMessageId));
             }
         }
@@ -157,8 +160,11 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             // assert
             var storedOutboxMessage = await persister.Get(incomingMessageId, context);
 
-            Assert.That(storedOutboxMessage.MessageId, Is.EqualTo(incomingMessageId));
-            Assert.That(storedOutboxMessage.TransportOperations.Length, Is.EqualTo(1));
+            Assert.Multiple(() =>
+            {
+                Assert.That(storedOutboxMessage.MessageId, Is.EqualTo(incomingMessageId));
+                Assert.That(storedOutboxMessage.TransportOperations.Length, Is.EqualTo(1));
+            });
             Assert.That(storedOutboxMessage.TransportOperations[0].MessageId, Is.EqualTo("test"));
         }
     }
