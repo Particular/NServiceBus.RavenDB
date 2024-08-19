@@ -99,7 +99,7 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
                 .Query<TestDocument>()
                 .Where(d => d.Id == context.SessionId);
             var d = documents.FirstOrDefault();
-            Assert.IsEmpty(documents);
+            Assert.That(documents, Is.Empty);
         }
 
         [TestCase(true)]

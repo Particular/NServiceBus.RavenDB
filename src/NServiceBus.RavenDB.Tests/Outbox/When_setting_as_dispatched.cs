@@ -55,7 +55,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 Assert.That(outboxRecord, Is.Not.Null);
                 Assert.That(outboxRecord.Dispatched, Is.True);
                 Assert.That(outboxRecord.DispatchedAt, Is.Not.Null);
-                Assert.IsEmpty(outboxRecord.TransportOperations);
+                Assert.That(outboxRecord.TransportOperations, Is.Empty);
             }
         }
 

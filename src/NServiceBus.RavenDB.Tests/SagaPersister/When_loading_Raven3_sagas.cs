@@ -59,8 +59,8 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             var dataDocs = await session.Advanced.LoadStartingWithAsync<SagaDataContainer>("CountingSagaDatas/", token: cancellationToken);
             var uniqueDocs = await session.Advanced.LoadStartingWithAsync<SagaUniqueIdentity>("Raven3Sagas-", token: cancellationToken);
 
-            Assert.IsEmpty(dataDocs);
-            Assert.IsEmpty(uniqueDocs);
+            Assert.That(dataDocs, Is.Empty);
+            Assert.That(uniqueDocs, Is.Empty);
         }
     }
 
