@@ -26,7 +26,7 @@
                      .Run();
             });
 
-            Assert.That(exception.Message.Contains("does not support custom saga finders"), Is.True, "Exception message did not contain expected phrase");
+            Assert.That(exception.Message, Does.Contain("does not support custom saga finders"), "Exception message did not contain expected phrase");
         }
 
         public class Context : ScenarioContext
