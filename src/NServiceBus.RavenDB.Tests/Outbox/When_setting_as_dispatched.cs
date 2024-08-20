@@ -52,10 +52,13 @@ namespace NServiceBus.RavenDB.Tests.Outbox
             {
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
 
-                Assert.NotNull(outboxRecord);
-                Assert.True(outboxRecord.Dispatched);
-                Assert.NotNull(outboxRecord.DispatchedAt);
-                Assert.IsEmpty(outboxRecord.TransportOperations);
+                Assert.That(outboxRecord, Is.Not.Null);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(outboxRecord.Dispatched, Is.True);
+                    Assert.That(outboxRecord.DispatchedAt, Is.Not.Null);
+                    Assert.That(outboxRecord.TransportOperations, Is.Empty);
+                });
             }
         }
 
@@ -84,7 +87,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
 
-                Assert.AreEqual(OutboxRecord.SchemaVersion, metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey]);
+                Assert.That(metadata[SchemaVersionExtensions.OutboxRecordSchemaVersionMetadataKey], Is.EqualTo(OutboxRecord.SchemaVersion));
             }
         }
 
@@ -147,7 +150,7 @@ namespace NServiceBus.RavenDB.Tests.Outbox
                 var outboxRecord = await session.LoadAsync<OutboxRecord>(outboxRecordId);
                 var metadata = session.Advanced.GetMetadataFor(outboxRecord);
 
-                Assert.False(metadata.Keys.Contains(Constants.Documents.Metadata.Expires));
+                Assert.That(metadata.Keys.Contains(Constants.Documents.Metadata.Expires), Is.False);
             }
         }
     }

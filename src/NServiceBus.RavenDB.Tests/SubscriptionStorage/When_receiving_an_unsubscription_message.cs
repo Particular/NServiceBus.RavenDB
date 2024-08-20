@@ -21,6 +21,6 @@ public class When_receiving_an_unsubscribe_message : RavenDBPersistenceTestBase
 
         var clients = await storage.GetSubscriberAddressesForMessage(new[] { MessageTypes.MessageA, MessageTypes.MessageB }, context);
 
-        Assert.IsEmpty(clients);
+        Assert.That(clients, Is.Empty);
     }
 }

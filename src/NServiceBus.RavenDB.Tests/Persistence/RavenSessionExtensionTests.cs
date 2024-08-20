@@ -27,7 +27,7 @@
 
                 var session2 = storageSession.RavenSession();
 
-                Assert.AreEqual(session, session2);
+                Assert.That(session2, Is.EqualTo(session));
             }
         }
 
@@ -49,7 +49,7 @@
 
                 var session2 = storageSession.RavenSession();
 
-                Assert.AreEqual(session, session2);
+                Assert.That(session2, Is.EqualTo(session));
             }
         }
     }

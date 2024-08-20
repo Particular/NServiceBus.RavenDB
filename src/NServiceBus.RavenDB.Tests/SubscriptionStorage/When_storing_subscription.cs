@@ -31,7 +31,7 @@ public class When_storing_subscription : RavenDBPersistenceTestBase
 
             var metadata = session.Advanced.GetMetadataFor(subscription);
 
-            Assert.AreEqual(Subscription.SchemaVersion, metadata[SchemaVersionExtensions.SubscriptionSchemaVersionMetadataKey]);
+            Assert.That(metadata[SchemaVersionExtensions.SubscriptionSchemaVersionMetadataKey], Is.EqualTo(Subscription.SchemaVersion));
         }
     }
 }

@@ -36,7 +36,7 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             var documents = SetupFixture.DocumentStore.OpenSession(SetupFixture.DefaultDatabaseName)
                 .Query<TestDocument>()
                 .Where(d => d.Id == context.SessionId);
-            Assert.AreEqual(1, documents.Count());
+            Assert.That(documents.Count(), Is.EqualTo(1));
         }
 
         [TestCase(true)]
@@ -64,7 +64,7 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             var documents = SetupFixture.DocumentStore.OpenSession(SetupFixture.DefaultDatabaseName)
                 .Query<TestDocument>()
                 .Where(d => d.Id == context.SessionId);
-            Assert.AreEqual(1, documents.Count());
+            Assert.That(documents.Count(), Is.EqualTo(1));
         }
 
         [TestCase(true)]
@@ -92,14 +92,17 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
                 .Done(c => c.CompleteMessageReceived)
                 .Run();
 
-            Assert.True(context.CompleteMessageReceived);
-            Assert.False(context.MessageReceived);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.CompleteMessageReceived, Is.True);
+                Assert.That(context.MessageReceived, Is.False);
+            });
 
             var documents = SetupFixture.DocumentStore.OpenSession(SetupFixture.DefaultDatabaseName)
                 .Query<TestDocument>()
                 .Where(d => d.Id == context.SessionId);
             var d = documents.FirstOrDefault();
-            Assert.IsEmpty(documents);
+            Assert.That(documents, Is.Empty);
         }
 
         [TestCase(true)]
@@ -123,7 +126,7 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
                 .Run()
                 ;
 
-            Assert.True(result.MessageReceived);
+            Assert.That(result.MessageReceived, Is.True);
         }
 
         class Context : ScenarioContext, IInjectServiceProvider

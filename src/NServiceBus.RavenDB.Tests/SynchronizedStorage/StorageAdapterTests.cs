@@ -20,7 +20,7 @@
                 await adaptedSession.TryOpen(ravenDBOutboxTransaction, new ContextBag());
                 await adaptedSession.RavenSession().StoreAsync(new StorageAdapterTestDocument(), documentId);
 
-                Assert.AreSame(outboxSession, adaptedSession.RavenSession());
+                Assert.That(adaptedSession.RavenSession(), Is.SameAs(outboxSession));
                 //Core commits both adapted and outbox sessions:
                 await adaptedSession.CompleteAsync();
                 await ravenDBOutboxTransaction.Commit();
@@ -29,8 +29,8 @@
             using (var verificationSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             {
                 var document = await verificationSession.LoadAsync<StorageAdapterTestDocument>(documentId);
-                Assert.IsNotNull(document);
-                Assert.AreEqual(documentId, document.Id);
+                Assert.That(document, Is.Not.Null);
+                Assert.That(document.Id, Is.EqualTo(documentId));
             }
         }
 
@@ -45,7 +45,7 @@
                 await adaptedSession.TryOpen(ravenDBOutboxTransaction, new ContextBag());
                 await adaptedSession.RavenSession().StoreAsync(new StorageAdapterTestDocument(), documentId);
 
-                Assert.AreSame(outboxSession, adaptedSession.RavenSession());
+                Assert.That(adaptedSession.RavenSession(), Is.SameAs(outboxSession));
                 //await adaptedSession.CompleteAsync();
                 //await ravenDBOutboxTransaction.Commit();
             }
@@ -53,7 +53,7 @@
             using (var verificationSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             {
                 var document = await verificationSession.LoadAsync<StorageAdapterTestDocument>(documentId);
-                Assert.IsNull(document);
+                Assert.That(document, Is.Null);
             }
         }
 
@@ -68,7 +68,7 @@
                 await adaptedSession.TryOpen(ravenDBOutboxTransaction, new ContextBag());
                 await adaptedSession.RavenSession().StoreAsync(new StorageAdapterTestDocument(), documentId);
 
-                Assert.AreSame(outboxSession, adaptedSession.RavenSession());
+                Assert.That(adaptedSession.RavenSession(), Is.SameAs(outboxSession));
                 // The adapted session can complete but a failure can happen at a later point to cause
                 // the underlying outbox transaction to roll back
                 await adaptedSession.CompleteAsync();
@@ -78,7 +78,7 @@
             using (var verificationSession = store.OpenAsyncSession(GetSessionOptions()).UsingOptimisticConcurrency())
             {
                 var document = await verificationSession.LoadAsync<StorageAdapterTestDocument>(documentId);
-                Assert.IsNull(document);
+                Assert.That(document, Is.Null);
             }
         }
 

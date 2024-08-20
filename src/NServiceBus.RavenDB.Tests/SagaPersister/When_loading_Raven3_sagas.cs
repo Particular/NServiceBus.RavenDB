@@ -46,9 +46,12 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             var synchronizedSession = await session.CreateSynchronizedSession(context, cancellationToken);
             var sagaData = await getSaga(persister, sagaId, synchronizedSession, context, cancellationToken);
 
-            Assert.IsNotNull(sagaData);
-            Assert.AreEqual(42, sagaData.Counter);
-            Assert.AreEqual("Alpha", sagaData.Name);
+            Assert.That(sagaData, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(sagaData.Counter, Is.EqualTo(42));
+                Assert.That(sagaData.Name, Is.EqualTo("Alpha"));
+            });
 
             await persister.Complete(sagaData, synchronizedSession, context, cancellationToken);
             await session.SaveChangesAsync(cancellationToken);
@@ -59,8 +62,11 @@ class Raven3Sagas : RavenDBPersistenceTestBase
             var dataDocs = await session.Advanced.LoadStartingWithAsync<SagaDataContainer>("CountingSagaDatas/", token: cancellationToken);
             var uniqueDocs = await session.Advanced.LoadStartingWithAsync<SagaUniqueIdentity>("Raven3Sagas-", token: cancellationToken);
 
-            Assert.IsEmpty(dataDocs);
-            Assert.IsEmpty(uniqueDocs);
+            Assert.Multiple(() =>
+            {
+                Assert.That(dataDocs, Is.Empty);
+                Assert.That(uniqueDocs, Is.Empty);
+            });
         }
     }
 

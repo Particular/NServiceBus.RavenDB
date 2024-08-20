@@ -35,13 +35,13 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
             var saga = await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options);
 
-            Assert.IsNotNull(saga, "Saga is null");
-            Assert.AreNotEqual(Guid.Empty, saga.Id, "Id is Guid.Empty");
+            Assert.That(saga, Is.Not.Null, "Saga is null");
+            Assert.That(saga.Id, Is.Not.EqualTo(Guid.Empty), "Id is Guid.Empty");
 
             await persister.Complete(saga, synchronizedSession, options);
             await session.SaveChangesAsync().ConfigureAwait(false);
 
-            Assert.IsNull(await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options), "Saga was not completed");
+            Assert.That(await persister.Get<SagaWithUniqueProperty>("UniqueString", unique, synchronizedSession, options), Is.Null, "Saga was not completed");
         }
     }
 
@@ -89,9 +89,9 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
 
             var loadedSaga = await persister.Get<SagaWithUniqueProperty>("UniqueString", uniqueString, synchronizedSession, options);
 
-            Assert.IsNotNull(loadedSaga, "Saga is null");
-            Assert.AreNotEqual(Guid.Empty, loadedSaga.Id, "Id is Guid.Empty");
-            Assert.AreEqual(sagaId, loadedSaga.Id, "Saga Id is not the correct value.");
+            Assert.That(loadedSaga, Is.Not.Null, "Saga is null");
+            Assert.That(loadedSaga.Id, Is.Not.EqualTo(Guid.Empty), "Id is Guid.Empty");
+            Assert.That(loadedSaga.Id, Is.EqualTo(sagaId), "Saga Id is not the correct value.");
         }
     }
 

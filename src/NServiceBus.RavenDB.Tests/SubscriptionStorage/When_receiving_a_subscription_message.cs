@@ -27,7 +27,7 @@ public class When_receiving_a_subscription_message : RavenDBPersistenceTestBase
                 .Customize(c => c.WaitForNonStaleResults())
                 .CountAsync();
 
-            Assert.AreEqual(1, subscriptions);
+            Assert.That(subscriptions, Is.EqualTo(1));
         }
     }
 }

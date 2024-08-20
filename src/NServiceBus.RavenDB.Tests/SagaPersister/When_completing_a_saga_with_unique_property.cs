@@ -47,8 +47,11 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
                 testIdentity = await session.Query<SagaUniqueIdentity>().Customize(c => c.WaitForNonStaleResults()).SingleOrDefaultAsync(u => u.SagaId == sagaId).ConfigureAwait(false);
             }
 
-            Assert.Null(testSaga);
-            Assert.Null(testIdentity);
+            Assert.Multiple(() =>
+            {
+                Assert.That(testSaga, Is.Null);
+                Assert.That(testIdentity, Is.Null);
+            });
         }
     }
 

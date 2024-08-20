@@ -32,11 +32,14 @@
                 .Done(c => c.SagaData != null)
                 .Run();
 
-            Assert.IsNotNull(context.SagaData);
-            Assert.AreEqual(3, context.SagaData.ContinueCount);
-            Assert.Contains(1, context.SagaData.CollectedIndexes);
-            Assert.Contains(2, context.SagaData.CollectedIndexes);
-            Assert.Contains(3, context.SagaData.CollectedIndexes);
+            Assert.That(context.SagaData, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.SagaData.ContinueCount, Is.EqualTo(3));
+                Assert.That(context.SagaData.CollectedIndexes, Does.Contain(1));
+            });
+            Assert.That(context.SagaData.CollectedIndexes, Does.Contain(2));
+            Assert.That(context.SagaData.CollectedIndexes, Does.Contain(3));
         }
 
         public class Context : ScenarioContext

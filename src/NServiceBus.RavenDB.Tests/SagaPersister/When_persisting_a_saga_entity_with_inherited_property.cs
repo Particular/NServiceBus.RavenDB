@@ -31,7 +31,7 @@ public class When_persisting_a_saga_entity_with_inherited_property : RavenDBPers
             var savedEntity = await persister.Get<SagaData>(entity.Id, synchronizedSession, options);
             var expected = (PolymorphicProperty)entity.PolymorphicRelatedProperty;
             var actual = (PolymorphicProperty)savedEntity.PolymorphicRelatedProperty;
-            Assert.AreEqual(expected.SomeInt, actual.SomeInt);
+            Assert.That(actual.SomeInt, Is.EqualTo(expected.SomeInt));
         }
     }
 

@@ -53,7 +53,7 @@
 
                 var injectedSessionId = ((InMemoryDocumentSessionOperations)context.RavenSessionFromHandler).Id;
                 var found = createdSessions.Cast<InMemoryDocumentSessionOperations>().Any(session => session.Id == injectedSessionId);
-                Assert.IsTrue(found);
+                Assert.That(found, Is.True);
             }
             finally
             {
@@ -90,7 +90,7 @@
                         .Done(c => c.HandlerWasHit)
                         .Run();
 
-                Assert.IsNotNull(context.RavenSessionFromHandler);
+                Assert.That(context.RavenSessionFromHandler, Is.Not.Null);
             }
             finally
             {
