@@ -45,13 +45,15 @@ jobs:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
       - name: Setup RavenDB
         id: setup-ravendb
-        uses: Particular/setup-ravendb-action@v1.5.0
+        uses: Particular/setup-ravendb-action@v1.7.0
         with:
             single-connection-string-name: RavenSingleNodeUrl
             cluster-connection-string-name: CommaSeparatedRavenClusterUrls
             ravendb-license: ${{ secrets.RAVENDB_LICENSE }}
             ravendb-mode: Both
             tag: RavenDBPersistence
+            registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+            registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Upload packages
         if: matrix.name == 'Windows'
         uses: actions/upload-artifact@v4.3.1
