@@ -35,11 +35,13 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4.1.0
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: |
+            9.0.x
+            8.0.x
       - name: Build
         run: dotnet build src --configuration Release
       - name: Azure login
-        uses: azure/login@v2.1.1
+        uses: azure/login@v2.2.0
         if: matrix.name == 'Windows'
         with:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
