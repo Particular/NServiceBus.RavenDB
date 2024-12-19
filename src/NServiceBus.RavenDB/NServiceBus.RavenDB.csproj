@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <PackageReference Include="Fody" Version="6.9.1" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" AutomaticVersionRange="false" />
     <PackageReference Include="NServiceBus" Version="8.2.4" />
     <PackageReference Include="NuGet.Versioning" Version="6.5.0" AutomaticVersionRange="false" />
     <PackageReference Include="Obsolete.Fody" Version="5.3.0" PrivateAssets="All" />
