@@ -5,7 +5,7 @@ using NUnit.Framework;
 using Particular.Approvals;
 
 [TestFixture]
-public class OutboxAprovals
+public class OutboxApprovals
 {
     [Test]
     public void ApproveOutboxSchema()
