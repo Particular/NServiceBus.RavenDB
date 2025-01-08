@@ -10,15 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NServiceBus" Version="[9.0.0, 10.0.0)" />
-    <PackageReference Include="NuGet.Versioning" Version="6.9.1" />
-    <PackageReference Include="RavenDB.Client" Version="[5.4.116, 6.0.0)" />
+    <PackageReference Include="NServiceBus" Version="9.1.2" />
+    <PackageReference Include="NuGet.Versioning" Version="6.9.1" AutomaticVersionRange="false" />
+    <PackageReference Include="RavenDB.Client" Version="5.4.116" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fody" Version="6.8.0" PrivateAssets="All" />
+    <PackageReference Include="Fody" Version="6.9.1" PrivateAssets="All" />
     <PackageReference Include="Obsolete.Fody" Version="5.3.0" PrivateAssets="All" />
-    <PackageReference Include="Particular.Packaging" Version="4.1.0" PrivateAssets="All" />
+    <PackageReference Include="Particular.Packaging" Version="4.2.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
