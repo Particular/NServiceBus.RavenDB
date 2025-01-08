@@ -10,16 +10,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="8.0.3" GeneratePathProperty="true" />
+    <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="8.2.4" GeneratePathProperty="true" />
     <PackageReference Include="NUnit" Version="3.14.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-    <PackageReference Include="RavenDB.Client" Version="5.4.103" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\**\*.cs" Exclude="**\obj\**" />
+    <!-- The high contention test is only relevant for pessimistic concurrency control -->
+    <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\When_storing_saga_with_high_contention.cs" />
+    <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\ConfigureEndpointRavenDBPersistence.cs" />
+    <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\TestSuiteConstraints.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(PkgNServiceBus_AcceptanceTests_Sources)' != ''">
@@ -43,11 +46,6 @@
     <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\TimeToBeReceived\*.*" />
     <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Tx\**\*.*" />
     <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Versioning\*.*" />
-
-    <!-- The high contention test is only relevant for pessimistic concurrency control -->
-    <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\When_storing_saga_with_high_contention.cs" />
-    <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\ConfigureEndpointRavenDBPersistence.cs" />
-    <Compile Remove="..\NServiceBus.RavenDB.AcceptanceTests\TestSuiteConstraints.cs" />
   </ItemGroup>
 
 </Project>

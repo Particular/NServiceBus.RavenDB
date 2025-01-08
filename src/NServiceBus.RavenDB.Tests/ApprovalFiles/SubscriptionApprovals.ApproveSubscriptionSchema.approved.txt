@@ -1,6 +1,9 @@
 {
   "Id": "Id",
-  "MessageType": "System.Object, Version=4.0.0",
+  "MessageType": {
+    "TypeName": "System.Object",
+    "Version": "4.0.0"
+  },
   "Subscribers": [
     {
       "TransportAddress": "TransportAddress",

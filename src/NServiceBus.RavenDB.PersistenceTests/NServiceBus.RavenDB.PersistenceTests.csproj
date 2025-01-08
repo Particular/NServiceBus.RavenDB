@@ -12,17 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageReference Include="NServiceBus.PersistenceTests.Sources" Version="8.0.3" GeneratePathProperty="true" />
+    <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="NServiceBus.PersistenceTests.Sources" Version="8.2.4" GeneratePathProperty="true" />
     <PackageReference Include="NUnit" Version="3.14.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-    <PackageReference Include="RavenDB.Client" Version="5.4.103" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(PkgNServiceBus_PersistenceTests_Sources)' != ''">
-    <!-- To remove when https://github.com/Particular/NServiceBus/pull/6603 is merged and released  -->
-    <Compile Remove="$(PkgNServiceBus_PersistenceTests_Sources)\**\When_updating_saga_concurrently_on_same_thread.cs" />
-    <Compile Remove="$(PkgNServiceBus_PersistenceTests_Sources)\**\When_updating_saga_concurrently_twice_on_the_same_thread.cs" />
-  </ItemGroup>
 </Project>

@@ -10,12 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Particular.Packaging" Version="2.3.0" PrivateAssets="All" />
-    <PackageReference Include="NServiceBus.TransactionalSession" Version="[2.0.0, 3)" />
+    <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NServiceBus.RavenDB\NServiceBus.RavenDB.csproj" />
+    <PackageReference Include="NServiceBus.TransactionalSession" Version="2.0.2" />
+    <PackageReference Include="Particular.Packaging" Version="4.2.0" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
