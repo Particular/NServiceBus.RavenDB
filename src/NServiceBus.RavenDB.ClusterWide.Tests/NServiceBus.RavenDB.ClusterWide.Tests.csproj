@@ -21,9 +21,6 @@
 
   <ItemGroup>
     <Compile Include="..\NServiceBus.RavenDB.Tests\**\*.cs" Exclude="**\obj\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Remove="..\NServiceBus.RavenDB.Tests\API\*.cs" />
     <Compile Remove="..\NServiceBus.RavenDB.Tests\ReusableDbConfig.cs" />
     <Compile Remove="..\NServiceBus.RavenDB.Tests\TestConstants.cs" />

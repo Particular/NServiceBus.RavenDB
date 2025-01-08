@@ -19,8 +19,4 @@
     <PackageReference Include="PublicApiGenerator" Version="11.3.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ApprovalFiles" />
-  </ItemGroup>
-
 </Project>

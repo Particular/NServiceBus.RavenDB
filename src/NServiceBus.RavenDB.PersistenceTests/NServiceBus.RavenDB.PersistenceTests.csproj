@@ -19,9 +19,4 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(PkgNServiceBus_PersistenceTests_Sources)' != ''">
-    <!-- To remove when https://github.com/Particular/NServiceBus/pull/6603 is merged and released  -->
-    <Compile Remove="$(PkgNServiceBus_PersistenceTests_Sources)\**\When_updating_saga_concurrently_on_same_thread.cs" />
-    <Compile Remove="$(PkgNServiceBus_PersistenceTests_Sources)\**\When_updating_saga_concurrently_twice_on_the_same_thread.cs" />
-  </ItemGroup>
 </Project>
