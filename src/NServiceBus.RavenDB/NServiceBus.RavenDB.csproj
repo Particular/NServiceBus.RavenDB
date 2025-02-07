@@ -26,7 +26,6 @@
     <InternalsVisibleTo Include="NServiceBus.RavenDB.Tests" Key="$(NServiceBusTestsKey)" />
     <InternalsVisibleTo Include="NServiceBus.RavenDB.ClusterWide.Tests" Key="$(NServiceBusTestsKey)" />
     <InternalsVisibleTo Include="NServiceBus.RavenDB.PersistenceTests" Key="$(NServiceBusTestsKey)" />
-    <InternalsVisibleTo Include="NServiceBus.PersistersCompatibilityTests.NServiceBus5" Key="$(NServiceBusTestsKey)" />
   </ItemGroup>
 
 </Project>
