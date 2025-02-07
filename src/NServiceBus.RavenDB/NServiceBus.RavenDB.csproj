@@ -22,4 +22,10 @@
     <PackageReference Include="Particular.Packaging" Version="4.2.0" PrivateAssets="All" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="NServiceBus.RavenDB.Tests" Key="$(NServiceBusTestsKey)" />
+    <InternalsVisibleTo Include="NServiceBus.RavenDB.ClusterWide.Tests" Key="$(NServiceBusTestsKey)" />
+    <InternalsVisibleTo Include="NServiceBus.RavenDB.PersistenceTests" Key="$(NServiceBusTestsKey)" />
+  </ItemGroup>
+
 </Project>
