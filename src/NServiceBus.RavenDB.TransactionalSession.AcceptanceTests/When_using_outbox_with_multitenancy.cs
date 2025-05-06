@@ -39,10 +39,8 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             Assert.That(context.Document.SessionId, Is.EqualTo(context.SessionId), "should have loaded the document from the correct tenant database");
         }
 
-        public class Context : ScenarioContext, IInjectServiceProvider
+        public class Context : TransactionalSessionTestContext
         {
-            public IServiceProvider ServiceProvider { get; set; }
-
             public bool MessageReceived { get; set; }
             public TestDocument Document { get; set; }
             public string SessionId { get; set; }
@@ -52,18 +50,14 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
         {
             public MultitenantEndpoint() => EndpointSetup<TransactionSessionWithOutboxEndpoint>();
 
-            public class SampleMessageHandler : IHandleMessages<SampleMessage>
+            public class SampleMessageHandler(Context testContext) : IHandleMessages<SampleMessage>
             {
-                public SampleMessageHandler(Context testContext) => this.testContext = testContext;
-
                 public async Task Handle(SampleMessage message, IMessageHandlerContext context)
                 {
                     testContext.MessageReceived = true;
                     var ravenSession = context.SynchronizedStorageSession.RavenSession();
                     testContext.Document = await ravenSession.LoadAsync<TestDocument>(message.DocumentId);
                 }
-
-                readonly Context testContext;
             }
         }
 

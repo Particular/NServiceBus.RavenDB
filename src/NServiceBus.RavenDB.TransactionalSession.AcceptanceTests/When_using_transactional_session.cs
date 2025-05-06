@@ -129,11 +129,10 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
             Assert.That(result.MessageReceived, Is.True);
         }
 
-        class Context : ScenarioContext, IInjectServiceProvider
+        class Context : TransactionalSessionTestContext
         {
             public bool MessageReceived { get; set; }
             public bool CompleteMessageReceived { get; set; }
-            public IServiceProvider ServiceProvider { get; set; }
             public string SessionId { get; set; }
         }
 
@@ -151,32 +150,24 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
                 }
             }
 
-            class SampleHandler : IHandleMessages<SampleMessage>
+            class SampleHandler(Context testContext) : IHandleMessages<SampleMessage>
             {
-                public SampleHandler(Context testContext) => this.testContext = testContext;
-
                 public Task Handle(SampleMessage message, IMessageHandlerContext context)
                 {
                     testContext.MessageReceived = true;
 
                     return Task.CompletedTask;
                 }
-
-                readonly Context testContext;
             }
 
-            class CompleteTestMessageHandler : IHandleMessages<CompleteTestMessage>
+            class CompleteTestMessageHandler(Context testContext) : IHandleMessages<CompleteTestMessage>
             {
-                public CompleteTestMessageHandler(Context context) => testContext = context;
-
                 public Task Handle(CompleteTestMessage message, IMessageHandlerContext context)
                 {
                     testContext.CompleteMessageReceived = true;
 
                     return Task.CompletedTask;
                 }
-
-                readonly Context testContext;
             }
         }
 
