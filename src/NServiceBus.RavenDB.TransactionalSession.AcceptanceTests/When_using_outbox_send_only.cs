@@ -73,7 +73,7 @@ public class When_using_outbox_send_only : NServiceBusAcceptanceTest
 
     class ProcessorEndpoint : EndpointConfigurationBuilder
     {
-        public ProcessorEndpoint() => EndpointSetup<TransactionSessionWithOutboxEndpoint>();
+        public ProcessorEndpoint() => EndpointSetup<TransactionSessionWithOutboxEndpoint>(c => c.GetSettings().Set("RavenDB.Outbox.EndpointName", Conventions.EndpointNamingConvention.Invoke(typeof(SendOnlyEndpoint))));
     }
 
     class SampleMessage : ICommand
