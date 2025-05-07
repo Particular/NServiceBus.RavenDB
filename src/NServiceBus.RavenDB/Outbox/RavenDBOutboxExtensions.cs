@@ -20,6 +20,17 @@
         public static void SetTimeToKeepDeduplicationData(this OutboxSettings configuration, TimeSpan timeToKeepDeduplicationData) =>
             configuration.GetSettings().SetTimeToKeepDeduplicationData(timeToKeepDeduplicationData);
 
+        /// <summary>
+        /// Sets the endpoint name to use when generating document IDs. This is needed for use cases like configuring a transactional session processor endpoint.
+        /// </summary>
+        public static void EndpointName(this OutboxSettings configuration, string endpointName)
+        {
+            ArgumentNullException.ThrowIfNull(configuration);
+            ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
+
+            configuration.GetSettings().Set(RavenDbOutboxStorage.EndpointNameKey, endpointName);
+        }
+
         static void SetTimeToKeepDeduplicationData(this SettingsHolder settings, TimeSpan timeToKeepDeduplicationData)
         {
             var now = DateTime.UtcNow;

@@ -20,6 +20,7 @@ namespace NServiceBus
 {
     public static class RavenDBOutboxExtensions
     {
+        public static void EndpointName(this NServiceBus.Outbox.OutboxSettings configuration, string endpointName) { }
         public static void SetFrequencyToRunDeduplicationDataCleanup(this NServiceBus.Outbox.OutboxSettings configuration, System.TimeSpan frequencyToRunDeduplicationDataCleanup) { }
         public static void SetTimeToKeepDeduplicationData(this NServiceBus.Outbox.OutboxSettings configuration, System.TimeSpan timeToKeepDeduplicationData) { }
     }
