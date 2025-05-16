@@ -3,6 +3,7 @@ namespace NServiceBus.TransactionalSession
     using System;
     using Configuration.AdvancedExtensibility;
     using Features;
+    using Persistence.RavenDB;
 
     /// <summary>
     /// Enables the transactional session feature.
@@ -28,6 +29,12 @@ namespace NServiceBus.TransactionalSession
             var settings = persistenceExtensions.GetSettings();
 
             settings.Set(transactionalSessionOptions);
+
+            if (!string.IsNullOrWhiteSpace(transactionalSessionOptions.ProcessorEndpoint))
+            {
+                settings.Set(RavenDbOutboxStorage.ProcessorEndpointKey, transactionalSessionOptions.ProcessorEndpoint);
+            }
+
             settings.EnableFeatureByDefault<RavenDbTransactionalSession>();
 
             return persistenceExtensions;

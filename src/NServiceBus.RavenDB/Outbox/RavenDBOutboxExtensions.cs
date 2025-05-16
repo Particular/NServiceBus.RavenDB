@@ -28,7 +28,7 @@
             ArgumentNullException.ThrowIfNull(configuration);
             ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
 
-            configuration.GetSettings().Set(RavenDbOutboxStorage.EndpointNameKey, endpointName);
+            configuration.GetSettings().Set(RavenDbOutboxStorage.ProcessorEndpointKey, endpointName);
         }
 
         static void SetTimeToKeepDeduplicationData(this SettingsHolder settings, TimeSpan timeToKeepDeduplicationData)
