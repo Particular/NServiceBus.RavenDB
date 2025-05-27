@@ -7,5 +7,6 @@ namespace NServiceBus.TransactionalSession
     public static class RavenDbTransactionalSessionExtensions
     {
         public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> EnableTransactionalSession(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> persistenceExtensions) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> EnableTransactionalSession(this NServiceBus.PersistenceExtensions<NServiceBus.RavenDBPersistence> persistenceExtensions, NServiceBus.TransactionalSession.TransactionalSessionOptions transactionalSessionOptions) { }
     }
 }

@@ -25,9 +25,10 @@
 
             var timeToKeepDeduplicationData = context.Settings.GetOrDefault<TimeSpan?>(TimeToKeepDeduplicationData) ?? DeduplicationDataTTLDefault;
             var useClusterWideTransactions = context.Settings.GetOrDefault<bool>(RavenDbStorageSession.UseClusterWideTransactions);
+            var endpointName = context.Settings.GetOrDefault<string>(ProcessorEndpointKey) ?? context.Settings.EndpointName();
 
             context.Services.AddTransient<IOutboxStorage>(
-                sp => new OutboxPersister(context.Settings.EndpointName(), sp.GetRequiredService<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData, useClusterWideTransactions));
+                sp => new OutboxPersister(endpointName, sp.GetRequiredService<IOpenTenantAwareRavenSessions>(), timeToKeepDeduplicationData, useClusterWideTransactions));
 
             var frequencyToRunDeduplicationDataCleanup = context.Settings.GetOrDefault<TimeSpan?>(FrequencyToRunDeduplicationDataCleanup) ?? Timeout.InfiniteTimeSpan;
 
@@ -48,6 +49,7 @@
         }
 
         internal const string TimeToKeepDeduplicationData = "Outbox.TimeToKeepDeduplicationData";
+        internal const string ProcessorEndpointKey = "RavenDB.TransactionalSession.ProcessorEndpoint";
         internal const string FrequencyToRunDeduplicationDataCleanup = "Outbox.FrequencyToRunDeduplicationDataCleanup";
         internal static readonly TimeSpan DeduplicationDataTTLDefault = TimeSpan.FromDays(7);
 

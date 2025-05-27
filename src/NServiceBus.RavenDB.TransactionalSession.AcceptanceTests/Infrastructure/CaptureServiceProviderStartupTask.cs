@@ -3,18 +3,11 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using NServiceBus.AcceptanceTesting;
-    using NServiceBus.Features;
+    using Features;
 
     public class CaptureServiceProviderStartupTask : FeatureStartupTask
     {
-        public CaptureServiceProviderStartupTask(IServiceProvider serviceProvider, ScenarioContext context)
-        {
-            if (context is IInjectServiceProvider c)
-            {
-                c.ServiceProvider = serviceProvider;
-            }
-        }
+        public CaptureServiceProviderStartupTask(IServiceProvider serviceProvider, TransactionalSessionTestContext context, string endpointName) => context.RegisterServiceProvider(serviceProvider, endpointName);
 
         protected override Task OnStart(IMessageSession session, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
