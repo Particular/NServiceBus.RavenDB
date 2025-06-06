@@ -5,8 +5,4 @@
     <MinVerAutoIncrement>minor</MinVerAutoIncrement>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <WriteMinVerProperties>false</WriteMinVerProperties>
-  </PropertyGroup>
-
 </Project>

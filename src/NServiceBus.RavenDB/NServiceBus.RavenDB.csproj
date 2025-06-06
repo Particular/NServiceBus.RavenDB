@@ -6,7 +6,6 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
     <Description>RavenDB persistence support for NServiceBus</Description>
-    <WriteMinVerProperties>true</WriteMinVerProperties>
   </PropertyGroup>
 
   <ItemGroup>
