@@ -22,9 +22,7 @@
 
             var operation = await documentStore.Operations.SendAsync(deleteOp, token: cancellationToken).ConfigureAwait(false);
 
-            // This is going to execute multiple "status check" requests to Raven, but this does
-            // not currently support CancellationToken.
-            await operation.WaitForCompletionAsync().ConfigureAwait(false);
+            await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
         }
 
         IDocumentStore documentStore;
