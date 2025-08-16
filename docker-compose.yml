@@ -2,7 +2,7 @@ version: '3'
 services:
   singlenode:
     container_name: singlenode
-    image: ravendb/ravendb:5.3-ubuntu-latest
+    image: ravendb/ravendb:6.2-ubuntu-latest
     ports:
       - 8080:8080
       - 38888:38888
@@ -34,7 +34,7 @@ services:
         - singlenode_network
   leader:
     container_name: leader
-    image: ravendb/ravendb:5.3-ubuntu-latest
+    image: ravendb/ravendb:6.2-ubuntu-latest
     ports:
       - 8081:8080
       - 38889:38888
@@ -53,7 +53,7 @@ services:
             ipv4_address: 172.29.1.1
   follower1:
     container_name: follower1
-    image: ravendb/ravendb:5.3-ubuntu-latest
+    image: ravendb/ravendb:6.2-ubuntu-latest
     depends_on:
       - leader
     ports:
@@ -74,7 +74,7 @@ services:
             ipv4_address: 172.29.1.2
   follower2:
     container_name: follower2
-    image: ravendb/ravendb:5.3-ubuntu-latest
+    image: ravendb/ravendb:6.2-ubuntu-latest
     depends_on:
       - leader
     ports:

@@ -144,7 +144,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         using (var session = store.OpenSession(sessionOptions))
         {
             var blittableDoc = session.Advanced.JsonConverter.ToBlittable(document, documentInfo);
-            var command = new PutDocumentCommand(id, string.Empty, blittableDoc);
+            var command = new PutDocumentCommand(store.Conventions, id, string.Empty, blittableDoc);
             session.Advanced.RequestExecutor.Execute(command, session.Advanced.Context);
             session.SaveChanges();
         }
@@ -164,7 +164,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
         using (var session = store.OpenSession())
         {
             var blittableDoc = session.Advanced.JsonConverter.ToBlittable(document, documentInfo);
-            var command = new PutDocumentCommand(id, string.Empty, blittableDoc);
+            var command = new PutDocumentCommand(store.Conventions, id, string.Empty, blittableDoc);
             session.Advanced.RequestExecutor.Execute(command, session.Advanced.Context);
             session.SaveChanges();
         }

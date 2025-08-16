@@ -147,7 +147,7 @@ class When_loading_a_saga_with_legacy_unique_identity : RavenDBPersistenceTestBa
         using (var session = store.OpenSession(sessionOptions))
         {
             var blittableDoc = session.Advanced.JsonConverter.ToBlittable(document, documentInfo);
-            var command = new PutDocumentCommand(id, string.Empty, blittableDoc);
+            var command = new PutDocumentCommand(store.Conventions, id, string.Empty, blittableDoc);
             session.Advanced.RequestExecutor.Execute(command, session.Advanced.Context);
             session.SaveChanges();
         }
