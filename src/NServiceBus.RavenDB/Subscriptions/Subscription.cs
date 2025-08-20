@@ -21,10 +21,7 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
                 return subscribers;
             }
 
-            set
-            {
-                subscribers = value;
-            }
+            set => subscribers = value;
         }
 
         List<SubscriptionClient> subscribers;
