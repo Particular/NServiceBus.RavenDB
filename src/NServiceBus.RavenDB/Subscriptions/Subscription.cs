@@ -16,13 +16,15 @@ namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
         {
             get
             {
-                field ??= [];
+                subscribers ??= [];
 
-                return field;
+                return subscribers;
             }
 
-            set;
+            set => subscribers = value;
         }
+
+        List<SubscriptionClient> subscribers;
 
         internal static readonly string SchemaVersion = "1.0.0";
     }
