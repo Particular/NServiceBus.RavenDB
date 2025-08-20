@@ -22,7 +22,7 @@ jobs:
         with:
           global-json-file: global.json
       - name: Build
-        run: dotnet build src --configuration Release
+        run: dotnet build src/NServiceBus.RavenDB.slnx --configuration Release
       - name: Sign NuGet packages
         uses: Particular/sign-nuget-packages-action@v1.0.0
         with:
