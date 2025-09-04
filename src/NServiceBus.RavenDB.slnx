@@ -12,6 +12,8 @@
   </Folder>
   <Folder Name="/Tests/AcceptanceTests/">
     <Project Path="NServiceBus.RavenDB.AcceptanceTests/NServiceBus.RavenDB.AcceptanceTests.csproj" />
+    <Project Path="NServiceBus.RavenDB.Latest.AcceptanceTests/NServiceBus.RavenDB.Latest.AcceptanceTests.csproj" />
+    <Project Path="NServiceBus.RavenDB.ClusterWide.Latest.AcceptanceTests/NServiceBus.RavenDB.ClusterWide.Latest.AcceptanceTests.csproj" Type="Classic C#" />
     <Project Path="NServiceBus.RavenDB.ClusterWide.AcceptanceTests/NServiceBus.RavenDB.ClusterWide.AcceptanceTests.csproj" />
     <Project Path="NServiceBus.RavenDB.Optimistic.AcceptanceTests/NServiceBus.RavenDB.Optimistic.AcceptanceTests.csproj" />
     <Project Path="NServiceBus.RavenDB.Optimistic.ClusterWide.AcceptanceTests/NServiceBus.RavenDB.Optimistic.ClusterWide.AcceptanceTests.csproj" />
