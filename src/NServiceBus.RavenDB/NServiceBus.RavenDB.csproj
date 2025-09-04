@@ -7,10 +7,11 @@
     <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
     <Description>RavenDB persistence support for NServiceBus</Description>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="NServiceBus" Version="9.2.7" />
     <PackageReference Include="NuGet.Versioning" Version="6.14.0" AutomaticVersionRange="false" />
-    <PackageReference Include="RavenDB.Client" Version="6.2.9" />
+    <PackageReference Include="RavenDB.Client" Version="[6.2.9,8.0.0)" AutomaticVersionRange="false" />  
   </ItemGroup>
 
   <ItemGroup>
