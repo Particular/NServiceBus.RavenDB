@@ -5,14 +5,9 @@
     using NServiceBus.Outbox;
     using Raven.Client.Documents.Session;
 
-    class RavenDBOutboxTransaction : IOutboxTransaction
+    sealed class RavenDBOutboxTransaction(IAsyncDocumentSession session) : IOutboxTransaction
     {
-        public RavenDBOutboxTransaction(IAsyncDocumentSession session)
-        {
-            AsyncSession = session;
-        }
-
-        public IAsyncDocumentSession AsyncSession { get; private set; }
+        public IAsyncDocumentSession AsyncSession { get; private set; } = session;
 
         public void Dispose()
         {
@@ -27,8 +22,6 @@
         }
 
         public Task Commit(CancellationToken cancellationToken = default)
-        {
-            return AsyncSession.SaveChangesAsync(cancellationToken);
-        }
+            => AsyncSession.SaveChangesAsync(cancellationToken);
     }
 }
