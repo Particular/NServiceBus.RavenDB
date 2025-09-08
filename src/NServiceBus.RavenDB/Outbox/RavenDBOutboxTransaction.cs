@@ -20,6 +20,12 @@
             AsyncSession = null;
         }
 
+        public ValueTask DisposeAsync()
+        {
+            Dispose();
+            return ValueTask.CompletedTask;
+        }
+
         public Task Commit(CancellationToken cancellationToken = default)
         {
             return AsyncSession.SaveChangesAsync(cancellationToken);
