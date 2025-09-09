@@ -21,6 +21,10 @@
     <!-- We are pulling in latest here to ensure we are testing against the latest RavenDB.Client -->
     <PackageReference Include="RavenDB.Client" Version="7.1.2" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\NServiceBus.RavenDB.AcceptanceTests\**\*.cs" Exclude="**\obj\**" />
+  </ItemGroup>
   
   <ItemGroup Condition="'$(PkgNServiceBus_AcceptanceTests_Sources)' != ''">
     <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\ConfigureEndpointInMemoryPersistence.cs" />
