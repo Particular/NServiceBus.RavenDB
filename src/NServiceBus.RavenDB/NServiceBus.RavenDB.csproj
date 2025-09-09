@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="NServiceBus" Version="10.0.0-alpha.5" />
     <PackageReference Include="NuGet.Versioning" Version="6.14.0" AutomaticVersionRange="false" />
-    <PackageReference Include="RavenDB.Client" Version="6.2.9" />
+    <PackageReference Include="RavenDB.Client" Version="[6.2.9,8.0.0)" AutomaticVersionRange="false" />  
   </ItemGroup>
 
   <ItemGroup>
