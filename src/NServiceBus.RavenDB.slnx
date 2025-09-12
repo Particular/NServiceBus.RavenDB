@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/Solution Items/">
+    <File Path="../.github/renovate.json5" />
     <File Path="../.github/workflows/ci.yml" />
     <File Path="../.github/workflows/release.yml" />
     <File Path="Custom.Build.props" />
