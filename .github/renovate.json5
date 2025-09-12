@@ -1,13 +1,13 @@
 {
   packageRules: [
     {
-      description: "Allow .Latest. projects to use RavenDB.Client v7.x and above",
+      description: "Allow .Latest. test projects to use RavenDB.Client v7.x and above",
       matchFiles: ["**/*.Latest.*.csproj"],
       matchPackageNames: ["RavenDB.Client"],
       allowedVersions: ">=7.0.0",
     },
     {
-      description: "Keep non-Latest projects on RavenDB.Client v6.x",
+      description: "Keep all other projects on RavenDB.Client v6.x",
       matchFiles: ["**/*.csproj"],
       matchPackageNames: ["RavenDB.Client"],
       allowedVersions: ">=6.0.0 <7.0.0",
