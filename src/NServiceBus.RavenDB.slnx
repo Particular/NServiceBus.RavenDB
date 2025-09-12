@@ -13,13 +13,15 @@
   <Folder Name="/Tests/AcceptanceTests/">
     <Project Path="NServiceBus.RavenDB.AcceptanceTests/NServiceBus.RavenDB.AcceptanceTests.csproj" />
     <Project Path="NServiceBus.RavenDB.ClusterWide.AcceptanceTests/NServiceBus.RavenDB.ClusterWide.AcceptanceTests.csproj" />
-    <Project Path="NServiceBus.RavenDB.ClusterWide.Latest.AcceptanceTests/NServiceBus.RavenDB.ClusterWide.Latest.AcceptanceTests.csproj" />
-    <Project Path="NServiceBus.RavenDB.Latest.AcceptanceTests/NServiceBus.RavenDB.Latest.AcceptanceTests.csproj" />
     <Project Path="NServiceBus.RavenDB.Optimistic.AcceptanceTests/NServiceBus.RavenDB.Optimistic.AcceptanceTests.csproj" />
     <Project Path="NServiceBus.RavenDB.Optimistic.ClusterWide.AcceptanceTests/NServiceBus.RavenDB.Optimistic.ClusterWide.AcceptanceTests.csproj" />
+    <Project Path="NServiceBus.RavenDB.TransactionalSession.AcceptanceTests/NServiceBus.RavenDB.TransactionalSession.AcceptanceTests.csproj" />
+  </Folder>
+  <Folder Name="/Tests/AcceptanceTests/LatestClient/">
+    <Project Path="NServiceBus.RavenDB.ClusterWide.Latest.AcceptanceTests/NServiceBus.RavenDB.ClusterWide.Latest.AcceptanceTests.csproj" />
+    <Project Path="NServiceBus.RavenDB.Latest.AcceptanceTests/NServiceBus.RavenDB.Latest.AcceptanceTests.csproj" />
     <Project Path="NServiceBus.RavenDB.Optimistic.ClusterWide.Latest.AcceptanceTests\NServiceBus.RavenDB.Optimistic.ClusterWide.Latest.AcceptanceTests.csproj" />
     <Project Path="NServiceBus.RavenDB.Optimistic.Latest.AcceptanceTests\NServiceBus.RavenDB.Optimistic.Latest.AcceptanceTests.csproj" />
-    <Project Path="NServiceBus.RavenDB.TransactionalSession.AcceptanceTests/NServiceBus.RavenDB.TransactionalSession.AcceptanceTests.csproj" />
   </Folder>
   <Project Path="NServiceBus.RavenDB.TransactionalSession/NServiceBus.RavenDB.TransactionalSession.csproj" />
   <Project Path="NServiceBus.RavenDB/NServiceBus.RavenDB.csproj" />
