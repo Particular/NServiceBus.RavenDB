@@ -33,6 +33,13 @@ namespace NServiceBus.Persistence.RavenDB
             disposed = true;
         }
 
+        public ValueTask DisposeAsync()
+        {
+            Dispose();
+
+            return ValueTask.CompletedTask;
+        }
+
         public ValueTask<bool> TryOpen(IOutboxTransaction transaction, ContextBag contextBag, CancellationToken cancellationToken = default)
         {
             if (transaction is RavenDBOutboxTransaction outboxTransaction)
