@@ -1,22 +1,21 @@
 ﻿namespace NServiceBus
 {
-    using NServiceBus.Features;
     using NServiceBus.Persistence;
     using NServiceBus.Persistence.RavenDB;
 
     /// <summary>
     /// Specifies the capabilities of the RavenDB suite of storages
     /// </summary>
-    public class RavenDBPersistence : PersistenceDefinition
+    public partial class RavenDBPersistence : PersistenceDefinition, IPersistenceDefinitionFactory<RavenDBPersistence>
     {
-        /// <summary>
-        /// Defines the capabilities
-        /// </summary>
-        public RavenDBPersistence()
+        // constructor parameter is a temporary workaround until the public constructor is removed
+        RavenDBPersistence(object _)
         {
-            Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<RavenDbSagaStorage>());
-            Supports<StorageType.Subscriptions>(s => s.EnableFeatureByDefault<RavenDbSubscriptionStorage>());
-            Supports<StorageType.Outbox>(s => s.EnableFeatureByDefault<RavenDbOutboxStorage>());
+            Supports<StorageType.Sagas, RavenDbSagaStorage>();
+            Supports<StorageType.Subscriptions, RavenDbSubscriptionStorage>();
+            Supports<StorageType.Outbox, RavenDbOutboxStorage>();
         }
+
+        static RavenDBPersistence IPersistenceDefinitionFactory<RavenDBPersistence>.Create() => new(null);
     }
 }
