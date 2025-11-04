@@ -11,7 +11,7 @@
     {
         internal RavenDbSagaStorage()
         {
-            Defaults(s => s.EnableFeatureByDefault<RavenDbStorageSession>());
+            EnableByDefault<RavenDbStorageSession>();
 
             DependsOn<Sagas>();
             DependsOn<RavenDbStorageSession>();
