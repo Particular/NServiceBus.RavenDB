@@ -12,7 +12,7 @@
     {
         public RavenDbOutboxStorage()
         {
-            Defaults(s => s.EnableFeatureByDefault<RavenDbStorageSession>());
+            EnableByDefault<RavenDbStorageSession>();
 
             DependsOn<Outbox>();
             DependsOn<RavenDbStorageSession>();

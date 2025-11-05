@@ -35,7 +35,7 @@ namespace NServiceBus.TransactionalSession
                 settings.Set(RavenDbOutboxStorage.ProcessorEndpointKey, transactionalSessionOptions.ProcessorEndpoint);
             }
 
-            settings.EnableFeatureByDefault<RavenDbTransactionalSession>();
+            settings.EnableFeature<RavenDbTransactionalSession>();
 
             return persistenceExtensions;
         }
