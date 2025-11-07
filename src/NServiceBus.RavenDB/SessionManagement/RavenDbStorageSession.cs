@@ -6,7 +6,7 @@
     using Microsoft.Extensions.DependencyInjection;
     using Raven.Client.Documents.Session;
 
-    class RavenDbStorageSession : Feature
+    sealed class RavenDbStorageSession : Feature
     {
         public RavenDbStorageSession() => DependsOn<SynchronizedStorage>();
 
