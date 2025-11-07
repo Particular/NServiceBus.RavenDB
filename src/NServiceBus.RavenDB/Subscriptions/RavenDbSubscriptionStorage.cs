@@ -7,10 +7,6 @@
 
     class RavenDbSubscriptionStorage : Feature
     {
-        RavenDbSubscriptionStorage()
-        {
-        }
-
         protected override void Setup(FeatureConfigurationContext context)
         {
             var doNotCacheSubscriptions = context.Settings.GetOrDefault<bool>(DoNotCacheSubscriptions);

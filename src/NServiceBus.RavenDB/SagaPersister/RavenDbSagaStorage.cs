@@ -7,11 +7,11 @@
     using NServiceBus.Sagas;
 
 
-    class RavenDbSagaStorage : Feature
+    sealed class RavenDbSagaStorage : Feature
     {
-        internal RavenDbSagaStorage()
+        public RavenDbSagaStorage()
         {
-            EnableByDefault<RavenDbStorageSession>();
+            Enable<RavenDbStorageSession>();
 
             DependsOn<Sagas>();
             DependsOn<RavenDbStorageSession>();
