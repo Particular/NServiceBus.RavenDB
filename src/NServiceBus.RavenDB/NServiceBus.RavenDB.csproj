@@ -11,7 +11,7 @@
   <ItemGroup Label="Public dependencies">
     <PackageReference Include="NServiceBus" Version="10.0.0-alpha.12" />
     <PackageReference Include="NuGet.Versioning" Version="6.14.0" AutomaticVersionRange="false" />
-    <PackageReference Include="RavenDB.Client" Version="6.2.10" AutomaticVersionRange="false" />
+    <PackageReference Include="RavenDB.Client" Version="6.2.11" AutomaticVersionRange="false" />
   </ItemGroup>
 
   <ItemGroup Label="Private dependencies">
