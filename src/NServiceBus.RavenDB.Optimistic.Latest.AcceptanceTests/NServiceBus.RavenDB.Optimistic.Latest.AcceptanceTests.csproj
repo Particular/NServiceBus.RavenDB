@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <!-- We are pulling in latest here to ensure we are testing against the latest RavenDB.Client -->
-    <PackageReference Include="RavenDB.Client" Version="7.1.3" />
+    <PackageReference Include="RavenDB.Client" Version="7.1.4" />
   </ItemGroup>
 
   <ItemGroup>
