@@ -30,9 +30,11 @@
         {
             public MultiPropEndpoint() => EndpointSetup<DefaultServer>();
 
-            public class MultiPropSaga : Saga<MultiPropSagaData>, IAmStartedByMessages<StartSagaMessage>
+            public class MultiPropSaga : Saga<MultiPropSagaData>, IAmStartedByMessages<StartSagaMessage>, IAmStartedByMessages<StartSagaMessage2>
             {
                 public Task Handle(StartSagaMessage message, IMessageHandlerContext context) => Task.CompletedTask;
+
+                public Task Handle(StartSagaMessage2 message, IMessageHandlerContext context) => Task.CompletedTask;
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<MultiPropSagaData> mapper)
                 {
