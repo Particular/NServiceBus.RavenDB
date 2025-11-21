@@ -19,11 +19,11 @@
             var exception = Assert.ThrowsAsync<Exception>(async () =>
             {
                 await Scenario.Define<Context>()
-                     .WithEndpoint<SagaFinderEndpoint>(b => b
-                         .When(bus => bus.SendLocal(new StartSagaMessage()))
-                         .When(c => c.SagaId != Guid.Empty, bus => bus.SendLocal(new StartSagaMessage())))
-                     .Done(c => c.SecondMessageProcessed)
-                     .Run();
+                    .WithEndpoint<SagaFinderEndpoint>(b => b
+                        .When(bus => bus.SendLocal(new StartSagaMessage()))
+                        .When(c => c.SagaId != Guid.Empty, bus => bus.SendLocal(new StartSagaMessage())))
+                    .Done(c => c.SecondMessageProcessed)
+                    .Run();
             });
 
             Assert.That(exception.Message, Does.Contain("does not support custom saga finders"), "Exception message did not contain expected phrase");
@@ -39,11 +39,7 @@
 
         public class SagaFinderEndpoint : EndpointConfigurationBuilder
         {
-            public SagaFinderEndpoint()
-            {
-                EndpointSetup<DefaultServer>(c => c.LimitMessageProcessingConcurrencyTo(1));
-            }
-
+            public SagaFinderEndpoint() => EndpointSetup<DefaultServer>();
 
             class MySagaFinder : ISagaFinder<SagaFinderSagaData, StartSagaMessage>
             {
@@ -74,13 +70,12 @@
 
                         return Task.FromResult(0);
                     }
+
                     Context.SagaId = Data.Id;
                     return Task.FromResult(0);
                 }
 
-                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaFinderSagaData> mapper)
-                {
-                }
+                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaFinderSagaData> mapper) => mapper.ConfigureFinderMapping<StartSagaMessage, MySagaFinder>();
             }
 
             public class SagaFinderSagaData : IContainSagaData

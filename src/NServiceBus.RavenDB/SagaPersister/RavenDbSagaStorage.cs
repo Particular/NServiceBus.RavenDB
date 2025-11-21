@@ -37,7 +37,7 @@
             }
 
             var customFinders = allSagas.SelectMany(sagaMetadata => sagaMetadata.Finders)
-                .Where(finder => finder.Properties.ContainsKey("custom-finder-clr-type"))
+                .Where(finder => finder.Type.FullName!.Contains("CustomFinderAdapter"))
                 .ToArray();
 
             if (customFinders.Length <= 0)
