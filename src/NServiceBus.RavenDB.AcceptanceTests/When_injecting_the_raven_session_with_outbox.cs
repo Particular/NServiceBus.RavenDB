@@ -145,7 +145,7 @@
                 }
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SharedSessionSagaData> mapper) =>
-                    mapper.ConfigureMapping<GenericMessage>(m => m.Id).ToSaga(s => s.Id);
+                    mapper.MapSaga(s => s.Id).ToMessage<GenericMessage>(m => m.Id);
             }
 
             [Serializable]

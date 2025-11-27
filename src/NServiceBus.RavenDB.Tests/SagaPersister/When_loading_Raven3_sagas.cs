@@ -106,7 +106,7 @@ class Raven3Sagas : RavenDBPersistenceTestBase
     {
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<CountingSagaData> mapper)
         {
-            mapper.ConfigureMapping<CountMsg>(m => m.Name).ToSaga(s => s.Name);
+            mapper.MapSaga(s => s.Name).ToMessage<CountMsg>(m => m.Name);
         }
 
         public Task Handle(CountMsg message, IMessageHandlerContext context)

@@ -64,7 +64,7 @@ public class When_completing_a_saga_with_unique_property : RavenDBPersistenceTes
 
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
         {
-            mapper.ConfigureMapping<StartMessage>(m => m.SomeId).ToSaga(s => s.SomeId);
+            mapper.MapSaga(s => s.SomeId).ToMessage<StartMessage>(m => m.SomeId);
         }
     }
 

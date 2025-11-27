@@ -61,7 +61,7 @@ namespace NServiceBus.RavenDB.AcceptanceTests
                 }
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<MySagaData> mapper) =>
-                    mapper.ConfigureMapping<StartSaga>(m => m.DataId).ToSaga(s => s.DataId);
+                    mapper.MapSaga(s => s.DataId).ToMessage<StartSaga>(m => m.DataId);
 
                 public class MySagaData : ContainSagaData
                 {

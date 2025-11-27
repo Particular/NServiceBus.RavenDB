@@ -68,9 +68,10 @@
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<OrderSagaData> mapper)
                 {
-                    mapper.ConfigureMapping<StartMsg>(m => m.OrderId).ToSaga(s => s.OrderId);
-                    mapper.ConfigureMapping<ContinueMsg>(m => m.OrderId).ToSaga(s => s.OrderId);
-                    mapper.ConfigureMapping<FinishMsg>(m => m.OrderId).ToSaga(s => s.OrderId);
+                    mapper.MapSaga(s => s.OrderId)
+                        .ToMessage<StartMsg>(m => m.OrderId)
+                        .ToMessage<ContinueMsg>(m => m.OrderId)
+                        .ToMessage<FinishMsg>(m => m.OrderId);
                 }
 
                 public async Task Handle(StartMsg message, IMessageHandlerContext context)

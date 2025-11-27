@@ -41,7 +41,7 @@ public class When_updating_a_saga_without_unique_properties : RavenDBPersistence
     {
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
         {
-            mapper.ConfigureMapping<StartSaga>(m => m.UniqueString).ToSaga(s => s.UniqueString);
+            mapper.MapSaga(s => s.UniqueString).ToMessage<StartSaga>(m => m.UniqueString);
         }
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
