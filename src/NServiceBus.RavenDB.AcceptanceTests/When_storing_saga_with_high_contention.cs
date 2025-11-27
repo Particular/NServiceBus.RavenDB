@@ -79,8 +79,9 @@ namespace NServiceBus.RavenDB.AcceptanceTests
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<HighContentionSagaData> mapper)
                 {
-                    mapper.ConfigureMapping<StartSaga>(message => message.SomeId).ToSaga(data => data.SomeId);
-                    mapper.ConfigureMapping<ConcurrentMessage>(message => message.SomeId).ToSaga(data => data.SomeId);
+                    mapper.MapSaga(data => data.SomeId)
+                        .ToMessage<StartSaga>(message => message.SomeId)
+                        .ToMessage<ConcurrentMessage>(message => message.SomeId);
                 }
 
                 public async Task Handle(StartSaga message, IMessageHandlerContext context)

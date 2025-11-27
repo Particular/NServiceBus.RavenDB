@@ -75,7 +75,7 @@
                     return Task.FromResult(0);
                 }
 
-                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaFinderSagaData> mapper) => mapper.ConfigureFinderMapping<StartSagaMessage, MySagaFinder>();
+                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaFinderSagaData> mapper) => mapper.MapSaga().Using<MySagaFinder, StartSagaMessage>();
             }
 
             public class SagaFinderSagaData : IContainSagaData

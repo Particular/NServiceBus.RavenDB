@@ -47,7 +47,7 @@ public class When_completing_a_version3_saga : RavenDBPersistenceTestBase
 
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
         {
-            mapper.ConfigureMapping<StartMessage>(m => m.SomeId).ToSaga(s => s.SomeId);
+            mapper.MapSaga(s => s.SomeId).ToMessage<StartMessage>(m => m.SomeId);
         }
     }
 
