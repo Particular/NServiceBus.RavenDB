@@ -32,7 +32,7 @@ public class When_storing_a_saga_with_a_long_namespace : RavenDBPersistenceTestB
     {
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaWithUniquePropertyAndALongNamespace> mapper)
         {
-            mapper.ConfigureMapping<StartSaga>(m => m.UniqueString).ToSaga(s => s.UniqueString);
+            mapper.MapSaga(s => s.UniqueString).ToMessage<StartSaga>(m => m.UniqueString);
         }
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)

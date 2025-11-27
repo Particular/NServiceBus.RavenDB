@@ -37,7 +37,7 @@ public class Saga_with_unique_property_set_to_null : RavenDBPersistenceTestBase
     {
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
         {
-            mapper.ConfigureMapping<StartSaga>(m => m.UniqueString).ToSaga(s => s.UniqueString);
+            mapper.MapSaga(s => s.UniqueString).ToMessage<StartSaga>(m => m.UniqueString);
         }
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)

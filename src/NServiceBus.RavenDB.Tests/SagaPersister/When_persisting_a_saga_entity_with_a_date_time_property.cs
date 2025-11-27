@@ -34,7 +34,7 @@ public class When_persisting_a_saga_entity_with_a_DateTime_property : RavenDBPer
     {
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
         {
-            mapper.ConfigureMapping<StartSaga>(m => m.UniqueString).ToSaga(s => s.UniqueString);
+            mapper.MapSaga(s => s.UniqueString).ToMessage<StartSaga>(m => m.UniqueString);
         }
 
         public Task Handle(StartSaga message, IMessageHandlerContext context)
