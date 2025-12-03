@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup Label="Public dependencies">
-    <PackageReference Include="NServiceBus" Version="10.0.0-alpha.19" />
+    <PackageReference Include="NServiceBus" Version="10.0.0-alpha.20" />
     <PackageReference Include="NuGet.Versioning" Version="7.0.1" AutomaticVersionRange="false" />
     <PackageReference Include="RavenDB.Client" Version="6.2.11" AutomaticVersionRange="false" />
   </ItemGroup>
