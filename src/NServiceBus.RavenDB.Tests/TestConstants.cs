@@ -1,16 +1,15 @@
-﻿namespace NServiceBus.RavenDB.Tests
-{
-    using System;
+﻿namespace NServiceBus.RavenDB.Tests;
 
-    class TestConstants
+using System;
+
+class TestConstants
+{
+    public static string[] RavenUrls
     {
-        public static string[] RavenUrls
+        get
         {
-            get
-            {
-                var urls = Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
-                return urls.Split(',');
-            }
+            var urls = Environment.GetEnvironmentVariable("RavenSingleNodeUrl") ?? "http://localhost:8080";
+            return urls.Split(',');
         }
     }
 }

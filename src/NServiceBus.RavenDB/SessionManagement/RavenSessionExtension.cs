@@ -1,25 +1,24 @@
-﻿namespace NServiceBus
-{
-    using System;
-    using NServiceBus.Persistence;
-    using NServiceBus.Persistence.RavenDB;
-    using NServiceBus.Testing;
-    using Raven.Client.Documents.Session;
+﻿namespace NServiceBus;
 
+using System;
+using NServiceBus.Persistence;
+using NServiceBus.Persistence.RavenDB;
+using NServiceBus.Testing;
+using Raven.Client.Documents.Session;
+
+/// <summary>
+/// Extensions to manage RavenDB session.
+/// </summary>
+public static class RavenSessionExtension
+{
     /// <summary>
-    /// Extensions to manage RavenDB session.
+    /// Gets the current RavenDB session.
     /// </summary>
-    public static class RavenSessionExtension
+    /// <param name="session">The storage session.</param>
+    public static IAsyncDocumentSession RavenSession(this ISynchronizedStorageSession session) => session switch
     {
-        /// <summary>
-        /// Gets the current RavenDB session.
-        /// </summary>
-        /// <param name="session">The storage session.</param>
-        public static IAsyncDocumentSession RavenSession(this ISynchronizedStorageSession session) => session switch
-        {
-            RavenDBSynchronizedStorageSession synchronizedStorageSession => synchronizedStorageSession.Session,
-            TestableRavenStorageSession testableStorageSession => testableStorageSession.Session,
-            _ => throw new InvalidOperationException("It was not possible to retrieve a RavenDB session.")
-        };
-    }
+        RavenDBSynchronizedStorageSession synchronizedStorageSession => synchronizedStorageSession.Session,
+        TestableRavenStorageSession testableStorageSession => testableStorageSession.Session,
+        _ => throw new InvalidOperationException("It was not possible to retrieve a RavenDB session.")
+    };
 }

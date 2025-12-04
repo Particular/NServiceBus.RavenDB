@@ -1,23 +1,22 @@
-﻿namespace NServiceBus.RavenDB.Tests
+﻿namespace NServiceBus.RavenDB.Tests;
+
+using Sagas;
+
+static class RavenDBPersistenceTestBaseExtensions
 {
-    using NServiceBus.Sagas;
-
-    static class RavenDBPersistenceTestBaseExtensions
+    public static SagaCorrelationProperty CreateMetadata<TSaga>(this RavenDBPersistenceTestBase test, IContainSagaData sagaEntity) where TSaga : Saga
     {
-        public static SagaCorrelationProperty CreateMetadata<T>(this RavenDBPersistenceTestBase test, IContainSagaData sagaEntity)
-        {
-            _ = test;
+        _ = test;
 
-            var metadata = SagaMetadata.Create(typeof(T));
+        var metadata = SagaMetadata.Create<TSaga>();
 
-            metadata.TryGetCorrelationProperty(out SagaMetadata.CorrelationPropertyMetadata correlationPropertyMetadata);
+        metadata.TryGetCorrelationProperty(out SagaMetadata.CorrelationPropertyMetadata correlationPropertyMetadata);
 
-            var propertyInfo = metadata.SagaEntityType.GetProperty(correlationPropertyMetadata.Name);
-            var value = propertyInfo.GetValue(sagaEntity);
+        var propertyInfo = metadata.SagaEntityType.GetProperty(correlationPropertyMetadata.Name);
+        var value = propertyInfo.GetValue(sagaEntity);
 
-            var correlationProperty = new SagaCorrelationProperty(correlationPropertyMetadata.Name, value);
+        var correlationProperty = new SagaCorrelationProperty(correlationPropertyMetadata.Name, value);
 
-            return correlationProperty;
-        }
+        return correlationProperty;
     }
 }

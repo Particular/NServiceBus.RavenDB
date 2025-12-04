@@ -1,16 +1,15 @@
-namespace NServiceBus.Persistence.RavenDB
+namespace NServiceBus.Persistence.RavenDB;
+
+using NServiceBus.RavenDB.Outbox;
+using Raven.Client.Documents.Session;
+
+static partial class SchemaVersionExtensions
 {
-    using NServiceBus.RavenDB.Outbox;
-    using Raven.Client.Documents.Session;
-
-    static partial class SchemaVersionExtensions
+    public static void StoreSchemaVersionInMetadata(this IAsyncDocumentSession session, OutboxRecord entity)
     {
-        public static void StoreSchemaVersionInMetadata(this IAsyncDocumentSession session, OutboxRecord entity)
-        {
-            var metadata = session.Advanced.GetMetadataFor(entity);
-            metadata[OutboxRecordSchemaVersionMetadataKey] = OutboxRecord.SchemaVersion;
-        }
-
-        internal const string OutboxRecordSchemaVersionMetadataKey = MetadataKeyPrefix + "Outbox" + MetadataKeySchemaVersionSuffix;
+        var metadata = session.Advanced.GetMetadataFor(entity);
+        metadata[OutboxRecordSchemaVersionMetadataKey] = OutboxRecord.SchemaVersion;
     }
+
+    internal const string OutboxRecordSchemaVersionMetadataKey = MetadataKeyPrefix + "Outbox" + MetadataKeySchemaVersionSuffix;
 }

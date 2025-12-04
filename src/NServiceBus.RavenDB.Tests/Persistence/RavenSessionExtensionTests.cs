@@ -1,56 +1,55 @@
-﻿namespace NServiceBus.RavenDB.Tests.Persistence
+﻿namespace NServiceBus.RavenDB.Tests.Persistence;
+
+using System.Threading.Tasks;
+using NServiceBus.Extensibility;
+using NServiceBus.Persistence.RavenDB;
+using NServiceBus.Testing;
+using NUnit.Framework;
+using Raven.Client.Documents.Session;
+
+public class RavenSessionExtensionTests
 {
-    using System.Threading.Tasks;
-    using NServiceBus.Extensibility;
-    using NServiceBus.Persistence.RavenDB;
-    using NServiceBus.Testing;
-    using NUnit.Framework;
-    using Raven.Client.Documents.Session;
-
-    public class RavenSessionExtensionTests
+    [Test]
+    public async Task CanGetNormalSession()
     {
-        [Test]
-        public async Task CanGetNormalSession()
+        using (var db = new ReusableDB())
+        using (var store = db.NewStore().Initialize())
         {
-            using (var db = new ReusableDB())
-            using (var store = db.NewStore().Initialize())
+            await db.EnsureDatabaseExists(store);
+
+            var sessionOptions = new SessionOptions
             {
-                await db.EnsureDatabaseExists(store);
+                TransactionMode = db.UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
+            var session = store.OpenAsyncSession(sessionOptions);
 
-                var sessionOptions = new SessionOptions
-                {
-                    TransactionMode = db.UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
-                };
-                var session = store.OpenAsyncSession(sessionOptions);
+            var storageSession = await session.CreateSynchronizedSession(new ContextBag());
 
-                var storageSession = await session.CreateSynchronizedSession(new ContextBag());
+            var session2 = storageSession.RavenSession();
 
-                var session2 = storageSession.RavenSession();
-
-                Assert.That(session2, Is.EqualTo(session));
-            }
+            Assert.That(session2, Is.EqualTo(session));
         }
+    }
 
-        [Test]
-        public async Task CanGetTestableSession()
+    [Test]
+    public async Task CanGetTestableSession()
+    {
+        using (var db = new ReusableDB())
+        using (var store = db.NewStore().Initialize())
         {
-            using (var db = new ReusableDB())
-            using (var store = db.NewStore().Initialize())
+            await db.EnsureDatabaseExists(store);
+
+            var sessionOptions = new SessionOptions
             {
-                await db.EnsureDatabaseExists(store);
+                TransactionMode = db.UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
+            };
+            var session = store.OpenAsyncSession(sessionOptions);
 
-                var sessionOptions = new SessionOptions
-                {
-                    TransactionMode = db.UseClusterWideTransactions ? TransactionMode.ClusterWide : TransactionMode.SingleNode
-                };
-                var session = store.OpenAsyncSession(sessionOptions);
+            var storageSession = new TestableRavenStorageSession(session);
 
-                var storageSession = new TestableRavenStorageSession(session);
+            var session2 = storageSession.RavenSession();
 
-                var session2 = storageSession.RavenSession();
-
-                Assert.That(session2, Is.EqualTo(session));
-            }
+            Assert.That(session2, Is.EqualTo(session));
         }
     }
 }
