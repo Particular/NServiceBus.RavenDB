@@ -1,8 +1,7 @@
-namespace NServiceBus.Persistence.RavenDB
+namespace NServiceBus.Persistence.RavenDB;
+
+static partial class SchemaVersionExtensions
 {
-    static partial class SchemaVersionExtensions
-    {
-        internal const string MetadataKeyPrefix = "NServiceBus-Persistence-RavenDB-";
-        internal const string MetadataKeySchemaVersionSuffix = "-SchemaVersion";
-    }
+    internal const string MetadataKeyPrefix = "NServiceBus-Persistence-RavenDB-";
+    internal const string MetadataKeySchemaVersionSuffix = "-SchemaVersion";
 }

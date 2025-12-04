@@ -1,31 +1,30 @@
-﻿namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
+﻿namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+
+using System;
+
+class SubscriptionClient
 {
-    using System;
+    public string TransportAddress { get; set; }
 
-    class SubscriptionClient
+    public string Endpoint { get; set; }
+
+    public override bool Equals(object obj)
     {
-        public string TransportAddress { get; set; }
-
-        public string Endpoint { get; set; }
-
-        public override bool Equals(object obj)
+        if (obj is null)
         {
-            if (obj is null)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
-            return obj is SubscriptionClient client && Equals(client);
+            return false;
         }
 
-        bool Equals(SubscriptionClient obj) =>
-            string.Equals(TransportAddress, obj.TransportAddress, StringComparison.InvariantCultureIgnoreCase);
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
 
-        public override int GetHashCode() => TransportAddress.ToLowerInvariant().GetHashCode();
+        return obj is SubscriptionClient client && Equals(client);
     }
+
+    bool Equals(SubscriptionClient obj) =>
+        string.Equals(TransportAddress, obj.TransportAddress, StringComparison.InvariantCultureIgnoreCase);
+
+    public override int GetHashCode() => TransportAddress.ToLowerInvariant().GetHashCode();
 }

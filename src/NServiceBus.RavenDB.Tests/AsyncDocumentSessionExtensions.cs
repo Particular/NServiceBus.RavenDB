@@ -1,25 +1,24 @@
-﻿namespace NServiceBus.RavenDB.Tests
+﻿namespace NServiceBus.RavenDB.Tests;
+
+using NServiceBus.Extensibility;
+using Raven.Client.Documents.Session;
+
+static class AsyncDocumentSessionExtensions
 {
-    using NServiceBus.Extensibility;
-    using Raven.Client.Documents.Session;
-
-    static class AsyncDocumentSessionExtensions
+    public static IAsyncDocumentSession UsingOptimisticConcurrency(this IAsyncDocumentSession session)
     {
-        public static IAsyncDocumentSession UsingOptimisticConcurrency(this IAsyncDocumentSession session)
+        if (((AsyncDocumentSession)session).TransactionMode == TransactionMode.SingleNode)
         {
-            if (((AsyncDocumentSession)session).TransactionMode == TransactionMode.SingleNode)
-            {
-                session.Advanced.UseOptimisticConcurrency = true;
-            }
-
-            return session;
+            session.Advanced.UseOptimisticConcurrency = true;
         }
 
-        public static IAsyncDocumentSession InContext(this IAsyncDocumentSession session, out ContextBag context)
-        {
-            context = new ContextBag();
-            context.Set(session);
-            return session;
-        }
+        return session;
+    }
+
+    public static IAsyncDocumentSession InContext(this IAsyncDocumentSession session, out ContextBag context)
+    {
+        context = new ContextBag();
+        context.Set(session);
+        return session;
     }
 }

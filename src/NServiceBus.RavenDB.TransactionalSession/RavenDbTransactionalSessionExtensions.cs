@@ -1,43 +1,42 @@
-namespace NServiceBus.TransactionalSession
+namespace NServiceBus.TransactionalSession;
+
+using System;
+using Configuration.AdvancedExtensibility;
+using Features;
+using Persistence.RavenDB;
+
+/// <summary>
+/// Enables the transactional session feature.
+/// </summary>
+public static class RavenDbTransactionalSessionExtensions
 {
-    using System;
-    using Configuration.AdvancedExtensibility;
-    using Features;
-    using Persistence.RavenDB;
+    /// <summary>
+    /// Enables transactional session for this endpoint.
+    /// </summary>
+    public static PersistenceExtensions<RavenDBPersistence> EnableTransactionalSession(
+        this PersistenceExtensions<RavenDBPersistence> persistenceExtensions) =>
+        EnableTransactionalSession(persistenceExtensions, new TransactionalSessionOptions());
 
     /// <summary>
-    /// Enables the transactional session feature.
+    /// Enables the transactional session for this endpoint using the specified TransactionalSessionOptions.
     /// </summary>
-    public static class RavenDbTransactionalSessionExtensions
+    public static PersistenceExtensions<RavenDBPersistence> EnableTransactionalSession(this PersistenceExtensions<RavenDBPersistence> persistenceExtensions,
+        TransactionalSessionOptions transactionalSessionOptions)
     {
-        /// <summary>
-        /// Enables transactional session for this endpoint.
-        /// </summary>
-        public static PersistenceExtensions<RavenDBPersistence> EnableTransactionalSession(
-            this PersistenceExtensions<RavenDBPersistence> persistenceExtensions) =>
-            EnableTransactionalSession(persistenceExtensions, new TransactionalSessionOptions());
+        ArgumentNullException.ThrowIfNull(persistenceExtensions);
+        ArgumentNullException.ThrowIfNull(transactionalSessionOptions);
 
-        /// <summary>
-        /// Enables the transactional session for this endpoint using the specified TransactionalSessionOptions.
-        /// </summary>
-        public static PersistenceExtensions<RavenDBPersistence> EnableTransactionalSession(this PersistenceExtensions<RavenDBPersistence> persistenceExtensions,
-            TransactionalSessionOptions transactionalSessionOptions)
+        var settings = persistenceExtensions.GetSettings();
+
+        settings.Set(transactionalSessionOptions);
+
+        if (!string.IsNullOrWhiteSpace(transactionalSessionOptions.ProcessorEndpoint))
         {
-            ArgumentNullException.ThrowIfNull(persistenceExtensions);
-            ArgumentNullException.ThrowIfNull(transactionalSessionOptions);
-
-            var settings = persistenceExtensions.GetSettings();
-
-            settings.Set(transactionalSessionOptions);
-
-            if (!string.IsNullOrWhiteSpace(transactionalSessionOptions.ProcessorEndpoint))
-            {
-                settings.Set(RavenDbOutboxStorage.ProcessorEndpointKey, transactionalSessionOptions.ProcessorEndpoint);
-            }
-
-            settings.EnableFeature<RavenDbTransactionalSession>();
-
-            return persistenceExtensions;
+            settings.Set(RavenDbOutboxStorage.ProcessorEndpointKey, transactionalSessionOptions.ProcessorEndpoint);
         }
+
+        settings.EnableFeature<RavenDbTransactionalSession>();
+
+        return persistenceExtensions;
     }
 }

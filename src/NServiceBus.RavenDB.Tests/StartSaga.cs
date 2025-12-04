@@ -1,7 +1,6 @@
-namespace NServiceBus.RavenDB.Tests
+namespace NServiceBus.RavenDB.Tests;
+
+public class StartSaga
 {
-    public class StartSaga
-    {
-        public string UniqueString { get; set; }
-    }
+    public string UniqueString { get; set; }
 }

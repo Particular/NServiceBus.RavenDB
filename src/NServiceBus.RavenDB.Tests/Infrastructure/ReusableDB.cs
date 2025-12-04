@@ -1,83 +1,82 @@
-﻿namespace NServiceBus.RavenDB.Tests
+﻿namespace NServiceBus.RavenDB.Tests;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Raven.Client.Documents;
+using Raven.Client.Documents.Operations;
+using Raven.Client.ServerWide.Operations;
+
+partial class ReusableDB : IReusableDB, IDisposable
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Raven.Client.Documents;
-    using Raven.Client.Documents.Operations;
-    using Raven.Client.ServerWide.Operations;
+    readonly string databaseName;
+    readonly bool deleteOnCompletion;
 
-    partial class ReusableDB : IReusableDB, IDisposable
+    public ReusableDB(bool deleteOnCompletion = true)
     {
-        readonly string databaseName;
-        readonly bool deleteOnCompletion;
+        this.deleteOnCompletion = deleteOnCompletion;
+        databaseName = Guid.NewGuid().ToString("N");
+    }
 
-        public ReusableDB(bool deleteOnCompletion = true)
+    public IDocumentStore NewStore(string identifier = null)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"Creating new DocumentStore for {databaseName}");
+        var store = CreateStore();
+
+        if (identifier != null)
         {
-            this.deleteOnCompletion = deleteOnCompletion;
-            databaseName = Guid.NewGuid().ToString("N");
+            store.Identifier = identifier;
         }
 
-        public IDocumentStore NewStore(string identifier = null)
+        return store;
+    }
+
+    public IDocumentStore CreateStore() =>
+        new DocumentStore
         {
-            Console.WriteLine();
-            Console.WriteLine($"Creating new DocumentStore for {databaseName}");
-            var store = CreateStore();
+            Urls = TestConstants.RavenUrls,
+            Database = databaseName
+        };
 
-            if (identifier != null)
-            {
-                store.Identifier = identifier;
-            }
-
-            return store;
+    public async Task WaitForIndexing(IDocumentStore store, CancellationToken cancellationToken = default)
+    {
+        while ((await store.Maintenance.SendAsync(new GetStatisticsOperation(), cancellationToken)).StaleIndexes.Length != 0)
+        {
+            await Task.Delay(250, cancellationToken);
         }
 
-        public IDocumentStore CreateStore() =>
-            new DocumentStore
-            {
-                Urls = TestConstants.RavenUrls,
-                Database = databaseName
-            };
+        await Task.Delay(100, cancellationToken);
+    }
 
-        public async Task WaitForIndexing(IDocumentStore store, CancellationToken cancellationToken = default)
+    public void Dispose()
+    {
+        if (!deleteOnCompletion)
         {
-            while ((await store.Maintenance.SendAsync(new GetStatisticsOperation(), cancellationToken)).StaleIndexes.Length != 0)
-            {
-                await Task.Delay(250, cancellationToken);
-            }
-
-            await Task.Delay(100, cancellationToken);
+            return;
         }
 
-        public void Dispose()
+        var docStore = new DocumentStore
         {
-            if (!deleteOnCompletion)
+            Urls = TestConstants.RavenUrls
+        };
+
+        docStore.Initialize();
+
+        for (var i = 0; i < 4; i++)
+        {
+            try
             {
+                docStore.Maintenance.Server.Send(new DeleteDatabasesOperation(databaseName, hardDelete: true));
                 return;
             }
-
-            var docStore = new DocumentStore
+            catch (Exception)
             {
-                Urls = TestConstants.RavenUrls
-            };
-
-            docStore.Initialize();
-
-            for (var i = 0; i < 4; i++)
-            {
-                try
-                {
-                    docStore.Maintenance.Server.Send(new DeleteDatabasesOperation(databaseName, hardDelete: true));
-                    return;
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine("Unable to delete database, waiting 250ms");
-                    Thread.Sleep(250);
-                }
+                Console.WriteLine("Unable to delete database, waiting 250ms");
+                Thread.Sleep(250);
             }
-
-            docStore.Maintenance.Server.Send(new DeleteDatabasesOperation(databaseName, hardDelete: true));
         }
+
+        docStore.Maintenance.Server.Send(new DeleteDatabasesOperation(databaseName, hardDelete: true));
     }
 }

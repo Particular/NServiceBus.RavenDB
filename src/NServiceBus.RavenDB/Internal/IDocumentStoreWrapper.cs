@@ -1,9 +1,8 @@
-﻿namespace NServiceBus.Persistence.RavenDB
-{
-    using Raven.Client.Documents;
+﻿namespace NServiceBus.Persistence.RavenDB;
 
-    interface IDocumentStoreWrapper
-    {
-        IDocumentStore DocumentStore { get; }
-    }
+using Raven.Client.Documents;
+
+interface IDocumentStoreWrapper
+{
+    IDocumentStore DocumentStore { get; }
 }

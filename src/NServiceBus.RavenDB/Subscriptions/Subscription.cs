@@ -1,29 +1,28 @@
-namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage
+namespace NServiceBus.RavenDB.Persistence.SubscriptionStorage;
+
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using NServiceBus.Persistence.RavenDB;
+using NServiceBus.Unicast.Subscriptions;
+
+class Subscription
 {
-    using System.Collections.Generic;
-    using Newtonsoft.Json;
-    using NServiceBus.Persistence.RavenDB;
-    using NServiceBus.Unicast.Subscriptions;
+    public string Id { get; set; }
 
-    class Subscription
+    [JsonConverter(typeof(MessageTypeConverter))]
+    public MessageType MessageType { get; set; }
+
+    public List<SubscriptionClient> Subscribers
     {
-        public string Id { get; set; }
-
-        [JsonConverter(typeof(MessageTypeConverter))]
-        public MessageType MessageType { get; set; }
-
-        public List<SubscriptionClient> Subscribers
+        get
         {
-            get
-            {
-                field ??= [];
+            field ??= [];
 
-                return field;
-            }
-
-            set;
+            return field;
         }
 
-        internal static readonly string SchemaVersion = "1.0.0";
+        set;
     }
+
+    internal static readonly string SchemaVersion = "1.0.0";
 }

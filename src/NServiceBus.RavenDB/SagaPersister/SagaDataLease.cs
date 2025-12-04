@@ -1,11 +1,10 @@
-namespace NServiceBus.Persistence.RavenDB
+namespace NServiceBus.Persistence.RavenDB;
+
+using System;
+
+class SagaDataLease
 {
-    using System;
+    public SagaDataLease(DateTime reservedUntil) => ReservedUntil = reservedUntil;
 
-    class SagaDataLease
-    {
-        public SagaDataLease(DateTime reservedUntil) => ReservedUntil = reservedUntil;
-
-        public DateTime ReservedUntil { get; }
-    }
+    public DateTime ReservedUntil { get; }
 }

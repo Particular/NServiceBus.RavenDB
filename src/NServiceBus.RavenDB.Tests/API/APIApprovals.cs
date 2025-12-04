@@ -1,20 +1,19 @@
-﻿namespace NServiceBus.RavenDB.Tests.API
-{
-    using NUnit.Framework;
-    using Particular.Approvals;
-    using PublicApiGenerator;
+﻿namespace NServiceBus.RavenDB.Tests.API;
 
-    [TestFixture]
-    class APIApprovals
+using NUnit.Framework;
+using Particular.Approvals;
+using PublicApiGenerator;
+
+[TestFixture]
+class APIApprovals
+{
+    [Test]
+    public void ApproveRavenDBPersistence()
     {
-        [Test]
-        public void ApproveRavenDBPersistence()
+        var publicApi = typeof(RavenDBPersistence).Assembly.GeneratePublicApi(new ApiGeneratorOptions
         {
-            var publicApi = typeof(RavenDBPersistence).Assembly.GeneratePublicApi(new ApiGeneratorOptions
-            {
-                ExcludeAttributes = ["System.Runtime.Versioning.TargetFrameworkAttribute", "System.Reflection.AssemblyMetadataAttribute"]
-            });
-            Approver.Verify(publicApi);
-        }
+            ExcludeAttributes = ["System.Runtime.Versioning.TargetFrameworkAttribute", "System.Reflection.AssemblyMetadataAttribute"]
+        });
+        Approver.Verify(publicApi);
     }
 }

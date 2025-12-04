@@ -1,21 +1,20 @@
-﻿namespace NServiceBus.AcceptanceTests
+﻿namespace NServiceBus.AcceptanceTests;
+
+using AcceptanceTesting.Support;
+
+public partial class TestSuiteConstraints
 {
-    using AcceptanceTesting.Support;
+    public bool SupportsDtc => false;
 
-    public partial class TestSuiteConstraints
-    {
-        public bool SupportsDtc => false;
+    public bool SupportsCrossQueueTransactions => true;
+    public bool SupportsNativePubSub => false;
+    public bool SupportsDelayedDelivery => true;
 
-        public bool SupportsCrossQueueTransactions => true;
-        public bool SupportsNativePubSub => false;
-        public bool SupportsDelayedDelivery => true;
+    public bool SupportsOutbox => true;
 
-        public bool SupportsOutbox => true;
+    public bool SupportsPurgeOnStartup => true;
 
-        public bool SupportsPurgeOnStartup => true;
+    public IConfigureEndpointTestExecution CreateTransportConfiguration() => new ConfigureEndpointAcceptanceTestingTransport(SupportsNativePubSub, SupportsDelayedDelivery);
 
-        public IConfigureEndpointTestExecution CreateTransportConfiguration() => new ConfigureEndpointAcceptanceTestingTransport(SupportsNativePubSub, SupportsDelayedDelivery);
-
-        public IConfigureEndpointTestExecution CreatePersistenceConfiguration() => new ConfigureEndpointRavenDBPersistence();
-    }
+    public IConfigureEndpointTestExecution CreatePersistenceConfiguration() => new ConfigureEndpointRavenDBPersistence();
 }
