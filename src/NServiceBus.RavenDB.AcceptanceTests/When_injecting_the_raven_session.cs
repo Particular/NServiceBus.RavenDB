@@ -42,11 +42,8 @@
             }
             finally
             {
-                if (session != null)
-                {
-                    session.Dispose();
-                    session = null;
-                }
+                session?.Dispose();
+                session = null;
 
                 if (documentStore != null)
                 {
