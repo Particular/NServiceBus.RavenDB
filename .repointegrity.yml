@@ -1,0 +1,4 @@
+ignore:
+  # "Latest" test projects explicitly bring in the latest version of the RavenDB client
+  - test: ComponentDependenciesShouldNotBeDuplicatedInTests
+    path: src/NServiceBus.*.Latest.AcceptanceTests.csproj
