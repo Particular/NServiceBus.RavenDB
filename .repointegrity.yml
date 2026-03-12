@@ -1,11 +1,11 @@
 ignore:
   # The *Latest* are explicitely pulling in the latest RavenDB.Client package
   # to ensure we are also testing against the latest version
-  - test: AbsoluteVersionsInTestProjects
+  - test: ComponentDependenciesShouldNotBeDuplicatedInTests
     path: src/NServiceBus.RavenDB.ClusterWide.Latest.AcceptanceTests/NServiceBus.RavenDB.ClusterWide.Latest.AcceptanceTests.csproj
-  - test: AbsoluteVersionsInTestProjects
+  - test: ComponentDependenciesShouldNotBeDuplicatedInTests
     path: src/NServiceBus.RavenDB.Latest.AcceptanceTests/NServiceBus.RavenDB.Latest.AcceptanceTests.csproj
-  - test: AbsoluteVersionsInTestProjects
+  - test: ComponentDependenciesShouldNotBeDuplicatedInTests
     path: src/NServiceBus.RavenDB.Optimistic.ClusterWide.Latest.AcceptanceTests/NServiceBus.RavenDB.Optimistic.ClusterWide.Latest.AcceptanceTests.csproj
-  - test: AbsoluteVersionsInTestProjects
+  - test: ComponentDependenciesShouldNotBeDuplicatedInTests
     path: src/NServiceBus.RavenDB.Optimistic.Latest.AcceptanceTests/NServiceBus.RavenDB.Optimistic.Latest.AcceptanceTests.csproj
