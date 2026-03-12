@@ -1,0 +1,5 @@
+ignore:
+  # The *Latest* are explicitely pulling in the latest RavenDB.Client package
+  # to ensure we are also testing against the latest version
+  - test: AbsoluteVersionsInTestProjects
+    path: src/**/NServiceBus.RavenDB.*.Latest.AcceptanceTests.csproj
