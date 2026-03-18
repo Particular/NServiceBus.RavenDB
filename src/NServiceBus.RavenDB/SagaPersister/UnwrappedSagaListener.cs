@@ -31,16 +31,14 @@
                 return;
             }
 
-            if (!args.Document.TryGetMember("Originator", out _))
+            if (!args.Document.TryGet<object>("Originator", out _))
             {
                 // The SagaDataContainer will not have "Originator" but older stored IContainSagaData will
                 return;
             }
 
-            if (!args.Document.TryGetMember("@metadata", out var metadataObj) ||
-                metadataObj is not BlittableJsonReaderObject metadata ||
-                !metadata.TryGetMember(Constants.Documents.Metadata.RavenClrType, out var lazyClrType) ||
-                lazyClrType is not LazyStringValue clrType ||
+            if (!args.Document.TryGet<BlittableJsonReaderObject>("@metadata", out var metadata) ||
+                !metadata.TryGet<LazyStringValue>(Constants.Documents.Metadata.RavenClrType, out var clrType) ||
                 clrType.ToString() == ContainerTypeName)
             {
                 return;
