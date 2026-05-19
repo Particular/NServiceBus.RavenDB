@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup Label="Public dependencies">
-    <PackageReference Include="NServiceBus" Version="10.1.4" />
+    <PackageReference Include="NServiceBus" Version="10.2.0-alpha.12" />
     <PackageReference Include="NuGet.Versioning" Version="7.6.0" AutomaticVersionRange="false" />
     <PackageReference Include="RavenDB.Client" Version="6.2.15" AutomaticVersionRange="false" />
   </ItemGroup>
