@@ -28,23 +28,21 @@ jobs:
         env:
           SECRETS_AVAILABLE: ${{ secrets.SECRETS_AVAILABLE }}
         run: exit $(If ($env:SECRETS_AVAILABLE -eq 'true') { 0 } Else { 1 })
-      - name: Checkout
-        uses: actions/checkout@v7.0.1
-        with:
-          fetch-depth: 0
-      - name: Setup WSL
-        uses: Particular/setup-wsl-action@v1.2.0
+      - parallel:
+        - name: Checkout
+          uses: actions/checkout@v7.0.1
+          with:
+            fetch-depth: 0
+        - name: Setup WSL
+          uses: Particular/setup-wsl-action@v1.2.0
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v6.0.0
         with:
           global-json-file: global.json
       - name: Build
+        id: build
         run: dotnet build src --configuration Release
-      - name: Azure login
-        uses: azure/login@v3.0.1
-        if: matrix.name == 'Windows'
-        with:
-          creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
+        background: true
       - name: Setup RavenDB
         id: setup-ravendb
         uses: Particular/setup-ravendb-action@d5084f80fcd17eefd6cedf6242fd4560db651301
@@ -55,12 +53,15 @@ jobs:
             ravendb-mode: Both
             registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
             registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Upload packages
-        if: matrix.name == 'Windows'
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: NuGet packages
-          path: nugets/
-          retention-days: 7
-      - name: Run tests
-        uses: Particular/run-tests-action@v1.7.0
+      - name: Wait for build
+        wait: build
+      - parallel:
+        - name: Upload packages
+          if: matrix.name == 'Windows'
+          uses: actions/upload-artifact@v7.0.1
+          with:
+            name: NuGet packages
+            path: nugets/
+            retention-days: 7
+        - name: Run tests
+          uses: Particular/run-tests-action@v1.7.0
