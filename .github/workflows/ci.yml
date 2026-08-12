@@ -32,6 +32,8 @@ jobs:
         uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+      - name: Setup WSL
+        uses: Particular/setup-wsl-action@v1.2.0
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v6.0.0
         with:
@@ -45,13 +47,12 @@ jobs:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
       - name: Setup RavenDB
         id: setup-ravendb
-        uses: Particular/setup-ravendb-action@v1.11.0
+        uses: Particular/setup-ravendb-action@d5084f80fcd17eefd6cedf6242fd4560db651301
         with:
             single-connection-string-name: RavenSingleNodeUrl
             cluster-connection-string-name: CommaSeparatedRavenClusterUrls
             ravendb-license: ${{ secrets.RAVENDB_LICENSE }}
             ravendb-mode: Both
-            tag: RavenDBPersistence
             registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
             registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Upload packages
