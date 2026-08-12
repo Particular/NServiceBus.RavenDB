@@ -45,7 +45,7 @@ jobs:
         background: true
       - name: Setup RavenDB
         id: setup-ravendb
-        uses: Particular/setup-ravendb-action@d5084f80fcd17eefd6cedf6242fd4560db651301
+        uses: Particular/setup-ravendb-action@v2.0.0
         with:
             single-connection-string-name: RavenSingleNodeUrl
             cluster-connection-string-name: CommaSeparatedRavenClusterUrls
